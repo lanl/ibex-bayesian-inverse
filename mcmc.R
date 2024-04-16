@@ -4,8 +4,7 @@ library(laGP)
 library(tidyverse)
 
 ## Loads in scaled Vecchia approximation code
-Sys.setenv('https_proxy'='http://proxyout.lanl.gov:8080')
-source('https://raw.githubusercontent.com/katzfuss-group/scaledVecchia/master/vecchia_scaled.R')
+source('../vecchia_scaled.R')
 
 ###############################################################################
 # Runs Markov chain Monte Carlo (McMC) for computer model calibration. Uses
