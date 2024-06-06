@@ -1,0 +1,156 @@
+\documentclass[11pt]{article}
+\usepackage{hyperref}
+\usepackage{amsmath, amsfonts, amssymb, mathrsfs}
+\usepackage{dcolumn}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{filemod}
+\usepackage{natbib}
+\usepackage[ruled, vlined]{algorithm2e}
+\usepackage{floatrow}
+\usepackage{setspace}
+\usepackage{verbatim}
+
+\usepackage{graphicx}
+
+\oddsidemargin=0.25in
+\evensidemargin=0.25in
+\textwidth=7in
+\textheight=8.75in
+\topmargin=-.5in
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\footskip=0.5in
+
+\title{Computer Model Calibration for Large-Scale, Spatially Distributed Counts}
+\author{Steven D. Barnett\thanks{Corresponding author: Department of Statistics, 
+  Virginia Tech, {\tt sdbarnett@vt.edu}} \and Robert B. Gramacy\thanks{Department 
+  of Statistics, Virginia Tech} \and
+  Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos National Laboratory} \and
+  Dave Osthus\footnotemark[3]}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\bigskip
+
+\begin{abstract} 
+\textbf{Outline for the paper:} Motivate the need for computer model calibration
+in the context of non-Gaussian data. Motivate the need to use an approximation
+in computer model calibration of large-scale data (Vecchia). Introduce the IBEX
+sky map as an excellent use case of both these barriers. Expand upon the
+Kennedy \& O'Hagan canonical calibration framework. Propose using scaled Vecchia
+as a GP surrogate. Illustrate the performance on simulated examples. Talk about
+the need for adding discrepancy and propose model for doing so. Show the ability
+to obtain good estimates of calibration parameters and out-of-sample predictions
+with discrepancy analysis.
+\end{abstract}
+
+\noindent \textbf{Keywords:} vecchia, poisson, heliospheric science, gaussian process surrogate 
+
+%\vfill
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+\begin{itemize}
+  \item Introduce the heliosphere, energetic neutral atoms, globally distributed flux, ribbon
+  \item Introduce the Interstellar Boundary Explorer
+  \item Motivate the use of computer models to understand the process that generates GDF/ribbon
+  \item Introduce computer model simulations (ribbon, GDF)
+  \item Explain current process of theory evaluation (Theseus, ribbon separation)
+  \item Summary of work done on computer model calibration
+  \item Summary of work modeling Poisson data in the context of computer model calibration
+  \item Description of what we'll do: build a framework that's an extension of
+    canonical Kenndy \& O'Hagan framework, use of scaled vecchia for handling large data,
+    illustrate performance on simulated data, propose a method for handling discrepancy,
+    demonstrate performance on real IBEX data.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Review} 
+\label{sec:review}
+
+\begin{itemize}
+  \item Review Gaussian processes and their use in surrogate modeling
+  \item Review Kennedy O'Hagan framework
+  \item Review Vecchia approximation and Scaled vecchia approximation
+  \item Do we need to review any method that we'll later use for discrepancy?
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Model}
+\label{sec:modeling}
+
+\begin{itemize}
+  \item Rehash the need to update KOH to account for Poisson data
+  \item Show diagram of updated framework (McMC with Poisson likelihood)
+  \item Explain the use of a no-bias set up to initially prove the capability
+  \item Briefly show the math behind this
+\end{itemize}
+
+\subsection{Scaled Vecchia Gaussian Process Surrogate}
+
+\subsection{Discrepancy Analysis}
+
+\subsection{Estimation of calibration parameters}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Simulated example: IBEX Skymap}
+\label{sec:dgpal}
+
+\begin{itemize}
+  \item Go in depth on development of GDF and ribbon computer models
+  \item Explain the parameters that govern the computer model output
+  \item Run tests on noisy maps generated from known simulations
+  \item Display distributions on calibration parameters that show the method
+    is able to recover the truth
+  \item Show prediction results on hold out data (RMSE? Score? Visual?)
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discrepancy analysis in IBEX real data} 
+\label{sec:experiments}
+
+\begin{itemize}
+  \item Illustrate the gap between computer model output and real data
+  \item Recall how we will account for discrepancy (PCA?, GP?)
+  \item Perform tests on examples where we know what the bias is. How well
+    does our method account for this?
+  \item Lack of competitors? (could we compare to calibration of
+    ribbon-separated maps)
+  \item Run our code on IBEX real data.
+  \item We could display predictions for different values of the calibration
+    parameters. Not sure if this is of interest.
+  \item Display distributions on calibration parameters.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion} 
+\label{sec:conclude}
+
+\begin{itemize}
+  \item Recap what we are proposing in the paper
+  \item Highlight performance of calibration framework in prediction and
+    estimation of calibration parameters
+  \item Point out need to collaborate with theorists to improve computer
+    model and get better estimates of calibration parameters
+  \item Discuss a need to build out a more exhaustive procedure to perform
+    hypothesis testing on which theoretical model is most probable to
+    explain the data
+  \item Acknowledge limitations (lack of fulll UQ with SVecchia estimates)
+  \item Propose a fully Bayesian framework (teasing use of deep GPs)
+\end{itemize}
+
+\end{document}
