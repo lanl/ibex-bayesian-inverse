@@ -14,7 +14,7 @@ source("../mcmc.R")
 args <- R.utils::commandArgs(asValues=TRUE)
 
 ## energy level of data to work with
-esa_lev <- ifelse(!is.null(args$esa), as.integer(args$esa), 3)
+esa_lev <- ifelse(!is.null(args$esa), as.integer(args$esa), 4)
 ## number of MCMC iterations to run
 nmcmcs <- ifelse(!is.null(args$nmcmcs), as.integer(args$nmcmcs), 10000)
 ## specifies type of GP to fit (e.g. svecchia, laGP w/ nearest neighbors)
@@ -48,11 +48,11 @@ debug <- ifelse(!is.null(args$debug), as.logical(args$debug), FALSE)
 ## flag to print more output to screen
 vb <- ifelse(!is.null(args$v), as.logical(args$v), FALSE)
 
-model_data <- readRDS(file="../data/Simulations.rds")
+model_data <- read.csv(file="../data/sims.csv")
 if (!real) {
-  field_data <- readRDS(file="../data/simulated_binned_direct_events_data.rds")
+  field_data <- read.csv(file="../data/sims_real.csv")
 } else {
-  field_data <- readRDS(file="../data/ibex_data_real.rds")
+  field_data <- read.csv(file="../data/ibex_real.csv")
   field_data <- field_data %>% dplyr::rename(esa=ESA, sim_counts=counts)
 }
 
