@@ -14,39 +14,44 @@ source("../mcmc.R")
 args <- R.utils::commandArgs(asValues=TRUE)
 
 ## energy level of data to work with
-esa_lev <- ifelse(!is.null(args$esa), as.integer(args$esa), 4)
+esa_lev <- ifelse(!is.null(args[["esa"]]), as.integer(args[["esa"]]), 4)
 ## number of MCMC iterations to run
-nmcmcs <- ifelse(!is.null(args$nmcmcs), as.integer(args$nmcmcs), 10000)
+nmcmcs <- ifelse(!is.null(args[["nmcmcs"]]), as.integer(args[["nmcmcs"]]), 10000)
 ## specifies type of GP to fit (e.g. svecchia, laGP w/ nearest neighbors)
-gp <- ifelse(!is.null(args$gp), as.character(args$gp), "svecchia")
+gp <- ifelse(!is.null(args[["gp"]]), as.character(args[["gp"]]), "svecchia")
 ## if using laGP, end is the neighborhood size for each local GP
-end <- ifelse(!is.null(args$end), as.integer(args$end), 25)
+end <- ifelse(!is.null(args[["end"]]), as.integer(args[["end"]]), 25)
 ## if using laGP, number of threads to run during each fit
-thrds <- ifelse(!is.null(args$threads), as.integer(args$threads), 10)
+thrds <- ifelse(!is.null(args[["threads"]]), as.integer(args[["threads"]]), 10)
 ## maximum number of calibrations to perform at once (for the dopar loop)
-maxprocs <- ifelse(!is.null(args$procs), as.integer(args$procs), 6)
+maxprocs <- ifelse(!is.null(args[["procs"]]), as.integer(args[["procs"]]), 6)
 ## flag indicating if field data in calibration should be real or simulated
-real <- ifelse(!is.null(args$r), as.logical(args$r), FALSE)
+real <- ifelse(!is.null(args[["r"]]), as.logical(args[["r"]]), FALSE)
 ## if using simulated field data, what the true PMFP and ratio should be
-fpmfp <- ifelse(!is.null(args$fpmfp), as.numeric(args$fpmfp), 2500)
-fratio <- ifelse(!is.null(args$fratio), as.numeric(args$fratio), 0.05)
+fpmfp <- ifelse(!is.null(args[["fpmfp"]]), as.numeric(args[["fpmfp"]]), 2500)
+fratio <- ifelse(!is.null(args[["fratio"]]), as.numeric(args[["fratio"]]), 0.05)
 ## if using real field data, what year it should come from
-fyear <- ifelse(!is.null(args$fyear), as.numeric(args$fyear), 2009)
+fyear <- ifelse(!is.null(args[["fyear"]]), as.numeric(args[["fyear"]]), 2009)
 ## file that contains multiple parameter combinations for field data
-infile <- ifelse(!is.null(args$infile), as.character(args$infile), NA)
+infile <- ifelse(!is.null(args[["infile"]]), as.character(args[["infile"]]), NA)
 ## amount the PMFP and ratio should be scaled before fitting (used for laGP)
-psc <- ifelse(!is.null(args$psc), as.numeric(args$psc), 1)
-rsc <- ifelse(!is.null(args$rsc), as.numeric(args$rsc), 1)
+psc <- ifelse(!is.null(args[["psc"]]), as.numeric(args[["psc"]]), 1)
+rsc <- ifelse(!is.null(args[["rsc"]]), as.numeric(args[["rsc"]]), 1)
 ## step size for random walk in McMC
-step_size <- ifelse(!is.null(args$step), as.numeric(args$step), 0.06517432)
+step_size <- ifelse(!is.null(args[["step"]]), as.numeric(args[["step"]]), 0.06517432)
 ## quantile of changes in y below which to remove points
-quant <- ifelse(!is.null(args$quant), as.numeric(args$quant), 0.0)
+quant <- ifelse(!is.null(args[["quant"]]), as.numeric(args[["quant"]]), 0.0)
 ## tolerance of changes in y below which to remove points
-tol <- ifelse(!is.null(args$tol), as.numeric(args$tol), NA)
+tol <- ifelse(!is.null(args[["tol"]]), as.numeric(args[["tol"]]), NA)
 ## flag to turn on "debug" mode, which will save more output
-debug <- ifelse(!is.null(args$debug), as.logical(args$debug), FALSE)
+debug <- ifelse(!is.null(args[["debug"]]), as.logical(args[["debug"]]), FALSE)
 ## flag to print more output to screen
-vb <- ifelse(!is.null(args$v), as.logical(args$v), FALSE)
+vb <- ifelse(!is.null(args[["v"]]), as.logical(args[["v"]]), FALSE)
+settings <- list(esa_lev=esa_lev, nmcmcs=nmcmcs, gp=gp, end=end, thrds=thrds,
+  maxprocs=maxprocs, real=real, fpmfp=fpmfp, fratio=fratio, fyear=fyear,
+  infile=infile, psc=psc, rsc=rsc, step_size=step_size, quant=quant, tol=tol,
+  debug=debug, vb=vb)
+if (vb) print(settings)
 
 model_data <- read.csv(file="../data/sims.csv")
 if (!real) {
