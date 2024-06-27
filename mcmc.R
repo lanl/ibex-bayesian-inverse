@@ -29,9 +29,11 @@ source('../vecchia_scaled.R')
 ###############################################################################
 mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
                  step=NA, thrds=2, vb=FALSE, debug=FALSE) {
+  id <- sample(100000:999999, 1)
   ## create objects to hold posterior samples and other metrics
-  u <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(Um))
-  props <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(Um))
+  u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(Um))
+  scl <- sclprops <- matrix(data=NA, nrow=nmcmcs, ncol=1)
+
   rates <- rep(NA, nmcmcs-min(nmcmcs, 10))
   covars <- list()
   colnames(u) <- colnames(Um)
@@ -39,11 +41,14 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   XUm <- cbind(Xm, Um)
   if (gpmeth=="svecchia") {
     fit <- fit_scaled(y=Zm, inputs=as.matrix(cbind(Xm, Um)), nug=1e-4, ms=25)
+  } else {
+    fit <- NA
   }
   ## initialize chains
-  u[1,] <- props[1,] <- apply(Um, 2, mean)
-  lhatc <- runif(length(Zf))
-  lls[1] <- sum(Zf*log(lhatc) - lhatc)
+  u[1,] <- uprops[1,] <- apply(Um, 2, mean)
+  scl[1,] <- sclprops[1,] <- 1
+  lhat_curr <- runif(length(Zf))
+  lls[1] <- sum(Zf*log(lhat_curr) - lhat_curr)
   ## establish covariance for proposals
   pvar <- ifelse(is.na(step), 0.1, step)
   pcovar <- covars[[1]] <- matrix(c(pvar, 0, 0, pvar), nrow=2, byrow=TRUE)
@@ -52,20 +57,27 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   tic <- proc.time()[3]
   for (t in 2:nmcmcs) {
     if (vb) print(paste("Started iteration:", t))
-    ## Propose u_prime and calculate proposal ratio
-    up <- proposal(curr=u[t-1,], method="tmvnorm", pmin=pmin, pmax=pmax,
+
+    ###########################################################################
+    ## SAMPLE CALIBRATION PARAMETERS U
+    ### Propose u_prime and calculate proposal ratio
+    up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=pmin, pmax=pmax,
       pcovar=pcovar)
-    props[t,] <- up$prop
-    if (vb) print(paste("Iteration proposal:", up$prop[1], up$prop[2]))
+    uprops[t,] <- up$prop
+    if (vb) {
+      print(paste("Iteration proposal (calib params):", up$prop[1],
+       up$prop[2]))
+    }
+    ### Predict simulator output at u_prime using fitted surrogate
     if (gpmeth=="svecchia") {
-      ## surrogate model predictions using scaled vecchia fit
+      ## Use scaled Vecchia GP
       XX <- cbind(Xf, up$prop)
       colnames(XX) <- c("x", "y", "z", "pmfp", "ratio")
       ## TODO: value of m should be user specified
       lhatp <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
         predvar=FALSE)
     } else {
-      ## surrogate model predictions using a locally approximated GP
+      ## Use laGP
       d <- darg(NULL, cbind(Xm, Um))
       if (vb) print(paste0("Lengthscale prior information: ", "MLE: ", d$mle,
         "; start: ", d$start, "; max: ", d$max, "; min: ", d$min, "; a: ",
@@ -74,19 +86,30 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
         omp.threads=thrds, d=d, verb=0)
       lhatp <- sfit$mean
     }
-    ## calculate MH ratio under truncated multivariate normal proposal
-    ## TODO: is my proposal ratio correct?
-    llp <- sum(Zf*log(Of$time*(lhatp + Of$bg)) - Of$time*(lhatp + Of$bg))
-    lmh <- llp - lls[t-1] + up$pr
+    ### Calculate proposed likelihood
+    llp <- sum(Zf*log(Of$time*(lhatp + Of$bg)*scl[t-1]) -
+     Of$time*(lhatp + Of$bg)*scl[t-1])
+    ### Calculate proposal priors
+    lpp <- dbeta(up$prop[1], shape1=1.1, shape2=1.1, log=TRUE) +
+     dbeta(up$prop[2], shape1=1.1, shape2=1.1, log=TRUE)
+    lp_curr <- dbeta(u[t-1,1], shape1=1.1, shape2=1.1, log=TRUE) +
+     dbeta(u[t-1,2], shape1=1.1, shape2=1.1, log=TRUE)
+    ### Calculate Metropolis-Hastings ratio
+    ### { L(xp|Y)*p(xp)*g(xt|xp) } / { L(xt|Y)*p(xt)*g(xp|xt) }
+    lmh <- llp - lls[t-1] + lpp - lp_curr + up$pr
     ## accept or reject
     if (lmh > log(runif(n=1))) {
       u[t,] <- up$prop
       lls[t] <- llp
+      lhat_curr <- lhatp
     } else {
       u[t,] <- u[t-1,]
       lls[t] <- lls[t-1]
     }
-    ## update proposal covariance
+
+    ###########################################################################
+
+    ## update u proposal covariance
     if (debug && t > 10) {
       winsize <- ifelse(t > 100, 100, t)
       accepted_vals <- u[(t-winsize+1):t,] %>%
@@ -94,6 +117,30 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
       pcovar <- covars[[t-10]] <- as.matrix(cov(accepted_vals))
       rates[t-10] <- nrow(accepted_vals)/winsize
     }
+
+    ###########################################################################
+    ## SAMPLE SCALE PARAMETER
+    sclp <- propose_scl(curr=scl[t-1], sd=0.01)
+    sclprops[t] <- sclp$prop
+    if (vb) print(paste("Iteration proposal (scale):", sclp$prop))
+    ### Calculate proposed likelihood
+    llp <- sum(Zf*log(Of$time*(lhat_curr + Of$bg)*sclp$prop) -
+     Of$time*(lhat_curr + Of$bg)*sclp$prop)
+    ### Calculate proposal priors
+    lpp <- dlnorm(x=sclp$prop, meanlog=-0.5, sdlog=0.5)
+    lp_curr <- dlnorm(x=scl[t-1], meanlog=-0.5, sdlog=0.5)
+    ### Calculate Metropolis-Hastings ratio
+    ### { L(xp|Y)*p(xp)*g(xt|xp) } / { L(xt|Y)*p(xt)*g(xp|xt) }
+    lmh <- llp - lls[t-1] + lpp - lp_curr + sclp$pr
+    ## accept or reject
+    if (lmh > log(runif(n=1))) {
+      scl[t,] <- sclp$prop
+      lls[t] <- llp
+    } else {
+      scl[t,] <- scl[t-1]
+      lls[t] <- lls[t-1]
+    }
+
     toc <- proc.time()[3]
     if (vb && t %% 1 == 0) {
       print(paste("Finished iteration", t))
@@ -101,10 +148,10 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
       print(paste("Iteration sample:", drop(u[t,1]), drop(u[t,2])))
     }
     if (t %% 100 == 0) {
-      temp_res <- list(u=u, lls=lls, props=props, rates=rates, covars=covars)
-      saveRDS(temp_res, file="../results/temp_mcmc.rds")
+      temp_res <- list(u=u, lls=lls, uprops=uprops, rates=rates, covars=covars)
+      saveRDS(temp_res, file=paste0("../results/temp_mcmc_", id, ".rds")
     }
   }
-  return(list(u=u, lls=lls, props=props, rates=rates, covars=covars,
-    time=proc.time()[3]-tic))
+  return(list(u=u, lls=lls, props=list(u=uprops, scl=sclprops), rates=rates,
+   covars=covars, time=proc.time()[3]-tic))
 }

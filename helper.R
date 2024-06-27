@@ -14,7 +14,7 @@ library(tmvtnorm)
 # @return list with posterior samples of calibration parameters, along with
 # likelihoods, proposals, acceptance rates, and covariances.
 ###############################################################################
-proposal <- function(curr, method, pmin=NULL, pmax=NULL, pcovar=NULL) {
+propose_u <- function(curr, method, pmin=NULL, pmax=NULL, pcovar=NULL) {
 
   if (method=="unifsq") {
     prop <- matrix(runif(2), nrow=1, dimnames=list(NULL, c("pmfp", "ratio")))
@@ -36,6 +36,13 @@ proposal <- function(curr, method, pmin=NULL, pmax=NULL, pcovar=NULL) {
   } else {
     stop("specified method not implemented")
   }
+}
+
+propose_scl <- function(curr, sd) {
+  prop <- rnorm(n=1, mean=curr, sd=sd)
+  pr <- dnorm(curr, mean=prop, sd=sd, log=TRUE) -
+    dnorm(prop, mean=curr, sd=sd, log=TRUE)
+  return(list(prop=prop, pr=pr))
 }
 
 ###############################################################################
