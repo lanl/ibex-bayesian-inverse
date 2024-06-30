@@ -56,7 +56,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   pmax <- apply(Um, 2, max)
   tic <- proc.time()[3]
   for (t in 2:nmcmcs) {
-    if (vb) print(paste(id, "- Started iteration:", t))
+    if (vb) print(paste("Started iteration:", t))
 
     ###########################################################################
     ## SAMPLE CALIBRATION PARAMETERS U
@@ -65,7 +65,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
       pcovar=pcovar)
     uprops[t,] <- up$prop
     if (vb) {
-      print(paste(id, "- Iteration proposal (calib params):", up$prop[1],
+      print(paste("Iteration proposal (calib params):", up$prop[1],
        up$prop[2]))
     }
     ### Predict simulator output at u_prime using fitted surrogate
@@ -87,9 +87,10 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
       lhatp <- sfit$mean
     }
     ### Calculate proposed likelihood
-    llp <- sum(Zf*log(Of$time*(lhatp + Of$bg)*scl[t-1]) -
-     Of$time*(lhatp + Of$bg)*scl[t-1])
-    ### Calculate proposal priors
+    ### TODO: do not scale background
+    llp <- sum(Zf*log(Of$time*(lhatp*scl[t-1] + Of$bg)) -
+     Of$time*(lhatp*scl[t-1] + Of$bg))
+    ### Calculate prior on u (calibration parameters)
     lpp <- dbeta(up$prop[1], shape1=1.1, shape2=1.1, log=TRUE) +
      dbeta(up$prop[2], shape1=1.1, shape2=1.1, log=TRUE)
     lp_curr <- dbeta(u[t-1,1], shape1=1.1, shape2=1.1, log=TRUE) +
@@ -110,6 +111,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
     ###########################################################################
 
     ## update u proposal covariance
+    ## TODO: 10 iterations might be too often
     if (debug && t > 10) {
       winsize <- ifelse(t > 100, 100, t)
       accepted_vals <- u[(t-winsize+1):t,] %>%
@@ -120,13 +122,16 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
 
     ###########################################################################
     ## SAMPLE SCALE PARAMETER
+    ## TODO: adaptive estimation for sd
+    ## TODO: propose on the log scale
     sclp <- propose_scl(curr=scl[t-1], sd=0.01)
     sclprops[t] <- sclp$prop
-    if (vb) print(paste(id, "- Iteration proposal (scale):", sclp$prop))
+    if (vb) print(paste("Iteration proposal (scale):", sclp$prop))
     ### Calculate proposed likelihood
-    llp <- sum(Zf*log(Of$time*(lhat_curr + Of$bg)*sclp$prop) -
-     Of$time*(lhat_curr + Of$bg)*sclp$prop)
-    ### Calculate proposal priors
+    llp <- sum(Zf*log(Of$time*(lhat_curr*sclp$prop + Of$bg)) -
+     Of$time*(lhat_curr*sclp$prop + Of$bg))
+    ### Calculate prior on scale parameter
+    ### TODO: model the log scale (prior will be normal centered at 0, var=1)
     lpp <- dlnorm(x=sclp$prop, meanlog=-0.5, sdlog=0.5)
     lp_curr <- dlnorm(x=scl[t-1], meanlog=-0.5, sdlog=0.5)
     ### Calculate Metropolis-Hastings ratio
@@ -143,15 +148,15 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
 
     toc <- proc.time()[3]
     if (vb && t %% 1 == 0) {
-      print(paste(id, " - Finished iteration", t))
-      print(paste(id, " - Time elapsed:", toc-tic))
-      print(paste(id, " - Iteration sample:", drop(u[t,1]), drop(u[t,2])))
+      print(paste("Finished iteration", t))
+      print(paste("Time elapsed:", toc-tic))
+      print(paste("Iteration sample:", drop(u[t,1]), drop(u[t,2])))
     }
     if (t %% 100 == 0) {
       temp_res <- list(u=u, lls=lls, uprops=uprops, rates=rates, covars=covars)
       saveRDS(temp_res, file=paste0("../results/temp_mcmc_", id, ".rds"))
     }
   }
-  return(list(u=u, scl=scl, lls=lls, props=list(u=uprops, scl=sclprops),
-   rates=rates, covars=covars, time=proc.time()[3]-tic))
+  return(list(u=u, lls=lls, props=list(u=uprops, scl=sclprops), rates=rates,
+   covars=covars, time=proc.time()[3]-tic))
 }

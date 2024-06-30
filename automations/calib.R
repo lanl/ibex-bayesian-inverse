@@ -25,6 +25,8 @@ end <- ifelse(!is.null(args[["end"]]), as.integer(args[["end"]]), 25)
 thrds <- ifelse(!is.null(args[["threads"]]), as.integer(args[["threads"]]), 10)
 ## maximum number of calibrations to perform at once (for the dopar loop)
 maxprocs <- ifelse(!is.null(args[["procs"]]), as.integer(args[["procs"]]), 6)
+## flag indicating if simulated field data should have discrepancy
+disc <- ifelse(!is.null(args[["d"]]), as.logical(args[["d"]]), FALSE)
 ## flag indicating if field data in calibration should be real or simulated
 real <- ifelse(!is.null(args[["r"]]), as.logical(args[["r"]]), FALSE)
 ## if using simulated field data, what the true PMFP and ratio should be
@@ -55,7 +57,11 @@ if (vb) print(settings)
 
 model_data <- read.csv(file="../data/sims.csv")
 if (!real) {
-  field_data <- read.csv(file="../data/sims_real.csv")
+  if (disc) {
+    field_data <- read.csv(file="../data/sims_bias.csv")
+  } else {
+    field_data <- read.csv(file="../data/sims_real.csv")
+  }
 } else {
   field_data <- read.csv(file="../data/ibex_real.csv")
   field_data <- field_data %>% dplyr::rename(esa=ESA, sim_counts=counts)
@@ -63,6 +69,9 @@ if (!real) {
 
 if (!is.na(infile)) {
   cpars <- read.csv(file=infile, head=TRUE)
+} else if (disc) {
+  cpars <- data.frame(matrix(data=unique(field_data$scl)))
+  names(cpars) <- c("scl")
 } else {
   if (!real) {
     cpars <- data.frame(matrix(data=c(fpmfp, fratio), nrow=1))
@@ -78,13 +87,14 @@ cl <- parallel::makeCluster(ifelse(nrow(cpars) < maxprocs, nrow(cpars),
 doParallel::registerDoParallel(cl)
 foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tidyverse",
                                        "tmvtnorm")) %dopar% {
-  if (!real) {
+  if (!real && !disc) {
     fparams <- c(cpars[i,]$pmfp, cpars[i,]$ratio)
   } else {
     fparams <- c(cpars[i,])
   }
   pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=esa_lev,
-    fparams=fparams, scales=c(psc, rsc), tol=tol, quant=quant, real=real)
+    fparams=fparams, scales=c(psc, rsc), tol=tol, quant=quant, real=real,
+    disc=disc)
   mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
     Zf=pd$Zfield, Of=pd$Ofield, nmcmcs=nmcmcs, step=step_size,
     gpmeth=gp, end=end, thrds=thrds, vb=vb, debug=debug)

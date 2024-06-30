@@ -63,14 +63,18 @@ propose_scl <- function(curr, sd) {
 # Xfield, Zfield, Ofield, and settings used in preprocessing
 ###############################################################################
 preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
-  quant=NA, real=FALSE) {
+  quant=NA, real=FALSE, disc=FALSE) {
 
   md$pmfp <- md$parallel_mean_free_path
   if (!real) {
     fd$pmfp <- fd$parallel_mean_free_path
-    fd <- fd %>% dplyr::filter(esa==esa_lev, pmfp==fparams[1],
-      ratio==fparams[2], time > 0)
-  } else {
+    if (disc) {
+      fd <- fd %>% dplyr::filter(scl==fparams[1], time > 0)
+    } else {
+      fd <- fd %>% dplyr::filter(esa==esa_lev, pmfp==fparams[1],
+        ratio==fparams[2], time > 0)
+    }
+  } else{
     fd <- fd %>% dplyr::filter(esa==esa_lev, map==fparams[1], time > 0,
       ooc=="no")
   }
