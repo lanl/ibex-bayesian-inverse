@@ -150,13 +150,16 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
     if (vb && t %% 1 == 0) {
       print(paste("Finished iteration", t))
       print(paste("Time elapsed:", toc-tic))
-      print(paste("Iteration sample:", drop(u[t,1]), drop(u[t,2])))
+      print(paste("Iteration sample (calib params):", drop(u[t,1]),
+        drop(u[t,2])))
+      print(paste("Iteration sample (scl):", scl[t],))
     }
     if (t %% 100 == 0) {
-      temp_res <- list(u=u, lls=lls, uprops=uprops, rates=rates, covars=covars)
+      temp_res <- list(u=u, scl=scl, lls=lls,
+        props=list(u=uprops, scl=sclprops), rates=rates, covars=covars)
       saveRDS(temp_res, file=paste0("../results/temp_mcmc_", id, ".rds"))
     }
   }
-  return(list(u=u, lls=lls, props=list(u=uprops, scl=sclprops), rates=rates,
-   covars=covars, time=proc.time()[3]-tic))
+  return(list(u=u, scl=scl, lls=lls, props=list(u=uprops, scl=sclprops),
+    rates=rates, covars=covars, time=proc.time()[3]-tic))
 }
