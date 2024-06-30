@@ -152,7 +152,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
       print(paste("Time elapsed:", toc-tic))
       print(paste("Iteration sample (calib params):", drop(u[t,1]),
         drop(u[t,2])))
-      print(paste("Iteration sample (scl):", scl[t],))
+      print(paste("Iteration sample (scl):", scl[t]))
     }
     if (t %% 100 == 0) {
       temp_res <- list(u=u, scl=scl, lls=lls,
