@@ -124,7 +124,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
     ## SAMPLE SCALE PARAMETER
     ## TODO: adaptive estimation for sd
     ## TODO: propose on the log scale
-    sclp <- propose_scl(curr=scl[t-1], sd=0.01)
+    sclp <- propose_scl(curr=scl[t-1], sd=0.1)
     sclprops[t] <- sclp$prop
     if (vb) print(paste("Iteration proposal (scale):", sclp$prop))
     ### Calculate proposed likelihood
