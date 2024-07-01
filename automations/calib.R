@@ -50,7 +50,7 @@ debug <- ifelse(!is.null(args[["debug"]]), as.logical(args[["debug"]]), FALSE)
 ## flag to print more output to screen
 vb <- ifelse(!is.null(args[["v"]]), as.logical(args[["v"]]), FALSE)
 settings <- list(esa_lev=esa_lev, nmcmcs=nmcmcs, gp=gp, end=end, thrds=thrds,
-  maxprocs=maxprocs, real=real, fpmfp=fpmfp, fratio=fratio, fyear=fyear,
+  maxprocs=maxprocs, disc=disc, real=real, fpmfp=fpmfp, fratio=fratio, fyear=fyear,
   infile=infile, psc=psc, rsc=rsc, step_size=step_size, quant=quant, tol=tol,
   debug=debug, vb=vb)
 if (vb) print(settings)

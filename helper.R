@@ -109,7 +109,7 @@ preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
   }
 
   return(list(Xmod=Xmod, Umod=Umod, Zmod=Zmod, Xfield=Xfield, Zfield=Zfield,
-    Ofield=Ofield, settings=list(esa_lev, fparams=fparams, pmfp_sc=scales[1],
+    Ofield=Ofield, settings=list(esa=esa_lev, fparams=fparams, pmfp_sc=scales[1],
     ratio_sc=scales[2])))
 }
 
