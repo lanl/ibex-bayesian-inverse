@@ -32,9 +32,11 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   id <- sample(100000:999999, 1)
   ## create objects to hold posterior samples and other metrics
   u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(Um))
-  scl <- sclprops <- matrix(data=NA, nrow=nmcmcs, ncol=1)
+  logscl <- logsclprops <- matrix(data=NA, nrow=nmcmcs, ncol=1)
 
-  rates <- rep(NA, nmcmcs-min(nmcmcs, 10))
+  if (debug) {
+    urates <- logsclrates <- rep(NA, nmcmcs-1)
+  }
   covars <- list()
   colnames(u) <- colnames(Um)
   lls <- rep(NA, nmcmcs)
@@ -46,7 +48,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   }
   ## initialize chains
   u[1,] <- uprops[1,] <- apply(Um, 2, mean)
-  scl[1,] <- sclprops[1,] <- 1
+  logscl[1,] <- logsclprops[1,] <- 1
   lhat_curr <- runif(length(Zf))
   lls[1] <- sum(Zf*log(lhat_curr) - lhat_curr)
   ## establish covariance for proposals
@@ -87,9 +89,8 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
       lhatp <- sfit$mean
     }
     ### Calculate proposed likelihood
-    ### TODO: do not scale background
-    llp <- sum(Zf*log(Of$time*(lhatp*scl[t-1] + Of$bg)) -
-     Of$time*(lhatp*scl[t-1] + Of$bg))
+    llp <- sum(Zf*log(Of$time*(lhatp*exp(logscl[t-1]) + Of$bg)) -
+     Of$time*(lhatp*exp(logscl[t-1]) + Of$bg))
     ### Calculate prior on u (calibration parameters)
     lpp <- dbeta(up$prop[1], shape1=1.1, shape2=1.1, log=TRUE) +
      dbeta(up$prop[2], shape1=1.1, shape2=1.1, log=TRUE)
@@ -111,55 +112,64 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
     ###########################################################################
 
     ## update u proposal covariance
-    ## TODO: 10 iterations might be too often
-    if (debug && t > 10) {
-      winsize <- ifelse(t > 100, 100, t)
+    if (t %% 100 == 0) {
       accepted_vals <- u[(t-winsize+1):t,] %>%
         as.data.frame() %>% tidyr::drop_na() %>% dplyr::distinct()
-      pcovar <- covars[[t-10]] <- as.matrix(cov(accepted_vals))
-      rates[t-10] <- nrow(accepted_vals)/winsize
+      pcovar <- covars[[floor(t / 100)+1]] <- as.matrix(cov(accepted_vals))
     }
 
     ###########################################################################
     ## SAMPLE SCALE PARAMETER
     ## TODO: adaptive estimation for sd
-    ## TODO: propose on the log scale
-    sclp <- propose_scl(curr=scl[t-1], sd=0.1)
-    sclprops[t] <- sclp$prop
-    if (vb) print(paste("Iteration proposal (scale):", sclp$prop))
+    logsclp <- propose_logscl(curr=logscl[t-1], sd=0.1)
+    logsclprops[t] <- logsclp$prop
+    if (vb) print(paste("Iteration proposal (scale):", exp(logsclp$prop)))
     ### Calculate proposed likelihood
-    llp <- sum(Zf*log(Of$time*(lhat_curr*sclp$prop + Of$bg)) -
-     Of$time*(lhat_curr*sclp$prop + Of$bg))
-    ### Calculate prior on scale parameter
-    ### TODO: model the log scale (prior will be normal centered at 0, var=1)
-    lpp <- dlnorm(x=sclp$prop, meanlog=-0.5, sdlog=0.5)
-    lp_curr <- dlnorm(x=scl[t-1], meanlog=-0.5, sdlog=0.5)
+    llp <- sum(Zf*log(Of$time*(lhat_curr*exp(logsclp$prop) + Of$bg)) -
+     Of$time*(lhat_curr*exp(logsclp$prop) + Of$bg))
+    ### Calculate prior on log scale parameter
+    lpp <- dnorm(x=logsclp$prop, log=TRUE)
+    lp_curr <- dnorm(x=logscl[t-1], log=TRUE)
     ### Calculate Metropolis-Hastings ratio
     ### { L(xp|Y)*p(xp)*g(xt|xp) } / { L(xt|Y)*p(xt)*g(xp|xt) }
-    lmh <- llp - lls[t-1] + lpp - lp_curr + sclp$pr
+    lmh <- llp - lls[t-1] + lpp - lp_curr + logsclp$pr
     ## accept or reject
     if (lmh > log(runif(n=1))) {
-      scl[t,] <- sclp$prop
+      logscl[t,] <- logsclp$prop
       lls[t] <- llp
     } else {
-      scl[t,] <- scl[t-1]
+      logscl[t,] <- logscl[t-1]
       lls[t] <- lls[t-1]
     }
+    ###########################################################################
 
     toc <- proc.time()[3]
+    ## calculate acceptance rates
+    if (debug) {
+      winsize <- min(t, 100)
+      accepted_u <- u[(t-winsize+1):t,] %>%
+        as.data.frame() %>% tidyr::drop_na() %>% dplyr::distinct()
+      urates[t-10] <- nrow(accepted_u)/winsize
+      accepted_logscl <- unique(logscl[(t-winsize+1):t])
+      logsclrates[t-10] <- length(accepted_logscl)/winsize
+    }
+
     if (vb && t %% 1 == 0) {
       print(paste("Finished iteration", t))
       print(paste("Time elapsed:", toc-tic))
       print(paste("Iteration sample (calib params):", drop(u[t,1]),
         drop(u[t,2])))
-      print(paste("Iteration sample (scl):", scl[t]))
+      print(paste("Iteration sample (scl):", exp(logscl[t])))
     }
-    if (t %% 100 == 0) {
-      temp_res <- list(u=u, scl=scl, lls=lls,
-        props=list(u=uprops, scl=sclprops), rates=rates, covars=covars)
+    if (t %% 1 == 0) {
+      temp_res <- list(u=u, logscl=logscl, lls=lls,
+        props=list(u=uprops, logscl=logsclprops), covars=covars)
+      if (debug) temp_res$rates <- list(u=urates, logscl=logsclrates)
       saveRDS(temp_res, file=paste0("../results/temp_mcmc_", id, ".rds"))
     }
   }
-  return(list(u=u, scl=scl, lls=lls, props=list(u=uprops, scl=sclprops),
-    rates=rates, covars=covars, time=proc.time()[3]-tic))
+  ret <- list(u=u, logscl=logscl, lls=lls, props=list(u=uprops, logscl=logsclprops),
+    covars=covars, time=proc.time()[3]-tic)
+  if (debug) ret$rates <- list(u=urates, logscl=logsclrates)
+  return(ret)
 }

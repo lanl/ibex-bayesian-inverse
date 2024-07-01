@@ -38,7 +38,7 @@ propose_u <- function(curr, method, pmin=NULL, pmax=NULL, pcovar=NULL) {
   }
 }
 
-propose_scl <- function(curr, sd) {
+propose_logscl <- function(curr, sd) {
   prop <- rnorm(n=1, mean=curr, sd=sd)
   pr <- dnorm(curr, mean=prop, sd=sd, log=TRUE) -
     dnorm(prop, mean=curr, sd=sd, log=TRUE)
