@@ -134,9 +134,12 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
 
     ## update u proposal covariance
     if (any(is.na(true_u)) && t %% 100 == 0) {
+      winsize <- min(t, 100)
       accepted_vals <- u[(t-winsize+1):t,] %>%
         as.data.frame() %>% tidyr::drop_na() %>% dplyr::distinct()
-      pcovar <- covars[[floor(t / 100)+1]] <- as.matrix(cov(accepted_vals))
+      if (nrow(accepted_vals) > 5) {
+        pcovar <- covars[[floor(t / 100)+1]] <- as.matrix(cov(accepted_vals))
+      }
     }
 
     ###########################################################################
