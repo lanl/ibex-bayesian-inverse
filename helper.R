@@ -69,7 +69,7 @@ preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
   if (!real) {
     fd$pmfp <- fd$parallel_mean_free_path
     if (disc) {
-      fd <- fd %>% dplyr::filter(scl==fparams[1], time > 0)
+      fd <- fd %>% dplyr::filter(near(scl, fparams[1]), time > 0)
     } else {
       fd <- fd %>% dplyr::filter(esa==esa_lev, pmfp==fparams[1],
         ratio==fparams[2], time > 0)
