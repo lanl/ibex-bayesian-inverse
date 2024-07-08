@@ -7,7 +7,7 @@ ratios <- c(0.001, 0.005, 0.01, 0.02, 0.05, 0.1)
 grid <- as.matrix(expand.grid(pmfps, ratios))
 colnames(grid) <- c("pmfp", "ratio")
 
-ncores <- parallel::detectCores()-1
+ncores <- min(1, ceiling(parallel::detectCores()/2) - 1)
 cl <- parallel::makeCluster(ncores, outfile="../temp/log.txt")
 doParallel::registerDoParallel(cl)
 

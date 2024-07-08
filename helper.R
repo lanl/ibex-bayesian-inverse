@@ -27,7 +27,7 @@ propose_u <- function(curr, method, pmin=NULL, pmax=NULL, pcovar=NULL) {
     return(list(prop=prop, pr=1))
   } else if (method=="tmvnorm") {
     prop <- tmvtnorm::rtmvnorm(n=1, mean=curr, sigma=pcovar, lower=pmin,
-      upper=pmax, algorithm="gibbs")
+      upper=pmax, algorithm="rejection")
     pr <- tmvtnorm::dtmvnorm(curr, mean=drop(prop), sigma=pcovar, lower=pmin,
       upper=pmax, log=TRUE) -
       tmvtnorm::dtmvnorm(drop(prop), mean=curr, sigma=pcovar, lower=pmin,
