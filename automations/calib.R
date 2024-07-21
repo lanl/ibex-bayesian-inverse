@@ -27,6 +27,8 @@ thrds <- ifelse(!is.null(args[["threads"]]), as.integer(args[["threads"]]), 10)
 maxprocs <- ifelse(!is.null(args[["procs"]]), as.integer(args[["procs"]]), 6)
 ## flag indicating if simulated field data should have discrepancy
 disc <- ifelse(!is.null(args[["d"]]), as.logical(args[["d"]]), FALSE)
+## number of discrepancy file to use
+disc_num <- ifelse(!is.null(args[["dnum"]]), as.numeric(args[["dnum"]]), NA)
 ## flag indicating if field data in calibration should be real or simulated
 real <- ifelse(!is.null(args[["r"]]), as.logical(args[["r"]]), FALSE)
 ## if using simulated field data, what the true PMFP and ratio should be
@@ -50,15 +52,19 @@ debug <- ifelse(!is.null(args[["debug"]]), as.logical(args[["debug"]]), FALSE)
 ## flag to print more output to screen
 vb <- ifelse(!is.null(args[["v"]]), as.logical(args[["v"]]), FALSE)
 settings <- list(esa_lev=esa_lev, nmcmcs=nmcmcs, gp=gp, end=end, thrds=thrds,
-  maxprocs=maxprocs, disc=disc, real=real, fpmfp=fpmfp, fratio=fratio, fyear=fyear,
-  infile=infile, psc=psc, rsc=rsc, step_size=step_size, quant=quant, tol=tol,
-  debug=debug, vb=vb)
+  maxprocs=maxprocs, disc=disc, disc_num=disc_num, real=real, fpmfp=fpmfp,
+  fratio=fratio, fyear=fyear, infile=infile, psc=psc, rsc=rsc,
+  step_size=step_size, quant=quant, tol=tol, debug=debug, vb=vb)
 if (vb) print(settings)
 
 model_data <- read.csv(file="../data/sims.csv")
 if (!real) {
   if (disc) {
-    field_data <- read.csv(file="../data/sims_bias.csv")
+    disc_files <- list.files(path="../data", pattern="sims_bias_2020A_p*")
+    if (is.na(disc_num) || disc_num > length(disc_files)) {
+      stop("Incorrect number of discrepancy file specified")
+    }
+    field_data <- read.csv(file=paste0("../data/", disc_files[disc_num]))
   } else {
     field_data <- read.csv(file="../data/sims_real.csv")
   }
@@ -81,6 +87,8 @@ if (!is.na(infile)) {
     names(cpars) <- c("year")
   }
 }
+true_pmfp <- unique(field_data$parallel_mean_free_path)
+true_ratio <- unique(field_data$ratio)
 
 cl <- parallel::makeCluster(ifelse(nrow(cpars) < maxprocs, nrow(cpars),
                                    maxprocs), outfile="../temp/log.txt")
@@ -99,9 +107,9 @@ foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tidyverse",
     Zf=pd$Zfield, Of=pd$Ofield, nmcmcs=nmcmcs, step=step_size,
     gpmeth=gp, end=end, thrds=thrds, vb=vb, debug=debug)
   res <- list(mcmc_res=mcmc_res,
-    settings=list(esa=esa_lev, nmcmcs=nmcmcs, threads=thrds,
-                  params=fparams, real=real, step=step_size,
-                  pmfp_scale=psc, ratio_scale=rsc))
+    settings=list(truth=list(pmfp=true_pmfp, ratio=true_ratio, scl=fparams),
+      esa=esa_lev, nmcmcs=nmcmcs, threads=thrds, params=fparams, real=real,
+       step=step_size, pmfp_scale=psc, ratio_scale=rsc))
   saveRDS(res, file=paste0("../results/mcmc_res_esa", esa_lev, "_nmcmc", nmcmcs,
     "_end", end, "_sc", strsplit(as.character(psc), split='\\.')[[1]][2],
     "_quant", strsplit(as.character(quant), split='\\.')[[1]][2],
