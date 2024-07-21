@@ -29,6 +29,10 @@ maxprocs <- ifelse(!is.null(args[["procs"]]), as.integer(args[["procs"]]), 6)
 disc <- ifelse(!is.null(args[["d"]]), as.logical(args[["d"]]), FALSE)
 ## number of discrepancy file to use
 disc_num <- ifelse(!is.null(args[["dnum"]]), as.numeric(args[["dnum"]]), NA)
+## flag indicating if the true u should be sent
+true_u <- ifelse(!is.null(args[["tu"]]), as.logical(args[["tu"]]), FALSE)
+## setting for true log scale
+true_logscl <- ifelse(!is.null(args[["tls"]]), as.numeric(args[["tls"]]), NA)
 ## flag indicating if field data in calibration should be real or simulated
 real <- ifelse(!is.null(args[["r"]]), as.logical(args[["r"]]), FALSE)
 ## if using simulated field data, what the true PMFP and ratio should be
@@ -54,7 +58,8 @@ vb <- ifelse(!is.null(args[["v"]]), as.logical(args[["v"]]), FALSE)
 settings <- list(esa_lev=esa_lev, nmcmcs=nmcmcs, gp=gp, end=end, thrds=thrds,
   maxprocs=maxprocs, disc=disc, disc_num=disc_num, real=real, fpmfp=fpmfp,
   fratio=fratio, fyear=fyear, infile=infile, psc=psc, rsc=rsc,
-  step_size=step_size, quant=quant, tol=tol, debug=debug, vb=vb)
+  step_size=step_size, quant=quant, tol=tol, debug=debug, vb=vb,
+  true_u=true_u, true_logscl=true_logscl)
 if (vb) print(settings)
 
 model_data <- read.csv(file="../data/sims.csv")
@@ -89,6 +94,10 @@ if (!is.na(infile)) {
 }
 true_pmfp <- unique(field_data$parallel_mean_free_path)
 true_ratio <- unique(field_data$ratio)
+if (true_u) {
+  true_u <- c(true_pmfp, true_ratio)
+  settings$true_u <- true_u
+}
 
 cl <- parallel::makeCluster(ifelse(nrow(cpars) < maxprocs, nrow(cpars),
                                    maxprocs), outfile="../temp/log.txt")
@@ -105,11 +114,12 @@ foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tidyverse",
     disc=disc)
   mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
     Zf=pd$Zfield, Of=pd$Ofield, nmcmcs=nmcmcs, step=step_size,
-    gpmeth=gp, end=end, thrds=thrds, vb=vb, debug=debug)
-  res <- list(mcmc_res=mcmc_res,
-    settings=list(truth=list(pmfp=true_pmfp, ratio=true_ratio, scl=fparams),
-      esa=esa_lev, nmcmcs=nmcmcs, threads=thrds, params=fparams, real=real,
-       step=step_size, pmfp_scale=psc, ratio_scale=rsc))
+    gpmeth=gp, end=end, thrds=thrds, vb=vb, debug=debug,
+    true_u=true_u, true_logscl=true_logscl)
+  settings$truth <- list(pmfp=true_pmfp, ratio=true_ratio, scl=fparams)
+  res <- list(mcmc_res=mcmc_res, settings=settings, esa=esa_lev, nmcmcs=nmcmcs,
+   threads=thrds, params=fparams, real=real, step=step_size, pmfp_scale=psc,
+   ratio_scale=rsc)
   saveRDS(res, file=paste0("../results/mcmc_res_esa", esa_lev, "_nmcmc", nmcmcs,
     "_end", end, "_sc", strsplit(as.character(psc), split='\\.')[[1]][2],
     "_quant", strsplit(as.character(quant), split='\\.')[[1]][2],
