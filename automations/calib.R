@@ -97,6 +97,8 @@ true_ratio <- unique(field_data$ratio)
 if (true_u) {
   true_u <- c(true_pmfp, true_ratio)
   settings$true_u <- true_u
+} else {
+  true_u <- NA
 }
 
 cl <- parallel::makeCluster(ifelse(nrow(cpars) < maxprocs, nrow(cpars),
