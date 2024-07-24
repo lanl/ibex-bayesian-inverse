@@ -92,8 +92,12 @@ if (!is.na(infile)) {
     names(cpars) <- c("year")
   }
 }
-true_pmfp <- unique(field_data$parallel_mean_free_path)
-true_ratio <- unique(field_data$ratio)
+
+if (!real) {
+  true_pmfp <- unique(field_data$parallel_mean_free_path)
+  true_ratio <- unique(field_data$ratio)
+}
+
 if (true_u) {
   true_u <- c(true_pmfp, true_ratio)
   settings$true_u <- true_u
