@@ -39,7 +39,7 @@ real <- ifelse(!is.null(args[["r"]]), as.logical(args[["r"]]), FALSE)
 fpmfp <- ifelse(!is.null(args[["fpmfp"]]), as.numeric(args[["fpmfp"]]), 2500)
 fratio <- ifelse(!is.null(args[["fratio"]]), as.numeric(args[["fratio"]]), 0.05)
 ## if using real field data, what year it should come from
-fyear <- ifelse(!is.null(args[["fyear"]]), as.numeric(args[["fyear"]]), 2009)
+fyear <- ifelse(!is.null(args[["fyear"]]), args[["fyear"]], "2009A")
 ## file that contains multiple parameter combinations for field data
 infile <- ifelse(!is.null(args[["infile"]]), as.character(args[["infile"]]), NA)
 ## amount the PMFP and ratio should be scaled before fitting (used for laGP)
@@ -75,7 +75,8 @@ if (!real) {
   }
 } else {
   field_data <- read.csv(file="../data/ibex_real.csv")
-  field_data <- field_data %>% dplyr::rename(esa=ESA, sim_counts=counts)
+  field_data <- field_data %>% dplyr::rename(sim_counts=counts,
+    lat=ecliptic_lat, lon=ecliptic_lon)
 }
 
 if (!is.na(infile)) {
