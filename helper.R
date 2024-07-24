@@ -105,7 +105,15 @@ preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
   }
 
   for (i in 1:ncol(Umod)) {
-    Umod[,i] <- (Umod[,i] - min(Umod[,i]))/(diff(range(Umod[,i]))/scales[i])
+    Umin <- min(Umod[,i])
+    Umax <- max(Umod[,i])
+    Urange <- diff(range(Umod[,i]))
+    Umin <- max(c(0, Umin-(Urange*0.1)))
+    ## TODO: this should be custom to each parameter
+    ## Ratio cannot be greater than 1
+    Umax <- Umax+(Urange*0.1)
+    Urange <- Umax-Umin
+    Umod[,i] <- (Umod[,i] - Umin)/(Urange/scales[i])
   }
 
   return(list(Xmod=Xmod, Umod=Umod, Zmod=Zmod, Xfield=Xfield, Zfield=Zfield,
