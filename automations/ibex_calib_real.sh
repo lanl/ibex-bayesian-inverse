@@ -28,5 +28,5 @@ then
 fi
 
 echo "Started script"
-R CMD BATCH "--args -v --procs=1 --fyear=$2" calib.R
+R CMD BATCH "--args -r -v --procs=1 --fyear=$2" calib.R
 echo "Finished calibration script"
