@@ -69,8 +69,8 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   ## establish covariance for proposals
   pvar <- ifelse(is.na(step), 0.1, step)
   pcovar <- covars[[1]] <- matrix(c(pvar, 0, 0, pvar), nrow=2, byrow=TRUE)
-  pmin <- apply(Um, 2, min)
-  pmax <- apply(Um, 2, max)
+  pmin <- c(0, 0)
+  pmax <- c(1, 1)
   tic <- proc.time()[3]
 
   for (t in 2:nmcmcs) {
