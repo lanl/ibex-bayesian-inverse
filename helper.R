@@ -82,7 +82,7 @@ preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
   Xmod <- md %>% dplyr::filter(ESA==esa_lev)
   Umod <- Xmod %>% dplyr::select(pmfp, ratio)
 
-  Xfield <- remove_unchanged_points(md=Xmod, fd=fd, tol=tol, quant=quant)
+  Xfield <- fd##remove_unchanged_points(md=Xmod, fd=fd, tol=tol, quant=quant)
 
   Xmod[,c("x", "y", "z")] <- geo_to_spher_coords(Xmod$lat, Xmod$lon)
   Xmod <- Xmod %>% dplyr::select(x, y, z)
@@ -108,11 +108,6 @@ preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
     Umin <- min(Umod[,i])
     Umax <- max(Umod[,i])
     Urange <- diff(range(Umod[,i]))
-    Umin <- max(c(0, Umin-(Urange*0.1)))
-    ## TODO: this should be custom to each parameter
-    ## Ratio cannot be greater than 1
-    Umax <- Umax+(Urange*0.1)
-    Urange <- Umax-Umin
     Umod[,i] <- (Umod[,i] - Umin)/(Urange/scales[i])
   }
 
@@ -193,4 +188,8 @@ spher_to_geo_coords <- function(x, y, z) {
   lat <- (180/pi)*asin(z)
   lon <- (180/pi)*atan2(y, x)
   return(data.frame(lat, lon))
+}
+
+nose_center_lons <- function(lons) {
+  return((lons - 85) %% 360)
 }
