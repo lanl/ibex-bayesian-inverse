@@ -41,4 +41,4 @@ for (i in 1:nrow(sims_sub)) {
   }
 }
 
-saveRDS(matrix(c(row, min_ind), nrow=1), file=paste0("near_sim_", row, ".rds"))
+saveRDS(matrix(c(row, min_ind), nrow=1), file=paste0("near_sim_", map, "_", row, ".rds"))
