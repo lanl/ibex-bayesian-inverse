@@ -1,9 +1,22 @@
-res_files <- list.files(pattern="near_sim_[0-9]*.rds")
+map <- "2020A"
 
-if (length(res_files) != 14154) {
+args <- commandArgs(TRUE)
+if (length(args) > 0) {
+  for (i in 1:length(args)) {
+    eval(parse(text=args[[i]]))
+  }
+}
+
+ibex_real <- read.csv("ibex_real.csv")
+ibex_real <- ibex_real[ibex_read$map==map,]
+n <- nrow(ibex_real)
+
+res_files <- list.files(pattern=paste0("near_sim_", map, "_[0-9]*.rds")
+
+if (length(res_files) != n) {
   stop("Not all rows of the IBEX real data were executed")
 }
-res <- matrix(NA, nrow=14154, ncol=2)
+res <- matrix(NA, nrow=length(res_files), ncol=2)
 
 for (row in 1:length(res_files)) {
   near_sim <- readRDS(res_files[row])
@@ -12,4 +25,4 @@ for (row in 1:length(res_files)) {
 }
 colnames(res) <- c("row", "near_sim")
 
-write.csv(res, paste0('ibex_sim_map.csv'), row.names=FALSE)
+write.csv(res, paste0('ibex_sim_map_', map, '.csv'), row.names=FALSE)
