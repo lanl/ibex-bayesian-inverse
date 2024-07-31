@@ -7,11 +7,11 @@ if (length(args) > 0) {
   }
 }
 
-ibex_real <- read.csv("ibex_real.csv")
-ibex_real <- ibex_real[ibex_read$map==map,]
+ibex_real <- read.csv("../data/ibex_real.csv")
+ibex_real <- ibex_real[ibex_real$map==map,]
 n <- nrow(ibex_real)
 
-res_files <- list.files(pattern=paste0("near_sim_", map, "_[0-9]*.rds")
+res_files <- list.files(pattern=paste0("near_sim_", map, "_[0-9]*.rds"))
 
 if (length(res_files) != n) {
   stop("Not all rows of the IBEX real data were executed")
