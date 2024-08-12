@@ -24,5 +24,6 @@ for (row in 1:length(res_files)) {
 #  file.remove(res_files[row])
 }
 colnames(res) <- c("row", "near_sim")
+res <- res[order(res[,1]),]
 
 write.csv(res, paste0('ibex_sim_map_', map, '.csv'), row.names=FALSE)
