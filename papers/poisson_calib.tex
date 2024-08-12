@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 \usepackage{hyperref}
 \usepackage{amsmath, amsfonts, amssymb, mathrsfs}
 \usepackage{dcolumn}
@@ -22,37 +22,56 @@
 \addtolength{\evensidemargin}{-.5in}
 \footskip=0.5in
 
-\title{Computer Model Calibration for Large-Scale, Spatially Distributed Counts}
-\author{Steven D. Barnett\thanks{Corresponding author: Department of Statistics, 
-  Virginia Tech, {\tt sdbarnett@vt.edu}} \and Robert B. Gramacy\thanks{Department 
-  of Statistics, Virginia Tech} \and
-  Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos National Laboratory} \and
-  Dave Osthus\footnotemark[3]}
-\date{\today}
-
 \begin{document}
 
-\maketitle
-\bigskip
+\title{Computer Model Calibration for Large-Scale, Spatially Distributed Counts}
+\author{Steven D. Barnett\thanks{Corresponding author \href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu},
+  Department of Statistics, Virginia Tech} \and Robert B. Gramacy\thanks{Department
+  of Statistics, Virginia Tech} \and
+  Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos National Laboratory} \and
+  Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{Nuclear and Particle Physics,
+  AstroPhysics and Cosmology, Los Alamos National Laboratory} \and Fan Guo\footnotemark[4]
+  \and Eric J. Zirnstein\thanks{Department of Astrophysical Sciences, Princeton University}
+  \and Daniel B. Reisenfeld\thanks{Space Science and Applications Group, Los Alamos National
+  Laboratory}}
+\date{\today}
 
-\begin{abstract} 
-\textbf{Outline for the paper:} Motivate the need for computer model calibration
-in the context of non-Gaussian data. Motivate the need to use an approximation
-in computer model calibration of large-scale data (Vecchia). Introduce the IBEX
-sky map as an excellent use case of both these barriers. Expand upon the
-Kennedy \& O'Hagan canonical calibration framework. Propose using scaled Vecchia
-as a GP surrogate. Illustrate the performance on simulated examples. Talk about
-the need for adding discrepancy and propose model for doing so. Show the ability
-to obtain good estimates of calibration parameters and out-of-sample predictions
-with discrepancy analysis.
+\maketitle
+
+\vspace{-0.5cm}
+
+\begin{abstract}
+The Interstellar Boundary Explorer (IBEX) satellite detects energetic neutral
+atoms (ENAs) and determines the rate at which they are generated in the heliosphere.
+Computer models attempt to represent the physical process that produces these ENAs
+based on varying the value of certain parameters. Computer model calibration enables
+scientists to use data collected in a field experiment along with simulator output
+to predict out-of-sample and learn the distribution of parameters. We introduce an
+extension of the Kennedy \& O'Hagan canonical calibration framework that handles
+Poisson-distributed data collected by the IBEX satellite. The resolution at which
+data is collected prohibits us from using typical models. We propose the use of
+the Scaled Vecchia approximation as a Gaussian process (GP) surrogate. We demonstrate
+the capability of our proposed framework through multiple simulated examples.
+Additionally, we show that we can recover the true parameters in a discrepancy-free
+environment. We provide guidance on how to account for discrepancy and show that
+we can obtain accurate out of sample prediction.
 \end{abstract}
 
-\noindent \textbf{Keywords:} vecchia, poisson, heliospheric science, gaussian process surrogate 
+\noindent \textbf{Key words:} simulator, Gaussian process surrogate, Poisson response,
+ Vecchia approximation, Bayesian inference, discrepancy analysis, heliospheric
+ science, IBEX
+\end{abstract}
 
-%\vfill
+\doublespacing
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+\label{sec:intro}
+
+%%% No calibration going on in IBEX (super novel)
+%%% like the narrative of no bias, then bias
+%%% SEPIA: Dave Higdon's LANL - we're going back to what Dave wanted to do, but couldn't at the time with
+%%% computational limits
 
 \begin{itemize}
   \item Introduce the heliosphere, energetic neutral atoms, globally distributed flux, ribbon
@@ -71,8 +90,12 @@ with discrepancy analysis.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Review} 
+\section{Review}
 \label{sec:review}
+
+%%% Vecchia should go in review (off the shelf)
+%%% novelty is SEPIA approach and Poisson
+%%% get more into the detail of limitations that SEPIA and Vecchia help
 
 \begin{itemize}
   \item Review Gaussian processes and their use in surrogate modeling
@@ -87,6 +110,12 @@ with discrepancy analysis.
 \section{Model}
 \label{sec:modeling}
 
+%%% non-discrepancy version is pretty simple
+%%% discrepancy free. illustrate it
+%%% show posterior distributions
+
+%%% subsection on last summer's work
+%%% add discrepancy in section 4
 \begin{itemize}
   \item Rehash the need to update KOH to account for Poisson data
   \item Show diagram of updated framework (McMC with Poisson likelihood)
@@ -118,7 +147,7 @@ with discrepancy analysis.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discrepancy analysis in IBEX real data} 
+\section{Discrepancy analysis in IBEX real data}
 \label{sec:experiments}
 
 \begin{itemize}
@@ -137,7 +166,7 @@ with discrepancy analysis.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion} 
+\section{Discussion}
 \label{sec:conclude}
 
 \begin{itemize}
