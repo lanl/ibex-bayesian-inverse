@@ -78,8 +78,11 @@ we can obtain accurate out of sample prediction.
   \item Motivate the use of computer models to understand the process that generates GDF/ribbon
   \item Introduce computer model simulations (ribbon, GDF)
   \item Explain current process of theory evaluation (Theseus, ribbon separation)
+  \item Calibration is SUPER novel in this field
   \item Summary of work done on computer model calibration
+  \item Reference Dave's work on calibration. Wanted to do it, but had to do PCA stuff do to computational limits
   \item Summary of work modeling Poisson data in the context of computer model calibration
+  \item Mention that Katzfuss and Lawrence suggested use of SVecchia in calibration
   \item Description of what we'll do: build a framework that's an extension of
     canonical Kenndy \& O'Hagan framework, use of scaled vecchia for handling large data,
     illustrate performance on simulated data, propose a method for handling discrepancy,
@@ -106,8 +109,8 @@ we can obtain accurate out of sample prediction.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Model}
-\label{sec:modeling}
+\section{Computer Model Calibration for Poisson-distributed Response}
+\label{sec:poisson_calib}
 
 %%% non-discrepancy version is pretty simple
 %%% discrepancy free. illustrate it
@@ -129,6 +132,32 @@ we can obtain accurate out of sample prediction.
 \subsection{Estimation of calibration parameters}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Scaled Vecchia}
+\label{sec:poisson_calib}
+
+%%% non-discrepancy version is pretty simple
+%%% discrepancy free. illustrate it
+%%% show posterior distributions
+
+%%% subsection on last summer's work
+%%% add discrepancy in section 4
+\begin{itemize}
+  \item Rehash the need to update KOH to account for Poisson data
+  \item Show diagram of updated framework (McMC with Poisson likelihood)
+  \item Explain the use of a no-bias set up to initially prove the capability
+  \item Briefly show the math behind this
+\end{itemize}
+
+\subsection{Scaled Vecchia Gaussian Process Surrogate}
+
+\subsection{Discrepancy Analysis}
+
+\subsection{Estimation of calibration parameters}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simulated example: IBEX Skymap}
