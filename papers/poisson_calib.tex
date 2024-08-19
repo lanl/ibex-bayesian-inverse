@@ -24,16 +24,18 @@
 
 \begin{document}
 
-\title{Computer Model Calibration for Large-Scale, Spatially Distributed Counts}
-\author{Steven D. Barnett\thanks{Corresponding author \href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu},
-  Department of Statistics, Virginia Tech} \and Robert B. Gramacy\thanks{Department
-  of Statistics, Virginia Tech} \and
-  Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos National Laboratory} \and
-  Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{Nuclear and Particle Physics,
-  AstroPhysics and Cosmology, Los Alamos National Laboratory} \and Fan Guo\footnotemark[4]
-  \and Eric J. Zirnstein\thanks{Department of Astrophysical Sciences, Princeton University}
-  \and Daniel B. Reisenfeld\thanks{Space Science and Applications Group, Los Alamos National
-  Laboratory}}
+\title{Computer Model Calibration for Spatially Distributed
+Counts} \author{Steven D. Barnett\thanks{Corresponding author
+\href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of Statistics,
+Virginia Tech} \and Robert B. Gramacy\thanks{Department of Statistics, Virginia
+Tech} \and Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos
+National Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{
+Nuclear and Particle Physics, AstroPhysics and Cosmology, Los Alamos National
+Laboratory} \and Fan Guo\footnotemark[4] \and Eric J. Zirnstein\thanks{
+Department of Astrophysical Sciences, Princeton University} \and Daniel B.
+Reisenfeld\thanks{Space Science and Applications Group, Los Alamos National
+Laboratory}}
+
 \date{\today}
 
 \maketitle
@@ -42,26 +44,32 @@
 
 \begin{abstract}
 The Interstellar Boundary Explorer (IBEX) satellite detects energetic neutral
-atoms (ENAs) and determines the rate at which they are generated in the heliosphere.
-Computer models attempt to represent the physical process that produces these ENAs
-based on varying the value of certain parameters. Computer model calibration enables
-scientists to use data collected in a field experiment along with simulator output
-to predict out-of-sample and learn the distribution of parameters. We introduce an
-extension of the Kennedy \& O'Hagan canonical calibration framework that handles
-Poisson-distributed data collected by the IBEX satellite. The resolution at which
-data is collected prohibits us from using typical models. We propose the use of
-the Scaled Vecchia approximation as a Gaussian process (GP) surrogate. We demonstrate
-the capability of our proposed framework through multiple simulated examples.
-Additionally, we show that we can recover the true parameters in a discrepancy-free
-environment. We provide guidance on how to account for discrepancy and show that
-we can obtain accurate out of sample prediction.
+atoms (ENAs) and determines the rate at which they are generated in the
+heliosphere. Computer models attempt to represent the physical process that
+produces heliospheric ENAs through specified model parameters. Computer model
+calibration enables statisticians to use data collected in a field experiment
+along with simulator output from a variety of parameter settings to make
+out-of-sample predictions and learn the posterior distributions of model
+parameters. However, calibration typically assumes a Gaussian or continuous
+response for both field and computer model data. We introduce a novel Markov
+chain Monte Carlo calibration framework that accommodates the spatially
+distributed Poisson counts collected by the IBEX satellite. Additionally, the
+computer simulation in our application is limited in the amount of runs it can
+perform, but each run's output is quite large. Therefore, we propose the use of
+the Scaled Vecchia approximation as a Gaussian process (GP) surrogate. We
+demonstrate the capability of our proposed framework through multiple simulated
+examples and show that we can consistently recover the true parameters in a
+discrepancy-free environment and obtain accurate out-of-sample prediction. We
+apply this to the IBEX satellite data and the corresponding computer model
+output.
 
-\noindent \textbf{Key words:} simulator, Gaussian process surrogate, Poisson response,
- Vecchia approximation, Bayesian inference, discrepancy analysis, heliospheric
- science, IBEX
+\bigskip
+\noindent \textbf{Key words:} computer experiments, simulator, Gaussian process
+ surrogate, Poisson response, Vecchia approximation, Bayesian inference,
+ heliospheric science, IBEX
 \end{abstract}
 
-\doublespacing
+\doublespacing % no double spacing for arXiv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
