@@ -117,7 +117,8 @@ than on the sides (port and starboard) of the ship. Prior to the launch of the
 IBEX satellite, space scientists had the same expectation for the heliosphere.
 Higher rates of ENAs being generated would exist at the stern (space scientists
 call this the nose) and bow (tail) of the helisophere due to its movement
-through interstellar space. And that was found to be true. But in a completely
+through interstellar space. And that was found to be true. These higher rates
+are referred to as globally distributed flux (GDF). But in a completely
 unexpected finding \citep{mccomas2009aIBEX}, IBEX recorded a string of higher
 rates of ENAs \citep{fuselier2009IBEXribbon}, or ribbon, being generated that
 curved around the heliosphere. For the past decade and a half, space scientists
@@ -126,19 +127,58 @@ process that generates it. Along with these proposed explanations, theorists
 have developed computer simulations that produce maps of the heliosphere based
 on the values of certain model parameters.
 
-%%% No calibration going on in IBEX (super novel)
-Introduce computer model simulations (ribbon, GDF). Explain current process of theory evaluation (Theseus, ribbon separation). Calibration is SUPER novel in this field
+% Introduce computer model simulations (ribbon, GDF).
+Many computer models to generate sky maps exist (???). In this paper we focus on two. One simulation to create variations of the GDF and one that offers and explanation of how the ribbon is produced.
 
-Introduce a charicature of the IBEX problem
+Statistical computer model calibration utilizes both data collected from a
+physical experiment and data generated from a computer simulation
+representative of the physical process of interest. Often, the physical
+experiment is either too expensive to run a sufficient number of times or it's
+unethical to conduct. In this way, a computer model representing the physical
+process allows a practitioner to learn more about the physical process without
+the prohibitive expense. Use of this additional source of data (even with it's
+potential bias, as no simulation is perfect) has been shown to improve
+prediction and uncertainty quantification out-of-sample (ref?). It is often
+impossible to control the values of certain variables in a physical experiment
+(e.g. gravity), but that barrier does not exist in a computer simulation. These
+calibration or tuning parameters can be of high scientific interest. Varying
+them helps experimenters explore more of the input space, understand the
+distribution of these parameters, and perhaps make inferential claims about
+them. Parameters that are part of computer simulations developed by space
+scientists to explain the existence of the GDF and ribbon fall in this
+category.
+
+%%% No calibration going on in IBEX (super novel)
+Scientific investigation of the GDF and ribbon currently involve a long and
+complex process. The noisy and irregular nature of the data has made it hard
+for space scientists to perform analysis, especially separating signal from the
+noise. The IBEX Science Operations Center (ISOC) perform some aggregation of
+the raw data to produces maps, but these still retain a significant amount of
+noise. To remedy this problem \citet{osthustheseus2023} propose a method called
+Theseus, which takes the raw data and generates a much smoother representation
+of the surface, using a series of Generative Additive Models (GAM) and
+Projection Pursuit Regression. Once those Theseus maps are created, they are
+separated into GDF-only and ribbon-only maps \citep{beesleyribbonsep2023}. With
+the source of ENAs separated into two distinct maps, space scientists perform
+analysis and conduct research exclusively for either the GDF or ribbon with the
+respective map. Both Theseus and ribbon separation rely on many assumptions about the data and thus depart from the data generation process itself.
+
+% Introduce a charicature of the IBEX problem
 
 %%% SEPIA: Dave Higdon's LANL - we're going back to what Dave wanted to do, but couldn't at the time with
 %%% computational limits
-Summary of work done on computer model calibration. KOH. Reference Dave's work on calibration. Wanted to do it, but had to do PCA stuff do to computational limits.
+Summary of work done on computer model calibration. KOH. Reference Dave's work
+on calibration. Wanted to do it, but had to do PCA stuff do to computational
+limits.
 
-Summary of work modeling Poisson data in the context of computer model calibration. Mention that Katzfuss and Lawrence suggested use of SVecchia in calibration
+Summary of work modeling Poisson data in the context of computer model
+calibration. Mention that Katzfuss and Lawrence suggested use of SVecchia in
+calibration
 
 Description of what we'll do: build a framework that's an extension of
-canonical Kenndy \& O'Hagan framework, use of scaled vecchia for handling large data, illustrate performance on simulated data, demonstrate performance on real IBEX data.
+canonical Kenndy \& O'Hagan framework, use of scaled vecchia for handling large
+data, illustrate performance on simulated data, demonstrate performance on real
+IBEX data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
