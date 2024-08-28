@@ -185,12 +185,20 @@ the past two decades.
 
 Summary of work modeling Poisson data in the context of computer model
 calibration. Mention that Katzfuss and Lawrence suggested use of SVecchia in
-calibration
+calibration. What we wish to address.
 
-Description of what we'll do: build a framework that's an extension of
-canonical Kenndy \& O'Hagan framework, use of scaled vecchia for handling large
-data, illustrate performance on simulated data, demonstrate performance on real
-IBEX data.
+Toward that end, the paper is outlined as follows. We review GPs as surrogates
+in computer model calibration and the work that has been done to apply
+calibration to a wide array of problems in Section \ref{sec:review}. Section
+\ref{sec:poisson_calib} introduces an McMC framework as an extension of KOH to
+account for non-Gaussian data in the context of calibration. We propose the use
+of the Scaled Vecchia Approximation \citep{scaledvecchiakatzfuss2022} to
+account for large-scale data in \ref{sec:scale_vec}. We provide empirical
+results for small and large problems in Section \ref{sec:ibex_sim}. We finish
+our contribution through application to the real IBEX satellite data in Section
+\ref{sec:ibex_real}. Section \ref{sec:discuss} follows up and concludes our
+paper with a discussion. Code reproducing all examples is provided at
+\url{https://github.com.org/lanl/IBEX_Calibration}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -265,7 +273,7 @@ IBEX data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simulated example: IBEX Skymap}
-\label{sec:dgpal}
+\label{sec:ibex_sim}
 
 \begin{itemize}
   \item Go in depth on development of GDF and ribbon computer models
@@ -280,7 +288,7 @@ IBEX data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discrepancy analysis in IBEX real data}
-\label{sec:experiments}
+\label{sec:ibex_real}
 
 \begin{itemize}
   \item Illustrate the gap between computer model output and real data
