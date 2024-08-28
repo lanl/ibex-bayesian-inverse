@@ -128,7 +128,7 @@ have developed computer simulations that produce maps of the heliosphere based
 on the values of certain model parameters.
 
 % Introduce computer model simulations (ribbon, GDF).
-Many computer models to generate sky maps exist (???). In this paper we focus on two. One simulation to create variations of the GDF and one that offers and explanation of how the ribbon is produced.
+Many computer models to generate sky maps exist (???). In this paper we focus on two. One simulation to create variations of the GDF and one that offers and explanation of how the ribbon is produced. \citet{zirnsteinGDFsims2015} developed a model to replicate the generation of ENAs at the GDF based on two parameters, param1 and param2.
 
 Statistical computer model calibration utilizes both data collected from a
 physical experiment and data generated from a computer simulation
@@ -165,11 +165,23 @@ respective map. Both Theseus and ribbon separation rely on many assumptions abou
 
 % Introduce a charicature of the IBEX problem
 
-%%% SEPIA: Dave Higdon's LANL - we're going back to what Dave wanted to do, but couldn't at the time with
-%%% computational limits
-Summary of work done on computer model calibration. KOH. Reference Dave's work
-on calibration. Wanted to do it, but had to do PCA stuff do to computational
-limits.
+%%% SEPIA: Dave Higdon's LANL - we're going back to what Dave wanted to do, but couldn't at the time with computational limits
+The canonical framework for statistical computer model calibration was proposed
+by \citet{kennedyohagan2001}. However, KOH relies on modeling the simulation
+runs and field data jointly via a multivariate normal representation. The field
+data collected by IBEX comes in Poisson-distributed as counts, preventing use
+of KOH. \citet{higdoncalib2004} expanded on the KOH framework to include the
+scenario where simulation evaluations are cheap and can be retrieved at will.
+Unfortunately, as noted above, an individual run of the IBEX simulation can
+take up to 16 hours to complete, precluding the assumption of an infinite
+supply of model data. Additionally, the output from the IBEX simulation is
+extremely high dimensional. Each run of the simulation produces a vector of
+16,2000 ENA rates that form a sky map. The computational burden of inverting a
+large covariance matrix in a GP surrograte necessitates approximation.
+\citet{higdoncalib2008} rely on a basis representation via principal components
+to reduce the dimension of the data. Use of a basis representation was
+necessary due to a lack of computational ability, something that has changed in
+the past two decades.
 
 Summary of work modeling Poisson data in the context of computer model
 calibration. Mention that Katzfuss and Lawrence suggested use of SVecchia in
