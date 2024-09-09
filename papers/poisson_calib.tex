@@ -128,7 +128,11 @@ have developed computer simulations that produce maps of the heliosphere based
 on the values of certain model parameters.
 
 % Introduce computer model simulations (ribbon, GDF).
-Many computer models to generate sky maps exist (???). In this paper we focus on two. One simulation to create variations of the GDF and one that offers and explanation of how the ribbon is produced. \citet{zirnsteinGDFsims2015} developed a model to replicate the generation of ENAs at the GDF based on two parameters, param1 and param2.
+Many computer models to generate sky maps exist (???). In this paper we focus
+on two. One simulation to create variations of the GDF and one that offers and
+explanation of how the ribbon is produced. \citet{zirnsteinGDFsims2015}
+developed a model to replicate the generation of ENAs at the GDF based on two
+parameters, param1 and param2.
 
 Statistical computer model calibration utilizes both data collected from a
 physical experiment and data generated from a computer simulation
@@ -149,7 +153,7 @@ scientists to explain the existence of the GDF and ribbon fall in this
 category.
 
 %%% No calibration going on in IBEX (super novel)
-Scientific investigation of the GDF and ribbon currently involve a long and
+Scientific investigation of the GDF and ribbon currently involves a long and
 complex process. The noisy and irregular nature of the data has made it hard
 for space scientists to perform analysis, especially separating signal from the
 noise. The IBEX Science Operations Center (ISOC) perform some aggregation of
@@ -157,11 +161,13 @@ the raw data to produces maps, but these still retain a significant amount of
 noise. To remedy this problem \citet{osthustheseus2023} propose a method called
 Theseus, which takes the raw data and generates a much smoother representation
 of the surface, using a series of Generative Additive Models (GAM) and
-Projection Pursuit Regression. Once those Theseus maps are created, they are
-separated into GDF-only and ribbon-only maps \citep{beesleyribbonsep2023}. With
-the source of ENAs separated into two distinct maps, space scientists perform
-analysis and conduct research exclusively for either the GDF or ribbon with the
-respective map. Both Theseus and ribbon separation rely on many assumptions about the data and thus depart from the data generation process itself.
+Projection Pursuit Regression (PPR) models. Once those Theseus maps are
+created, they are separated into GDF-only and ribbon-only maps
+\citep{beesleyribbonsep2023}. With the source of ENAs separated into two
+distinct maps, space scientists perform analysis and conduct research
+exclusively for either the GDF or ribbon with the respective map. However, both
+Theseus and ribbon separation rely on many assumptions about the data and thus
+depart from the data generation process itself.
 
 % Introduce a charicature of the IBEX problem
 
@@ -176,7 +182,7 @@ Unfortunately, as noted above, an individual run of the IBEX simulation can
 take up to 16 hours to complete, precluding the assumption of an infinite
 supply of model data. Additionally, the output from the IBEX simulation is
 extremely high dimensional. Each run of the simulation produces a vector of
-16,2000 ENA rates that form a sky map. The computational burden of inverting a
+16,200 ENA rates that form a sky map. The computational burden of inverting a
 large covariance matrix in a GP surrograte necessitates approximation.
 \citet{higdoncalib2008} rely on a basis representation via principal components
 to reduce the dimension of the data. Use of a basis representation was
@@ -198,7 +204,7 @@ results for small and large problems in Section \ref{sec:ibex_sim}. We finish
 our contribution through application to the real IBEX satellite data in Section
 \ref{sec:ibex_real}. Section \ref{sec:discuss} follows up and concludes our
 paper with a discussion. Code reproducing all examples is provided at
-\url{https://github.com.org/lanl/IBEX_Calibration}.
+\url{https://github.com/lanl/IBEX_Calibration}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
