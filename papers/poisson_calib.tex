@@ -155,19 +155,19 @@ category.
 %%% No calibration going on in IBEX (super novel)
 Scientific investigation of the GDF and ribbon currently involves a long and
 complex process. The noisy and irregular nature of the data has made it hard
-for space scientists to perform analysis, especially separating signal from the
-noise. The IBEX Science Operations Center (ISOC) perform some aggregation of
-the raw data to produces maps, but these still retain a significant amount of
-noise. To remedy this problem \citet{osthustheseus2023} propose a method called
-Theseus, which takes the raw data and generates a much smoother representation
-of the surface, using a series of Generative Additive Models (GAM) and
-Projection Pursuit Regression (PPR) models. Once those Theseus maps are
-created, they are separated into GDF-only and ribbon-only maps
+for space scientists to perform analysis, especially separating signal from
+the noise. The IBEX Science Operations Center (ISOC) perform some aggregation
+of the raw data to produces maps, but these still retain a significant amount
+of noise. To remedy this problem \citet{osthustheseus2023} propose a method
+called Theseus, which takes the raw data and generates a much smoother
+representation of the surface, using a series of Generative Additive Models
+(GAM) and Projection Pursuit Regression. Once those Theseus maps are created,
+they are separated into GDF-only and ribbon-only maps
 \citep{beesleyribbonsep2023}. With the source of ENAs separated into two
 distinct maps, space scientists perform analysis and conduct research
-exclusively for either the GDF or ribbon with the respective map. However, both
-Theseus and ribbon separation rely on many assumptions about the data and thus
-depart from the data generation process itself.
+exclusively for either the GDF or ribbon with the respective map. Both Theseus
+and ribbon separation rely on many assumptions about the data and thus depart
+from the data generation process itself.
 
 % Introduce a charicature of the IBEX problem
 
@@ -189,9 +189,15 @@ to reduce the dimension of the data. Use of a basis representation was
 necessary due to a lack of computational ability, something that has changed in
 the past two decades.
 
-Summary of work modeling Poisson data in the context of computer model
-calibration. Mention that Katzfuss and Lawrence suggested use of SVecchia in
-calibration. What we wish to address.
+Previous work has been done to generalize calibration to non-Gaussian
+responses \citep{grosskopfcountcalib2020}. However, applications were
+restricted to one-dimensional input spaces. Higher-dimensions brings multiple
+challenges, including the need to scale up to larger datasets. No
+approximation method was necessary in their implementation. Our use of the
+Scaled Vecchia approximation was actually suggested by
+\citet{scaledvecchiakatzfuss2022} in the discussion, noting its ability to
+scale well. Our proposed framework allows for both large scale datasets and
+the ability to extend to any type of response.
 
 Toward that end, the paper is outlined as follows. We review GPs as surrogates
 in computer model calibration and the work that has been done to apply
