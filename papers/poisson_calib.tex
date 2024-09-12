@@ -162,7 +162,7 @@ that generates ribbon-only maps representing the proposed Spatial Retention
 model. The ribbon-only model relies on two parameters, parallel mean free path
 and ratio. So far, minimal work has been done to validate theories or further
 understand the heliosphere by pairing the computer model output with real data
-collected by IBEX computer models.
+collected by IBEX.
 
 Statistical computer model calibration utilizes both data collected from a
 physical experiment and data generated from a computer simulation
@@ -183,19 +183,19 @@ space scientists to explain the existence of the GDF and ribbon fall in this
 category.
 
 Computer experiments \citep{santner2003design} do not face the same ethical and
-practical obstacles of physical experiements. Although some simulations are
-very quick to evaluate \citep{higdoncalib2004}, frequently they can be
-expensive in terms of compute time. Some computer simulations take hours, or
-even days, to complete. In our case, an individual run of the IBEX computer
-model to produce a simulated sky map can take up to 16 hours, precluding the
-assumption of an infinite supply of model data. Because of this constraint, a
-GP surrogate \citep{sacks1989computerexp, gramacy2020surrogates} is often fit
-to the limited computer output in order to provide fast predictions out of
-sample. Adding another layer of complexity, the output from the IBEX simulation
-is not only expensive to obtain, but is extremely high dimensional. Each run of
-the simulation produces a sky map represented by a vector of 16,200 ENA rates.
-The computational burden of inverting a large covariance matrix in a GP
-surrograte necessitates approximation. \citet{higdoncalib2008} rely on a basis
+practical obstacles of physical experiments. Although some simulations are very
+quick to evaluate \citep{higdoncalib2004}, frequently they can be expensive in
+terms of compute time. Some computer simulations take hours, or even days, to
+complete. In our case, an individual run of the IBEX computer model to produce
+a simulated sky map can take up to 16 hours, precluding the assumption of an
+infinite supply of computer model data. Because of this constraint, a GP
+surrogate \citep{sacks1989computerexp, gramacy2020surrogates} is often fit to
+the limited computer output in order to provide fast predictions out of sample.
+Adding another layer of complexity, the output from the IBEX simulation is not
+only expensive to obtain, but is extremely high dimensional. Each run of the
+simulation produces a sky map represented by a vector of 16,200 ENA rates. The
+computational burden of inverting a large covariance matrix in a GP surrograte
+necessitates approximation. \citet{higdoncalib2008} rely on a basis
 representation via principal components to reduce the dimension of the data.
 But use of a basis representation was only necessary due to a lack of
 computational ability, something that has changed dramatically in the past two
@@ -213,8 +213,8 @@ combinations for the values of $\mu \in \{5, 7.5, 10, 12.5, 15\}$ and $\nu \in
 evaluations (depicted as gray lines in \ref{f:logit1_examp}). Our goal is
 two-fold: 1) make accurate predictions at new, unobserved physical locations
 ($x_i'$) with good uncertainty quantification (UQ), and 2) estimate the
-distribution of calibration parameters $\mu$ and $\nu$ to better understand the
-how the mean process is constructed.
+distribution of calibration parameters $\mu$ and $\nu$ to better understand how
+the mean process is constructed.
 
 \begin{figure}[ht!]
 \centering
@@ -243,9 +243,10 @@ application of the Scaled Vecchia approximation in computer model calibration
 was suggested by the authors themselves, noting its ability to scale well.
 Therefore, contributions are three-fold: 1) Introduce a MCMC computer model
 calibration framework for any type of physical response in high dimensions (we
-focus on Poisson-distributed data), 2) Allow for large-scale, high-dimensional
-computer model output, and 3) For the first time, illustrate how IBEX data in
-its raw form can be used to make inferential claims about heliosphere.
+focus on Poisson-distributed data), 2) Allow for processing large-scale,
+high-dimensional computer model output in a reasonable time frame, and 3) For
+the first time, illustrate how IBEX data in its raw form can be used to make
+inferential claims about the heliosphere.
 
 Our paper is outlined as follows: We review statistical computer model
 calibration in Section \ref{sec:review} and focus on the use of GPs as
@@ -265,11 +266,11 @@ reproducing all examples is provided at
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Gaussian Process Surrogates for Computer Model Calibration}
+\section{Computer Model Calibration}
 \label{sec:review}
 
 \begin{itemize}
-  \item Review Gaussian processes and their use in surrogate modeling
+  \item Review computer model calibration
   \item Review Kennedy O'Hagan framework
   \item Review Dave Higdon's SEPIA approach
 \end{itemize}
@@ -299,9 +300,31 @@ reproducing all examples is provided at
   \item Set it up to have a Poisson response, but now our data is limited
 \end{itemize}
 
+\subsubsection{Examples}
+
+\begin{itemize}
+  \item Results of 1D Poisson calibration (prediction, distribution of calibration parameters)
+  \item Results of 2D Poisson calibration (prediction, distribution of calibration parameters)
+\end{itemize}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gaussian Process Surrogates}
+\begin{itemize}
+  \item Often our computer model is expensive to run
+  \item We need a surrogate
+  \item Review Gaussian processes and their use in surrogate modeling
+\end{itemize}
+
+\subsubsection{Example}
+
+\begin{itemize}
+  \item Go back to 1D and 2D Poisson examples, but now with limited model runs
+  \item Tease that this example is easy because the amount of data we have is
+  small
+\end{itemize}
+
 \subsection{Scaled Vecchia Gaussian Process Surrogate}
 \label{sec:scale_vec}
 
@@ -311,24 +334,11 @@ reproducing all examples is provided at
   \item Introduce Scaled Vecchia
 \end{itemize}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Estimation of calibration parameters}
-\label{sec:calib_params}
+\subsubsection{Example}
 
 \begin{itemize}
-  \item Talk about IBEX interested in calibration parameters, not just prediction
-\end{itemize}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Empirical Evaluation}
-\label{sec:empir_results}
-
-\begin{itemize}
-  \item Show results on toy datasets, both 1D, 2D, and 2D large data
+  \item 2D Poisson example with large computer model output
+  \item Maybe show some timings here (how timing of non-Vecchia explodes)
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -340,6 +350,7 @@ reproducing all examples is provided at
 \begin{itemize}
   \item Go in depth on development of GDF and ribbon computer models
   \item Explain the parameters that govern the computer model output
+  \item Talk about IBEX interested in calibration parameters, not just prediction
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
