@@ -125,7 +125,7 @@ distributed flux (GDF)}. But in a completely unexpected finding
 heliosphere. Scientists now refer to this phenomenom as the \textit{ribbon}.
 For the past fifteen years, space scientists have conducted extensive research
 and proposed dozens of theories to explain the existence of the ribbon and the
-physical process that generates it (\citep{mccomas2014ibex, zirnstein2018role,
+physical process that generates it \citep{mccomas2014ibex, zirnstein2018role,
 zirnstein2019strong, zirnstein2021dependence}.
 
 %%% No calibration going on in IBEX (super novel)
@@ -171,35 +171,34 @@ experiment is either too expensive to run a sufficient number of times (e.g.
 launching hundreds of IBEX satellites) or it is unethical to conduct. In this
 way, a computer model representing the physical process allows a practitioner
 to learn more about the physical process without the prohibitive expense. Use
-of this additional source of data (even with its potential bias) has been shown
-to improve prediction and uncertainty quantification out-of-sample. For
-example, it is often impossible to control the values of certain variables in a
-physical experiment (e.g. gravity), but that barrier does not exist in a
-computer simulation. These calibration or tuning parameters can also be of high
-scientific interest. Varying them helps experimenters explore more of the input
-space, understand the distribution of these parameters, and even make
+of this additional source of data (even with its potential bias) has been
+shown to improve prediction and uncertainty quantification out-of-sample. For
+example, it is often impossible to control the values of certain variables in
+a physical experiment (e.g. gravity), but that barrier does not exist in a
+computer simulation. These calibration or tuning parameters can also be of
+high scientific interest. Varying them helps experimenters explore more of the
+input space, understand the distribution of these parameters, and even make
 inferential claims about them. Parameters in computer simulations developed by
 space scientists to explain the existence of the GDF and ribbon fall in this
 category.
 
-Computer experiments \citep{santner2003design} do not face the same ethical and
-practical obstacles of physical experiments. Although some simulations are very
-quick to evaluate \citep{higdoncalib2004}, frequently they can be expensive in
-terms of compute time. Some computer simulations take hours, or even days, to
-complete. In our case, an individual run of the IBEX computer model to produce
-a simulated sky map can take up to 16 hours, precluding the assumption of an
-infinite supply of computer model data. Because of this constraint, a GP
-surrogate \citep{sacks1989computerexp, gramacy2020surrogates} is often fit to
-the limited computer output in order to provide fast predictions out of sample.
-Adding another layer of complexity, the output from the IBEX simulation is not
-only expensive to obtain, but is extremely high dimensional. Each run of the
-simulation produces a sky map represented by a vector of 16,200 ENA rates. The
-computational burden of inverting a large covariance matrix in a GP surrograte
-necessitates approximation. \citet{higdoncalib2008} rely on a basis
-representation via principal components to reduce the dimension of the data.
-But use of a basis representation was only necessary due to a lack of
-computational ability, something that has changed dramatically in the past two
-decades.
+Computer experiments \citep{santner2018design} do not face the same ethical
+and practical obstacles of physical experiments. Although some simulations are
+very quick to evaluate \citep{higdoncalib2004}, frequently they can be
+computationally expensive. Some computer simulations take hours, or even days,
+to complete. In our case, an individual run of the IBEX computer model to
+produce a simulated sky map can take up to 16 hours, limiting the supply of
+computer model data. In such situations, a GP surrogate
+\citep{sacks1989computerexp, gramacy2020surrogates} is often fit to the
+limited computer output to provide fast predictions out of sample. Adding
+another layer of complexity, the output from the IBEX simulation is not only
+expensive to obtain, but is extremely high dimensional. Each run of the
+simulation produces a sky map represented by a vector of 16,200 ENA rates. GPs
+struggle with such big data because they must store and decompose matrices
+that grow quadratically with training data size. \citet{higdoncalib2008}
+mitigate this with a basis representation via principal components to reduce
+the dimension of the data. However, much has changed recently in the landscape
+of GP approximation.
 
 % Introduce a charicature of the IBEX problem
 Now, before we get ahead of ourselves, let's start with a simple problem.
@@ -211,10 +210,10 @@ values in a trivial, one-line ``computer model.'' If we consider all unique
 combinations for the values of $\mu \in \{5, 7.5, 10, 12.5, 15\}$ and $\nu \in
 \{0.25, 0.625, 1, 1.375, 1.75\}$, we end up with 25 different functional
 evaluations (depicted as gray lines in \ref{f:logit1_examp}). Our goal is
-two-fold: 1) make accurate predictions at new, unobserved physical locations
-($x_i'$) with good uncertainty quantification (UQ), and 2) estimate the
-distribution of calibration parameters $\mu$ and $\nu$ to better understand how
-the mean process is constructed.
+two-fold: 1) Make accurate predictions at new, unobserved physical locations
+($x_i'$) with good uncertainty quantification (UQ), and 2) Estimate the
+distribution of calibration parameters $\mu$ and $\nu$ to better understand
+how the mean process is constructed.
 
 \begin{figure}[ht!]
 \centering
@@ -226,12 +225,12 @@ $\nu$.
 \end{figure}
 
 The canonical framework for statistical computer model calibration was proposed
-by \citet{kennedyohagan2001}. However, \citet{kennedyohagan2001} (hereafter
-referred to as KOH) relies on modeling the simulation runs and field data
+by \citet{kennedyohagan2001} (hereafter
+referred to as KOH). However, KOH relies on modeling the simulation runs and field data
 jointly via a multivariate normal representation. The field data collected by
 IBEX comes in as Poisson-distributed counts, preventing use of KOH. Recent
 research has been done to generalize calibration to non-Gaussian responses
-\citep{grosskopfcountcalib2020}. But empirical examples and applications in
+\citep{grosskopfcountcalib2020}, but empirical examples and applications in
 this work are restricted to one-dimensional input spaces. Expanding to higher
 dimensions allows broader application and brings with it multiple challenges,
 including the need to scale larger datasets. No approximation method was
