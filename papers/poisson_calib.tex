@@ -268,11 +268,32 @@ reproducing all examples is provided at
 \section{Computer Model Calibration}
 \label{sec:review}
 
-\begin{itemize}
-  \item Review computer model calibration
-  \item Review Kennedy O'Hagan framework
-  \item Review Dave Higdon's SEPIA approach
-\end{itemize}
+%% Review computer model calibration
+Computer model calibration is a technique employed by statisticians to pair data
+collected from a physical experiment. Computer models attempt to represent a physical
+process that is infeasible to run, due to a number of reasons (e.g. physical expense,
+ethics). Data collected from a physical experiment can be augmented by output from a
+computer simulation. As a result of increased access to supercomputing resources,
+computer models have increased in complexity (cite??) over the past two decades to
+produce extremely high-fidelity output.Scientists are able to learn more about a
+physical process using such an augmented dataset. Additionally, computer models allow
+practitioners to vary certain parameters that cannot be controlled in a physical
+experiment (e.g. gravity). Therefore, in addition to helping achieve better
+prediction out-of-sample, the computer model output allows statisticians to estimate
+the distributions of certain unknown parameters.
+
+%% Review Kennedy O'Hagan framework
+\citet{kennedyohagan2001} introduced what has become the canonical framework for
+computer model calibration. Field data and computer simulation output are modeled
+jointly as following a multivariate normal distribution. \citet{kennedyohagan2001}
+make two key suggestions: 1) Computer models, despite improvements in recent years,
+are still inherently biased. It's virtually impossible to exactly replicate a
+physical process through simulation. 2) Although often easier to conduct than
+physical experiements, computer models are still expensive in terms of computation,
+necesitating a surrogate model for the simulated output to obtain additional
+predictions.
+
+%% Review Dave Higdon's SEPIA approach
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

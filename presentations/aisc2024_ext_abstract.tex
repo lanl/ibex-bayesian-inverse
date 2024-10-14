@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+\usepackage[ruled, vlined]{algorithm2e}
+\usepackage{amsmath, amsfonts, amssymb, mathrsfs}
+\usepackage{caption}
+\usepackage{dcolumn}
+\usepackage{filemod}
+\usepackage{floatrow}
+\usepackage{gensymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{verbatim}
+
+\oddsidemargin=0.25in
+\evensidemargin=0.25in
+\textwidth=7in
+\textheight=8.75in
+\topmargin=-.5in
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\footskip=0.5in
+
+\begin{document}
+
+\pagenumbering{gobble}
+
+\begin{abstract}
+
+The computer model calibration literature is well-suited for noisy, Gaussian field
+data and small-scale, smooth computer model output that can be modeled with a
+Gaussian process (GP). However, not all scientific problems served by computer model
+calibration fit into that mold. For example, we are working with count data collected
+by a satellite detector. Counts are collected over a grid of longitudes and
+latitudes, creating datasets in the range of tens or hundreds of thousands. Computer
+model output simulating this process is also large, preventing the use of a
+traditional GP surrogate. We introduce a novel Markov chain Monte Carlo calibration
+framework that accommodates the spatially distributed Poisson counts collected by the
+Interstellar Boundary Explorer (IBEX) satellite. Additionally, we propose the use of
+the Scaled Vecchia approximation as a GP surrogate for the computer simulation. We
+demonstrate the capability of our proposed framework through multiple simulated
+examples and show that we can consistently recover the true parameters in a
+discrepancy-free environment and obtain accurate out-of-sample prediction. We apply
+this to the IBEX satellite data and the corresponding computer model output.
+
+The solar wind, continously emitted from the Sun, is primarily made up of hydrogen
+ions, or lone protons. These ions travel through the solar system and out into
+interstellar space. As the ions reach the boundary of our solar system, they
+encounter the termination shock, where they slow down, absorb significant amounts of
+energy, and become highly energetic, charged atoms. These hydrogen ions form an
+egg-shaped bubble encapsulating our solar system called the heliosphere, which acts
+as a barrier between our solar system and interstellar space. While in this region
+called the heliopause (the outer edge of the heliosphere), the ions can interact with
+other particles in the interstellar medium. Sometimes these encounters result in
+electron exchange, converting the charged atoms into what heliospheric physicists
+call energetic neutral atoms (ENAs). Without charge, these ENAs travel in a straight
+line, unaffected by magnetic fields. Some ENAs cross back into the solar system and,
+depending on their path, can be detected in Earth's orbit. Determining the rate at
+which ENAs are generated in different parts of the heliosphere is key to
+understanding the makeup of this region at the boundary of our solar system and
+interstellar space.
+
+In this pursuit, the National Aeronautics and Space Administration (NASA) launched
+the IBEX satellite into Earth's orbit in 2008 as part of their Small Explorer
+program. IBEX continuously detects ENAs and records their energy level and
+approximate location of origin, providing sufficient data to estimate the rate at
+which ENAs are created throughout the heliopause. Specifically, the IBEX satellite
+contains an instrument called the IBEX-Hi ENA imager, which includes a series of
+plates that the ENAs travel through to be detected. The IBEX satellite rotates on an
+axis, and over a period of six months, is able to point at every part of the sky for
+some interval, or exposure time. This spatial map of ENA rates (referred to by space
+scientists as a \textit{sky map}) is used to analyze, make conjectures about, and
+ultimately develop theories for the heliosphere, its many properties, and the
+processes that govern its creation.
+
+The heliosphere is like a boat moving through water. Here the water represents
+interstellar medium. As a boat moves through water, the water is disturbed. However,
+the turbulence created is not equal at each location where the boat is in contact
+with the water. Turbulence is greater at the front (bow) and back (stern) than on the
+sides (port and starboard) of the ship. Prior to the launch of the IBEX satellite,
+space scientists had the same expectation for the heliosphere. Higher rates of ENAs
+being generated would exist at the stern (space scientists call this the
+\textit{nose}) and bow (\textit{tail}) of the helisophere due to its movement through
+interstellar space. Data observed found this to be true. These higher rates are
+referred to as \textit{globally distributed flux (GDF)}. But in a completely
+unexpected finding , IBEX also recorded a string of higher rates of ENAs being
+generated that curved around the heliosphere. Scientists now refer to this phenomenom
+as the \textit{ribbon}. For the past fifteen years, space scientists have conducted
+extensive research and proposed dozens of theories to explain the existence of the
+ribbon and the physical process that generates it. This has led to development of
+computer models to simulate the creation of sky maps. These computer simulations rely
+on a number of parameters that can be varied, thus modifying the shape and intensity
+of both ribbon and GDF. So far, minimal work has been done to validate theories or
+further understand the heliosphere by pairing the computer model output with real
+data collected by IBEX.
+
+Statistical computer model calibration utilizes both data collected from a physical
+experiment and data generated from a computer simulation representative of the
+physical process of interest. Often, the physical experiment is either too expensive
+to run a sufficient number of times (e.g. launching hundreds of IBEX satellites) or
+it is unethical to conduct. In this way, a computer model representing the physical
+process allows a practitioner to learn more about the physical process without the
+prohibitive expense. Use of this additional source of data (even with its potential
+bias) has been shown to improve prediction and uncertainty quantification
+out-of-sample. For example, it is often impossible to control the values of certain
+variables in a physical experiment (e.g. gravity), but that barrier does not exist in
+a computer simulation. Parameters in computer simulations developed by space
+scientists to explain the existence of the GDF and ribbon fall in this category.
+
+Computer experiments do not face the same ethical and practical obstacles of physical
+experiments. Although some simulations are very quick to evaluate, frequently they
+can be computationally expensive. In our case, an individual run of the IBEX computer
+model can take up to 16 hours, limiting the supply of computer model data. In such
+situations, a GP surrogate is often fit to provide fast predictions out of sample.
+Adding another layer of complexity, the output from the IBEX simulation is not only
+expensive to obtain, but is extremely high dimensional. Each run of the simulation
+produces a sky map represented by a vector of 16,200 ENA rates. GPs struggle with
+such big data because they must store and decompose matrices that grow quadratically
+with training data size. Previous work has attempted to mitigate this with a basis
+representation via principal components to reduce the dimension of the data. However,
+much has changed recently in the landscape of GP approximation. We propose a modern
+approach using the Scaled Vecchia approximation. Therefore, our contributions are
+three-fold: 1) Introduce an MCMC computer model calibration framework for any type of
+physical response in high dimensions (we focus on Poisson-distributed data), 2) Allow
+for processing large-scale, high-dimensional computer model output in a reasonable
+time frame, and 3) For the first time, illustrate how IBEX data in its raw form can
+be used to make inferential claims about the heliosphere.
+
+\end{abstract}
+
+\end{document}
