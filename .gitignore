@@ -7,6 +7,9 @@
 # Ignore data directory. Data stored locally on each machine
 data
 
+# Ignores temp directory.
+temp
+
 # Ignore images directory. Can be stored locally
 images
 
