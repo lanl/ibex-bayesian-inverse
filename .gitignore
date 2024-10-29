@@ -1,0 +1,23 @@
+# Mac operational files
+.DS_Store
+
+# Files produced by RStudio
+.Rhistory
+
+# Ignore data directory. Data stored locally on each machine
+data
+
+# Ignore images directory. Can be stored locally
+images
+
+# Ignore results files for now. Will be stored locally on each machine
+automations/results
+
+# Ignore LaTeX (and other) output files
+*.aux
+*.log
+*.nav
+*.out
+*.pdf
+*.snm
+*.toc
