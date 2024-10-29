@@ -17,10 +17,15 @@ images
 automations/results
 
 # Ignore LaTeX (and other) output files
+*.gz
+*.bbl
+*.fdb_latexmk
 *.aux
 *.log
 *.nav
 *.out
 *.pdf
 *.snm
+*.blg
+*.fls
 *.toc

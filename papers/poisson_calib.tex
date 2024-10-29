@@ -150,20 +150,6 @@ from the data generation process itself. Second, we believe inference about the
 heliosphere can be done in a more holistic way using the data in its original
 form, as counts of ENAs given some exposure time, regardless of source.
 
-% Introduce existence of computer model simulations (ribbon, GDF).
-In conjunction with proposing explanations for the existence of the ribbon and
-GDF, theoretical physicists have develped computer models to simulate the
-creation of sky maps. These computer simulations rely on a number of parameters
-that can be varied, thus modifying the shape and intensity of both ribbon and
-GDF. Although many simulations exist, we focus on two that are publicly
-available: a GDF model proposed by \citet{zirnsteinGDFsims2015} that relies on
-two parameters, param1 and param2, and \citet{zirnsteinGDFsims2015}'s model
-that generates ribbon-only maps representing the proposed Spatial Retention
-model. The ribbon-only model relies on two parameters, parallel mean free path
-and ratio. So far, minimal work has been done to validate theories or further
-understand the heliosphere by pairing the computer model output with real data
-collected by IBEX.
-
 Statistical computer model calibration utilizes both data collected from a
 physical experiment and data generated from a computer simulation
 representative of the physical process of interest. Often, the physical
@@ -275,7 +261,7 @@ process that is infeasible to run, due to a number of reasons (e.g. physical exp
 ethics). Data collected from a physical experiment can be augmented by output from a
 computer simulation. As a result of increased access to supercomputing resources,
 computer models have increased in complexity (cite??) over the past two decades to
-produce extremely high-fidelity output.Scientists are able to learn more about a
+produce extremely high-fidelity output. Scientists are able to learn more about a
 physical process using such an augmented dataset. Additionally, computer models allow
 practitioners to vary certain parameters that cannot be controlled in a physical
 experiment (e.g. gravity). Therefore, in addition to helping achieve better
@@ -301,11 +287,32 @@ predictions.
 \section{Generalized Computer Model Calibration}
 \label{sec:gen_calib}
 
-\begin{itemize}
-  \item Rehash the need to update KOH to account for Poisson data
-  \item Explain the use of a no-bias set up to initially prove the capability
-  \item Briefly show the math behind this
-\end{itemize}
+%% Rehash the need to update KOH to account for Poisson data
+%% Explain the use of a no-bias set up to initially prove the capability
+%% Briefly show the math behind this
+
+Computer models are not limited to modeling physical processes that generate a
+continous response. For instance, a field experiment may return a binary
+response, such as success or failure. Categorical responses may expand beyond
+two classes, representing a multinomial reponse. We focus on the
+Poisson-distributed counts in this paper, but our framework can be generalized
+to any response.
+
+The canonical KOH computer model calibration framework is limited to a
+continuous response from both the computer model and the field experiment, due
+to it's reliance on modeling the two outputs jointly via a multivariate normal
+distribution. Faced with spatially distributed counts from the IBEX satellite,
+we could not apply KOH to our problem. We propose a fully Bayesian Markov
+chain Monte Carlo (MCMC) framework to sample from the posterior distribution
+of our calibration parameters. At each MCMC iteration, we propose new
+calibration parameters, generate computer model output at those new settings,
+and evaluate the Poisson likelihood of the observed data, given the simulated
+mean surface.
+
+As a side note, we point out that we do not include a term for the bias
+inherent in the computer model. We do this initially to simplify the setup and
+prove the framework's capability. We will address discrepancy later in the
+paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -331,11 +338,35 @@ predictions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Gaussian Process Surrogates}
-\begin{itemize}
-  \item Often our computer model is expensive to run
-  \item We need a surrogate
-  \item Review Gaussian processes and their use in surrogate modeling
-\end{itemize}
+
+%% Often our computer model is expensive to run
+%% We need a surrogate
+%% Review Gaussian processes and their use in surrogate modeling
+
+Often our computer models take a long time to run. Due to complex and
+expensive operations, such as solving partial differential equations,
+simulations can take hours, days, or even weeks to complete. In our IBEX
+application, each run of the the computer model theorists have developed takes
+upwards of 64 hours. This limits the amount of simulated data that can be
+produced. But to be effective, computer model calibration needs to be able to
+explore the entire input space of the model parameters. Therefore, we need a
+surrogate to make accurate and reliable out-of-sample predictions. The
+canonical surrogate for computer experiments and computer model calibration is
+the Gaussian process.
+
+A Gaussian process (GP) is a realization of a multivariate normal distribution
+with some mean and covariance functions. GPs are fit to observed data and then
+used to make predictions at new input locations, relying on the conditional
+multivariate normal equations. GPs rely on the estimation of three
+hyperparameters that can be estimated using maximum likelihood estimators,
+method of moments estimators, or in our case, Bayesian MCMC methods. GPs
+provide a flexible, nonparamteric regression tool. GPs were popularized as
+surrogates for computer experiments due to their ability to interpolate
+between observed data points. Computer experiments are typically
+deterministic, although stochastic computer models are becoming increasingly
+common. GPs can provide predictive surfaces that give higher estimates of
+variance away from observed data, and virtually no variance at observed
+locations.
 
 \subsubsection{Example}
 
@@ -354,18 +385,105 @@ predictions.
   \item Introduce Scaled Vecchia
 \end{itemize}
 
-\subsubsection{Example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interstellar Boundary Explorer}
+\label{sec:ibex}
+
+In 2008,  NASA launched the IBEX satellite into Earth's orbit as part of their
+Small Explorer program \citep{mccomas2009aIBEX}. IBEX's mission is to collect
+data that will deepen the scientific community's understanding of the
+heliosphere, the egg-shaped bubble encapsulating our solar system. The
+heliosphere is created from the solar wind. The solar wind, continously
+emitted from the Sun, is primarily made up of hydrogen ions, or lone protons.
+These ions travel through the solar system and out into interstellar space. As
+the ions reach the boundary of our solar system, they encounter the
+termination shock, where they slow down, absorb significant amounts of energy,
+and become highly energetic, charged atoms. These hydrogen ions form the
+heliosphere and act as a barrier between our solar system and interstellar
+space. While in this region called the heliopause (the outer edge of the
+heliosphere), the ions can interact with other particles in the interstellar
+medium. Sometimes these encounters result in electron exchange, converting the
+charged atoms into what heliospheric physicists call energetic neutral atoms
+(ENAs). Without charge, these ENAs travel in a straight line, unaffected by
+magnetic fields. Some ENAs cross back into the solar system and, depending on
+their path, can be detected in Earth's orbit. Determining the rate at which
+ENAs are generated in different parts of the heliosphere is key to
+understanding the makeup of this region at the boundary of our solar system
+and interstellar space.
+
+IBEX records the energy level and approximate location of origin for each ENA
+that enters the satellite, providing sufficient data to estimate the rate at
+which ENAs are created throughout the heliopause. Specifically, the IBEX
+satellite contains an instrument called the IBEX-Hi ENA imager
+\citep{funsten2009IBEXHiENA}, which includes a series of plates
+\citep{moran2024statistical} that the ENAs travel through to be detected. The
+IBEX satellite rotates on an axis, and over a period of six months, is able to
+point at every part of the sky for some interval, or exposure time. This
+spatial map of ENA rates (referred to by space scientists as a \textit{sky
+map}) is used to analyze, make conjectures about, and ultimately develop
+theories for the heliosphere, its many properties, and the processes that
+govern its creation.
+
+The heliosphere is like a boat moving through water. Here the water represents
+interstellar medium. As a boat moves through water, the water is disturbed.
+However, the turbulence created is not equal at each location where the boat is
+in contact with the water. Turbulence is greater at the front (bow) and back
+(stern) than on the sides (port and starboard) of the ship. Prior to the launch
+of the IBEX satellite, space scientists had the same expectation for the
+heliosphere. Higher rates of ENAs being generated would exist at the stern
+(space scientists call this the \textit{nose}) and bow (\textit{tail}) of the
+helisophere due to its movement through interstellar space. Data observed found
+this to be true. These higher rates are referred to as \textit{globally
+distributed flux (GDF)}. But in a completely unexpected finding
+\citep{mccomas2009bIBEX}, IBEX also recorded a string of higher rates of ENAs
+\citep{fuselier2009IBEXribbon} being generated that curved around the
+heliosphere. Scientists now refer to this phenomenom as the \textit{ribbon}.
+For the past fifteen years, space scientists have conducted extensive research
+and proposed dozens of theories to explain the existence of the ribbon and the
+physical process that generates it \citep{mccomas2014ibex, zirnstein2018role,
+zirnstein2019strong, zirnstein2021dependence}.
+
+% Introduce existence of computer model simulations (ribbon, GDF).
+In conjunction with proposing explanations for the existence of the ribbon and
+GDF, theoretical physicists have developed computer models to simulate the
+creation of sky maps. These computer simulations rely on a number of
+parameters that can be varied, thus modifying the shape and intensity of both
+ribbon and GDF. Although many simulations exist, we focus on two that are
+publicly available: a GDF model proposed by \citet{zirnstein2021heliosheath}
+and a ribbon-only model developed by \citet{zirnsteinGDFsims2015} representing
+the proposed Spatial Retention model. The ribbon-only model relies on two
+parameters, parallel mean free path and ratio. So far, minimal work has been
+done to validate theories or further understand the heliosphere by pairing the
+computer model output with real data collected by IBEX.
+
+Scientific investigation of the GDF and ribbon currently involves a long,
+complex, and at times cumbersome process. For one, the noisy and irregular
+nature of the data has made it hard for space scientists to separate signal
+from noise and perform their analyses. First, a smooth surface is generated
+from the raw satellite data. Once smooth \textit{sky maps} are created, they
+are separated into GDF-only and ribbon-only maps \citet{beesleyribbonsep2023}.
+With the source of ENAs separated into two distinct maps, space scientists
+perform analysis and conduct research exclusively for either the GDF or ribbon
+with the respective map. We believe this process can be improved in two ways.
+First, both the response surface modeling and ribbon separation rely on many
+assumptions about the data and thus depart from the data generation process
+itself. Second, we believe inference about the heliosphere can be done in a
+more holistic way using the data in its original form, as counts of ENAs given
+some exposure time, regardless of source.
 
 \begin{itemize}
-  \item 2D Poisson example with large computer model output
-  \item Maybe show some timings here (how timing of non-Vecchia explodes)
+  \item Go in depth on development of GDF and ribbon computer models
+  \item Explain the parameters that govern the computer model output
+  \item Talk about IBEX interested in calibration parameters, not just prediction
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{IBEX Sky Map}
-\label{sec:ibex}
+\label{sec:ibex_sky}
 
 \begin{itemize}
   \item Go in depth on development of GDF and ribbon computer models
@@ -436,3 +554,21 @@ by Laboratory Directed Research and Development (LDRD) Project 20220107DR.
 \appendix
 
 \end{document}
+
+%% STEPS:
+%% - Write discussion
+%% - Redesign intro to be more like Bobby suggested
+%% - Review computer model calibration (lit review)
+%% - Review KOH (lit review)
+%% - Review Higdon SEPIA (lit review)
+%% - Introduce generalized computer model calibration (can't model joint MVN)
+%%%% - 10/23
+%% - Create and introduce 1D poisson example
+%% - Write section on GP surrogates
+%%%% - 10/23
+%% - Expand on toy example and write about needing a surrogate
+%% - Talk about Scaled Vecchia
+%% - Create and introduce 2D poisson toy example
+%% - Write about IBEX stuff
+%% - Explain experiment with synthetic
+%% - Explain experiment with real data (need for discrepancy)
