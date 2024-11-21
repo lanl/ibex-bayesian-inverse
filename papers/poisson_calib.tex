@@ -417,43 +417,63 @@ paper.
 \subsubsection{Examples}
 
 \begin{itemize}
-  \item Results of 1D Poisson calibration (prediction, distribution of calibration parameters)
-  \item Results of 2D Poisson calibration (prediction, distribution of calibration parameters)
+  \item Results of 1D Poisson calibration (prediction, distribution of calibration
+  parameters)
+  \item Results of 2D Poisson calibration (prediction, distribution of calibration
+  parameters)
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Gaussian Process Surrogates}
+\label{sec:gp_surr}1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Often our computer model is expensive to run
-%% We need a surrogate
+% Motivate need for surrogate (computer model is expensive)
+Often computer models are comuptationally costly. Due to complex and expensive
+operations, such as solving partial differential equations, simulations can take
+hours, days, or even weeks to complete. For example, astrophysicists at LANL have
+developed sophisticate computer models that require over 16 hours for a single run.
+This severely limits the amount of simulated data that can be produced. But in order
+for computer model calibration to be effective in prediction and parameter
+estimation, we need to be able to explore the entire input space of the model
+parameters. Therefore, we need a surrogate to make accurate and reliable
+out-of-sample predictions. The canonical surrogate for computer experiments and
+computer model calibration is the Gaussian process.
+
+%------------------------------------------------------------------------------
+\subsection{Gaussian Processes}
+\label{sec:gp}
+%------------------------------------------------------------------------------
+
 %% Review Gaussian processes and their use in surrogate modeling
+A Gaussian process (GP) is a realization of a multivariate normal distribution with
+some mean and covariance functions. GPs are fit to observed data and then used to
+make predictions at new input locations, relying on the conditional multivariate
+normal equations. Suppose we have a vector of observations $Y$ at input locations
+$X$. We can model this data as being normally distributed, as in
+Eq.~(\ref{eq:mvn_eq}). More importantly, we are interested in what our model predicts
+at a new location $x$.
+\begin{equation}
+Y \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^* \mid Y \sim N\!\left(\mu^*(x), \Sigma^*(x)) \\
 
-Often our computer models take a long time to run. Due to complex and
-expensive operations, such as solving partial differential equations,
-simulations can take hours, days, or even weeks to complete. In our IBEX
-application, each run of the the computer model theorists have developed takes
-upwards of 64 hours. This limits the amount of simulated data that can be
-produced. But to be effective, computer model calibration needs to be able to
-explore the entire input space of the model parameters. Therefore, we need a
-surrogate to make accurate and reliable out-of-sample predictions. The
-canonical surrogate for computer experiments and computer model calibration is
-the Gaussian process.
+\mu^*(x)=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \\
 
-A Gaussian process (GP) is a realization of a multivariate normal distribution
-with some mean and covariance functions. GPs are fit to observed data and then
-used to make predictions at new input locations, relying on the conditional
-multivariate normal equations. GPs rely on the estimation of three
-hyperparameters that can be estimated using maximum likelihood estimators,
-method of moments estimators, or in our case, Bayesian MCMC methods. GPs
-provide a flexible, nonparamteric regression tool. GPs were popularized as
-surrogates for computer experiments due to their ability to interpolate
-between observed data points. Computer experiments are typically
-deterministic, although stochastic computer models are becoming increasingly
-common. GPs can provide predictive surfaces that give higher estimates of
-variance away from observed data, and virtually no variance at observed
-locations.
+\Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
+\end{equation}
+
+GPs rely on the estimation of three hyperparameters that can be estimated using
+maximum likelihood estimators, method of moments estimators, or in our case, Bayesian
+MCMC methods. GPs provide a flexible, nonparamteric regression tool. GPs were
+popularized as surrogates for computer experiments due to their ability to
+interpolate between observed data points. Computer experiments are typically
+deterministic, although stochastic computer models are becoming increasingly common.
+GPs can provide predictive surfaces that give higher estimates of variance away from
+observed data, and virtually no variance at observed locations.
+
+%------------------------------------------------------------------------------
+\subsection{Vecchia Approximation}
+\label{sec:vecchia}
+%------------------------------------------------------------------------------
 
 \subsubsection{Example}
 
