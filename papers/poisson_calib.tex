@@ -72,8 +72,95 @@ output.
 \doublespacing % no double spacing for arXiv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Layout
+%
+% SECTION 1: Introduction
+% SECTION 2: Computer Model Calibration
+%% A general review of computer model calibration
+%% Review Kennedy O'Hagan framework
+%% Review Dave Higdon's SEPIA?? Maybe his 2004 paper?
+
+%%% SECTION 2.1: Generalized Computer Model Calibration
+%%%%% Maybe introduce toy example here
+%%%%% Rehash the need to update KOH to account for Poisson data
+%%%%% Explain the use of a no-bias set up to initially prove the capability
+%%%%% Briefly show the math behind this
+
+%%% SECTION 2.2: Poisson Response
+%%%%% Results of 1D Poisson calibration (prediction, distribution of calibration parameters)
+%%%%% Results of 2D Poisson calibration (prediction, distribution of calibration parameters)
+
+% SECTION 3: Gaussian Process Surrogates
+%%%%% Motivate need for surrogate from previous section
+%%%%% Often our computer model is expensive to run
+%%%%% We need a surrogate
+%%%%% Review Gaussian process surrogates and their use in surrogate modeling
+%%%%% Go back to 1D and 2D Poisson examples, but now with limited model runs
+%%%%% Tease that this example is easy because the amount of data we have is small
+%%%%% Increase to large data example. Show inability of framework to fit surrogate without Vecchia
+
+%%% SECTION 3.1: Vecchia Approximation
+%%%%%
+%%%%%
+%%%%%
+
+%%% SECTION 3.2: Scaled Vecchia Approximation
+%%%%%
+%%%%%
+%%%%%
+
+% SECTION 4: Heliospheric Science
+%%% Introduce the idea of the heliosphere?
+
+%%% SECTION 4.1: Computer Model
+%%% Introduce the computer model
+
+%%% SECTION 4.2: Benchmark against synthetic data
+%%% Run and evaluate experiements
+
+% SECTION 5: IBEX SKY MAP - Real data
+%%% Introduce the satellite
+%%% Introduce what our data looks like
+
+%%% SECTION 5.1: Benchmark against real data data
+%%% Run and evaluate experiements
+
+%%% SECTION 5.2: Discrepancy
+%%% Note that discrepancy was explored
+%%% Maybe show some plots that indicate a simple discrepancy is insufficient
+%%% Lead into discussion
+
+% SECTION 6: Discussion
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Introduction}
 \label{sec:intro}
+
+%  The computer model calibration literature is great when you have noisy,
+%   Gaussian field data and smooth computer model you can model with GP(and not TOO big)
+%   However, not all calibration fit into that mold.
+%  For example, we are working with satelite detector counts. IBEX is giving a lot of count data <- that is big
+%   computer model data is big too. other problems don't fit into that mold.
+%  Doint it over latitude and longitude
+%  WAY different than what I have.
+%  Keep in all the cites, but make it more compact.
+%  move toy problem to a review
+%  either way, get to the novel contribution QUICKER (at least page 2)
+%  Go for 3-4 pages. but still give the scientific impact!
+%  Include figure 1 <- image of raw data, and maybe a couple model outputs
+
+%  Cites:
+%  helps the reader if someone else has done this before
+%  maybe the sentence isn't necessary.
+%  any paper on calibration with parameters themselves of interest
+%  scott's paper has some good cites for this.
+%  papers in the intro: Bayarri et al. 2009, Higdon et al. 2004; Brynjarsdottir and O'Hagan, 2014
+%  should we deflect from parameter inference??
+%  what about additional source of data cite:
+%  scott's paper, radiative shock, other one with Derek.
 
 The solar wind, continously emitted from the Sun, is primarily made up of
 hydrogen ions, or lone protons. These ions travel through the solar system and
