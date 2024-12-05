@@ -162,6 +162,15 @@ output.
 %  what about additional source of data cite:
 %  scott's paper, radiative shock, other one with Derek.
 
+The computer model calibration literature provides statisticians with tools to
+improve out-of-sample prediction and estimate unknown parameters when field data are
+noisy, Gaussian observations and simulator data are smooth enough and small enough to
+be modeled with a Gaussian process. However, not all scientific problems that require
+calibration fit into that mold. For example, our motivating application consists of a
+large number of counts of particles detected by a satelite and computer model output
+that is extremely high-dimensional. This is only one such problem, but certaintly
+many other situations fall outside the standard computer model calibration set up.
+
 The solar wind, continously emitted from the Sun, is primarily made up of
 hydrogen ions, or lone protons. These ions travel through the solar system and
 out into interstellar space. As the ions reach the boundary of our solar
@@ -288,15 +297,6 @@ two-fold: 1) Make accurate predictions at new, unobserved physical locations
 distribution of calibration parameters $\mu$ and $\nu$ to better understand
 how the mean process is constructed.
 
-\begin{figure}[ht!]
-\centering
-\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_examp.pdf}
-\caption{Counts from a Poisson process at varying $x_i$ locations along with
-evaluations of $\lambda_i=\mu + \nu f(x_i)$ for different values of $\mu$ and
-$\nu$.
-\label{f:logit1_examp}}
-\end{figure}
-
 The canonical framework for statistical computer model calibration was proposed
 by \citet{kennedyohagan2001} (hereafter
 referred to as KOH). However, KOH relies on modeling the simulation runs and field data
@@ -385,6 +385,26 @@ two classes, representing a multinomial reponse. We focus on the
 Poisson-distributed counts in this paper, but our framework can be generalized
 to any response.
 
+Consider the output displayed in Figure \ref{f:logit1_examp}. Suppose we are given
+counts collected from a physical experiment at different input locations ($x_i$). We
+know that the underlying mean process is of the form $\lambda_i=f(x_i, \mu, \nu)$. We
+are unable to modify $\mu$ and $\nu$ in a physical setting, but we can vary these
+values in a computer model. We run the simulation for a variety of unique
+combinations for the values of $\mu$ and $\nu$, resulting in 25 different functional
+evaluations (depicted as gray lines in \ref{f:logit1_examp}). Our goal is two-fold:
+1) Make accurate predictions at new, unobserved physical locations ($x_i'$) with good
+uncertainty quantification (UQ), and 2) Estimate the distribution of calibration
+parameters $\mu$ and $\nu$ to better understand how the mean process is constructed.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_examp.pdf}
+\caption{Counts from a Poisson process at varying $x_i$ locations along with
+evaluations of $\lambda_i=\mu + \nu f(x_i)$ for different values of $\mu$ and
+$\nu$.
+\label{f:logit1_examp}}
+\end{figure}
+
 The canonical KOH computer model calibration framework is limited to a
 continuous response from both the computer model and the field experiment, due
 to it's reliance on modeling the two outputs jointly via a multivariate normal
@@ -396,10 +416,14 @@ calibration parameters, generate computer model output at those new settings,
 and evaluate the Poisson likelihood of the observed data, given the simulated
 mean surface.
 
-As a side note, we point out that we do not include a term for the bias
-inherent in the computer model. We do this initially to simplify the setup and
-prove the framework's capability. We will address discrepancy later in the
-paper.
+%%%%% Explain the use of a no-bias set up to initially prove the capability
+KOH makes the presumably correct assumption that bias is inherent in any computer
+model attempting to represent a physical process. Therefore, KOH include a term for
+the discrepancy between model and reality. We initially ignore the bias to simplify
+the setup and prove the framework's capability. We will address discrepancy later in
+the paper.
+
+%%%%% Briefly show the math behind this
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -672,19 +696,29 @@ some exposure time, regardless of source.
 \section{Discussion}
 \label{sec:discuss}
 
-\begin{itemize}
-  \item Recap what we are proposing in the paper
-  \item Highlight performance of calibration framework in prediction and
-    estimation of calibration parameters
-  \item Point out need to collaborate with theorists to improve computer
-    model and get better estimates of calibration parameters
-  \item Discuss a need to build out a more exhaustive procedure to perform
-    hypothesis testing on which theoretical model is most probable to
-    explain the data
-  \item Acknowledge limitations (lack of fulll UQ with SVecchia estimates)
-  \item Propose a fully Bayesian framework (teasing use of deep GPs)
-  \item Can use in other non-Gaussian response settings
-\end{itemize}
+We have introduced an effective tool for computer model calibration where 1) data
+from a field experiment is not normally distributed and 2) computer model output is
+extremely high-dimensional, demanding an approximation for the Gaussian process
+surrogate. In simulated experiments, our framework provides accurate predictions at
+unsampled input locations. Additionally, when provided with data where the underlying
+calibration parameters are known, we can recover the truth at the nominal rate. We
+applied this methodology to data collected from the IBEX satellite, and corresponding
+simulator output generating heliospheric sky maps. When faced with real data from the
+satellite, our method shows that large discrepancies exist between the computer model
+and the physical process it attempts to represent. Further collaboration is needed to
+inform the theoretical astrophysicists responsible for model development where the
+model is lacking, and improve its fidelity to the truth.
+
+Our framework is only applied to counts assumed to come from a Poisson distributed
+process. We encourage other practitioners to use this work in other contexts where
+data from the field may come from some other distribution (e.g. Negative Binomial,
+Bernoulli, Exponential, etc.). We recognize the limitations of our method. First, the
+Scaled Vecchia GP surrogate for the computer model fails to provide full uncertainty
+quantification on its parameter estimates. A fully Bayesian framework could be
+developed, perhaps with the use of a deep Gaussian process to handle the inherent
+non-stationarity in the response surface. Finally, this project motivates the need
+for a more exhaustive procedure to perform hypothesis testing for which theoretical
+model is most probable, considering the data observed.
 
 \subsection*{Acknowledgments}
 

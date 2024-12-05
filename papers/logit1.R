@@ -29,11 +29,9 @@ ylims <- range(yf, ym)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("logit1_examp.pdf", width=5, height=5)
 plot(x=as.vector(t(xf)), y=yf, xlab="X", ylab=expression(lambda), ylim=ylims)
-matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, add=TRUE)
-lines(x=xm, y=lam_m, type="l", col=2, lty=2, lwd=2)
-legend("topleft", c("counts", "simulation", "true mean"),
-  col=c(1, "lightgrey", 2), pch=c(1, NA, NA), lty=c(NA, 1, 2), lwd=c(1, 1, 2),
-  cex=0.85)
+matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, add=TRUE)
+legend("topleft", c("observed counts", "computer model output"),
+  col=c(1, "lightgrey"), pch=c(1, NA), lty=c(NA, 1), lwd=c(1, 1.5))
 dev.off()
 
 library(GPvecchia)
