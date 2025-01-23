@@ -72,8 +72,6 @@ output.
 \doublespacing % no double spacing for arXiv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Layout
 %
 % SECTION 1: Introduction
@@ -144,7 +142,7 @@ output.
 %   However, not all calibration fit into that mold.
 %  For example, we are working with satelite detector counts. IBEX is giving a lot of count data <- that is big
 %   computer model data is big too. other problems don't fit into that mold.
-%  Doint it over latitude and longitude
+%  Doing it over latitude and longitude
 %  WAY different than what I have.
 %  Keep in all the cites, but make it more compact.
 %  move toy problem to a review
@@ -163,88 +161,14 @@ output.
 %  scott's paper, radiative shock, other one with Derek.
 
 The computer model calibration literature provides statisticians with tools to
-improve out-of-sample prediction and estimate unknown parameters when field data are
-noisy, Gaussian observations and simulator data are smooth enough and small enough to
-be modeled with a Gaussian process. However, not all scientific problems that require
-calibration fit into that mold. For example, our motivating application consists of a
-large number of counts of particles detected by a satelite and computer model output
-that is extremely high-dimensional. This is only one such problem, but certaintly
-many other situations fall outside the standard computer model calibration set up.
-
-The solar wind, continously emitted from the Sun, is primarily made up of
-hydrogen ions, or lone protons. These ions travel through the solar system and
-out into interstellar space. As the ions reach the boundary of our solar
-system, they encounter the termination shock, where they slow down, absorb
-significant amounts of energy, and become highly energetic, charged atoms.
-These hydrogen ions form an egg-shaped bubble encapsulating our solar system
-called the heliosphere, which acts as a barrier between our solar system and
-interstellar space. While in this region called the heliopause (the outer edge
-of the heliosphere), the ions can interact with other particles in the
-interstellar medium. Sometimes these encounters result in electron exchange,
-converting the charged atoms into what heliospheric physicists call energetic
-neutral atoms (ENAs). Without charge, these ENAs travel in a straight line,
-unaffected by magnetic fields. Some ENAs cross back into the solar system and,
-depending on their path, can be detected in Earth's orbit. Determining the rate
-at which ENAs are generated in different parts of the heliosphere is key to
-understanding the makeup of this region at the boundary of our solar system and
-interstellar space.
-
-In this pursuit, the National Aeronautics and Space Administration (NASA)
-launched the Interstellar Boundary Explorer (IBEX) into Earth's orbit in 2008
-as part of their Small Explorer program \citep{mccomas2009aIBEX}. IBEX
-continuously detects ENAs and records their energy level and approximate
-location of origin, providing sufficient data to estimate the rate at which
-ENAs are created throughout the heliopause. Specifically, the IBEX satellite
-contains an instrument called the IBEX-Hi ENA imager
-\citep{funsten2009IBEXHiENA}, which includes a series of plates
-\citep{moran2024statistical} that the ENAs travel through to be detected. The
-IBEX satellite rotates on an axis, and over a period of six months, is able to
-point at every part of the sky for some interval, or exposure time. This
-spatial map of ENA rates (referred to by space scientists as a \textit{sky
-map}) is used to analyze, make conjectures about, and ultimately develop
-theories for the heliosphere, its many properties, and the processes that
-govern its creation.
-
-The heliosphere is like a boat moving through water. Here the water represents
-interstellar medium. As a boat moves through water, the water is disturbed.
-However, the turbulence created is not equal at each location where the boat is
-in contact with the water. Turbulence is greater at the front (bow) and back
-(stern) than on the sides (port and starboard) of the ship. Prior to the launch
-of the IBEX satellite, space scientists had the same expectation for the
-heliosphere. Higher rates of ENAs being generated would exist at the stern
-(space scientists call this the \textit{nose}) and bow (\textit{tail}) of the
-helisophere due to its movement through interstellar space. Data observed found
-this to be true. These higher rates are referred to as \textit{globally
-distributed flux (GDF)}. But in a completely unexpected finding
-\citep{mccomas2009bIBEX}, IBEX also recorded a string of higher rates of ENAs
-\citep{fuselier2009IBEXribbon} being generated that curved around the
-heliosphere. Scientists now refer to this phenomenom as the \textit{ribbon}.
-For the past fifteen years, space scientists have conducted extensive research
-and proposed dozens of theories to explain the existence of the ribbon and the
-physical process that generates it \citep{mccomas2014ibex, zirnstein2018role,
-zirnstein2019strong, zirnstein2021dependence}.
-
-%%% No calibration going on in IBEX (super novel)
-Scientific investigation of the GDF and ribbon currently involves a long,
-complex, and at times cumbersome process. For one, the noisy and irregular
-nature of the data has made it hard for space scientists to separate signal
-from noise and perform their analyses. For the first 15 years of its mission,
-IBEX relied soley on maps produced by the IBEX Science Operations Center
-(ISOC). ISOC maps are generated using a simple aggregation of the raw data. But
-these maps still retain a significant amount of noise and are fairly low
-resolution (each pixel represents a $6\degree \times 6\degree$ area of the
-sky). To remedy this problem \citet{osthustheseus2023} propose a method called
-Theseus, which takes the raw data and generates a much smoother representation
-of the surface, using a series of Generative Additive and Projection Pursuit
-Regression models. Once Theseus maps are created, they are separated into
-GDF-only and ribbon-only maps \citet{beesleyribbonsep2023}. With the source of
-ENAs separated into two distinct maps, space scientists perform analysis and
-conduct research exclusively for either the GDF or ribbon with the respective
-map. We believe this process can be improved in two ways. First, both Theseus
-and ribbon separation rely on many assumptions about the data and thus depart
-from the data generation process itself. Second, we believe inference about the
-heliosphere can be done in a more holistic way using the data in its original
-form, as counts of ENAs given some exposure time, regardless of source.
+improve out-of-sample prediction and estimate unknown calibration parameters when
+field data are noisy, Gaussian observations and simulator data are both smooth and
+small enough to be modeled with a Gaussian process. However, not all scientific
+problems that require calibration fit into that mold. For example, our motivating
+application consists of a large number of counts of particles detected by a satelite
+and corresponding computer model output that is smooth, but extremely
+high-dimensional. This is only one such problem, but certaintly many other situations
+fall outside the standard computer model calibration set up.
 
 Statistical computer model calibration utilizes both data collected from a
 physical experiment and data generated from a computer simulation
@@ -264,38 +188,21 @@ inferential claims about them. Parameters in computer simulations developed by
 space scientists to explain the existence of the GDF and ribbon fall in this
 category.
 
-Computer experiments \citep{santner2018design} do not face the same ethical
-and practical obstacles of physical experiments. Although some simulations are
-very quick to evaluate \citep{higdoncalib2004}, frequently they can be
-computationally expensive. Some computer simulations take hours, or even days,
-to complete. In our case, an individual run of the IBEX computer model to
-produce a simulated sky map can take up to 16 hours, limiting the supply of
-computer model data. In such situations, a GP surrogate
-\citep{sacks1989computerexp, gramacy2020surrogates} is often fit to the
-limited computer output to provide fast predictions out of sample. Adding
-another layer of complexity, the output from the IBEX simulation is not only
-expensive to obtain, but is extremely high dimensional. Each run of the
-simulation produces a sky map represented by a vector of 16,200 ENA rates. GPs
-struggle with such big data because they must store and decompose matrices
-that grow quadratically with training data size. \citet{higdoncalib2008}
-mitigate this with a basis representation via principal components to reduce
-the dimension of the data. However, much has changed recently in the landscape
-of GP approximation.
-
-% Introduce a charicature of the IBEX problem
-Now, before we get ahead of ourselves, let's start with a simple problem.
-Suppose we are given counts collected from a physical experiment at different
-input locations ($x_i$), as shown in Figure \ref{f:logit1_examp}. We know that
-the underlying mean process is of the form $\lambda_i=\mu + \nu f(x_i)$. We are
-unable to modify $\mu$ and $\nu$ in a physical setting, but we can vary these
-values in a trivial, one-line ``computer model.'' If we consider all unique
-combinations for the values of $\mu \in \{5, 7.5, 10, 12.5, 15\}$ and $\nu \in
-\{0.25, 0.625, 1, 1.375, 1.75\}$, we end up with 25 different functional
-evaluations (depicted as gray lines in \ref{f:logit1_examp}). Our goal is
-two-fold: 1) Make accurate predictions at new, unobserved physical locations
-($x_i'$) with good uncertainty quantification (UQ), and 2) Estimate the
-distribution of calibration parameters $\mu$ and $\nu$ to better understand
-how the mean process is constructed.
+Computer experiments \citep{santner2018design} do not face the same ethical and
+practical obstacles of physical experiments. Although some simulations are very quick
+to evaluate \citep{higdoncalib2004}, others can be computationally expensive. Some
+computer simulations take hours, or even days, to complete. In our motivating
+example, an individual run of the computer model can take up to 16 hours, limiting
+the supply of computer model data. In such situations, a GP surrogate
+\citep{sacks1989computerexp, gramacy2020surrogates} is often fit to the limited
+computer output to provide fast predictions out of sample. Adding another layer of
+complexity, the output from the our simulation is not only expensive to obtain, but
+is extremely high dimensional. Each run of the simulation produces a surface
+represented by a vector of 16,200 points. GPs struggle with such big data because
+they must store and decompose matrices that grow quadratically with training data
+size. \citet{higdoncalib2008} mitigate this with a basis representation via principal
+components to reduce the dimension of the data. However, much has changed recently in
+the landscape of GP approximation.
 
 The canonical framework for statistical computer model calibration was proposed
 by \citet{kennedyohagan2001} (hereafter
@@ -385,6 +292,21 @@ two classes, representing a multinomial reponse. We focus on the
 Poisson-distributed counts in this paper, but our framework can be generalized
 to any response.
 
+% Introduce a charicature of the IBEX problem
+Now, before we get ahead of ourselves, let's start with a simple problem.
+Suppose we are given counts collected from a physical experiment at different
+input locations ($x_i$), as shown in Figure \ref{f:logit1_examp}. We know that
+the underlying mean process is of the form $\lambda_i=\mu + \nu f(x_i)$. We are
+unable to modify $\mu$ and $\nu$ in a physical setting, but we can vary these
+values in a trivial, one-line ``computer model.'' If we consider all unique
+combinations for the values of $\mu \in \{5, 7.5, 10, 12.5, 15\}$ and $\nu \in
+\{0.25, 0.625, 1, 1.375, 1.75\}$, we end up with 25 different functional
+evaluations (depicted as gray lines in \ref{f:logit1_examp}). Our goal is
+two-fold: 1) Make accurate predictions at new, unobserved physical locations
+($x_i'$) with good uncertainty quantification (UQ), and 2) Estimate the
+distribution of calibration parameters $\mu$ and $\nu$ to better understand
+how the mean process is constructed.
+
 Consider the output displayed in Figure \ref{f:logit1_examp}. Suppose we are given
 counts collected from a physical experiment at different input locations ($x_i$). We
 know that the underlying mean process is of the form $\lambda_i=f(x_i, \mu, \nu)$. We
@@ -449,7 +371,7 @@ the paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Gaussian Process Surrogates}
-\label{sec:gp_surr}1
+\label{sec:gp_surr}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Motivate need for surrogate (computer model is expensive)
@@ -477,14 +399,11 @@ normal equations. Suppose we have a vector of observations $Y$ at input location
 $X$. We can model this data as being normally distributed, as in
 Eq.~(\ref{eq:mvn_eq}). More importantly, we are interested in what our model predicts
 at a new location $x$.
-\begin{equation}
-Y \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^* \mid Y \sim N\!\left(\mu^*(x), \Sigma^*(x)) \\
-
-\mu^*(x)=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \\
-
+\begin{align}
+Y \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^* \mid Y \sim N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
+\mu^*(x)=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
 \Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
-\end{equation}
-
+\end{align}
 GPs rely on the estimation of three hyperparameters that can be estimated using
 maximum likelihood estimators, method of moments estimators, or in our case, Bayesian
 MCMC methods. GPs provide a flexible, nonparamteric regression tool. GPs were
