@@ -290,7 +290,7 @@ predictions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Generalized Computer Model Calibration}
+\subsection{Generalized Computer Model Calibration}
 \label{sec:gen_calib}
 
 %% Rehash the need to update KOH to account for Poisson data
@@ -305,6 +305,11 @@ Poisson-distributed counts in this paper, but our framework can be generalized
 to any response.
 
 % Introduce a charicature of the IBEX problem
+%% Progression of toy example:
+%%% 1) Limited field data, unlimited, low-dimensional simulator output
+%%% 2) Limited field data, limited, low-dimensional simulator output
+%%% 3) Limited field data, limited, high-dimensional simulator output
+
 Now, before we get ahead of ourselves, let's start with a simple problem.
 Suppose we are given counts collected from a physical experiment at different
 input locations ($x_i$), as shown in Figure \ref{f:logit1_examp}. We know that
@@ -387,16 +392,14 @@ the paper.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Motivate need for surrogate (computer model is expensive)
-Often computer models are comuptationally costly. Due to complex and expensive
+Computer models are often computationally expensive. Due to complex and expensive
 operations, such as solving partial differential equations, simulations can take
-hours, days, or even weeks to complete. For example, astrophysicists at LANL have
-developed sophisticate computer models that require over 16 hours for a single run.
-This severely limits the amount of simulated data that can be produced. But in order
-for computer model calibration to be effective in prediction and parameter
-estimation, we need to be able to explore the entire input space of the model
-parameters. Therefore, we need a surrogate to make accurate and reliable
-out-of-sample predictions. The canonical surrogate for computer experiments and
-computer model calibration is the Gaussian process.
+hours, days, or even weeks to complete. In order for computer model calibration to be
+effective in prediction and parameter estimation, we need to be able to explore more
+of the model parameter input space than the limited output from the expensive
+simulation. Therefore, we need a surrogate to make accurate and reliable predictions
+for out-of-sample values of our calibration parameters. The canonical surrogate for
+computer experiments and computer model calibration is the Gaussian process.
 
 %------------------------------------------------------------------------------
 \subsection{Gaussian Processes}
@@ -408,27 +411,33 @@ A Gaussian process (GP) is a realization of a multivariate normal distribution w
 some mean and covariance functions. GPs are fit to observed data and then used to
 make predictions at new input locations, relying on the conditional multivariate
 normal equations. Suppose we have a vector of observations $Y$ at input locations
-$X$. We can model this data as being normally distributed, as in
-Eq.~(\ref{eq:mvn_eq}). More importantly, we are interested in what our model predicts
-at a new location $x$.
+$X$. We make the assumption that this data is normally distributed with some mean
+function $(\mu(X))$ and covariance function $(\Sigma(X))$. Note that these are only
+functions of the inputs $X$. However, more important than how we model observed data
+is what our model predicts at a new location $x$. Eq.~(\ref{eq:mvn_eq}) articulates
+how to obtain mean predictions $\mu^*(x)$ and corresponding uncertainty
+quantification $\Sigma*(x)$.
 \begin{align}
-Y \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^* \mid Y \sim N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
+Y(X) \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^*(x) \mid Y(X) \sim
+N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
 \mu^*(x)=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
 \Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
 \end{align}
-GPs rely on the estimation of three hyperparameters that can be estimated using
-maximum likelihood estimators, method of moments estimators, or in our case, Bayesian
-MCMC methods. GPs provide a flexible, nonparamteric regression tool. GPs were
-popularized as surrogates for computer experiments due to their ability to
-interpolate between observed data points. Computer experiments are typically
-deterministic, although stochastic computer models are becoming increasingly common.
-GPs can provide predictive surfaces that give higher estimates of variance away from
-observed data, and virtually no variance at observed locations.
+Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is common
+to set that to zero. In this case, all the action takes place in the covariance
+function. Many covariance functions exists, such as the Gaussian or Matern kernels.
+We use the Matern kernel in our work, of which the Gaussian kernel is a special case.
+The Matern kernel relies on estimating three hyperparameters: a nugget $g$, a
+lengthscale $\theta$, and a scale $\tau^2$. These can be estimated using maximum
+likelihood estimators, method of moments estimators, or in our case, Bayesian MCMC
+methods.
 
-%------------------------------------------------------------------------------
-\subsection{Vecchia Approximation}
-\label{sec:vecchia}
-%------------------------------------------------------------------------------
+GPs provide a flexible, nonparamteric regression tool. They were popularized as
+surrogate models for computer experiments due to their ability to interpolate between
+observed data points (setting nugget $g = 0$). Although stochastic computer models
+are becoming more common, computer experiments are typically deterministic. GPs are
+therefore helpful in providing predictive surfaces that give higher estimates of
+variance away from observed data, and virtually no variance at observed locations.
 
 \subsubsection{Example}
 
@@ -438,42 +447,38 @@ observed data, and virtually no variance at observed locations.
   small
 \end{itemize}
 
-\begin{itemize}
-  \item Increase to large data example.
-  \item Show inability of framework to fit surrogate without Vecchia
-  \item Introduce Scaled Vecchia
-\end{itemize}
+%------------------------------------------------------------------------------
+\subsection{Vecchia Approximation}
+\label{sec:vecchia}
+%------------------------------------------------------------------------------
 
-\subsection{Scaled Vecchia Gaussian Process Surrogates}
-\label{sec:scale_vec}
+%\begin{itemize}
+%  \item Increase to large data example.
+%  \item Show inability of framework to fit surrogate without Vecchia
+%  \item Introduce Scaled Vecchia
+%\end{itemize}
 
-One weakness of GPs is the need to invert an $n \times n$ covariance matrix,
-making it difficult to scale to large datasets, such as that from our sky map
-simulator. Many methods have been introduced to address this computational
-burden. These include, but are not limited to, fixed-rank kriging
-\citep{cressie2008fixed}, inducing points \citep{banerjee2008gaussian},
-compactly supported kernels \citep{kaufman2011efficient}, divide-and-conquer
-\citep{gramacy2008bayesian, gramacy2015local}, and nearest neighbors
-\citep{datta2016hierarchical, wu2022variational}. In the context of computer
-model calibration, \citet{higdoncalib2008} use a basis representation via
-principal components to accommodate high-dimensional output. However, with the
-dramatic increase in computing capacity over the past decade and the
-aforementioned advances in methodology, we believe there are better GP
-approximations available to model the output of a computer simulation. We
-propose the recently popularized Vecchia approximation
+One weakness of GPs is the need to invert an $n \times n$ covariance matrix, making
+it difficult to scale to large datasets. Many methods have been introduced to address
+this computational burden. These include, but are not limited to, fixed-rank kriging
+\citep{cressie2008fixed}, inducing points \citep{banerjee2008gaussian}, compactly
+supported kernels \citep{kaufman2011efficient}, divide-and-conquer
+\citep{gramacy2015local}, and nearest neighbors \citep{datta2016hierarchical,
+wu2022variational}. In the context of computer model calibration,
+\citet{higdoncalib2008} use a basis representation via principal components to
+accommodate high-dimensional output. However, with the dramatic increase in computing
+capacity over the past decade and the aforementioned advances in methodology, we
+believe there are better GP approximations available to model the output of a
+computer simulation. We propose the recently popularized Vecchia approximation
 \citep{vecchia1988estimation, katzfuss2020vecchia, katzfuss2021general,
-zhang2022multi}. In particular, we utilize the Scaled Vecchia Approximation
-\citep{scaledvecchiakatzfuss2022} to model the limited simulator output and
-make predictions at new locations. In discussing further work,
-\citet{scaledvecchiakatzfuss2022} proposed their method as an effective tool
-for use in computer model calibration.
+zhang2022multi}.
 
 The Vecchia approximation relies on the ability to write a likelihood function as the
 product of conditional likelihoods as shown below.
 \begin{align}
 L(Y)&=\prod_{i=1}^n L(Y_i \mid Y_{g(i)})
-\hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and } g(i)=\{1, 2, \ldots, i-1\}\\
-&\approx \prod_{i=1}^{n}L(Y_i \mid Y_{h(i)}) \hspace{0.3em} \mbox{ where } h(i) \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| = m \ll n \nonumber \label{eq:vecchia}
+\hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and } g(i)=\{1, 2, \ldots, i-1\} \nonumber \\
+&\approx \prod_{i=1}^{n}L(Y_i \mid Y_{h(i)}) \hspace{0.3em} \mbox{ where } h(i) \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| = m \ll n \label{eq:vecchia}
 \end{align}
 Reducing the size of the conditioning set ($h(i)$ above) induces sparsity in
 the precision matrix, speeding up the evaluation of the likelihood. This takes
@@ -483,6 +488,15 @@ quality of the approximation improves, but we find a value of $m < 30$ is more
 than sufficient. The conditioning set can be constructed in many ways, but we
 default to a nearest-neighbors approach, which has been done previously
 \citep{sauer2023active}.
+
+\subsection{Scaled Vecchia Gaussian Process Surrogates}
+\label{sec:scale_vec}
+
+In particular, we utilize the Scaled Vecchia Approximation
+\citep{scaledvecchiakatzfuss2022} to model the limited simulator output and make
+predictions at new locations. In discussing further work,
+\citet{scaledvecchiakatzfuss2022} proposed their method as an effective tool for use
+in computer model calibration.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

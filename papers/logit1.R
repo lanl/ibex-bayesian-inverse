@@ -36,10 +36,11 @@ for (i in 1:nrow(calib_params)) {
 ylims <- range(yf, ym)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("logit1_examp.pdf", width=5, height=5)
-plot(x=xf, y=yf, xlab="X", ylab=expression(lambda), ylim=ylims)
-matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, add=TRUE)
+matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
+  ylab=expression(lambda), ylim=ylims)
+points(x=as.vector(t(xf)), y=yf)
 legend("topleft", c("observed counts", "computer model output"),
-  col=c(1, "lightgrey"), pch=c(1, NA), lty=c(NA, 1), lwd=c(1, 1.5))
+  col=c(1, "lightgrey"), pch=c(1, NA), lty=c(NA, 1), lwd=c(1, 1.5), cex=1.25)
 dev.off()
 
 nmcmcs <- 10000
