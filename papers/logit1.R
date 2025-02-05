@@ -1,17 +1,25 @@
+#################
+
+#################
 
 f <- function(x, mu, nu) {
+  if (is.null(nrow(x))) {
+    x <- matrix(x, ncol=1)
+  }
   mu*exp(mu*x-5)/(nu+exp(mu*x-5))
 }
 
 true_mu <- 10
 true_nu <- 1
+nf <- 8
+nm <- 50
+repsf <- 4
 
-xf <- seq(0, 1, length=8)
-xf <- rbind(xf, xf, xf, xf)
-lam <- as.vector(t(f(x=xf, mu=true_mu, nu=true_nu)))
+xf <- rep(seq(0, 1, length=nf), repsf)
+lam <- f(x=xf, mu=true_mu, nu=true_nu)
 yf <- rpois(lam, lam)
 
-xm <- seq(0, 1, length=50)
+xm <- seq(0, 1, length=nm)
 lam_m <- f(x=xm, mu=true_mu, nu=true_nu)
 mus <- seq(5, 15, length=5)
 nus <- seq(0.25, 1.75, length=5)
@@ -28,27 +36,18 @@ for (i in 1:nrow(calib_params)) {
 ylims <- range(yf, ym)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("logit1_examp.pdf", width=5, height=5)
-plot(x=as.vector(t(xf)), y=yf, xlab="X", ylab=expression(lambda), ylim=ylims)
+plot(x=xf, y=yf, xlab="X", ylab=expression(lambda), ylim=ylims)
 matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, add=TRUE)
 legend("topleft", c("observed counts", "computer model output"),
   col=c(1, "lightgrey"), pch=c(1, NA), lty=c(NA, 1), lwd=c(1, 1.5))
 dev.off()
-
-library(GPvecchia)
-library(GpGp)
-library(laGP)
-library(tidyverse)
-
-## Loads in scaled Vecchia approximation code
-source('../helper.R')
-source('../vecchia_scaled.R')
 
 nmcmcs <- 10000
 u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(calib_params))
 
 colnames(u) <- colnames(uprops) <- colnames(calib_params)
 lls <- rep(NA, nmcmcs)
-umins <- umaxs <- uranges <- rep(NA, 2)
+umins <- umaxs <- uranges <- rep(NA, ncol(calib_params))
 
 for (i in 1:ncol(calib_params)) {
   umins[i] <- min(calib_params[,i])
@@ -57,35 +56,14 @@ for (i in 1:ncol(calib_params)) {
   calib_params[,i] <- (calib_params[,i] - umins[i])/uranges[i]
 }
 
-Xm <- matrix(rep(xm, nrow(calib_params)), ncol=1)
-Xm <- cbind(Xm, rep(NA, 1250), rep(NA, 1250))
-row <- 1
-for (i in 1:nrow(calib_params)) {
-  for (j in 1:length(xm)) {
-    Xm[row,2:3] <- calib_params[i,] 
-    row <- row + 1 
-  }
-}
-XUm <- Xm
-
-fit <- fit_scaled(y=as.vector(ym), inputs=XUm, nug=1e-4, ms=25)
-
 ## initialize chains
 u[1,] <- uprops[1,] <- c(0.5, 0.5)
 
-XX <- matrix(as.vector(t(xf)), ncol=1)
-XX <- cbind(XX, rep(NA, nrow(XX)), rep(NA, nrow(XX)))
-for (i in 1:nrow(XX)) {
-  XX[i,2:3] <- u[1,]
-}
-colnames(XX) <- c("x", "mu", "nu")
+XX <- matrix(xf, ncol=1)
 
 pmin <- apply(calib_params, 2, min)
 pmax <- apply(calib_params, 2, max)
-## TODO: value of m should be user specified
-lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
-  predvar=FALSE)
-lhat_curr[lhat_curr <= 0] <- 0.1
+lhat_curr <- f(x=XX, mu=u[1,1]*uranges[1]+umins[1], nu=u[1,2]*uranges[2]+umins[2])
 lls[1] <- sum(yf*log(lhat_curr) - lhat_curr)
 
 accept <- 1
@@ -98,19 +76,8 @@ for (t in 2:nmcmcs) {
   up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=pmin, pmax=pmax,
     pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
-  # print(paste("Iteration proposal (calib params):", up$prop[1], up$prop[2]))
-  ### Predict simulator output at u_prime using fitted surrogate
-  ## Use scaled Vecchia GP
-  XX <- matrix(as.vector(t(xf)), ncol=1)
-  XX <- cbind(XX, rep(NA, nrow(XX)), rep(NA, nrow(XX)))
-  for (i in 1:nrow(XX)) {
-    XX[i,2:3] <- up$prop
-  }
-  colnames(XX) <- c("x", "mu", "nu")
-  ## TODO: value of m should be user specified
-  lhatp <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
-    predvar=FALSE)
-  lhatp[lhatp < 0] <- 0.1
+  ## Evaluate simulator at u_prime
+  lhatp <- f(x=XX, mu=uprops[t,1]*uranges[1]+umins[1], nu=uprops[t,2]*uranges[2]+umins[2])
 
   ### Calculate proposed likelihood
   llp <- sum(yf*log(lhatp) - lhatp)
@@ -124,38 +91,33 @@ for (t in 2:nmcmcs) {
   lmh <- llp - lls[t-1] + lpp - lp_curr + up$pr
   lmhs[t] <- lmh
 
-  # print(paste("Current likelihood:", lls[t-1])
-  # print(paste("Proposed likelihood:", llp)
-
   ## accept or reject
   if (lmh > log(runif(n=1))) {
     u[t,] <- up$prop
     lls[t] <- llp
     lhat_curr <- lhatp
     accept <- accept + 1
-    # print("ACCEPTED!!")
   } else {
     u[t,] <- u[t-1,]
     lls[t] <- lls[t-1]
-    # print("REJECTED!!")
   }
-  # t <- t + 1
-  print(paste("Finished iteration", t))
+  if (t %% 100 == 0) {
+    print(paste("Finished iteration", t))
+  }
 }
 
 ## Visualize this:
 plot(x=xm, y=f(xm, u[t-1,1]*uranges[1]+umins[1], u[t-1,2]*uranges[2]+umins[2]),
  type="l", lwd=2, xlab="X", ylab="lambda", ylim=ylims)
-lines(x=XX[1:8,1], y=lhat_curr[1:8], col=2, lwd=2, lty=2)
-points(x=as.vector(t(xf)), y=yf)
-lines(x=XX[1:8,1], y=lhatp[1:8], col=3, lwd=2, lty=3)
+lines(x=xf[1:8], y=lhat_curr[1:8], col=2, lwd=2, lty=2)
+points(x=xf, y=yf)
+lines(x=XX[1:8], y=lhatp[1:8], col=3, lwd=2, lty=3)
 # lines(x=xm, y=f(xm, uprops[t,1]*uranges[1]+umins[1],
  # uprops[t,2]*uranges[2]+umins[2]), col=3, lty=3, lwd=2)
 lines(x=xm, y=lam_m, col=4, lty=4, lwd=2)
 legend("topleft", c("current u at model X", "current u at field X",
   "proposed u at field X", "true lambda", "field obs"),
   col=c(1:4, 1), lty=c(1:4, NA), lwd=2, pch=c(rep(NA, 4), 1))
-
 
 par(mfrow=c(1,3))
 plot(x=xm, y=f(xm, u[t-1,1]*uranges[1]+umins[1], u[t-1,2]*uranges[2]+umins[2]),
