@@ -586,29 +586,43 @@ itself. Second, we believe inference about the heliosphere can be done in a
 more holistic way using the data in its original form, as counts of ENAs given
 some exposure time, regardless of source.
 
-\begin{itemize}
-  \item Go in depth on development of GDF and ribbon computer models
-  \item Explain the parameters that govern the computer model output
-  \item Talk about IBEX interested in calibration parameters, not just prediction
-\end{itemize}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{IBEX Sky Map}
 \label{sec:ibex_sky}
 
-\begin{itemize}
-  \item Go in depth on development of GDF and ribbon computer models
-  \item Explain the parameters that govern the computer model output
-  \item Talk about IBEX interested in calibration parameters, not just prediction
-\end{itemize}
+Over the past 15 years, physicists at Princeton University and Los Alamos National
+Lab have developed theoretical models to explain the existence of the GDF and ribbon,
+along with their corresponding shape and intensity. The shape and intensity of the
+GDF and ribbon are controlled by four paramters: parallel mean free path, ratio,
+parameter3, and parameter4. We leave a more in depth physical interpretation of these
+parameters to more appropriate venues (??cite). However, as an example, the parallel
+mean free path represents the distance a hydrogen ion travels beyond the heliopause
+before interacting with another particle, receiving an electron, and becoming an ENA.
+Physicists engaged in this work have developed computer models to represent the
+physical model they have proposed. Therefore, given specific values for our four
+paramters, we can run the model and output a vector of proposed ENA rates at specific
+geographical coordinates. The resolution of the output can be varied, but typical
+runs output ~16,000 rates, corresponding to a 2 degree grid over latitude and
+longitude.
+
+As stated previously, computer model calibration is concerned with leveraging
+simulator output to make more accurate predictions at out-of-sample field locations.
+Additionally, the distribution of calibration parameters can be estimated. The latter
+purpose is the primary interest of physicists involved in this project, as estimation
+of these parameters will give credence to what model best represents the data.
+However, we will also show that using computer model output enables us to make better
+predictions on holdout satellite data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Synthetic IBEX Data}
 \label{sec:ibex_sim}
+
+In order to showcase and validate our proposed methodology on the IBEX data, we will
+first test on simulated sky maps.
 
 \begin{itemize}
   \item Run tests on noisy maps generated from known simulations
