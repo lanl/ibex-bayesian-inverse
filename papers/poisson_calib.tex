@@ -161,93 +161,95 @@ output.
 %  scott's paper, radiative shock, other one with Derek.
 
 The computer model calibration literature provides statisticians with tools to
-improve out-of-sample prediction and estimate unknown calibration parameters when
-field data are noisy, Gaussian observations and simulator data are both smooth and
-small enough to be modeled with a Gaussian process. However, not all scientific
-problems that require calibration fit into that mold. For example, our motivating
-application consists of a large number of counts of particles detected by a satelite
-and corresponding computer model output that is smooth, but extremely
-high-dimensional. This is only one such problem, but certaintly many other situations
-fall outside the standard computer model calibration set up.
-
+improve out-of-sample prediction and estimate unknown calibration parameters
+when extensive physical experimentation is infeasible, field data are noisy,
+Gaussian observations, and simulator data are both smooth and small enough to
+be modeled with a Gaussian process. However, not all scientific problems that
+require calibration fit into this mold. For example, our motivating
+application produces counts of particles detected by a satelite and
+corresponding computer model output that is smooth, but extremely
+high-dimensional. This is only one such problem, but certaintly many other
+situations fall outside the standard computer model calibration set up.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.74,trim=0 0 65 0,clip=TRUE]{ibex_real1.pdf}
 \includegraphics[scale=0.74,trim=35 0 65 0,clip=TRUE]{sim1.pdf}
 \includegraphics[scale=0.74,trim=35 0 0 0,clip=TRUE]{sim2.pdf}
-\caption{Observed ENA rate from the IBEX satellite (left) and output from two
+\caption{Observed rate of energetic neutral atoms (ENA) detected by the
+Interstellar Boundary Explorer (IBEX) satellite (left) and output from two
 runs of the IBEX computer simulation at different settings (middle, right).
 \label{f:fig1}}
 \end{figure}
-
 Statistical computer model calibration utilizes both data collected from a
 physical experiment and data generated from a computer simulation
 representative of the physical process of interest. Often, the physical
 experiment is either too expensive to run a sufficient number of times (e.g.
-launching hundreds of IBEX satellites) or it is unethical to conduct. In this
+launching hundreds of IBEX satellites) or is unethical to conduct. In this
 way, a computer model representing the physical process allows a practitioner
 to learn more about the physical process without the prohibitive expense. Use
 of this additional source of data (even with its potential bias) has been
-shown to improve prediction and uncertainty quantification out-of-sample. For
-example, it is often impossible to control the values of certain variables in
-a physical experiment (e.g. gravity), but that barrier does not exist in a
-computer simulation. These calibration or tuning parameters can also be of
-high scientific interest. Varying them helps experimenters explore more of the
-input space, understand the distribution of these parameters, and even make
-inferential claims about them. Parameters in computer simulations developed by
-space scientists to explain the existence of the GDF and ribbon fall in this
+shown to improve prediction and uncertainty quantification out-of-sample.
+Additionally, computer model calibration allows scientists to manipulate
+parameters that are often impossible to control in a physical experiment (e.g.
+gravity). That barrier does not exist in a computer simulation. These
+calibration or tuning parameters are often of high scientific interest.
+Varying them helps experimenters explore more of the input space, understand
+the distribution of these parameters, and even make inferential claims about
+them. Parameters in computer simulations developed by space scientists in our
+motivating example that potentially explain observed phenomena fall in this
 category.
 
-Computer experiments \citep{santner2018design} do not face the same ethical and
-practical obstacles of physical experiments. Although some simulations are very quick
-to evaluate \citep{higdoncalib2004}, others can be computationally expensive. Some
-computer simulations take hours, or even days, to complete. In our motivating
-example, an individual run of the computer model can take up to 16 hours, limiting
-the supply of computer model data. In such situations, a GP surrogate
-\citep{sacks1989computerexp, gramacy2020surrogates} is often fit to the limited
-computer output to provide fast predictions out of sample. Adding another layer of
-complexity, the output from the our simulation is not only expensive to obtain, but
-is extremely high dimensional. Each run of the simulation produces a surface
-represented by a vector of 16,200 points. GPs struggle with such big data because
-they must store and decompose matrices that grow quadratically with training data
-size. \citet{higdoncalib2008} mitigate this with a basis representation via principal
-components to reduce the dimension of the data. However, much has changed recently in
-the landscape of GP approximation.
+Computer experiments \citep{santner2018design} do not face the same ethical
+and practical obstacles of physical experiments, but they can be
+computationally expensive. Although some simulations are very quick to
+evaluate \citep{higdoncalib2004} some take hours, or even days, to complete.
+In our motivating example, an individual run of the computer model can take up
+to 16 hours, limiting the supply of computer model data. In such situations, a
+GP surrogate \citep{sacks1989computerexp, gramacy2020surrogates} is often fit
+to the computer output to provide fast predictions out of sample. Adding
+another layer of complexity, the output from our simulation is not only
+expensive to obtain, but is extremely high dimensional. Each run of the
+simulation produces a surface represented by a vector of 16,200 points. GPs
+struggle with such big data because they must store and decompose matrices
+that grow quadratically with training data size. \citet{higdoncalib2008}
+mitigate this with a basis representation via principal components to reduce
+the dimension of the data. However, much has changed recently in the landscape
+of GP approximation.
 
-The canonical framework for statistical computer model calibration was proposed
-by \citet{kennedyohagan2001} (hereafter
-referred to as KOH). However, KOH relies on modeling the simulation runs and field data
-jointly via a multivariate normal representation. The field data collected by
-IBEX comes in as Poisson-distributed counts, preventing use of KOH. Recent
-research has been done to generalize calibration to non-Gaussian responses
+The canonical framework for statistical computer model calibration was
+proposed by \citet{kennedyohagan2001} (hereafter referred to as KOH). However,
+KOH relies on modeling the simulation runs and field data jointly via a
+multivariate normal representation. The field data collected by IBEX comes in
+as Poisson-distributed counts, preventing use of KOH. Recent research has been
+done to generalize calibration to non-Gaussian responses
 \citep{grosskopfcountcalib2020}, but empirical examples and applications in
 this work are restricted to one-dimensional input spaces. Expanding to higher
 dimensions allows broader application and brings with it multiple challenges,
-including the need to scale larger datasets. No approximation method was
+including the need to scale to larger datasets. No approximation method was
 necessary in \citet{grosskopfcountcalib2020}'s implementation. As mentioned
 previously, \citet{higdoncalib2008} employed PCA to reduce the dimensionality
 of the data in a calibration setting. We propose a modern approach using the
 Scaled Vecchia approximation \citep{scaledvecchiakatzfuss2022}. In fact, the
 application of the Scaled Vecchia approximation in computer model calibration
 was suggested by the authors themselves, noting its ability to scale well.
-Therefore, contributions are three-fold: 1) Introduce a MCMC computer model
-calibration framework for any type of physical response in high dimensions (we
-focus on Poisson-distributed data), 2) Allow for processing large-scale,
-high-dimensional computer model output in a reasonable time frame, and 3) For
-the first time, illustrate how IBEX data in its raw form can be used to make
-inferential claims about the heliosphere.
+Therefore, our contributions are three-fold: 1) Introduce a MCMC computer
+model calibration framework for any type of physical response in high
+dimensions (we focus on Poisson-distributed data), 2) Allow for processing
+large-scale, high-dimensional computer model output in a reasonable time
+frame, and 3) For the first time, illustrate how IBEX data in its raw form can
+be used to make inferential claims about the heliosphere.
 
 Our paper is outlined as follows: We review statistical computer model
 calibration in Section \ref{sec:review} and focus on the use of GPs as
 surrogates of simulator output. Section \ref{sec:gen_calib} introduces a novel
-Markov chain Monte Carlo framework (MCMC) as an extension of KOH to account for
-non-Gaussian data \ref{sec:poisson_calib} in computer model calibration.
-Section \ref{sec:scale_vec} proposes the Scaled Vecchia Approximation
-\citep{scaledvecchiakatzfuss2022} as a way to account for large-scale data in
-the computer model output. We illustrate the efficacy of our method through
-empirical results for small and large problems in Section
-\ref{sec:empir_results}. We finish our contribution through novel application
-to the real IBEX satellite data in Section \ref{sec:ibex}. Section
+Markov chain Monte Carlo framework (MCMC) as an extension of KOH to account
+for non-Gaussian field data \ref{sec:poisson_calib} in computer model
+calibration. Section \ref{sec:scale_vec} proposes the Scaled Vecchia
+Approximation \citep{scaledvecchiakatzfuss2022} as a way to account for
+high-dimensional output from the computer model. We illustrate the efficacy of
+our method through empirical results for small and large problems in Section
+\ref{sec:empir_results}. We finish our contribution through innovative
+application to the real IBEX satellite data in Section \ref{sec:ibex}. Section
 \ref{sec:discuss} follows up and concludes our paper with a discussion. Code
 reproducing all examples is provided at
 \url{https://github.com/lanl/IBEX_Calibration}.
