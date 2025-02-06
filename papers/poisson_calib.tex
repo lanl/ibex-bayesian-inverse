@@ -655,11 +655,25 @@ right).
 \label{f:ibex_synth_ex}}
 \end{figure}
 
-Display distributions on calibration parameters that show the method is able to recover the truth
+We can apply this method to each unique combination of calibration parameters within
+our simulator output. Due to the inability for the model to provide good
+distributions for bounday parameters, we don't consider combinations for which at
+least one parameter is on its edge. For instance, when parallel mean free path is
+either 500 or 300 and/or ratio is either 0.0001 and 0.1. This results in 36 unique
+combinations. For each combination, we follow the same procedure as described above.
+First, we elect one unique combination and create simulated observed satellite data
+based on the computer model. Next, we remove that combination from the training data
+used to fit our Scaled Vecchia Gaussian Process surrogate model. And finally, we run
+our calibration framework to retrieve estimates for the calibration parameters. Our
+results are shown in Figure \ref{f:synth_estimates_all}. In each plot of the
+posterior distributions, we have included the true combination of parameters that
+generated the simulated data. Our 95\% credible intervals encompass the truth in 34
+of the 36 of the iterations, near the nominal coverage rate we'd expect.
 
-
-Show prediction results on hold out data (RMSE? Score? Visual?)
-
+In addition to estimating the calibration parameters, we can utilize our framework to
+achieve better prediction at out-of-sample field locations. While we have not dealt
+with real data from the satellite just yet, we can simulate satellite data as before
+and run cross-validation on holdout sets.
 
 \begin{figure}[ht!]
 \centering
@@ -668,7 +682,6 @@ Show prediction results on hold out data (RMSE? Score? Visual?)
 combination of values that has been treated as a holdout set.
 \label{f:synth_estimates_all}}
 \end{figure}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
