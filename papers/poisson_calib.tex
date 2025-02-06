@@ -622,14 +622,53 @@ predictions on holdout satellite data.
 \label{sec:ibex_sim}
 
 In order to showcase and validate our proposed methodology on the IBEX data, we will
-first test on simulated sky maps.
+first test on simulated sky maps. To do this, we will treat one output from the
+computer model simulation as the \"truth.\" Using this output as the underlying mean
+ENA rate, we will draw Poisson counts with exposure time specified by the real IBEX
+data. Figure \ref{f:ibex_synth_ex} shows both the \"truth\" from the simulation (top
+right) and the \"observed\" simulated data. Note that the spread of the data is as if
+it came from orbits of the IBEX satellite, along with strings of missing data along
+certain orbits.
 
-\begin{itemize}
-  \item Run tests on noisy maps generated from known simulations
-  \item Display distributions on calibration parameters that show the method
-    is able to recover the truth
-  \item Show prediction results on hold out data (RMSE? Score? Visual?)
-\end{itemize}
+Now, treating the simulated data as if it came from the satellite, we run our Poisson
+computer model calibration code and estimate the underlying parameters. In Figure
+\ref{f:ibex_synth_ex}, the bivariate posterior distribution of parallel mean free
+path and ratio are displayed. We can see that our framework does a good job of
+obtaining the true combination of parameters, with the posterior mode lying near the
+truth. Additionally, the truth falls squarely in the 95\% credible interval. As a
+sanity check, we take the value of each parameter at the posterior mode and insert
+those into our fitted surrogate model. The predicted output is shown in the bottom
+right of Figure \ref{f:ibex_synth_ex}. It is obvious that there are some differences
+between the estimated sky map and the \"truth.\". The shape and intensity of the
+ribbon in each sky map is slightly different. However, it is also abundantly clear
+that each map (truth and estimated) could have reasonably generated the data we
+\"observe\" in the top left plot. Therefore, we can confidently assert that our
+framework recovers the truth.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{sim_ibex_real_calib.png}
+\caption{Simulated satellite data based on an output from the computer model (top
+left). True simulator output (top right). Estimated calibration parameters (bottom
+left). Estimated output via surrogate at estimated calibration parameters (bottom
+right).
+\label{f:ibex_synth_ex}}
+\end{figure}
+
+Display distributions on calibration parameters that show the method is able to recover the truth
+
+
+Show prediction results on hold out data (RMSE? Score? Visual?)
+
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{calib_estimates_all.png}
+\caption{Posterior distributions for estimated calibration parameters for each unique
+combination of values that has been treated as a holdout set.
+\label{f:synth_estimates_all}}
+\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -648,6 +687,38 @@ first test on simulated sky maps.
     parameters. Not sure if this is of interest.
   \item Display distributions on calibration parameters.
 \end{itemize}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{calib_estimates_real.png}
+\caption{Posterior distributions for estimated calibration parameters for each year of data IBEX has collected.
+\label{f:real_estimates_all}}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% SECTION 5.2: Discrepancy
+%%% Note that discrepancy was explored
+%%% Maybe show some plots that indicate a simple discrepancy is insufficient
+
+\subsection{Discrepancy Analysis}
+\label{sec:discrepancy}
+\begin{itemize}
+  \item Illustrate the gap between computer model output and real data
+  \item Recall how we will account for discrepancy (PCA?, GP?)
+  \item Perform tests on examples where we know what the bias is. How well
+    does our method account for this?
+\end{itemize}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{discrepancy.png}
+\caption{\textbf{Top row:} Estimated sky maps at values of parameters calibration
+returned. \textbf{Middle row:} Satellite data for years 2009-2011. \textbf{Bottom
+row:} Difference between top two rows.
+\label{f:real_estimates_all}}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
