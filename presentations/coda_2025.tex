@@ -1,0 +1,34 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage[dvipsnames]{xcolor}
+
+\definecolor{hokiemaroon}{HTML}{861F41}
+
+\begin{document}
+
+
+%%% MOTIVATION SECTION
+\huge
+\setlength{\jot}{28pt}
+\begin{equation*}
+  \begin{gathered}
+    y(\textbf{s}_i) \mid t(\textbf{s}_i), \theta(\textbf{s}_i), b(\textbf{s}_i) \sim \text{Poisson}\left(t(\textbf{s}_i)\left[\theta(\textbf{s}_i)+b(\textbf{s}_i)\right]\right) \\
+    \vspace{-0.75cm}
+    t(\cdot)=\text{exposure time}; \quad \theta(\cdot)=\text{ENA rate} \\
+    b(\cdot)=\text{background ENA rate}; \quad \textbf{s}_i = (\text{lon}_i, \text{lat}_i)
+  \end{gathered}
+\end{equation*}
+
+%%% VECCHIA SECTION
+\huge
+\setlength{\jot}{28pt}
+\begin{equation*}
+  \begin{gathered}
+    \vspace{-0.75cm}
+    L(Y) = \prod_{i=1}^n L(Y_i|Y_{g(i)}) \quad |g(i)| = i - 1 \\
+    L(Y) \approx \prod_{i=1}^n L(Y_i|Y_{h(i)}) \quad |h(i)| = m \ll n \\
+  \end{gathered}
+\end{equation*}
+
+\end{document}
