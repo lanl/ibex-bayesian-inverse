@@ -337,7 +337,7 @@ parameters $\mu$ and $\nu$ to better understand how the mean process is construc
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_examp.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_obs.pdf}
 \caption{Counts from a Poisson process at varying $x_i$ locations along with
 evaluations of $\lambda_i=\mu + \nu f(x_i)$ for different values of $\mu$ and
 $\nu$.
@@ -379,6 +379,15 @@ the paper.
 
 \subsubsection{Examples}
 
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{Evaluations of model simulation at posterior draws (left) and
+posterior draws of calibration parameters $mu$ and $nu$ (right).
+\label{f:calib_nosurr}}
+\end{figure}
+
 \begin{itemize}
   \item Results of 1D Poisson calibration (prediction, distribution of calibration
   parameters)
@@ -387,57 +396,83 @@ the paper.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Gaussian Process Surrogates}
-\label{sec:gp_surr}
+\section{Surrogate Modeling}
+\label{sec:surr_mod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Motivate need for surrogate (computer model is expensive)
-Computer models are often computationally expensive. Due to complex and expensive
-operations, such as solving partial differential equations, simulations can take
-hours, days, or even weeks to complete. In order for computer model calibration to be
-effective in prediction and parameter estimation, we need to be able to explore more
-of the model parameter input space than the limited output from the expensive
-simulation. Therefore, we need a surrogate to make accurate and reliable predictions
-for out-of-sample values of our calibration parameters. The canonical surrogate for
-computer experiments and computer model calibration is the Gaussian process.
+In our example above, we had access to essentially unlimited output from our
+\"computer model.\" For each proposed vector of calibration parameters, we
+could generate a novel run of the simulation almost instantaneously. However,
+in many, or perhaps most, applications, the computer model of interest is
+computationally expensive. Due to complex and expensive operations, such as
+solving partial differential equations, simulations can take hours, days, or
+even weeks to complete. But in order for computer model calibration to be
+effective in prediction and parameter estimation, we need to be able to
+explore more of the model parameter input space than the limited output from
+an expensive simulation. Therefore, we need a model (what we call a surrogate
+or emulator) fit to the simulated data to make accurate and reliable
+predictions for out-of-sample values of our calibration parameters. Any
+statistical model can serve as a surrogate. Even machine learning models can
+potentially serve this purpose. However, the canonical surrogate for computer
+experiments and computer model calibration is the Gaussian process.
 
 %------------------------------------------------------------------------------
 \subsection{Gaussian Processes}
-\label{sec:gp}
+\label{sec:gp_surr}
 %------------------------------------------------------------------------------
 
 %% Review Gaussian processes and their use in surrogate modeling
-A Gaussian process (GP) is a realization of a multivariate normal distribution with
-some mean and covariance functions. GPs are fit to observed data and then used to
-make predictions at new input locations, relying on the conditional multivariate
-normal equations. Suppose we have a vector of observations $Y$ at input locations
-$X$. We make the assumption that this data is normally distributed with some mean
-function $(\mu(X))$ and covariance function $(\Sigma(X))$. Note that these are only
-functions of the inputs $X$. However, more important than how we model observed data
-is what our model predicts at a new location $x$. Eq.~(\ref{eq:mvn_eq}) articulates
-how to obtain mean predictions $\mu^*(x)$ and corresponding uncertainty
-quantification $\Sigma*(x)$.
+A Gaussian process (GP) is a realization of a multivariate normal distribution
+with some mean and covariance functions. GPs are fit to observed data and then
+used to make predictions at new input locations, relying on the conditional
+multivariate normal equations. Suppose we have a vector of observations $Y$ at
+input locations $X$. We make the assumption that this data is normally
+distributed, that is, the observed process has some mean function $(\mu(X))$
+and covariance function $(\Sigma(X))$. Note that these are only functions of
+the inputs $X$. However, more important than how we model observed data is
+what our model predicts at a new location $x$. Eq.~(\ref{eq:mvn_eq})
+articulates how to obtain mean predictions $\mu^*(x)$ and corresponding
+uncertainty quantification $\Sigma^*(x)$.
 \begin{align}
 Y(X) \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^*(x) \mid Y(X) \sim
 N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
 \mu^*(x)=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
 \Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
 \end{align}
-Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is common
-to set that to zero. In this case, all the action takes place in the covariance
-function. Many covariance functions exists, such as the Gaussian or Matern kernels.
-We use the Matern kernel in our work, of which the Gaussian kernel is a special case.
-The Matern kernel relies on estimating three hyperparameters: a nugget $g$, a
-lengthscale $\theta$, and a scale $\tau^2$. These can be estimated using maximum
-likelihood estimators, method of moments estimators, or in our case, Bayesian MCMC
+Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is
+common to set that to zero. In practice, the data is centered by subtracting
+off the sample mean. In the zero-mean context, all the action takes place in
+the covariance function. Many covariance kernels exists, such as the Gaussian,
+Exponential, Matern, etc. We use the Matern kernel in our work, of which both
+the Gaussian and Exponential kernels are special cases. The Matern kernel
+relies on estimating three hyperparameters: a nugget $g$, a lengthscale
+$\theta$, and a scale $\tau^2$. Another parameter ($\nu$) that can be
+estimated in the Matern kernel controls the smoothness of the estimated
+surface. But we will ignore that here and set $\nu = \frac{5}{2}$, following
+common practice due to it allowing the kernel function to be expressed in a
+simpler form. All hyperparameters can be estimated using maximum likelihood
+estimators, method of moments estimators, or in our case, Bayesian MCMC
 methods.
 
-GPs provide a flexible, nonparamteric regression tool. They were popularized as
-surrogate models for computer experiments due to their ability to interpolate between
-observed data points (setting nugget $g = 0$). Although stochastic computer models
-are becoming more common, computer experiments are typically deterministic. GPs are
-therefore helpful in providing predictive surfaces that give higher estimates of
-variance away from observed data, and virtually no variance at observed locations.
+GPs provide a flexible, nonparametric regression tool. They were popularized
+as surrogate models for computer experiments due to their ability to
+interpolate between observed data points (setting nugget $g = 0$). Although
+stochastic computer models are becoming more common, computer experiments are
+typically deterministic. This motivates the desire for a model that
+interpolates. GPs are then useful by providing predictive surfaces that give
+higher estimates of variance away from observed data, and virtually no
+variance at observed locations. GPs also naturally provide excellent
+uncertainty quantification for out-of-sample predictions, a matter of
+importance to scientists exploring these computer models, and in particular in
+computer model calibration.
+
+Now, let's go back to our example in Section ??. There, we were given a
+certain amount of observed field data and access to a computer model that
+could quickly spit out results for any unique combination of parameters we
+were interested in. Here, we only have 10 runs at our disposal. So, we need to
+fit a GP on these 10 runs and make predictions at other input combinations
+of interest using that model.
 
 \subsubsection{Example}
 
@@ -446,6 +481,11 @@ variance away from observed data, and virtually no variance at observed location
   \item Tease that this example is easy because the amount of data we have is
   small
 \end{itemize}
+
+Now, in each of these examples the data has been limited ($< 100$). But
+suppose we somehow were able to get hundreds, if not thousands, of simulation
+runs. In that situation, GPs face a computational hurdle that can severely
+limit their use. We address this concern next.
 
 %------------------------------------------------------------------------------
 \subsection{Vecchia Approximation}
@@ -458,7 +498,7 @@ variance away from observed data, and virtually no variance at observed location
 %  \item Introduce Scaled Vecchia
 %\end{itemize}
 
-One weakness of GPs is the need to invert an $n \times n$ covariance matrix, making
+One weakness of GPs is the need to decompose an $n \times n$ covariance matrix, making
 it difficult to scale to large datasets. Many methods have been introduced to address
 this computational burden. These include, but are not limited to, fixed-rank kriging
 \citep{cressie2008fixed}, inducing points \citep{banerjee2008gaussian}, compactly

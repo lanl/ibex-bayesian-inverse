@@ -2,6 +2,8 @@
 
 #################
 
+source("../helper.R")
+
 f <- function(x, mu, nu) {
   if (is.null(nrow(x))) {
     x <- matrix(x, ncol=1)
@@ -12,20 +14,21 @@ f <- function(x, mu, nu) {
 true_mu <- 10
 true_nu <- 1
 nf <- 8
-nm <- 50
 repsf <- 4
+nm <- 50
 
+## Set up field data
 xf <- rep(seq(0, 1, length=nf), repsf)
 lam <- f(x=xf, mu=true_mu, nu=true_nu)
 yf <- rpois(lam, lam)
 
+## Set up computer model data
 xm <- seq(0, 1, length=nm)
 lam_m <- f(x=xm, mu=true_mu, nu=true_nu)
-mus <- seq(5, 15, length=5)
-nus <- seq(0.25, 1.75, length=5)
+mus <- seq(5, 15, length=4)
+nus <- seq(0.25, 1.75, length=3)
 calib_params <- as.matrix(expand.grid(mus, nus))
 colnames(calib_params) <- c("mu", "nu")
-
 ym <- matrix(NA, ncol=nrow(calib_params), nrow=length(xm))
 for (i in 1:nrow(calib_params)) {
   mu <- calib_params[i,1]
@@ -35,7 +38,7 @@ for (i in 1:nrow(calib_params)) {
 
 ylims <- range(yf, ym)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("logit1_examp.pdf", width=5, height=5)
+pdf("logit1_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
   ylab=expression(lambda), ylim=ylims)
 points(x=as.vector(t(xf)), y=yf)
@@ -43,7 +46,7 @@ legend("topleft", c("observed counts", "computer model output"),
   col=c(1, "lightgrey"), pch=c(1, NA), lty=c(NA, 1), lwd=c(1, 1.5), cex=1.25)
 dev.off()
 
-nmcmcs <- 10000
+nmcmcs <- 20000
 u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(calib_params))
 
 colnames(u) <- colnames(uprops) <- colnames(calib_params)
@@ -62,23 +65,27 @@ u[1,] <- uprops[1,] <- c(0.5, 0.5)
 
 XX <- matrix(xf, ncol=1)
 
-pmin <- apply(calib_params, 2, min)
-pmax <- apply(calib_params, 2, max)
 lhat_curr <- f(x=XX, mu=u[1,1]*uranges[1]+umins[1], nu=u[1,2]*uranges[2]+umins[2])
 lls[1] <- sum(yf*log(lhat_curr) - lhat_curr)
 
 accept <- 1
 lmhs <- rep(NA, nmcmcs)
+mod_lhatps <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
+mod_lhatps[,1] <- f(x=xm, mu=uprops[1,1]*uranges[1]+umins[1],
+ nu=uprops[1,2]*uranges[2]+umins[2])
 for (t in 2:nmcmcs) {
 
   ###########################################################################
   ## SAMPLE CALIBRATION PARAMETERS U
   ### Propose u_prime and calculate proposal ratio
-  up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=pmin, pmax=pmax,
+  up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=rep(0, 2), pmax=rep(1, 2),
     pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
   ## Evaluate simulator at u_prime
-  lhatp <- f(x=XX, mu=uprops[t,1]*uranges[1]+umins[1], nu=uprops[t,2]*uranges[2]+umins[2])
+  lhatp <- f(x=XX, mu=uprops[t,1]*uranges[1]+umins[1],
+    nu=uprops[t,2]*uranges[2]+umins[2])
+  mod_lhatps[,t] <- f(x=xm, mu=uprops[t,1]*uranges[1]+umins[1],
+    nu=uprops[t,2]*uranges[2]+umins[2])
 
   ### Calculate proposed likelihood
   llp <- sum(yf*log(lhatp) - lhatp)
@@ -107,35 +114,31 @@ for (t in 2:nmcmcs) {
   }
 }
 
-## Visualize this:
-plot(x=xm, y=f(xm, u[t-1,1]*uranges[1]+umins[1], u[t-1,2]*uranges[2]+umins[2]),
- type="l", lwd=2, xlab="X", ylab="lambda", ylim=ylims)
-lines(x=xf[1:8], y=lhat_curr[1:8], col=2, lwd=2, lty=2)
-points(x=xf, y=yf)
-lines(x=XX[1:8], y=lhatp[1:8], col=3, lwd=2, lty=3)
-# lines(x=xm, y=f(xm, uprops[t,1]*uranges[1]+umins[1],
- # uprops[t,2]*uranges[2]+umins[2]), col=3, lty=3, lwd=2)
-lines(x=xm, y=lam_m, col=4, lty=4, lwd=2)
-legend("topleft", c("current u at model X", "current u at field X",
-  "proposed u at field X", "true lambda", "field obs"),
-  col=c(1:4, 1), lty=c(1:4, NA), lwd=2, pch=c(rep(NA, 4), 1))
+## Visualize model evaluations:
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("logit1_est.pdf", width=5, height=5)
+ylims <- range(c(mod_lhatps, yf, lam_m))
+matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
+  col="lightgrey", xlab="X", ylab="lambda", ylim=ylims)
+points(x=xf, y=yf, lwd=2)
+u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
+lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
+  u_postmean[2]*uranges[2]+umins[2]), col=2, lwd=2, lty=2)
+lines(x=xm, y=lam_m, col=3, lty=3, lwd=2)
+legend("topleft", c("field counts", "posterior draws of f(x)",
+  "posterior mean estimate", "true lambda"),
+  col=c(1, "lightgrey", 2, 3), lty=c(NA, 1:3), lwd=2, pch=c(1, rep(NA, 3)))
+dev.off()
 
-par(mfrow=c(1,3))
-plot(x=xm, y=f(xm, u[t-1,1]*uranges[1]+umins[1], u[t-1,2]*uranges[2]+umins[2]),
-   type="n", lwd=2, xlab="X", ylab="lambda", ylim=ylims)
-matplot(x=xm, y=draws, type="l", col="lightgrey", add=TRUE, lty=1)
-matplot(x=XX[1:8,1], y=fdraws, col="lightpink", add=TRUE, pch=1)
-points(x=as.vector(t(xf)), y=yf)
-lines(x=xm, y=lam_m, col=4, lty=4, lwd=2)
-lines(x=xm, y=apply(draws, 1, mean), col=1, lty=1, lwd=3)
-legend("topleft", c("truth", "posterior draws at model X", "posterior draws at field X", "observed counts"), col=c(4, "lightgrey", "lightpink", 1), lty=c(4, 1, NA, NA), pch=c(NA, NA, 1, 1), cex=1.5, bg="white")
-plot(x=1:900, y=u[seq(1001, 10000, by=10),1]*uranges[1]+umins[1], type="l", xlab="iteration", ylab="mu")
-abline(h=true_mu, col=4, lty=4, lwd=2)
-abline(h=mean(u[seq(1001, 10000, by=10),1]*uranges[1]+umins[1]), col=3, lwd=2)
-abline(h=quantile(u[seq(1001, 10000, by=10),1]*uranges[1]+umins[1], prob=0.025), col=3, lty=3, lwd=2)
-abline(h=quantile(u[seq(1001, 10000, by=10),1]*uranges[1]+umins[1], prob=0.975), col=3, lty=3, lwd=2)
-plot(x=1:900, y=u[seq(1001, 10000, by=10),2]*uranges[2]+umins[2], type="l", xlab="iteration", ylab="nu")
-abline(h=true_nu, col=4, lty=4, lwd=2)
-abline(h=mean(u[seq(1001, 10000, by=10),2]*uranges[2]+umins[2]), col=3, lwd=2)
-abline(h=quantile(u[seq(1001, 10000, by=10),2]*uranges[2]+umins[2], prob=0.025), col=3, lty=3, lwd=2)
-abline(h=quantile(u[seq(1001, 10000, by=10),2]*uranges[2]+umins[2], prob=0.975), col=3, lty=3, lwd=2)
+## Visualize posterior draws of u
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("logit1_post_draws.pdf", width=5, height=5)
+plot(x=u[seq(10001, 20000, by=10),1]*uranges[1]+umins[1],
+ y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(mu),
+ ylab=expression(nu))
+points(x=true_mu, y=true_nu, col=2, pch=8, lwd=2, cex=1.5)
+points(x=u_postmean[1]*uranges[1]+umins[1],
+  y=u_postmean[2]*uranges[2]+umins[2], col=3, pch=8, lwd=2, cex=1.5)
+legend("topleft", c("posterior draws of u", "posterior mean", "truth"),
+  col=c(1:3), lty=NA, lwd=2, pch=c(1, 8, 8))
+dev.off()
