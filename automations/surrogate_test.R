@@ -65,7 +65,7 @@ for (i in 1:nrow(unique_runs)) {
   print("Finished laGP fit and predictions")
 
   tic <- proc.time()[3]
-  dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=10, vecchia=TRUE, m=10)
+  dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
   toc <- proc.time()[3]
   fit_times[i,3] <- toc-tic
   print("Finished deep gp fit")
@@ -79,6 +79,9 @@ for (i in 1:nrow(unique_runs)) {
   print("Finished deep gp predictions")
 
   print(paste0("Finished holdout iteration ", i))
+
+  res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
+  saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "_%Y%m%d"), ".rds"))
 }
 
 res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)

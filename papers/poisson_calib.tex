@@ -482,10 +482,21 @@ of interest using that model.
   small
 \end{itemize}
 
-Now, in each of these examples the data has been limited ($< 100$). But
-suppose we somehow were able to get hundreds, if not thousands, of simulation
-runs. In that situation, GPs face a computational hurdle that can severely
-limit their use. We address this concern next.
+Now, in each of these examples the number of computer model evaluations has been
+limited ($n < 100$). As mentioned before, computational limits ensure that this is
+typically the case in computer model calibration. But note that the output of our
+computer model is functional, i.e. each response is a vector. Above, each simulation
+was evaluate at 50 separate points. Therefore, we were really modeling 500 ($10
+\times 50$) responses. Fitting a GP on 500 data points is already stretching the
+limitations of a GP (decomposing a $500 \times 500$ matrix). But consider if the
+functional output were of an extremely high dimension (say hundreds, or thousands).
+In that case, a GP would not be able to model each individual point as a separate
+response. To accommodate such a situation, \citet{higdoncalib2008} employed principal
+components analysis (PCA) to reduce the dimensionality of the output. Although this
+was successful, we argue that had Higdon and his co-authors had access to the
+computational capacity of our day, along with the proper technology leveraging such
+capacity, they would have steered their implementation in a different way. We propose
+our approach next.
 
 %------------------------------------------------------------------------------
 \subsection{Vecchia Approximation}
@@ -498,7 +509,7 @@ limit their use. We address this concern next.
 %  \item Introduce Scaled Vecchia
 %\end{itemize}
 
-One weakness of GPs is the need to decompose an $n \times n$ covariance matrix, making
+Perhaps the primary weakness of GPs is the need to decompose an $n \times n$ covariance matrix, making
 it difficult to scale to large datasets. Many methods have been introduced to address
 this computational burden. These include, but are not limited to, fixed-rank kriging
 \citep{cressie2008fixed}, inducing points \citep{banerjee2008gaussian}, compactly
@@ -529,14 +540,40 @@ than sufficient. The conditioning set can be constructed in many ways, but we
 default to a nearest-neighbors approach, which has been done previously
 \citep{sauer2023active}.
 
-\subsection{Scaled Vecchia Gaussian Process Surrogates}
-\label{sec:scale_vec}
+We considered multiple GP surrogate implementations to model the computer simulation,
+such as the {\tt R} package {\tt laGP}. However, due to its superior performance in
+predictive accurary, uncertainty quantification, and execution time, we landed on the
+Scaled Vecchia Approximation \citep{scaledvecchiakatzfuss2022} to model the limited
+simulator output and make predictions at new locations. In fact, when discussing
+further work, \citet{scaledvecchiakatzfuss2022} suggest that their method would work
+as an effective tool for use in computer model calibration.
 
-In particular, we utilize the Scaled Vecchia Approximation
-\citep{scaledvecchiakatzfuss2022} to model the limited simulator output and make
-predictions at new locations. In discussing further work,
-\citet{scaledvecchiakatzfuss2022} proposed their method as an effective tool for use
-in computer model calibration.
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{surr_fittimes.pdf}
+\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{surr_predtimes.pdf}
+\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{surr_rmses.pdf}
+\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{surr_crps.pdf}
+\caption{Benchmark methods on IBEX simulator data. Each method was run 66 times on
+the model data with one run held out for prediction each time. Hold-one-out
+cross-validation..
+\label{f:surr_bakeoff}}
+\end{figure}
+
+In Figure \ref{f:surr_bakeoff} we show the results of a bakeoff between each
+surrogate model considered on the IBEX simulated data. We will leave the details of
+the data to \ref{s:ibex_sim}. The only important things to note are that there are 66
+unique model runs (corresponding to unique combination of the input parameters) and
+each run produces a vector of 16,200 values. Quick math comes out to 1,069,200 unique
+observations, clearly much too large for an ordinary GP to handle. But even most
+approximate GPs struggle with a dataset of this size. For our bakeoff, we conducted
+hold-one-out cross-validation. Therefore, each boxplot in Figure \ref{f:surr_bakeoff}
+encompasses 66 points. Each method (besides SEPIA) uses a neighborhood size of
+$m=25$. Although {\tt laGP} benefits from parallelization, to keep the playing field
+level each method was restricted to using one core. {\tt BayesGP} uses MCMC, so due
+to time constaints, only 1000 iterations were allowed, with a burn in of 500 and
+thinning by 10. It's clear the Scaled Vecchia is superior in all measures. {\tt laGP}
+has no fitting time, as each call to predict encompasses the ``fitting'' process.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
