@@ -244,11 +244,11 @@ calibration in Section \ref{sec:review} and focus on the use of GPs as
 surrogates of simulator output. Section \ref{sec:gen_calib} introduces a novel
 Markov chain Monte Carlo framework (MCMC) as an extension of KOH to account
 for non-Gaussian field data \ref{sec:poisson_calib} in computer model
-calibration. Section \ref{sec:scale_vec} proposes the Scaled Vecchia
+calibration. Section \ref{sec:vecchia} proposes the Scaled Vecchia
 Approximation \citep{scaledvecchiakatzfuss2022} as a way to account for
 high-dimensional output from the computer model. We illustrate the efficacy of
 our method through empirical results for small and large problems in Section
-\ref{sec:empir_results}. We finish our contribution through innovative
+\ref{sec:vecchia}. We finish our contribution through innovative
 application to the real IBEX satellite data in Section \ref{sec:ibex}. Section
 \ref{sec:discuss} follows up and concludes our paper with a discussion. Code
 reproducing all examples is provided at
@@ -389,8 +389,6 @@ posterior draws of calibration parameters $mu$ and $nu$ (right).
 \end{figure}
 
 \begin{itemize}
-  \item Results of 1D Poisson calibration (prediction, distribution of calibration
-  parameters)
   \item Results of 2D Poisson calibration (prediction, distribution of calibration
   parameters)
 \end{itemize}
@@ -402,7 +400,7 @@ posterior draws of calibration parameters $mu$ and $nu$ (right).
 
 % Motivate need for surrogate (computer model is expensive)
 In our example above, we had access to essentially unlimited output from our
-\"computer model.\" For each proposed vector of calibration parameters, we
+``computer model.'' For each proposed vector of calibration parameters, we
 could generate a novel run of the simulation almost instantaneously. However,
 in many, or perhaps most, applications, the computer model of interest is
 computationally expensive. Due to complex and expensive operations, such as
@@ -476,11 +474,27 @@ of interest using that model.
 
 \subsubsection{Example}
 
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{1D POISSON CALIBRATION EXAMPLE WITH GP SURROGATE.
+\label{f:calib1d_surr}}
+\end{figure}
+
 \begin{itemize}
   \item Go back to 1D and 2D Poisson examples, but now with limited model runs
   \item Tease that this example is easy because the amount of data we have is
   small
 \end{itemize}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{2D POISSON CALIBRATION EXAMPLE WITH GP SURROGATE. Maybe include computation time panel?
+\label{f:calib2d_surr}}
+\end{figure}
 
 Now, in each of these examples the number of computer model evaluations has been
 limited ($n < 100$). As mentioned before, computational limits ensure that this is
@@ -491,12 +505,31 @@ was evaluate at 50 separate points. Therefore, we were really modeling 500 ($10
 limitations of a GP (decomposing a $500 \times 500$ matrix). But consider if the
 functional output were of an extremely high dimension (say hundreds, or thousands).
 In that case, a GP would not be able to model each individual point as a separate
-response. To accommodate such a situation, \citet{higdoncalib2008} employed principal
-components analysis (PCA) to reduce the dimensionality of the output. Although this
-was successful, we argue that had Higdon and his co-authors had access to the
-computational capacity of our day, along with the proper technology leveraging such
-capacity, they would have steered their implementation in a different way. We propose
-our approach next.
+response. Next we review what has been done historically with high dimensional output
+in a calibration setting. Then, we will propose a modern and better-perfoming
+approach.
+
+%------------------------------------------------------------------------------
+\subsection{Principal Components Analysis}
+\label{sec:pca}
+%------------------------------------------------------------------------------
+
+In the early 2000s, \citet{higdoncalib2008} faced this challenge. As a solution, they
+employed principal components analysis (PCA) to reduce the dimensionality of the
+output. By reducing the the output to a small set of component weights, the dimension
+of the input matrix $X$ was able to be better handled by a GP.
+
+Although this basis representation was successful, we argue that what
+\citet{higdoncalib2008} really wanted to do was represent the functional output as a
+univariate response. That is, replicate the entry in the input matrix $X$ for each
+response the number of times equal to the length of the output vector. In essence,
+implicitly encode the index (e.g. pixel in image, moment in time series) into the
+response vector for each observation in the input matrix. We believe that had
+\citet{higdoncalib2008} had access to the capacity of modern-day computing, along
+with the novel methodology that has been proposed since the early 200s, they would
+have steered their implementation in a significantly different way. We propose that
+approach next and illustrate the improved performance in both predictive accuracy and
+uncertainty quantification, along with a reduction in computational expense.
 
 %------------------------------------------------------------------------------
 \subsection{Vecchia Approximation}
@@ -540,13 +573,25 @@ than sufficient. The conditioning set can be constructed in many ways, but we
 default to a nearest-neighbors approach, which has been done previously
 \citep{sauer2023active}.
 
-We considered multiple GP surrogate implementations to model the computer simulation,
-such as the {\tt R} package {\tt laGP}. However, due to its superior performance in
-predictive accurary, uncertainty quantification, and execution time, we landed on the
-Scaled Vecchia Approximation \citep{scaledvecchiakatzfuss2022} to model the limited
-simulator output and make predictions at new locations. In fact, when discussing
-further work, \citet{scaledvecchiakatzfuss2022} suggest that their method would work
-as an effective tool for use in computer model calibration.
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{VECCHIA vs. SEPIA vs. DEEPGP vs. LAGP TimingM aybe replace the fitting and
+prediction time plots. This could look a lot like Annie's plot in her Vecchia. One
+panel has each method, showing the exponential increase. And one panel has just
+Vecchia on larger and larger datasets. SEPIA might do fine here. But worth a check.
+\label{f:surr_time_bakeoff}}
+\end{figure}
+
+We considered multiple surrogate implementations with GP approximations to model the
+computer simulation, such as the {\tt R} packages {\tt laGP} and {\tt deepgp}.
+However, due to its superior performance in predictive accurary, uncertainty
+quantification, and execution time, we landed on the Scaled Vecchia Approximation
+\citep{scaledvecchiakatzfuss2022} to model the limited simulator output and make
+predictions at new locations. In fact, when discussing further work,
+\citet{scaledvecchiakatzfuss2022} suggest that their method would work as an
+effective tool for use in computer model calibration.
 
 \begin{figure}[ht!]
 \centering
@@ -556,13 +601,13 @@ as an effective tool for use in computer model calibration.
 \includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{surr_crps.pdf}
 \caption{Benchmark methods on IBEX simulator data. Each method was run 66 times on
 the model data with one run held out for prediction each time. Hold-one-out
-cross-validation..
+cross-validation.
 \label{f:surr_bakeoff}}
 \end{figure}
 
 In Figure \ref{f:surr_bakeoff} we show the results of a bakeoff between each
 surrogate model considered on the IBEX simulated data. We will leave the details of
-the data to \ref{s:ibex_sim}. The only important things to note are that there are 66
+the data to \ref{sec:ibex_sim}. The only important things to note are that there are 66
 unique model runs (corresponding to unique combination of the input parameters) and
 each run produces a vector of 16,200 values. Quick math comes out to 1,069,200 unique
 observations, clearly much too large for an ordinary GP to handle. But even most
@@ -574,6 +619,14 @@ level each method was restricted to using one core. {\tt BayesGP} uses MCMC, so 
 to time constaints, only 1000 iterations were allowed, with a burn in of 500 and
 thinning by 10. It's clear the Scaled Vecchia is superior in all measures. {\tt laGP}
 has no fitting time, as each call to predict encompasses the ``fitting'' process.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{2D POISSON CALIBRATION EXAMPLE WITH VECCHIA GP SURROGATE. Maybe include computation time panel?
+\label{f:calib2d_surr_vecchia}}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -724,7 +777,7 @@ framework recovers the truth.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{sim_ibex_real_calib.png}
+\includegraphics[scale=0.25,trim=0 0 0 0,clip=TRUE]{sim_ibex_real_calib.png}
 \caption{Simulated satellite data based on an output from the computer model (top
 left). True simulator output (top right). Estimated calibration parameters (bottom
 left). Estimated output via surrogate at estimated calibration parameters (bottom
@@ -807,7 +860,7 @@ combination of values that has been treated as a holdout set.
 \caption{\textbf{Top row:} Estimated sky maps at values of parameters calibration
 returned. \textbf{Middle row:} Satellite data for years 2009-2011. \textbf{Bottom
 row:} Difference between top two rows.
-\label{f:real_estimates_all}}
+\label{f:ibex_discrep}}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
