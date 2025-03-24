@@ -88,8 +88,9 @@ if (method=="laGP" || method=="all") {
       model_data$ratio == ratio,c("blurred_ena_rate")]
 
     tic <- proc.time()[3]
+    d <- darg(NULL, cbind(Xm, Um))
     lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=1, verb=0,
-      end=25, method="nn")
+      end=25, method="nn", d=d)
     toc <- proc.time()[3]
     pred_times[i,2] <- toc-tic
     rmses[i,2] <- sqrt(mean((lagppreds$mean - Ytest)^2))

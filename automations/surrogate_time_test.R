@@ -1,0 +1,112 @@
+library(deepgp)
+library(dplyr)
+library(laGP)
+
+source("../helper.R")
+source('../vecchia_scaled.R')
+
+## read in the command line arguments
+## run with: R CMD BATCH '--args seed=1' surrogate_time_test.R
+args <- commandArgs(TRUE)
+if (length(args) > 0) {
+  for(i in 1:length(args)) {
+    eval(parse(text=args[[i]]))
+  }
+}
+
+model_data <- read.csv(file="../data/sims.csv")
+model_data <- model_data[model_data$ESA==4,]
+model_data[,c("x", "y", "z")] <- geo_to_spher_coords(lat=model_data$lat,
+  lon=model_data$lon)
+model_data <- model_data[,c("lat", "lon", "x", "y", "z", "parallel_mean_free_path",
+ "ratio", "blurred_ena_rate")]
+
+for (i in 1:(ncol(model_data)-1)) {
+  minval <- min(model_data[,i])
+  maxval <- max(model_data[,i])
+  valrange <- diff(range(model_data[,i]))
+  model_data[,i] <- (model_data[,i] - minval)/(valrange)
+}
+
+pmfps <- unique(model_data$parallel_mean_free_path)
+rats <- unique(model_data$ratio)
+calib_grid <- expand.grid(pmfps, rats)
+colnames(calib_grid) <- c("pmfp", "ratio")
+
+sim_runs <- list()
+for (i in 1:nrow(calib_grid)) {
+  pmfp <- calib_grid[i,1]
+  rat <- calib_grid[i,2]
+  sim_runs[[i]] <- model_data[model_data$parallel_mean_free_path==pmfp &
+    model_data$ratio==rat,]
+}
+
+## Calculating metrics
+set.seed(seed)
+exp_pows <- 7:44
+mcs <- 5
+fit_times <- pred_times <- array(NA, dim=c(5, length(exp_pows), 3))
+
+for (i in 1:length(exp_pows)) {
+
+  ## select training data size
+  n <- round(10 + 1.25^exp_pows[i])
+  cat("n = 1.25^", exp_pows[i], " = ", n, "\n", sep="")
+
+  for (m in 1:mcs) {
+
+    sim_run <- sample(1:66, 1)
+    inds <- sample(1:16200, n)
+
+    Xtest <- sim_runs[[i]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+    Ytest <- sim_runs[[i]][inds,c("blurred_ena_rate")]
+
+    Xtrain <- data.frame(matrix(NA, nrow=0, ncol=5))
+    Ytrain <- matrix(NA, nrow=0, ncol=1)
+    train_runs <- (1:66)[-sim_run] 
+
+    for (j in train_runs) {
+      Xtrain <- rbind(Xtrain, sim_runs[[j]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")])
+      Ytrain <- rbind(Ytrain, sim_runs[[j]][inds,c("blurred_ena_rate"),drop=FALSE])
+    }
+    Ytrain <- Ytrain$blurred_ena_rate
+
+    tic <- proc.time()[3]
+    svecfit <- fit_scaled(y=c(Ytrain), inputs=as.matrix(Xtrain), nug=1e-4, ms=25)
+    toc <- proc.time()[3]
+    fit_times[m,i,1] <- toc-tic
+    print("Finished SVecchia fit")
+
+    tic <- proc.time()[3]
+    svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=25, joint=FALSE,
+      predvar=TRUE)
+    toc <- proc.time()[3]
+    pred_times[m,i,1] <- toc-tic
+    print("Finished SVecchia predictions")
+
+    tic <- proc.time()[3]
+    d <- darg(NULL, Xtrain)
+    lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=1, verb=0,
+      end=25, method="nn", d=d)
+    toc <- proc.time()[3]
+    pred_times[m,i,2] <- toc-tic
+    print("Finished laGP fit and predictions")
+
+    tic <- proc.time()[3]
+    dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
+    toc <- proc.time()[3]
+    fit_times[m,i,3] <- toc-tic
+    print("Finished deep gp fit")
+
+    tic <- proc.time()[3]
+    dgp1preds <- predict(trim(dgp1fit, burn=100, thin=5), x_new=Xtest)
+    toc <- proc.time()[3]
+    pred_times[m,i,3] <- toc-tic
+    print("Finished deep gp predictions")
+    res <- list(fit_times=fit_times, pred_times=pred_times)
+    saveRDS(res, paste0("surrogate_time_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+  }
+}
+
+res <- list(fit_times=fit_times, pred_times=pred_times)
+saveRDS(res, paste0("surrogate_time_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
