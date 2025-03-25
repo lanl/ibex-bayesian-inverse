@@ -24,7 +24,7 @@ for i in range(len(exp_pows)):
     for j in range(mcs):
         sim_num = sample(range(66), 1)
         non_sim_nums = np.delete(range(66), sim_num)
-        inds = sample(range(16200), n)
+        inds = sample(range(16200), n) if n <= 16200 else choices(range(16200), k=n)
         y_iter = y[non_sim_nums,]
         y_iter = y_iter[:,inds]
         data = SepiaData(x_sim = x[non_sim_nums,], y_sim = y_iter, y_ind_sim = yx[inds,])
@@ -48,14 +48,14 @@ for i in range(len(exp_pows)):
         pred_times[j,i] = toc - tic
         print("Finished Monte Carlo iteration " + str(j+1) + "/5 of n=" + str(n))
 
-with open('sepia_fit_times.csv', 'w', newline='') as file:
-    # Create a CSV writer object
-    writer = csv.writer(file)  
-    # Write each row of data to the CSV file
-    writer.writerows(fit_times)
+    with open('sepia_fit_times.csv', 'w', newline='') as file:
+        # Create a CSV writer object
+        writer = csv.writer(file)
+        # Write each row of data to the CSV file
+        writer.writerows(fit_times)
 
-with open('sepia_pred_times.csv', 'w', newline='') as file:
-    # Create a CSV writer object
-    writer = csv.writer(file)  
-    # Write each row of data to the CSV file
-    writer.writerows(pred_times)
+    with open('sepia_pred_times.csv', 'w', newline='') as file:
+        # Create a CSV writer object
+        writer = csv.writer(file)
+        # Write each row of data to the CSV file
+        writer.writerows(pred_times)
