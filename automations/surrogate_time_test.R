@@ -46,6 +46,7 @@ set.seed(seed)
 exp_pows <- 7:44
 mcs <- 5
 fit_times <- pred_times <- array(NA, dim=c(5, length(exp_pows), 3))
+dgp_too_long <- FALSE
 
 for (i in 1:length(exp_pows)) {
 
@@ -92,19 +93,22 @@ for (i in 1:length(exp_pows)) {
     pred_times[m,i,2] <- toc-tic
     print("Finished laGP fit and predictions")
 
-    tic <- proc.time()[3]
-    dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
-    toc <- proc.time()[3]
-    fit_times[m,i,3] <- toc-tic
-    print("Finished deep gp fit")
+    if (!dgp_too_long) {
+      tic <- proc.time()[3]
+      dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
+      toc <- proc.time()[3]
+      fit_times[m,i,3] <- toc-tic
+      print("Finished deep gp fit")
 
-    tic <- proc.time()[3]
-    dgp1preds <- predict(trim(dgp1fit, burn=100, thin=5), x_new=Xtest)
-    toc <- proc.time()[3]
-    pred_times[m,i,3] <- toc-tic
-    print("Finished deep gp predictions")
-    res <- list(fit_times=fit_times, pred_times=pred_times)
-    saveRDS(res, paste0("surrogate_time_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+      tic <- proc.time()[3]
+      dgp1preds <- predict(trim(dgp1fit, burn=100, thin=5), x_new=Xtest)
+      toc <- proc.time()[3]
+      pred_times[m,i,3] <- toc-tic
+      print("Finished deep gp predictions")
+      res <- list(fit_times=fit_times, pred_times=pred_times)
+      saveRDS(res, paste0("surrogate_time_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+    }
+    dgp_too_long <- mean(pred_times[,i,3]) >= 3600
   }
 }
 

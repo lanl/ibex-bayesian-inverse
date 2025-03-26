@@ -1,7 +1,7 @@
 import csv
 import math
 import numpy as np
-from random import sample
+from random import sample, choices
 import time
 from sepia.SepiaModel import SepiaModel
 from sepia.SepiaData import SepiaData
