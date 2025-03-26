@@ -46,7 +46,7 @@ set.seed(seed)
 exp_pows <- 7:44
 mcs <- 5
 fit_times <- pred_times <- array(NA, dim=c(5, length(exp_pows), 3))
-dgp_too_long <- FALSE
+too_long <- rep(FALSE, 3)
 
 for (i in 1:length(exp_pows)) {
 
@@ -72,28 +72,32 @@ for (i in 1:length(exp_pows)) {
     }
     Ytrain <- Ytrain$blurred_ena_rate
 
-    tic <- proc.time()[3]
-    svecfit <- fit_scaled(y=c(Ytrain), inputs=as.matrix(Xtrain), nug=1e-4, ms=25)
-    toc <- proc.time()[3]
-    fit_times[m,i,1] <- toc-tic
-    print("Finished SVecchia fit")
+    if (!too_long[1]) {
+      tic <- proc.time()[3]
+      svecfit <- fit_scaled(y=c(Ytrain), inputs=as.matrix(Xtrain), nug=1e-4, ms=25)
+      toc <- proc.time()[3]
+      fit_times[m,i,1] <- toc-tic
+      print("Finished SVecchia fit")
 
-    tic <- proc.time()[3]
-    svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=25, joint=FALSE,
-      predvar=TRUE)
-    toc <- proc.time()[3]
-    pred_times[m,i,1] <- toc-tic
-    print("Finished SVecchia predictions")
+      tic <- proc.time()[3]
+      svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=25, joint=FALSE,
+        predvar=TRUE)
+      toc <- proc.time()[3]
+      pred_times[m,i,1] <- toc-tic
+      print("Finished SVecchia predictions")
+    }
 
-    tic <- proc.time()[3]
-    d <- darg(NULL, Xtrain)
-    lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=1, verb=0,
-      end=25, method="nn", d=d)
-    toc <- proc.time()[3]
-    pred_times[m,i,2] <- toc-tic
-    print("Finished laGP fit and predictions")
+    if (!too_long[2]) {
+      tic <- proc.time()[3]
+      d <- darg(NULL, Xtrain)
+      lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=1, verb=0,
+        end=25, method="nn", d=d)
+      toc <- proc.time()[3]
+      pred_times[m,i,2] <- toc-tic
+      print("Finished laGP fit and predictions")
+    }
 
-    if (!dgp_too_long) {
+    if (!too_long[3]) {
       tic <- proc.time()[3]
       dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
       toc <- proc.time()[3]
@@ -105,11 +109,11 @@ for (i in 1:length(exp_pows)) {
       toc <- proc.time()[3]
       pred_times[m,i,3] <- toc-tic
       print("Finished deep gp predictions")
-      res <- list(fit_times=fit_times, pred_times=pred_times)
-      saveRDS(res, paste0("surrogate_time_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
     }
-    dgp_too_long <- mean(pred_times[,i,3]) >= 3600
+    res <- list(fit_times=fit_times, pred_times=pred_times)
+    saveRDS(res, paste0("surrogate_time_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
+  too_long <- apply(pred_times[,i,], 2, mean) >= 3600
 }
 
 res <- list(fit_times=fit_times, pred_times=pred_times)
