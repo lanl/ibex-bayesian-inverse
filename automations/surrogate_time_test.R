@@ -43,7 +43,7 @@ for (i in 1:nrow(calib_grid)) {
 
 ## Calculating metrics
 set.seed(seed)
-exp_pows <- 7:44
+exp_pows <- 7:45
 mcs <- 5
 fit_times <- pred_times <- array(NA, dim=c(5, length(exp_pows), 3))
 too_long <- rep(FALSE, 3)
@@ -57,7 +57,7 @@ for (i in 1:length(exp_pows)) {
   for (m in 1:mcs) {
 
     sim_run <- sample(1:66, 1)
-    inds <- sample(1:16200, n)
+    inds <- sample(1:16200, n, replace=(n > 16200))
 
     Xtest <- sim_runs[[i]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
     Ytest <- sim_runs[[i]][inds,c("blurred_ena_rate")]
