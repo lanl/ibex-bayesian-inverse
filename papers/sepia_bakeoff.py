@@ -5,9 +5,9 @@ from sepia.SepiaModel import SepiaModel
 from sepia.SepiaData import SepiaData
 from sepia.SepiaPredict import SepiaEmulatorPrediction
 
-x = np.genfromtxt('calib_params_ibex.csv', delimiter=',') ## pmfp, ratio
-y = np.transpose(np.genfromtxt('ibex_responses.csv', delimiter=',')) ## 66 vectors of 16200
-yx = np.genfromtxt('lat_lon_grid.csv', delimiter=',') ## lat lon grid
+x = np.genfromtxt('calib_params_ibex.csv', delimiter=',', skip_header=1) ## pmfp, ratio
+y = np.transpose(np.genfromtxt('ibex_responses.csv', delimiter=',', skip_header=1)) ## 66 vectors of 16200
+yx = np.genfromtxt('xyz_grid.csv', delimiter=',', skip_header=1) ## xyz grid
 
 n_samp = 10000
 times = np.zeros((len(x), 4))

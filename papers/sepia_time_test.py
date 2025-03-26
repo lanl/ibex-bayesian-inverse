@@ -8,13 +8,13 @@ from sepia.SepiaModel import SepiaModel
 from sepia.SepiaData import SepiaData
 from sepia.SepiaPredict import SepiaEmulatorPrediction
 
-x = np.genfromtxt('calib_params_ibex.csv', delimiter=',') ## pmfp, ratio
-y = np.transpose(np.genfromtxt('ibex_responses.csv', delimiter=',')) ## 66 vectors of 16200
-yx = np.genfromtxt('lat_lon_grid.csv', delimiter=',') ## lat lon grid
+x = np.genfromtxt('calib_params_ibex.csv', delimiter=',', skip_header=1) ## pmfp, ratio
+y = np.transpose(np.genfromtxt('ibex_responses.csv', delimiter=',', skip_header=1)) ## 66 vectors of 16200
+yx = np.genfromtxt('xyz_grid.csv', delimiter=',', skip_header=1) ## xyz grid
 
-large_n = sys.argv[1]
+large_n = int(sys.argv[1])
 exp_pows = range(7, 45, 1)
-ns = range(20000, 75000, 5000)
+ns = range(20000, 75001, 5000)
 num_ns = len(ns) if large_n else len(exp_pows)
 
 mcs = 5
@@ -24,13 +24,13 @@ n_samp = 10000
 
 for i in range(num_ns):
     ## select training data size
-    n = ns[i] if large_n else int(round(10 + math.pow(1.25, exp_pows[i]), 0))
     if large_n:
         n = ns[i]
         print("n = ", str(n))
     else:
         n = int(round(10 + math.pow(1.25, exp_pows[i]), 0))
         print("n = 1.25^" + str(exp_pows[i]) + " = " + str(n))
+
     for j in range(mcs):
         sim_num = sample(range(66), 1)
         non_sim_nums = np.delete(range(66), sim_num)
