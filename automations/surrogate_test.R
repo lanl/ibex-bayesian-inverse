@@ -130,9 +130,9 @@ if (method=="deepgp" || method=="all") {
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
-    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "_%Y%m%d"), ".rds"))
+    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
 }
 
 res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
-saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "_%Y%m%d"), ".rds"))
+saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))

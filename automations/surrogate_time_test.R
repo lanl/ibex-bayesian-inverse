@@ -102,7 +102,7 @@ for (i in 1:length(exp_pows)) {
     if (!too_long[2]) {
       tic <- proc.time()[3]
       d <- darg(NULL, Xtrain)
-      lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=1, verb=0,
+      lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=16, verb=0,
         end=25, method="nn", d=d)
       toc <- proc.time()[3]
       pred_times[m,i,2] <- toc-tic

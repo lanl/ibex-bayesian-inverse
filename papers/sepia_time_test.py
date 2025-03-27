@@ -1,3 +1,6 @@
+# python3 -m venv ~/py_envs
+# source ~/py_envs/bin/activate
+
 import csv
 import math
 import numpy as np
@@ -37,13 +40,13 @@ for i in range(num_ns):
         inds = sample(range(16200), n) if n <= 16200 else choices(range(16200), k=n)
         y_iter = y[non_sim_nums,]
         y_iter = y_iter[:,inds]
+        tic = time.time()
         data = SepiaData(x_sim = x[non_sim_nums,], y_sim = y_iter, y_ind_sim = yx[inds,])
         data.transform_xt()
         data.standardize_y()
         data.create_K_basis(n_pc=0.99)
         model = SepiaModel(data)
         model.verbose = False
-        tic = time.time()
         model.tune_step_sizes(50, 20, verbose=False)
         model.do_mcmc(n_samp)
         toc = time.time()
