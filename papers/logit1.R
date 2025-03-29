@@ -53,11 +53,12 @@ colnames(u) <- colnames(uprops) <- colnames(calib_params)
 lls <- rep(NA, nmcmcs)
 umins <- umaxs <- uranges <- rep(NA, ncol(calib_params))
 
+calib_params_unit <- calib_params
 for (i in 1:ncol(calib_params)) {
   umins[i] <- min(calib_params[,i])
   umaxs[i] <- max(calib_params[,i])
   uranges[i] <- diff(range(calib_params[,i]))
-  calib_params[,i] <- (calib_params[,i] - umins[i])/uranges[i]
+  calib_params_unit[,i] <- (calib_params[,i] - umins[i])/uranges[i]
 }
 
 ## initialize chains
@@ -158,43 +159,39 @@ colnames(u) <- colnames(uprops) <- colnames(calib_params)
 lls <- rep(NA, nmcmcs)
 umins <- umaxs <- uranges <- rep(NA, ncol(calib_params))
 
+calib_params_unit <- calib_params
 for (i in 1:ncol(calib_params)) {
   umins[i] <- min(calib_params[,i])
   umaxs[i] <- max(calib_params[,i])
   uranges[i] <- diff(range(calib_params[,i]))
-  calib_params[,i] <- (calib_params[,i] - umins[i])/uranges[i]
+  calib_params_unit[,i] <- (calib_params[,i] - umins[i])/uranges[i]
 }
 
 ## initialize chains
 u[1,] <- uprops[1,] <- c(0.5, 0.5)
 
-XX <- matrix(xf, ncol=1)
-
 Xm <- matrix(rep(xm, ncol(ym)), ncol=1)
-Um <- matrix(NA, nrow=length(xm)*ncol(ym), ncol=ncol(calib_params))
-for (i in 1:nrow(calib_params)) {
+Um <- matrix(NA, nrow=length(xm)*ncol(ym), ncol=ncol(calib_params_unit))
+for (i in 1:nrow(calib_params_unit)) {
   for (j in 1:length(xm)) {
-    Um[((i-1)*length(xm)+j),] <- calib_params[i,]
+    Um[((i-1)*length(xm)+j),] <- calib_params_unit[i,]
   }
 }
 
-X <- cbind(Xm, Um)
-gpfit <- newGP(X=X, Z=c(ym), d=0.1, g=1e-6, dK=TRUE)
+Xsurr <- cbind(Xm, Um)
+gpfit <- newGP(X=Xsurr, Z=c(ym), d=0.1, g=1e-6, dK=TRUE)
 mle <- mleGP(gpfit, param="d")
 
-Xf <- matrix(NA, nrow=length(xf), ncol=3)
-Xf[,1] <- xf
-Xf[,2] <- 10
-Xf[,3] <- 1.1
+XXf <- matrix(NA, nrow=length(xf), ncol=3)
+XXf[,1] <- xf
+XXf[,2] <- (10 - umins[1])/uranges[1]
+XXf[,3] <- (1.1 - umins[2])/uranges[2]
 
-lhat_curr <- predGP(gpfit, XX=Xf, lite=TRUE)$mean
+lhat_curr <- predGP(gpfit, XX=XXf, lite=TRUE)$mean
 lls[1] <- sum(yf*log(lhat_curr) - lhat_curr)
 
 accept <- 1
-lmhs <- rep(NA, nmcmcs)
-mod_lhatps <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
-mod_lhatps[,1] <- f(x=xm, mu=uprops[1,1]*uranges[1]+umins[1],
- nu=uprops[1,2]*uranges[2]+umins[2])
+lhatps <- lhat_truth <- matrix(NA, nrow=8, ncol=nmcmcs)
 for (t in 2:nmcmcs) {
 
   ###########################################################################
@@ -204,10 +201,13 @@ for (t in 2:nmcmcs) {
     pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
   ## Evaluate simulator at u_prime
-  lhatp <- f(x=XX, mu=uprops[t,1]*uranges[1]+umins[1],
-    nu=uprops[t,2]*uranges[2]+umins[2])
-  mod_lhatps[,t] <- f(x=xm, mu=uprops[t,1]*uranges[1]+umins[1],
-    nu=uprops[t,2]*uranges[2]+umins[2])
+  XXiter <- XXf
+  XXiter[,2] <- uprops[t,1]
+  XXiter[,3] <- uprops[t,2]
+  lhatp <- predGP(gpfit, XX=XXiter, lite=TRUE)$mean
+  lhatps[,t] <- lhatp[1:8]
+  lhat_truth[,t] <- f(x=XXiter[1:8,1], mu=XXiter[1,2]*uranges[1]+umins[1],
+    nu=XXiter[1,3]*uranges[2]+umins[2])
 
   ### Calculate proposed likelihood
   llp <- sum(yf*log(lhatp) - lhatp)
@@ -219,7 +219,6 @@ for (t in 2:nmcmcs) {
   ### Calculate Metropolis-Hastings ratio
   ### { L(xp|Y)*p(xp)*g(xt|xp) } / { L(xt|Y)*p(xt)*g(xp|xt) }
   lmh <- llp - lls[t-1] + lpp - lp_curr + up$pr
-  lmhs[t] <- lmh
 
   ## accept or reject
   if (lmh > log(runif(n=1))) {
