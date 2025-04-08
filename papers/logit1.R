@@ -2,6 +2,8 @@
 ## FIGURES 2/3: Toy 1D example for Poisson calibration
 ####################################################################
 
+library(lhs)
+
 source("../helper.R")
 
 f <- function(x, mu, nu) {
@@ -15,7 +17,7 @@ true_mu <- 10
 true_nu <- 1
 nf <- 8
 repsf <- 4
-nm <- 50
+nm <- 20
 
 ## Set up field data
 xf <- rep(seq(0, 1, length=nf), repsf)
@@ -25,9 +27,15 @@ yf <- rpois(lam, lam)
 ## Set up computer model data
 xm <- seq(0, 1, length=nm)
 lam_m <- f(x=xm, mu=true_mu, nu=true_nu)
-mus <- seq(5, 15, length=4)
-nus <- seq(0.25, 1.75, length=3)
-calib_params <- as.matrix(expand.grid(mus, nus))
+calib_params <- randomLHS(n=100, k=2)
+mu_range <- 10
+mu_min <- 5
+mu_max <- 15
+nu_range <- 2
+nu_min <- 0
+nu_max <- 2
+calib_params[,1] <- calib_params[,1]*mu_range + mu_min
+calib_params[,2] <- calib_params[,2]*nu_range + nu_min
 colnames(calib_params) <- c("mu", "nu")
 ym <- matrix(NA, ncol=nrow(calib_params), nrow=length(xm))
 for (i in 1:nrow(calib_params)) {
@@ -179,8 +187,11 @@ for (i in 1:nrow(calib_params_unit)) {
 }
 
 Xsurr <- cbind(Xm, Um)
+tic <- proc.time()[3]
 gpfit <- newGP(X=Xsurr, Z=c(ym), d=0.1, g=1e-6, dK=TRUE)
 mle <- mleGP(gpfit, param="d")
+toc <- proc.time()[3]
+toc -tic
 
 XXf <- matrix(NA, nrow=length(xf), ncol=3)
 XXf[,1] <- xf
@@ -204,8 +215,11 @@ for (t in 2:nmcmcs) {
   XXiter <- XXf
   XXiter[,2] <- uprops[t,1]
   XXiter[,3] <- uprops[t,2]
-  lhatp <- predGP(gpfit, XX=XXiter, lite=TRUE)$mean
-  lhatps[,t] <- lhatp[1:8]
+  lhatp <- predGP(gpfit, XX=XXiter[1:8,], lite=TRUE)$mean
+  ## Set negative values to 0.0001
+  lhatp[which(lhatp<=0)] <- 0.0001
+  lhatps[,t] <- lhatp
+  lhatp <- rep(lhatp, 4)
   lhat_truth[,t] <- f(x=XXiter[1:8,1], mu=XXiter[1,2]*uranges[1]+umins[1],
     nu=XXiter[1,3]*uranges[2]+umins[2])
 
