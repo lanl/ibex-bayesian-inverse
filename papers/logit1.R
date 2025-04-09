@@ -27,7 +27,7 @@ yf <- rpois(lam, lam)
 ## Set up computer model data
 xm <- seq(0, 1, length=nm)
 lam_m <- f(x=xm, mu=true_mu, nu=true_nu)
-calib_params <- randomLHS(n=100, k=2)
+calib_params <- randomLHS(n=60, k=2)
 mu_range <- 10
 mu_min <- 5
 mu_max <- 15
@@ -251,23 +251,23 @@ for (t in 2:nmcmcs) {
 
 ## Visualize model evaluations:
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("logit1_est.pdf", width=5, height=5)
+pdf("logit1_est_wsurr.pdf", width=5, height=5)
 ylims <- range(c(mod_lhatps, yf, lam_m))
 matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
   col="lightgrey", xlab="X", ylab="lambda", ylim=ylims)
 points(x=xf, y=yf, lwd=2)
 u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
-  u_postmean[2]*uranges[2]+umins[2]), col=2, lwd=2, lty=2)
-lines(x=xm, y=lam_m, col=3, lty=3, lwd=2)
+  u_postmean[2]*uranges[2]+umins[2]), col=2, lwd=3, lty=2)
+lines(x=xm, y=lam_m, col=3, lty=3, lwd=4)
 legend("topleft", c("field counts", "posterior draws of f(x)",
   "posterior mean estimate", "true lambda"),
-  col=c(1, "lightgrey", 2, 3), lty=c(NA, 1:3), lwd=2, pch=c(1, rep(NA, 3)))
+  col=c(1, "lightgrey", 2, 3), lty=c(NA, 1:3), lwd=3, pch=c(1, rep(NA, 3)))
 dev.off()
 
 ## Visualize posterior draws of u
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("logit1_post_draws.pdf", width=5, height=5)
+pdf("logit1_post_draws_wsurr.pdf", width=5, height=5)
 plot(x=u[seq(10001, 20000, by=10),1]*uranges[1]+umins[1],
  y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(mu),
  ylab=expression(nu))
