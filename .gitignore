@@ -24,7 +24,6 @@ automations/results
 *.log
 *.nav
 *.out
-*.pdf
 *.snm
 *.blg
 *.fls
