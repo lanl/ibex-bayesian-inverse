@@ -10,16 +10,37 @@ from sepia.SepiaModel import SepiaModel
 from sepia.SepiaData import SepiaData
 from sepia.SepiaPredict import SepiaEmulatorPrediction
 
-x = np.genfromtxt('calib_params_ibex.csv', delimiter=',', skip_header=1) ## pmfp, ratio
-y = np.transpose(np.genfromtxt('ibex_responses.csv', delimiter=',', skip_header=1)) ## 66 vectors of 16200
-yx = np.genfromtxt('xyz_grid.csv', delimiter=',', skip_header=1) ## xyz grid
+model_data = np.genfromtxt('../data/sims.csv', delimiter=',', names=True)
+x = model_data[['parallel_mean_free_path', 'ratio']]
+x = np.unique(x, axis=0)
+x = np.sort(x, order=['parallel_mean_free_path', 'ratio'])
+x = np.array(x.tolist())
+nruns = x.shape[0]
+
+y_np = np.sort(model_data, order=['parallel_mean_free_path', 'ratio', 'lat', 'lon'])
+y_np = y_np['blurred_ena_rate']
+nresponses = int(len(y_np) / nruns)
+y = np.zeros((nruns, nresponses))
+start = 0
+end = nresponses
+for i in range(66):
+    y[i,:] = y_np[start:end]
+    start += nresponses
+    end += nresponses
+
+latlon = np.sort(np.unique(model_data[['lat', 'lon']], axis=0), order=['lat', 'lon'])
+yx = np.zeros((nresponses, 3))
+for i in range(len(yx)):
+    yx[i,0] = math.cos(math.pi*latlon['lon'][i]/180)*math.cos(math.pi*latlon['lat'][i]/180)
+    yx[i,1] = math.sin(math.pi*latlon['lon'][i]/180)*math.cos(math.pi*latlon['lat'][i]/180)
+    yx[i,2] = math.sin(math.pi*latlon['lat'][i]/180)
 
 n_samp = 10000
-metrics = np.zeros((len(x), 2))
+metrics = np.zeros((nruns, 2))
 
-for i in range(len(x)):
+for i in range(nruns):
     yy_true = y[[i],:][0]
-    inds = np.delete(range(len(x)), i)
+    inds = np.delete(range(nruns), i)
     data = SepiaData(x_sim=x[inds,], y_sim=y[inds,], y_ind_sim=yx)
     data.transform_xt()
     data.standardize_y()

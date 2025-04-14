@@ -17,7 +17,8 @@ settings <- list(seed=seed, method=method, start=start)
 print(settings)
 
 model_data <- read.csv(file="../data/sims.csv")
-model_data <- model_data[model_data$ESA==4,]
+model_data <- model_data[order(model_data$parallel_mean_free_path, model_data$ratio,
+  model_data$lat, model_data$lon),]
 model_data[,c("x", "y", "z")] <- geo_to_spher_coords(lat=model_data$lat,
   lon=model_data$lon)
 model_data <- model_data[,c("x", "y", "z", "parallel_mean_free_path", "ratio",
