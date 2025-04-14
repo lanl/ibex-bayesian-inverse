@@ -35,6 +35,8 @@ pmfps <- unique(model_data$parallel_mean_free_path)
 rats <- unique(model_data$ratio)
 calib_grid <- expand.grid(pmfps, rats)
 colnames(calib_grid) <- c("pmfp", "ratio")
+nruns <- nrow(calib_grid)
+nresponses <- nrow(model_data) / nruns
 
 sim_runs <- list()
 for (i in 1:nrow(calib_grid)) {
@@ -68,15 +70,15 @@ for (i in 1:length(exp_pows)) {
 
   for (m in 1:mcs) {
 
-    sim_run <- sample(1:66, 1)
-    inds <- sample(1:16200, n, replace=(n > 16200))
+    sim_run <- sample(1:nruns, 1)
+    inds <- sample(1:nresponses, n, replace=(n > nresponses))
 
     Xtest <- sim_runs[[i]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
     Ytest <- sim_runs[[i]][inds,c("blurred_ena_rate")]
 
     Xtrain <- data.frame(matrix(NA, nrow=0, ncol=5))
     Ytrain <- matrix(NA, nrow=0, ncol=1)
-    train_runs <- (1:66)[-sim_run] 
+    train_runs <- (1:nruns)[-sim_run]
 
     for (j in train_runs) {
       Xtrain <- rbind(Xtrain, sim_runs[[j]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")])
@@ -84,9 +86,15 @@ for (i in 1:length(exp_pows)) {
     }
     Ytrain <- Ytrain$blurred_ena_rate
 
+    write.csv(Xtrain, "xtrain_iter.csv", row.names=FALSE)
+    write.csv(Ytrain, "ytrain_iter.csv", row.names=FALSE)
+
     if (!too_long[1]) {
       tic <- proc.time()[3]
-      svecfit <- fit_scaled(y=c(Ytrain), inputs=as.matrix(Xtrain), nug=1e-4, ms=25)
+      Xtrain_iter <- read.csv("xtrain_iter.csv")
+      Ytrain_iter <- read.csv("ytrain_iter.csv")[,1]
+      svecfit <- fit_scaled(y=c(Ytrain_iter), inputs=as.matrix(Xtrain_iter),
+        nug=1e-4, ms=25)
       toc <- proc.time()[3]
       fit_times[m,i,1] <- toc-tic
       print("Finished SVecchia fit")
@@ -101,9 +109,11 @@ for (i in 1:length(exp_pows)) {
 
     if (!too_long[2]) {
       tic <- proc.time()[3]
-      d <- darg(NULL, Xtrain)
-      lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=16, verb=0,
-        end=25, method="nn", d=d)
+      Xtrain_iter <- read.csv("xtrain_iter.csv")
+      Ytrain_iter <- read.csv("ytrain_iter.csv")[,1]
+      d <- darg(NULL, Xtrain_iter)
+      lagppreds <- aGPsep(X=Xtrain_iter, Z=Ytrain_iter, XX=Xtest, omp.threads=16,
+       verb=0, end=25, method="nn", d=d)
       toc <- proc.time()[3]
       pred_times[m,i,2] <- toc-tic
       print("Finished laGP fit and predictions")
@@ -111,7 +121,10 @@ for (i in 1:length(exp_pows)) {
 
     if (!too_long[3]) {
       tic <- proc.time()[3]
-      dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
+      Xtrain_iter <- read.csv("xtrain_iter.csv")
+      Ytrain_iter <- read.csv("ytrain_iter.csv")[,1]
+      dgp1fit <- fit_one_layer(x=as.matrix(Xtrain_iter), y=Ytrain_iter, nmcmc=1000,
+       vecchia=TRUE, m=10)
       toc <- proc.time()[3]
       fit_times[m,i,3] <- toc-tic
       print("Finished deep gp fit")
@@ -121,6 +134,9 @@ for (i in 1:length(exp_pows)) {
       toc <- proc.time()[3]
       pred_times[m,i,3] <- toc-tic
       print("Finished deep gp predictions")
+
+      file.remove("xtrain_iter.csv")
+      file.remove("ytrain_iter.csv")
     }
     res <- list(fit_times=fit_times, pred_times=pred_times)
     saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
