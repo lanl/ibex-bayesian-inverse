@@ -86,13 +86,11 @@ for i in range(num_ns):
             writer = csv.writer(file)
             # Write each row of data to the CSV file
             writer.writerows(yx_write)
-
         tic = time.time()
         ## read in data
         x_iter = np.genfromtxt('x_iter.csv', delimiter=',')
         y_iter = np.genfromtxt('y_iter.csv', delimiter=',')
         yx_iter = np.genfromtxt('yx_iter.csv', delimiter=',')
-
         ## create object
         data = SepiaData(x_sim=x_iter, y_sim=y_iter, y_ind_sim=yx_iter)
         data.transform_xt()
@@ -107,7 +105,6 @@ for i in range(num_ns):
         pred_samples = model.get_samples(nburn=int(.1*n_samp),effectivesamples=True)
         toc = time.time()
         fit_times[j,i] = toc - tic
-
         tic = time.time()
         xx = x[sim_num, :]
         n_pred=xx.shape[0]
@@ -117,7 +114,6 @@ for i in range(num_ns):
         toc = time.time()
         pred_times[j,i] = toc - tic
         print("Finished Monte Carlo iteration " + str(j+1) + "/5 of n=" + str(n))
-
         ## Delete old files
         os.remove('x_iter.csv')
         os.remove('y_iter.csv')
