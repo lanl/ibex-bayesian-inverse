@@ -4,6 +4,10 @@ library(laGP)
 source("../helper.R")
 source('../vecchia_scaled.R')
 
+start <- 1
+method <- "all"
+seed <- 6756781
+
 ## read in the command line arguments
 ## run with: R CMD BATCH '--args seed=1 method=all start=1' surrogate_test.R
 args <- commandArgs(TRUE)
@@ -71,7 +75,7 @@ if (method=="svecchia" || method=="all") {
     print("Finished SVecchia predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
-    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "_%Y%m%d"), ".rds"))
+    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
 }
 
@@ -89,8 +93,8 @@ if (method=="laGP" || method=="all") {
       model_data$ratio == ratio,c("blurred_ena_rate")]
 
     tic <- proc.time()[3]
-    d <- darg(NULL, cbind(Xm, Um))
-    lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=1, verb=0,
+    d <- darg(NULL, Xtrain)
+    lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=16, verb=0,
       end=25, method="nn", d=d)
     toc <- proc.time()[3]
     pred_times[i,2] <- toc-tic
@@ -99,7 +103,7 @@ if (method=="laGP" || method=="all") {
     print("Finished laGP fit and predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
-    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "_%Y%m%d"), ".rds"))
+    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
 }
 
