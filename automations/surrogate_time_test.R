@@ -6,10 +6,9 @@ source("../helper.R")
 source('../vecchia_scaled.R')
 
 seed <- 781691
-large_n <- 0
 
 ## read in the command line arguments
-## run with: R CMD BATCH '--args seed=1 large_n=0' surrogate_time_test.R
+## run with: R CMD BATCH '--args seed=1' surrogate_time_test.R
 args <- commandArgs(TRUE)
 if (length(args) > 0) {
   for(i in 1:length(args)) {
@@ -18,7 +17,6 @@ if (length(args) > 0) {
 }
 
 model_data <- read.csv(file="../data/sims.csv")
-model_data <- model_data[model_data$ESA==4,]
 model_data[,c("x", "y", "z")] <- geo_to_spher_coords(lat=model_data$lat,
   lon=model_data$lon)
 model_data <- model_data[,c("lat", "lon", "x", "y", "z", "parallel_mean_free_path",
@@ -49,22 +47,21 @@ for (i in 1:nrow(calib_grid)) {
 ## Calculating metrics
 set.seed(seed)
 exp_pows <- 7:45
-ns <- seq(20000, 75000, by=5000)
-num_ns <- ifelse(large_n, length(ns), length(exp_pows))
-outf <- paste0("surrogate_time_test_", ifelse(large_n, "large_", ""))
+
+ns <- c(round(10 + 1.25^exp_pows), seq(20000, 75000, by=5000))
+num_ns <- length(ns)
+outf <- "surrogate_time_test_"
 
 mcs <- 5
 fit_times <- pred_times <- array(NA, dim=c(5, length(exp_pows), 3))
 too_long <- rep(FALSE, 3)
 
-for (i in 1:length(exp_pows)) {
-
+for (i in 1:num_ns) {
   ## select training data size
-  if (large_n) {
-    n <- ns[i]
+  n <- ns[i]
+  if (i > length(exp_pows)) {
     cat("n = ", n)
   } else {
-    n <- round(10 + 1.25^exp_pows[i])
     cat("n = 1.25^", exp_pows[i], " = ", n, "\n", sep="")
   }
 

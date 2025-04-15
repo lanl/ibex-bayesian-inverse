@@ -67,7 +67,7 @@ for i in range(num_ns):
         sim_num = sample(range(66), 1)
         non_sim_nums = np.delete(range(66), sim_num)
         x_write = x[non_sim_nums,]
-        inds = sample(range(16200), n) if n <= 16200 else choices(range(16200), k=n)
+        inds = sample(range(nresponses), n) if n <= nresponses else choices(range(nresponses), k=n)
         y_write = y[non_sim_nums,]
         y_write = y_write[:,inds]
         yx_write = yx[inds,]
