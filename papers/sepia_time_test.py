@@ -41,29 +41,32 @@ for i in range(len(yx)):
     yx[i,1] = math.sin(math.pi*latlon['lon'][i]/180)*math.cos(math.pi*latlon['lat'][i]/180)
     yx[i,2] = math.sin(math.pi*latlon['lat'][i]/180)
 
-large_n = int(sys.argv[1])
 exp_pows = range(7, 45, 1)
-ns = range(20000, 75001, 5000)
-num_ns = len(ns) if large_n else len(exp_pows)
+large_ns = range(20000, 75001, 5000)
+ns = []
+for i in range(len(exp_pows)):
+    ns.append(int(round(10 + math.pow(1.25, exp_pows[i]), 0)))
+
+for i in range(len(large_ns)):
+    ns.append(large_ns[i])
+
+num_ns = len(ns)
 mcs = 5
-fit_times = np.zeros((mcs, len(exp_pows)))
-pred_times = np.zeros((mcs, len(exp_pows)))
+fit_times = np.zeros((mcs, num_ns))
+pred_times = np.zeros((mcs, num_ns))
 n_samp = 10000
 
 for i in range(num_ns):
-    ## select training data size
-    if large_n:
-        n = ns[i]
+    n = ns[i]
+    if i >= len(exp_pows):
         print("n = ", str(n))
     else:
-        n = int(round(10 + math.pow(1.25, exp_pows[i]), 0))
         print("n = 1.25^" + str(exp_pows[i]) + " = " + str(n))
 
     for j in range(mcs):
-
         sim_num = sample(range(66), 1)
         non_sim_nums = np.delete(range(66), sim_num)
-        x_write = x[nonsim_nums,]
+        x_write = x[non_sim_nums,]
         inds = sample(range(16200), n) if n <= 16200 else choices(range(16200), k=n)
         y_write = y[non_sim_nums,]
         y_write = y_write[:,inds]
@@ -120,14 +123,14 @@ for i in range(num_ns):
         os.remove('y_iter.csv')
         os.remove('yx_iter.csv')
 
-    with open('sepia_fit_times.csv', 'w', newline='') as file:
-        # Create a CSV writer object
-        writer = csv.writer(file)
-        # Write each row of data to the CSV file
-        writer.writerows(fit_times)
+with open('sepia_fit_times.csv', 'w', newline='') as file:
+    # Create a CSV writer object
+    writer = csv.writer(file)
+    # Write each row of data to the CSV file
+    writer.writerows(fit_times)
 
-    with open('sepia_pred_times.csv', 'w', newline='') as file:
-        # Create a CSV writer object
-        writer = csv.writer(file)
-        # Write each row of data to the CSV file
-        writer.writerows(pred_times)
+with open('sepia_pred_times.csv', 'w', newline='') as file:
+    # Create a CSV writer object
+    writer = csv.writer(file)
+    # Write each row of data to the CSV file
+    writer.writerows(pred_times)
