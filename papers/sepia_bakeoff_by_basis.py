@@ -4,11 +4,16 @@
 import csv
 import math
 import numpy as np
+import random
 import time
 from scipy.stats import norm
 from sepia.SepiaModel import SepiaModel
 from sepia.SepiaData import SepiaData
 from sepia.SepiaPredict import SepiaEmulatorPrediction
+
+seed = random.randint(1000000, 9999999)
+fn_rmse = 'sepia_basis_rmses_' + str(seed) + '.csv'
+fn_crps = 'sepia_basis_crps_' + str(seed) + '.csv'
 
 model_data = np.genfromtxt('../data/sims.csv', delimiter=',', names=True)
 x = model_data[['parallel_mean_free_path', 'ratio']]
@@ -85,12 +90,12 @@ for i in range(len(nbases)):
         metrics[i,j,1] = np.nanmean(scores)
         print("\n")
         print("Finished holdout iteration " + str(j) + "\n")
-        with open('sepia_basis_rmses.csv', 'w', newline='') as file:
+        with open(fn_rmse, 'w', newline='') as file:
             # Create a CSV writer object
             writer = csv.writer(file)
             # Write each row of data to the CSV file
             writer.writerows(metrics[:,:,0])
-        with open('sepia_basis_crps.csv', 'w', newline='') as file:
+        with open(fn_crps, 'w', newline='') as file:
             # Create a CSV writer object
             writer = csv.writer(file)
             # Write each row of data to the CSV file
@@ -98,13 +103,13 @@ for i in range(len(nbases)):
 
     print("Finished iteration with " + str(nbase) + " basis functions\n")
 
-with open('sepia_basis_rmses.csv', 'w', newline='') as file:
+with open(fn_rmse, 'w', newline='') as file:
     # Create a CSV writer object
     writer = csv.writer(file)
     # Write each row of data to the CSV file
     writer.writerows(metrics[:,:,0])
 
-with open('sepia_basis_crps.csv', 'w', newline='') as file:
+with open(fn_crps, 'w', newline='') as file:
     # Create a CSV writer object
     writer = csv.writer(file)
     # Write each row of data to the CSV file
