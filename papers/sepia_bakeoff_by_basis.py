@@ -85,16 +85,27 @@ for i in range(len(nbases)):
         metrics[i,j,1] = np.nanmean(scores)
         print("\n")
         print("Finished holdout iteration " + str(j) + "\n")
+        with open('sepia_basis_rmses.csv', 'w', newline='') as file:
+            # Create a CSV writer object
+            writer = csv.writer(file)
+            # Write each row of data to the CSV file
+            writer.writerows(metrics[:,:,0])
+        with open('sepia_basis_crps.csv', 'w', newline='') as file:
+            # Create a CSV writer object
+            writer = csv.writer(file)
+            # Write each row of data to the CSV file
+            writer.writerows(metrics[:,:,1])
+
     print("Finished iteration with " + str(nbase) + " basis functions\n")
 
 with open('sepia_basis_rmses.csv', 'w', newline='') as file:
     # Create a CSV writer object
-    writer = csv.writer(file)  
+    writer = csv.writer(file)
     # Write each row of data to the CSV file
     writer.writerows(metrics[:,:,0])
 
 with open('sepia_basis_crps.csv', 'w', newline='') as file:
     # Create a CSV writer object
-    writer = csv.writer(file)  
+    writer = csv.writer(file)
     # Write each row of data to the CSV file
     writer.writerows(metrics[:,:,1])
