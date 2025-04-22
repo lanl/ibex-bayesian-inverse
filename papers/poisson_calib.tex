@@ -399,21 +399,18 @@ posterior draws of calibration parameters $mu$ and $nu$ (right).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Motivate need for surrogate (computer model is expensive)
-In our example above, we had access to essentially unlimited output from our
-``computer model.'' For each proposed vector of calibration parameters, we
-could generate a novel run of the simulation almost instantaneously. However,
-in many, or perhaps most, applications, the computer model of interest is
-computationally expensive. Due to complex and expensive operations, such as
-solving partial differential equations, simulations can take hours, days, or
-even weeks to complete. But in order for computer model calibration to be
-effective in prediction and parameter estimation, we need to be able to
-explore more of the model parameter input space than the limited output from
-an expensive simulation. Therefore, we need a model (what we call a surrogate
-or emulator) fit to the simulated data to make accurate and reliable
-predictions for out-of-sample values of our calibration parameters. Any
-statistical model can serve as a surrogate. Even machine learning models can
-potentially serve this purpose. However, the canonical surrogate for computer
-experiments and computer model calibration is the Gaussian process.
+In our example in \ref{sec:poisson_calib}, we had access to essentially unlimited
+output from our ``computer model.'' For each proposed vector of calibration
+parameters, we could generate a novel run of the simulation almost instantaneously.
+However, in most applications, the computer model of interest is computationally
+expensive. Due to complex and expensive operations, such as solving partial
+differential equations, simulations can take hours, days, or even weeks to complete.
+This limits the ability to thoroughly explore the model parameter input space, and bw
+effective in prediction and parameter estimation. Therefore, we need a model (what we
+call a surrogate, or emulator) fit to the simulator output to make accurate and
+reliable predictions for out-of-sample values of our calibration parameters. Any
+statistical model can serve as a surrogate. However, the canonical surrogate for
+computer experiments and computer model calibration is the Gaussian process.
 
 %------------------------------------------------------------------------------
 \subsection{Gaussian Processes}
@@ -465,12 +462,12 @@ uncertainty quantification for out-of-sample predictions, a matter of
 importance to scientists exploring these computer models, and in particular in
 computer model calibration.
 
-Now, let's go back to our example in Section ??. There, we were given a
-certain amount of observed field data and access to a computer model that
-could quickly spit out results for any unique combination of parameters we
-were interested in. Here, we only have 10 runs at our disposal. So, we need to
-fit a GP on these 10 runs and make predictions at other input combinations
-of interest using that model.
+Now, let's go back to our example in Section \ref{sec:poisson_calib}. There, we were
+given a certain amount of observed field data and access to a computer model that
+could immediately spit out results for any unique combination of parameters we were
+interested in. Here, we only have 40 runs at our disposal. So, we need to fit a GP on
+these 40 runs and make predictions at other input combinations of interest using
+\ref{eq:mvn_eq}.
 
 \subsubsection{Example}
 
@@ -483,11 +480,19 @@ of calibration parameters (left). Posterior draws of calibration parameters (rig
 \label{f:calib1d_surr}}
 \end{figure}
 
-\begin{itemize}
-  \item Go back to 1D and 2D Poisson examples, but now with limited model runs
-  \item Tease that this example is easy because the amount of data we have is
-  small
-\end{itemize}
+The left panel of \ref{f:calib1d_surr} shows evaluations of our GP surrogate at
+posterior draws of the calibration parameters, shown on the right. We can see that
+the MCMC does a good job of honing in on the truth. Although the posterior
+distribution is not centered on the truth, it covers the truth with a 95\% credible
+interval. These draws translate to predictions for what our computer model would
+output, through the use of our GP surrogate. The range of evaluations indicates that
+use of the surrogate allowed the MCMC to do extensive exploration of at unobserved
+inputs. Most importantly, we see that our algorithm is able to combine the limited
+field data with the limited simulator output to capture the true, underlying mean
+process.
+
+We can do the same thing in higher dimension, although it's harder to visualize, even
+in 2D. \ref{f:calib2d_surr} shows the results of this endeavor in a 2D example.
 
 \begin{figure}[ht!]
 \centering
