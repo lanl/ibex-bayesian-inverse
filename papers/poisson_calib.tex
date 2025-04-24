@@ -339,7 +339,7 @@ parameters $\mu$ and $\nu$ to better understand how the mean process is construc
 \centering
 \includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_obs.pdf}
 \caption{Counts from a Poisson process at varying $x_i$ locations along with
-evaluations of $\lambda_i=\mu + \nu f(x_i)$ for different values of $\mu$ and
+evaluations of $\lambda_i=f(x_i, \mu, \nu)$ for different values of $\mu$ and
 $\nu$.
 \label{f:logit1_examp}}
 \end{figure}
@@ -384,7 +384,7 @@ the paper.
 \includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
 \includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
 \caption{Evaluations of model simulation at posterior draws (left) and
-posterior draws of calibration parameters $mu$ and $nu$ (right).
+posterior draws of calibration parameters $\mu$ and $\nu$ (right).
 \label{f:calib1d_nosurr}}
 \end{figure}
 
@@ -395,10 +395,14 @@ posterior draws of calibration parameters $mu$ and $nu$ (right).
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
-\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
-\caption{2D POISSON CALIBRATION EXAMPLE WITH GP SURROGATE. Maybe include computation time panel?
-\label{f:calib2d_nosurr}}
+\includegraphics[scale=0.5, trim=30 15 40 0,clip=TRUE]{logit2_obs.pdf}
+\includegraphics[scale=0.5, trim=30 15 95 0,clip=TRUE]{logit2_model1.pdf}
+\includegraphics[scale=0.5, trim=75 15 40 0,clip=TRUE]{logit2_model2.pdf}
+\caption{Poisson draws from a mean process over $x_1$ and $x_2$ (left).
+Evaluations of a computer model at different settings of four parameters
+($\mu_1$, $\nu_1$, $\mu_2$, $\nu_2$) attempting to represent the true mean
+process (middle, right).
+\label{f:logit2_examp}}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -514,7 +518,7 @@ computer is functional, i.e. each response is a vector. Above, each simulation w
 evaluated at 20 separate points. Therefore, we were really modeling 800 ($40
 \times 20$) responses. Fitting a GP on 800 data points is already stretching the
 limitations of a GP (decomposing a $800 \times 800$ matrix). But consider our second
-example (\ref{f:calib2d_nosurr}). To get 10 unique values of four parameters
+example (\ref{f:logit2_examp}). To get 10 unique values of four parameters
 ($\mu_1$, $\nu_1$, $\mu_2$, $\nu_2$), we'd need upwards of 10,000 simulator runs.
 Combine that with a $20 \times 20$ grid over $x_1$ and $x_2$ and our response vector
 will be greater than 200,000. Even if we used an LHS design of size $n=100$, the

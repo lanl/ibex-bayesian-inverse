@@ -19,6 +19,7 @@ f <- function(x, mu, nu) {
 true_mu <- c(11, 8)
 true_nu <- c(0.5, 2.3)
 
+set.seed(233807)
 xf <- randomLHS(n=40, k=2)
 xf <- rbind(xf, xf, xf)
 lam <- as.vector(t(f(x=xf, mu=true_mu, nu=true_nu)))
@@ -58,6 +59,36 @@ plot(x=jitter(xf[,1],amount=0.02), y=jitter(xf[,2],amount=0.02),
   cex=1.5, pch=19, col=point_cols, xlab="x1", ylab="x2")
 par(mar=c(4.75,0.4,1,1))
 plot(c(0,2),c(0,1),type='n', axes=FALSE, xlab="", ylab="", main="Counts")
+text(x=1.5, y=seq(0,1,length=4),
+ labels=format(round(intervals$brks[seq(1, length(intervals$brks), length=4)], 0)),
+ cex=1.25)
+rasterImage(leg_img,0,0,1,1)
+dev.off()
+
+# mu1=11.2076745, nu1=2.8304068, mu2=0.4027237, nu2=1.8098630
+rand_model_rns <- sample(1:ncol(ym), 2)
+bks <- seq(ylims[1], ylims[2], length=129)
+pdf("logit2_model1.pdf", width=6, height=5)
+par(mar=c(4.75,4.25,0.4,1), oma=c(2,1.75,1,2));
+layout(matrix(c(1, 2), nrow=1, ncol=2, byrow=TRUE), width=c(1, 0.2))
+image(x=xm, y=xm, z=matrix(ym[,rand_model_rns[1]], ncol=length(xm)),
+ col=cols, breaks=bks, xlab="x1", ylab="x2")
+par(mar=c(4.75,0.4,1,1))
+plot(c(0,2),c(0,1),type='n', axes=FALSE, xlab="", ylab="", main=expression(paste(lambda)))
+text(x=1.5, y=seq(0,1,length=4),
+ labels=format(round(intervals$brks[seq(1, length(intervals$brks), length=4)], 0)),
+ cex=1.25)
+rasterImage(leg_img,0,0,1,1)
+dev.off()
+
+# mu1=14.6179921, nu1=0.2186919, mu2=2.7904711, nu2=0.5410672
+pdf("logit2_model2.pdf", width=6, height=5)
+par(mar=c(4.75,4.25,0.4,1), oma=c(2,1.75,1,2));
+layout(matrix(c(1, 2), nrow=1, ncol=2, byrow=TRUE), width=c(1, 0.2))
+image(x=xm, y=xm, z=matrix(ym[,rand_model_rns[2]], ncol=length(xm)),
+ col=cols, breaks=bks, xlab="x1", ylab="x2")
+par(mar=c(4.75,0.4,1,1))
+plot(c(0,2),c(0,1),type='n', axes=FALSE, xlab="", ylab="", main=expression(paste(lambda)))
 text(x=1.5, y=seq(0,1,length=4),
  labels=format(round(intervals$brks[seq(1, length(intervals$brks), length=4)], 0)),
  cex=1.25)
