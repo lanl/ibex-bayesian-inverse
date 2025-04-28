@@ -9,10 +9,10 @@ f <- function(x, mu, nu) {
     stop("function requires an nx2 matrix of parameters")
   }
   if (length(mu) != 2 || length(nu) != 2) {
-    stop("function requires an two vectors of length two")
+    stop("function requires two vectors of length two")
   }
   t1 <- mu[1]*exp(mu[1]*x[,1]-7)/(nu[1]+exp(mu[1]*x[,1]-7))
-  t2 <- mu[2]*exp(mu[2]*x[,2]-3)/(nu[1]+exp(mu[2]*x[,2]-3))
+  t2 <- mu[2]*exp(mu[2]*x[,2]-3)/(nu[2]+exp(mu[2]*x[,2]-3))
   return(t1+t2)
 }
 
