@@ -542,21 +542,28 @@ setting. Then, we will propose a modern and better-perfoming approach.
 
 In the early 2000s, \citet{higdoncalib2008} faced a similar challenge. Expensive
 computer models at Los Alamos National Laboratory produced limited runs with
-immensely high-dimensional output in the form of images, shape description, time
+extremely high-dimensional output in the form of images, shape description, time
 series, etc. In order to efficiently fit a surrogate model to the simulator, they
-needed to perform dimension reduction. As a solution, they employed principal
-components analysis (PCA). Specifically, they represented the output of a simulator
-model as the sum of basis functions $\textbf{k}_i$, scaled by weights $w_i$. By
-reducing the the output to a small set of component weights, the dimension of the
-input matrix $X$ was able to be better handled by a GP.
+needed to perform an approximation to limit the size of the data. As a solution, they
+employed principal components analysis (PCA) to reduce the dimensionality of the
+response. Specifically, they represented the output of a simulator model as the sum
+of $n_k$ basis functions $\textbf{k}_1, \textbf{k}_2, \ldots , \textbf{k}_{n_k}$,
+each scaled by a corresponding weight $w_i$, as shown in Eq. \ref{eq:higdon_pca}.
+Instead of modeling the high-dimensional response, the GP only modeled the small set
+of component weights. Bayesian inference was used to obtain the posterior
+distribution of those component weights. Combining estimates the weights with the
+calculated basis functions allowed for predictions out of sample. As a result of this
+approximation, the dimension of the covariance matrix $\Sigma(X)$ in the predictive
+equations of \ref{eq:mvn_eq} remained small.
 \begin{align}
-\textbf{y}(\textbf{x}, \textbf{u}) = \sum_{i=1}^{n_k} \textbf{k}_i \cdot w_i (\textbf{x}, \textbf{u}) \nonumber \\
+\textbf{y}(\textbf{x}, \textbf{u}) \approx \sum_{i=1}^{n_k} \textbf{k}_i \cdot w_i (\textbf{x}, \textbf{u}), \quad n_k \ll n \ \nonumber \\
 w_i (\textbf{x}, \textbf{u}) \sim GP(\textbf{0}, \Sigma_{w_i}),
 \label{eq:higdon_pca}
 \end{align}
 where $\Sigma_{w_i}$, dependent only on a limited number of combinations of
-$\textbf{x}$ and $\textbf{u}$, is a small matrix. Hence, the decomposition of
-$\Sigma_{w_i}$ is fast and prevents the O($n^3$) bottleneck in computation.
+$\textbf{x}$ and $\textbf{u}$, is a $n_k \times n_k$ matrix. Hence, the decomposition
+of $\Sigma_{w_i}$ avoids the O($n^3$) bottleneck in computation and can be completed
+in a reasonable amount of time.
 
 We propose a simpler approach, devoid of the definition and selection of how many
 basis functions to use. Although this basis representation was successful, we argue
@@ -602,14 +609,14 @@ L(Y)&=\prod_{i=1}^n L(Y_i \mid Y_{g(i)})
 \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| = m \ll n
 \label{eq:vecchia}
 \end{align}
-Reducing the size of the conditioning set ($h(i)$ above) induces sparsity in
-the precision matrix, speeding up the evaluation of the likelihood. This takes
-an operation of order $O(n^3)$ down to $O(nm^3)$, motivating small values of
-$m$. It's clear that as the size of the conditioning set $m$ increases, the
-quality of the approximation improves, but we find a value of $m < 30$ is more
-than sufficient. The conditioning set can be constructed in many ways, but we
-default to a nearest-neighbors approach, which has been done previously
-\citep{sauer2023active}.
+Reducing the size of the conditioning set ($h(i)$ above) induces sparsity in the
+precision matrix, speeding up the evaluation of the likelihood. This takes an
+operation of order $O(n^3)$ down to $O(nm^3)$, motivating small values of $m$. As the
+size of the conditioning set $m$ increases, the quality of the approximation
+improves, until $n=m-1$, and the likelihood is no longer an approximation. We
+find a value of $m < 30$ is more than sufficient. The conditioning set can be
+constructed in many ways, but we default to a nearest-neighbors approach, which has
+been done previously \citep{sauer2023active}.
 
 \begin{figure}[ht!]
 \centering

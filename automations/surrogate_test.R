@@ -38,7 +38,8 @@ for (i in 1:(ncol(model_data)-1)) {
 ## Hold one out - 66 model runs
 pmfps <- unique(model_data$parallel_mean_free_path)
 ratios <- unique(model_data$ratio)
-unique_runs <- expand.grid(pmfps, ratios)
+unique_runs <- as.matrix(expand.grid(pmfps, ratios))
+colnames(unique_runs) <- NULL
 
 ## Calculating metrics
 rmses <- crps <- fit_times <- pred_times <-
