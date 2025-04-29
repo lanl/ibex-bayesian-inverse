@@ -411,20 +411,21 @@ process (middle, right).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Motivate need for surrogate (computer model is expensive)
-In the example in \ref{sec:poisson_calib}, we had access to essentially unlimited
-output from our ``computer model.'' For each set of proposed calibration parameters,
-we could generate a novel run of the simulation almost instantaneously. However, in
-most scientific applications, the computer model of interest is computationally
-expensive. Due to complex and costly operations, such as solving partial differential
-equations, simulations can take hours, days, or even weeks to complete
-\citep{santner2018design}. This limits the ability to thoroughly explore the model
+In Section \ref{sec:poisson_calib}, both toy examples had access to essentially
+unlimited output from our ``computer model.'' For each set of proposed computer model
+parameters, we could generate a novel run of the simulation almost instantaneously.
+This allowed us to retrieve exact evaluations at any point in the entire input space.
+However, in most scientific applications, the computer model of interest is
+computationally expensive. Due to complex and costly operations, such as solving
+partial differential equations, simulations can take hours, days, or even weeks to
+complete \citep{santner2018design}. This limits the ability to thoroughly explore the
 parameter input space in computer model calibration, thereby reducing the predictive
 performance and accuracy of parameter estimates. Therefore, we need a model (what we
 call a surrogate, or emulator) fit to the simulator output to make accurate and
 reliable predictions for out-of-sample values of our calibration parameters. Any
-statistical model can serve as a surrogate. However, the canonical surrogate for
-computer experiments and computer model calibration is the Gaussian process
-\citep{gramacy2020surrogates}.
+statistical model can serve as a surrogate, ranging from linear regression to complex
+neural networks \citep{??}. However, the canonical surrogate for computer experiments and
+computer model calibration is the Gaussian process \citep{gramacy2020surrogates}.
 
 %------------------------------------------------------------------------------
 \subsection{Gaussian Processes}
@@ -435,12 +436,14 @@ computer experiments and computer model calibration is the Gaussian process
 A Gaussian process (GP) is a realization of a multivariate normal distribution,
 governed by some mean and covariance functions. GPs are fit to observed data and then
 used to make predictions at new input locations, relying on the conditional
-multivariate normal equations. For example, suppose we have a vector of observations
-$Y$ at input locations $X$. We make the assumption that this data is normally
-distributed with some mean function $(\mu(X))$ and covariance function $(\Sigma(X))$.
-However, more important than how we model observed data is what our model predicts at
-a new location $x$. Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean predictions
-$\mu^*(x)$ and corresponding uncertainty quantification $\Sigma^*(x)$.
+multivariate normal equations, also known as the \textit{kriging} equations
+\citep{??}. For example, suppose we have a vector of observations $Y$ at input
+locations $X$. $Y$ is an $n \times 1$ vector and $X$ is an $n \times p$ matrix. We
+make the assumption that $Y$ is normally distributed with some mean function
+$(\mu(X))$ and covariance function $(\Sigma(X))$. However, more important than how we
+model observed data is what our model predicts at a new location $x$.
+Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean predictions $\mu^*(x)$ and
+corresponding uncertainty quantification $\Sigma^*(x)$.
 \begin{align}
 Y(X) \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^*(x) \mid Y(X) \sim
 N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
@@ -448,16 +451,17 @@ N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
 \Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
 \end{align}
 Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is common
-to set that to zero. In practice, the data is centered by subtracting off the sample
-mean. In the zero-mean context, all the action takes place in the covariance
-function. Many covariance kernels exists, such as the Gaussian, Exponential, Matern,
-etc. We use the Matern kernel in our work, of which both the Gaussian and Exponential
-kernels are special cases. The Matern covariance kernel relies on estimating three
-hyperparameters: a nugget $g$, a lengthscale $\theta$, and a scale $\tau^2$. Another
-parameter ($\nu$) that can be estimated in the Matern kernel controls the smoothness
-of the estimated surface. But we will ignore that here and set $\nu = \frac{5}{2}$
-(\ref{eq:matern}), following common practice due to it allowing the kernel function
-to be expressed in a simpler form. All hyperparameters can be estimated using your preferred method (i.e. maximum
+to set $\mu(x)=0. In practice, $Y$ is centered by subtracting off the sample mean. In
+the zero-mean context, all the action takes place in the covariance function. Many
+covariance kernels exists, such as the Gaussian, Exponential, Matern, etc \citep{??}.
+We use the Matern kernel in our work, of which both the Gaussian and Exponential
+kernels are special cases. Covariance kernels typically depend on three
+hyperparameters: a nugget $g$, a lengthscale $\theta$, and a scale $\tau^2$. In the
+Matern kernel, an additional parameter ($\nu$) exists, which controls the smoothness
+of the estimated surface. But we will not estimate the smoothness parameter here and
+instead set $\nu = \frac{5}{2}$ (\ref{eq:matern}), following common practice due to
+it allowing the kernel function to be expressed in a simpler form. All
+hyperparameters can be estimated using your preferred method (i.e. maximum
 likelihood, method of moments). We will use Bayesian methods, specifically MCMC.
 \begin{align}
 \Sigma(x, x'|\sigma^2, \theta, \nu, g) &= \sigma^2 \frac{2^{1-\nu}}{\Gamma(\nu)}
@@ -468,24 +472,25 @@ likelihood, method of moments). We will use Bayesian methods, specifically MCMC.
 - x'\|}{\theta}\right) + g \cdot \mathbb{I}
 \label{eq:matern}
 \end{align}
-GPs provide a flexible, nonparametric regression tool. They were popularized
-as surrogate models for computer experiments due to their ability to
-interpolate between observed data points (setting nugget $g = 0$). Although
-stochastic computer models are becoming more common, computer experiments are
-typically deterministic. This motivates the desire for a model that
-interpolates. GPs are then useful by providing predictive surfaces that give
-higher estimates of variance away from observed data, and virtually no
-variance at observed locations. GPs also naturally provide excellent
-uncertainty quantification for out-of-sample predictions, a matter of
-importance to scientists exploring these computer models, and in particular in
-computer model calibration.
+GPs provide a flexible, nonparametric regression tool. They were popularized as
+surrogate models for computer experiments due to their ability to interpolate between
+observed data points (setting nugget $g = 0$). Although stochastic computer models
+are becoming more common, computer experiments are often deterministic. This
+motivates the desire for a model that interpolates. GPs are then useful by providing
+predictive surfaces that give higher estimates of variance away from observed data,
+and virtually no variance at observed locations. GPs also naturally provide excellent
+uncertainty quantification for out-of-sample predictions, a matter of importance to
+scientists exploring these computer models. In computer model calibration, we use a
+GP to model the simulator of interest.
 
 Now, let's go back to our example in Section \ref{sec:poisson_calib}. There, we were
 given a certain amount of observed field data and access to a computer model that
 could immediately spit out results for any unique combination of parameters we were
-interested in. Here, we use a Latin hypercube sample \citep{mckay1979} of size 40
-over our two parameters, $\mu$ and $\nu$. So, we need to fit a GP on these 40 runs
-and make predictions at other input combinations of interest using \ref{eq:mvn_eq}.
+interested in. Here, we only have the observed field data and a fixed number of runs
+from our computer model, usually evaluated over some space-filling design.
+Specifically, we use a Latin hypercube sample \citep{mckay1979} of size 40 over our
+two parameters, $\mu$ and $\nu$. So, we need to fit a GP on these 40 runs and make
+predictions at other input combinations of interest using \ref{eq:mvn_eq}.
 
 \subsubsection{Poisson Calibration with GP Surrogate Example}
 
@@ -499,33 +504,38 @@ of calibration parameters (left). Posterior draws of calibration parameters (rig
 \end{figure}
 
 The left panel of \ref{f:calib1d_surr} shows evaluations of our GP surrogate at
-posterior draws of the calibration parameters, shown on the right. We can see that
-the MCMC does a good job of honing in on the truth. Although the posterior
-distribution is not centered on the truth, it covers the truth with a 95\% credible
-interval. These draws translate to predictions for what our computer model would
-output, through the use of our GP surrogate. The range of evaluations indicates that
-use of the surrogate allowed the MCMC to do extensive exploration of at unobserved
-inputs. Most importantly, we see that our algorithm is able to combine the limited
-field data with the limited simulator output to capture the true, underlying mean
-process.
+posterior draws of the calibration parameters, shown on the right. These predictions
+are highly accurate, although that is not the focus of our discussion here, so we
+forego displaying results. Using those predictions from our surrogate, we can see
+that the MCMC does a good job of honing in on the true combination of $\mu$ and
+$\nu$. This is evidenced in the right panel of \ref{f:calib1d_surr}. Although the
+posterior distribution is not exactly centered on the truth, it covers the truth with
+a 95\% credible interval. These draws translate to predictions for what our computer
+model would output, through the use of our GP surrogate. The range of evaluations
+indicates that use of the surrogate allowed the MCMC to do extensive exploration of
+at unobserved inputs, far moreso than the 40 training runs. Most importantly, we see
+that our algorithm is able to combine the limited field data with the limited
+simulator output to capture the true, underlying mean process.
 
 We can do the same thing in higher dimension, although it's harder to visualize, even
-in 2D. But the more pressing barrier to overcome is the need for more runs in higher
-dimensions. In the example above, the number of computer model evaluations was
-limited ($n < 100$). As mentioned before, computational limits ensure that this is
-typically the case in computer model calibration. But note that the output of our
-computer is functional, i.e. each response is a vector. Above, each simulation was
-evaluated at 20 separate points. Therefore, we were really modeling 800 ($40
+in 2D. But the more pressing barrier to overcome is the need for more runs of the
+simulation in higher dimensions in order to obtain good predictions from a surrogate.
+In the example above, the number of computer model evaluations was limited ($n <
+100$). As mentioned before, computational limits ensure that this is typically the
+case in computer model calibration. But note that the output of our computer is
+functional, i.e. each response is a vector. Above, each simulation was evaluated at
+20 separate points. Therefore, we are really modeling 800 ($40
 \times 20$) responses. Fitting a GP on 800 data points is already stretching the
 limitations of a GP (decomposing a $800 \times 800$ matrix). But consider our second
-example (\ref{f:logit2_examp}). To get 10 unique values of four parameters
-($\mu_1$, $\nu_1$, $\mu_2$, $\nu_2$), we'd need upwards of 10,000 simulator runs.
-Combine that with a $20 \times 20$ grid over $x_1$ and $x_2$ and our response vector
-will be greater than 200,000. Even if we used an LHS design of size $n=100$, the
-response vector would consist of over 40,000 points. In that case, a GP would not
-feasibly be able to model each individual point as a separate response. Next we
-review what has been done historically with high dimensional output in a calibration
-setting. Then, we will propose a modern and better-perfoming approach.
+example (\ref{f:logit2_examp}). To get 10 unique values of four parameters ($\mu_1$,
+$\nu_1$, $\mu_2$, $\nu_2$), a typical threshold for a good surrogate, we'd need
+upwards of 10,000 simulator runs. Combine that with a $20 \times 20$ grid over $x_1$
+and $x_2$ and our response vector will be greater than 200,000. Even if we used an
+smaller LHS space-filling design of size $n=100$, the response vector would consist of
+over 40,000 points. In that case, a GP would not feasibly be able to model each
+individual point as a separate response. For this problem, we review what has been done
+historically with high dimensional output in a calibration setting. Then, we will
+propose a modern and better-perfoming approach.
 
 \begin{figure}[ht!]
 \centering
@@ -622,11 +632,9 @@ been done previously \citep{sauer2023active}.
 \centering
 \includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
 \includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
-\caption{VECCHIA vs. SEPIA vs. DEEPGP vs. LAGP TimingM aybe replace the fitting and
-prediction time plots. This could look a lot like Annie's plot in her Vecchia. One
-panel has each method, showing the exponential increase. And one panel has just
-Vecchia on larger and larger datasets. SEPIA might do fine here. But worth a check.
-\label{f:surr_time_bakeoff}}
+\caption{RMSE and CRPS on IBEX holdout data, comparing Scaled Vecchia Gaussian Processes, Locally
+Approximated Gaussian Processes, Fully Bayesian Gaussian Processes, and SEPIA.
+\label{f:surr_bakeoff}}
 \end{figure}
 
 We considered multiple surrogate implementations with GP approximations to model the
@@ -642,11 +650,9 @@ effective tool for use in computer model calibration.
 \centering
 \includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{logit1_est.pdf}
 \includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{logit1_est.pdf}
-\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{logit1_est.pdf}
-\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{logit1_est.pdf}
-\caption{Benchmark methods on IBEX simulator data. Each method was run 66 times on
-the model data with one run held out for prediction each time. Hold-one-out
-cross-validation.
+\caption{VECCHIA vs. SEPIA vs. DEEPGP vs. LAGP Timing. This could look a lot like
+Annie's plot in her Vecchia. One panel has each method, showing the exponential
+increase. And one panel has just Vecchia and SEPIA on larger and larger datasets.
 \label{f:surr_bakeoff}}
 \end{figure}
 
@@ -670,7 +676,7 @@ has no fitting time, as each call to predict encompasses the ``fitting'' process
 \includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
 \includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
 \caption{2D POISSON CALIBRATION EXAMPLE WITH VECCHIA GP SURROGATE. Maybe include
-computation time panel?
+computation time panel here as well. Maybe do calibration with other surrogates?
 \label{f:calib2d_surr_vecchia}}
 \end{figure}
 

@@ -61,13 +61,13 @@ if (method=="svecchia" || method=="all") {
       model_data$ratio == ratio,c("blurred_ena_rate")]
 
     tic <- proc.time()[3]
-    svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=25)
+    svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=50)
     toc <- proc.time()[3]
     fit_times[i,1] <- toc-tic
     print("Finished SVecchia fit")
 
     tic <- proc.time()[3]
-    svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=25, joint=FALSE,
+    svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=50, joint=FALSE,
       predvar=TRUE)
     toc <- proc.time()[3]
     pred_times[i,1] <- toc-tic
@@ -93,11 +93,18 @@ if (method=="laGP" || method=="all") {
     Ytest <- model_data[model_data$parallel_mean_free_path == pmfp &
       model_data$ratio == ratio,c("blurred_ena_rate")]
 
-    tic <- proc.time()[3]
-    d <- darg(NULL, Xtrain)
-    lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=16, verb=0,
-      end=25, method="nn", d=d)
-    toc <- proc.time()[3]
+    lagppreds <- NULL
+    attempts <- 1
+    while (is.null(lagppreds) && attempts <= 10) {
+      try({  ## occasionally laGP returns a Cholesky decomposition error
+        tic <- proc.time()[3]
+        d <- darg(NULL, Xtrain)
+        lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=8, verb=0,
+          end=50, method="nn", d=d)
+        toc <- proc.time()[3]
+      })
+      attempts <- attempts + 1
+    }
     pred_times[i,2] <- toc-tic
     rmses[i,2] <- sqrt(mean((lagppreds$mean - Ytest)^2))
     crps[i,2] <- crps(y=Ytest, mu=lagppreds$mean, s2=lagppreds$var)
