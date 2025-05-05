@@ -76,6 +76,7 @@ for (i in 1:num_ns) {
   XX[,1:2] <- as.matrix(expand.grid(xx, xx))
   XX[,3:6] <- rep(Utrue, each=nrow(XX))
   colnames(XX) <- NULL
+  write.csv(XX, paste0("xtest_n", n, ".csv"), row.names=FALSE)
 
   for (m in 1:mcs) {
 
@@ -115,7 +116,7 @@ for (i in 1:num_ns) {
     if (!too_long[2]) {
       tic <- proc.time()[3]
       d <- darg(NULL, Xtrain)
-      lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=XX, omp.threads=8, verb=0,
+      lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=XX, omp.threads=16, verb=0,
        end=25, method="nn", d=d)
       toc <- proc.time()[3]
       pred_times[m,i,2] <- toc-tic
@@ -134,8 +135,8 @@ for (i in 1:num_ns) {
       toc <- proc.time()[3]
       pred_times[m,i,3] <- toc-tic
       print("Finished deep gp predictions")
-      print(paste0("Finished MC iteration ", m))
     }
+    print(paste0("Finished MC iteration ", m))
     res <- list(fit_times=fit_times, pred_times=pred_times)
     saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
   }
