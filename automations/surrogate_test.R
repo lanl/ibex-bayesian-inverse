@@ -97,13 +97,14 @@ if (method=="laGP" || method=="all") {
     attempts <- 1
     while (is.null(lagppreds) && attempts <= 10) {
       try({  ## occasionally laGP returns a Cholesky decomposition error
+        print(paste0("Making attempt #", attempts))
+        attempts <- attempts + 1
         tic <- proc.time()[3]
         d <- darg(NULL, Xtrain)
         lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=Xtest, omp.threads=8, verb=0,
           end=50, method="nn", d=d)
         toc <- proc.time()[3]
-      })
-      attempts <- attempts + 1
+      }, silent=TRUE)
     }
     pred_times[i,2] <- toc-tic
     rmses[i,2] <- sqrt(mean((lagppreds$mean - Ytest)^2))
