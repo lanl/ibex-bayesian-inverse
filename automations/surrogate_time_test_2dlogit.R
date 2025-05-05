@@ -74,11 +74,15 @@ for (i in 1:num_ns) {
   XX <- matrix(NA, nrow=N^2, ncol=6)
   xx <- seq(0, 1, length=N)
   XX[,1:2] <- as.matrix(expand.grid(xx, xx))
-  XX[,3:6] <- rep(Utrue, each=nrow(XX))
+  XX[,3:6] <- rep(Utrueunit, each=nrow(XX))
   colnames(XX) <- NULL
-  write.csv(XX, paste0("xtest_n", n, ".csv"), row.names=FALSE)
+  xtest_fn <- paste0("xtest_n", n, ".csv")
+  write.csv(XX, xtest_fn, row.names=FALSE)
+  XX <- NULL
 
   for (m in 1:mcs) {
+    xtrain_fn <- paste0("xtrain_n", n, "_mc", m, ".csv")
+    ytrain_fn <- paste0("ytrain_n", n, "_mc", m, ".csv")
 
     X <- as.matrix(randomLHS(n=n, k=2))
     colnames(X) <- NULL
@@ -96,17 +100,23 @@ for (i in 1:num_ns) {
       end <- j*nrow(X)
       Ytrain[beg:end] <- log(f(x=X, mu=U[j,c(1,3)], nu=U[j,c(2,4)]))
     }
-    write.csv(Xtrain, paste0("xtrain_n", n, "_mc", m, ".csv"), row.names=FALSE)
-    write.csv(Ytrain, paste0("ytrain_n", n, "_mc", m, ".csv"), row.names=FALSE)
+    write.csv(Xtrain, xtrain_fn, row.names=FALSE)
+    write.csv(Ytrain, ytrain_fn, row.names=FALSE)
+    Xtrain <- Ytrain <- NULL
 
     if (!too_long[1]) {
       tic <- proc.time()[3]
+      Xtrain <- as.matrix(read.csv(xtrain_fn))
+      colnames(Xtrain) <- NULL
+      Ytrain <- drop(as.matrix(read.csv(ytrain_fn)))
       svecfit <- fit_scaled(y=Ytrain, inputs=Xtrain, nug=1e-4, ms=25)
       toc <- proc.time()[3]
       fit_times[m,i,1] <- toc-tic
       print("Finished SVecchia fit")
 
       tic <- proc.time()[3]
+      XX <- as.matrix(read.csv(xtest_fn))
+      colnames(XX) <- NULL
       svecpreds <- predictions_scaled(svecfit, XX, m=25, joint=FALSE, predvar=TRUE)
       toc <- proc.time()[3]
       pred_times[m,i,1] <- toc-tic
@@ -115,6 +125,11 @@ for (i in 1:num_ns) {
 
     if (!too_long[2]) {
       tic <- proc.time()[3]
+      Xtrain <- as.matrix(read.csv(xtrain_fn))
+      colnames(Xtrain) <- NULL
+      Ytrain <- drop(as.matrix(read.csv(ytrain_fn)))
+      XX <- as.matrix(read.csv(xtest_fn))
+      colnames(XX) <- NULL
       d <- darg(NULL, Xtrain)
       lagppreds <- aGPsep(X=Xtrain, Z=Ytrain, XX=XX, omp.threads=16, verb=0,
        end=25, method="nn", d=d)
@@ -125,12 +140,17 @@ for (i in 1:num_ns) {
 
     if (!too_long[3]) {
       tic <- proc.time()[3]
+      Xtrain <- as.matrix(read.csv(xtrain_fn))
+      colnames(Xtrain) <- NULL
+      Ytrain <- drop(as.matrix(read.csv(ytrain_fn)))
       dgp1fit <- fit_one_layer(x=Xtrain, y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
       toc <- proc.time()[3]
       fit_times[m,i,3] <- toc-tic
       print("Finished deep gp fit")
 
       tic <- proc.time()[3]
+      XX <- as.matrix(read.csv(xtest_fn))
+      colnames(XX) <- NULL
       dgp1preds <- predict(trim(dgp1fit, burn=100, thin=5), x_new=XX)
       toc <- proc.time()[3]
       pred_times[m,i,3] <- toc-tic
