@@ -451,7 +451,7 @@ N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
 \Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
 \end{align}
 Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is common
-to set $\mu(x)=0. In practice, $Y$ is centered by subtracting off the sample mean. In
+to set $\mu(x)=0$. In practice, $Y$ is centered by subtracting off the sample mean. In
 the zero-mean context, all the action takes place in the covariance function. Many
 covariance kernels exists, such as the Gaussian, Exponential, Matern, etc \citep{??}.
 We use the Matern kernel in our work, of which both the Gaussian and Exponential
@@ -630,10 +630,13 @@ been done previously \citep{sauer2023active}.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
-\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
-\caption{RMSE and CRPS on IBEX holdout data, comparing Scaled Vecchia Gaussian Processes, Locally
-Approximated Gaussian Processes, Fully Bayesian Gaussian Processes, and SEPIA.
+\includegraphics[scale=0.6, trim=0 10 15 50,clip=TRUE]{ibex_surr_rmse_bp.pdf}
+\includegraphics[scale=0.6, trim=0 10 15 50,clip=TRUE]{ibex_surr_crps_bp.pdf}
+\caption{Predictive performance for four methods (Scaled Vecchia
+Gaussian Processes, Locally Approximated Gaussian Processes (lagp), Fully
+Bayesian Gaussian Processes (deepgp1), and SEPIA) compared on RMSE and CRPS on
+the IBEX simulator. Each of 66 runs is held out once as test data, with the 65
+remaining runs acting as training data.
 \label{f:surr_bakeoff}}
 \end{figure}
 
