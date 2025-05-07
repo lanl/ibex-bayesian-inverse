@@ -79,6 +79,17 @@ if inc_out:
             toc = time.time()
             pred_times[j,i] = toc - tic
             print("Increasing n output: Finished MC iteration " + str(j+1) + "/" + str(mcs) + " of n=" + str(n))
+            with open(outf_fit, 'w', newline='') as file:
+                # Create a CSV writer object
+                writer = csv.writer(file)
+                # Write each row of data to the CSV file
+                writer.writerows(fit_times)
+
+            with open(outf_pred, 'w', newline='') as file:
+                # Create a CSV writer object
+                writer = csv.writer(file)
+                # Write each row of data to the CSV file
+                writer.writerows(pred_times)
 else:
     outf_fit = 'sepia_fit_times_nruns.csv'
     outf_pred = 'sepia_pred_times_nruns.csv'
@@ -142,15 +153,14 @@ else:
             toc = time.time()
             pred_times[j,i] = toc - tic
             print("Increasing n runs: Finished MC iteration " + str(j+1) + "/" + str(mcs) + " of n=" + str(n))
+            with open(outf_fit, 'w', newline='') as file:
+                # Create a CSV writer object
+                writer = csv.writer(file)
+                # Write each row of data to the CSV file
+                writer.writerows(fit_times)
 
-with open(outf_fit, 'w', newline='') as file:
-    # Create a CSV writer object
-    writer = csv.writer(file)
-    # Write each row of data to the CSV file
-    writer.writerows(fit_times)
-
-with open(outf_pred, 'w', newline='') as file:
-    # Create a CSV writer object
-    writer = csv.writer(file)
-    # Write each row of data to the CSV file
-    writer.writerows(pred_times)
+            with open(outf_pred, 'w', newline='') as file:
+                # Create a CSV writer object
+                writer = csv.writer(file)
+                # Write each row of data to the CSV file
+                writer.writerows(pred_times)
