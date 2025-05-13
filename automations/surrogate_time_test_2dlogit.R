@@ -52,16 +52,16 @@ if (inc_out) {
 
   ## Calculating metrics
   set.seed(seed)
-  exp_pows <- 7:45
+  exp_pows <- 7:44
 
   ns <- c(round(10 + 1.25^exp_pows), seq(20000, 75000, by=5000))
   num_ns <- length(ns)
-  outf <- "surrogate_time_test_2dlogit_"
+  outf <- "surrogate_time_test_2dlogit_inc_out_"
   mcs <- 10
 
   ## Calculating metrics
   fit_times <- pred_times <- array(NA, dim=c(mcs, length(ns), 3))
-  too_long <- c(FALSE, TRUE, TRUE)#rep(FALSE, 3)
+  too_long <- rep(FALSE, 3)
 
   for (i in 1:num_ns) {
     ## select training data size
@@ -162,9 +162,11 @@ if (inc_out) {
       res <- list(fit_times=fit_times, pred_times=pred_times)
       saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
     }
-    too_long[1] <- ifelse(too_long[1], too_long[1], mean(pred_times[,i,1], na.rm=TRUE) >= 2700)
-    too_long[2] <- ifelse(too_long[2], too_long[2], mean(pred_times[,i,2], na.rm=TRUE) >= 2700)
-    too_long[3] <- ifelse(too_long[3], too_long[3], mean(pred_times[,i,3], na.rm=TRUE) >= 2700)
+    too_long[1] <- ifelse(too_long[1], too_long[1],
+     mean(fit_times[,i,1], na.rm=TRUE) >= 3600 || mean(pred_times[,i,1], na.rm=TRUE) >= 3600)
+    too_long[2] <- ifelse(too_long[2], too_long[2], mean(pred_times[,i,2], na.rm=TRUE) >= 3600)
+    too_long[3] <- ifelse(too_long[3], too_long[3], mean(fit_times[,i,3], na.rm=TRUE) >= 3600)
+     mean(fit_times[,i,3], na.rm=TRUE) >= 3600 || mean(pred_times[,i,3], na.rm=TRUE) >= 3600)
   }
 } else {
 
@@ -186,7 +188,7 @@ if (inc_out) {
 
   ## Calculating metrics
   fit_times <- pred_times <- array(NA, dim=c(mcs, length(ns), 3))
-  too_long <- c(FALSE, TRUE, TRUE)#rep(FALSE, 3)
+  too_long <- rep(FALSE, 3)
 
   ## LOOP THROUGH SIZES OF RUNS (10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1000)
   for (i in 1:length(ns)) {
@@ -281,8 +283,10 @@ if (inc_out) {
       res <- list(fit_times=fit_times, pred_times=pred_times)
       saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
     }
-    too_long[1] <- ifelse(too_long[1], too_long[1], mean(pred_times[,i,1], na.rm=TRUE) >= 2700)
-    too_long[2] <- ifelse(too_long[2], too_long[2], mean(pred_times[,i,2], na.rm=TRUE) >= 2700)
-    too_long[3] <- ifelse(too_long[3], too_long[3], mean(pred_times[,i,3], na.rm=TRUE) >= 2700)
+    too_long[1] <- ifelse(too_long[1], too_long[1],
+     mean(fit_times[,i,1], na.rm=TRUE) >= 3600 || mean(pred_times[,i,1], na.rm=TRUE) >= 3600)
+    too_long[2] <- ifelse(too_long[2], too_long[2], mean(pred_times[,i,2], na.rm=TRUE) >= 3600)
+    too_long[3] <- ifelse(too_long[3], too_long[3], mean(fit_times[,i,3], na.rm=TRUE) >= 3600)
+     mean(fit_times[,i,3], na.rm=TRUE) >= 3600 || mean(pred_times[,i,3], na.rm=TRUE) >= 3600)
   }
 }
