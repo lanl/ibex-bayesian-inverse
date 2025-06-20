@@ -35,8 +35,7 @@ Laboratory} \and Fan Guo\footnotemark[4] \and Eric J. Zirnstein\thanks{
 Department of Astrophysical Sciences, Princeton University} \and Daniel B.
 Reisenfeld\thanks{Space Science and Applications Group, Los Alamos National
 Laboratory}}
-
-\date{\today}
+\date{}
 
 \maketitle
 
@@ -75,39 +74,52 @@ output.
 % Layout
 %
 % SECTION 1: Introduction
-% SECTION 2: Computer Model Calibration
+%% Reference Grosskopf and Bingham paper
+
+% SECTION 2: Review:
 %% A general review of computer model calibration
 %% Review Kennedy O'Hagan framework
-%% Review Dave Higdon's SEPIA?? Maybe his 2004 paper?
+%% Maybe introduce a toy example (could be the mean from the poisson example, treated as normal with noise)
 
-%%% SECTION 2.1: Generalized Computer Model Calibration
+%% SECTION 2.1: Gaussian Process Surrogates
+%%% Motivate need for surrogate from previous section. Expensive computer model and field data.
+%%% Review Gaussian process surrogates and their use in surrogate modeling
+
+%% SECTION 2.2: Approximated Gaussian Process Surrogates
+%%% List versions of approximations for GPs
+
+%%% SECTION 2.2.1: SEPIA
+%%% SEPIA. Review Dave Higdon's 2004 and 2008 papers. PCA
+
+%% Limitations: 
+%% Poisson response. Clunky way to deal with large data. Not generalizable.
+
+% SECTION 3: Methods
+
+%%% SECTION 3.1: Generalized Computer Model Calibration
 %%%%% Maybe introduce toy example here
 %%%%% Rehash the need to update KOH to account for Poisson data
 %%%%% Explain the use of a no-bias set up to initially prove the capability
 %%%%% Briefly show the math behind this
 
-%%% SECTION 2.2: Poisson Response
+%%% SECTION 3.2: Poisson Response Examples
 %%%%% Results of 1D Poisson calibration (prediction, distribution of calibration parameters)
 %%%%% Results of 2D Poisson calibration (prediction, distribution of calibration parameters)
 
-% SECTION 3: Gaussian Process Surrogates
-%%%%% Motivate need for surrogate from previous section
-%%%%% Often our computer model is expensive to run
-%%%%% We need a surrogate
-%%%%% Review Gaussian process surrogates and their use in surrogate modeling
+%%% SECTION 3.3: Vecchia Approximation
+%%%%%
+%%%%%
+%%%%%
+
+%%% SECTION 3.4: Scaled Vecchia Approximation
+%%%%%
+%%%%%
+%%%%%
+
+%%% SECTION 3.5: Scaled Vecchia Approximation
 %%%%% Go back to 1D and 2D Poisson examples, but now with limited model runs
 %%%%% Tease that this example is easy because the amount of data we have is small
 %%%%% Increase to large data example. Show inability of framework to fit surrogate without Vecchia
-
-%%% SECTION 3.1: Vecchia Approximation
-%%%%%
-%%%%%
-%%%%%
-
-%%% SECTION 3.2: Scaled Vecchia Approximation
-%%%%%
-%%%%%
-%%%%%
 
 % SECTION 4: Heliospheric Science
 %%% Introduce the idea of the heliosphere?
@@ -257,37 +269,245 @@ reproducing all examples is provided at
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Computer Model Calibration}
+
+% SECTION 2: Review:
+\section{Review}
 \label{sec:review}
 
 %% Review computer model calibration
-Computer model calibration is a technique employed by statisticians to pair data
-collected from a physical experiment. Computer models attempt to represent a physical
-process that is infeasible to run, due to a number of reasons (e.g. physical expense,
-ethics). Data collected from a physical experiment can be augmented by output from a
-computer simulation. As a result of increased access to supercomputing resources,
-computer models have increased in complexity (cite??) over the past two decades to
-produce extremely high-fidelity output. Scientists are able to learn more about a
-physical process using such an augmented dataset. Additionally, computer models allow
-practitioners to vary certain parameters that cannot be controlled in a physical
-experiment (e.g. gravity). Therefore, in addition to helping achieve better
-prediction out-of-sample, the computer model output allows statisticians to estimate
-the distributions of certain unknown parameters.
+Computer model calibration is a technique employed by statisticians to pair
+data collected from separate physical and computer experiments. The motivation
+for such a method stems from the infeasibility to collect a sufficient (or in
+some cases, any) number of physical observations. This may be due to a variety
+of limitations, such as prohibitive cost or ethical consierations. Therefore,
+in an effort to gain more insight, scientists develop computer models that
+attempt to represent that physical process. As a result of increased access to
+supercomputing resources, computer models have increased in complexity
+(cite??) over the past two decades to produce extremely high-fidelity output.
+Data collected from a physical experiment can then be augmented by output from
+this computer simulation. Scientists are able to make better predictions for
+the behavior of a physical process outside sample locations. Computer models
+also allow practitioners to vary certain parameters that cannot be controlled
+in a physical experiment (e.g. gravity). So, in addition to helping achieve
+better prediction out-of-sample, the computer model output allows
+statisticians to estimate the distributions of certain unknown parameters,
+deepening knowledge of the physical process.
+
+% SECTION 2.1 - KOH Review:
+\subsection{Kennedy \& O'Hagan Computer Model Calibration}
+\label{sec:koh_review}
 
 %% Review Kennedy O'Hagan framework
-\citet{kennedyohagan2001} introduced what has become the canonical framework for
-computer model calibration. Field data and computer simulation output are modeled
-jointly as following a multivariate normal distribution. \citet{kennedyohagan2001}
-make two key suggestions: 1) Computer models, despite improvements in recent years,
-are still inherently biased. It's virtually impossible to exactly replicate a
-physical process through simulation. 2) Although often easier to conduct than
-physical experiements, computer models are still expensive in terms of computation,
+In 2001, \citet{kennedyohagan2001} introduced what has become the canonical
+framework for computer model calibration. In this framework, field data and
+computer simulation output are modeled jointly as following a multivariate
+normal distribution. \citet{kennedyohagan2001} make two key suggestions: 1)
+Computer models, despite improvements in recent years, are still inherently
+biased. It's virtually impossible to exactly replicate a physical process
+through simulation. 2) Although often easier to conduct than physical
+experiments, computer models are still expensive in terms of computation,
 necesitating a surrogate model for the simulated output to obtain additional
 predictions.
+\begin{align}
+Y_F &= Y_R + \epsilon \\
+Y_R &= Y_M + \delta_b && \begin{bmatrix} Y_F \\ Y_M \end{bmatrix} \sim \left(\begin{matrix}0 \\ 0\end{matrix}, \begin{bmatrix} \Sigma_F & \Sigma_{FM} \\ \Sigma_M & \Sigma_{Mb} \end{bmatrix}\right)
+\end{align}
 
-%% Review Dave Higdon's SEPIA approach
+%% Maybe introduce a toy example (could be the mean from the poisson example, treated as normal with noise)
+Consider the left panel of Figure \ref{f:toy_calib}. Red stars denote field
+observations of some true, unknown process at different locations $X$. Note
+that these data are observed with some noise. Additionally, multiple
+observations are made at each location. This is common, due to the expense of
+changing configurations of a physical experiment, but it need not be the case.
+Dashed, green lines denote individual runs of a computer simulation, at
+different settings of parameters $\boldsymbol{\theta}$. Lastly, the black bold
+line shows the true, underlying process we want to estimate. Modeling the data
+as \citet{kennedyohagan2001} did, we can make field predictions out-of-sample
+and estimate the posterior distributions of $\boldsymbol{\theta}$. Predictions
+and posterior estimates are shown in the middle and right panels of Figure
+\ref{f:toy_calib}.
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.19,trim=0 0 65 0,clip=TRUE]{toy_calibration.jpg}
+\includegraphics[scale=0.19,trim=35 0 65 0,clip=TRUE]{toy_calib_pred.jpg}
+\includegraphics[scale=0.19,trim=35 0 0 0,clip=TRUE]{toy_calib_dist.jpg}
+\caption{Toy calibration example. Observations (left), predictions (middle),
+and posterior distribution (right).
+\label{f:toy_calib}}
+\end{figure}
+
+%%% Motivate need for surrogate from previous section. Expensive computer model and field data.
+In Section \ref{sec:poisson_calib}, both toy examples had access to essentially
+unlimited output from our ``computer model.'' For each set of proposed computer model
+parameters, we could generate a novel run of the simulation almost instantaneously.
+This allowed us to retrieve exact evaluations at any point in the entire input space.
+However, in most scientific applications, the computer model of interest is
+computationally expensive. Due to complex and costly operations, such as solving
+partial differential equations, simulations can take hours, days, or even weeks to
+complete \citep{santner2018design}. This limits the ability to thoroughly explore the
+parameter input space in computer model calibration, thereby reducing the predictive
+performance and accuracy of parameter estimates. Therefore, we need a model (what we
+call a surrogate, or emulator) fit to the simulator output to make accurate and
+reliable predictions for out-of-sample values of our calibration parameters. Any
+statistical model can serve as a surrogate, ranging from linear regression to complex
+neural networks \citep{??}. However, the canonical surrogate for computer experiments and
+computer model calibration is the Gaussian process \citep{gramacy2020surrogates}.
+
+%------------------------------------------------------------------------------
+%% SECTION 2.2 - Gaussian Process Surrogates:
+\subsection{Gaussian Process Surrogates}
+\label{sec:gp_surr}
+%------------------------------------------------------------------------------
+
+%% Review Gaussian processes and their use in surrogate modeling
+A Gaussian process (GP) is a realization of a multivariate normal distribution,
+governed by some mean and covariance functions. GPs are fit to observed data and then
+used to make predictions at new input locations, relying on the conditional
+multivariate normal equations, also known as the \textit{kriging} equations
+\citep{??}. For example, suppose we have a vector of observations $Y$ at input
+locations $X$. $Y$ is an $n \times 1$ vector and $X$ is an $n \times p$ matrix. We
+make the assumption that $Y$ is normally distributed with some mean function
+$(\mu(X))$ and covariance function $(\Sigma(X))$. However, more important than how we
+model observed data is what our model predicts at a new location $x$.
+Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean predictions $\mu^*(x)$ and
+corresponding uncertainty quantification $\Sigma^*(x)$.
+\begin{align}
+Y(X) \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^*(x) \mid Y(X) \sim
+N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
+\mu^*(x)=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
+\Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
+\end{align}
+Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is common
+to set $\mu(x)=0$. In practice, $Y$ is centered by subtracting off the sample mean. In
+the zero-mean context, all the action takes place in the covariance function. Many
+covariance kernels exists, such as the Gaussian, Exponential, Matern, etc \citep{??}.
+We use the Matern kernel in our work, of which both the Gaussian and Exponential
+kernels are special cases. Covariance kernels typically depend on three
+hyperparameters: a nugget $g$, a lengthscale $\theta$, and a scale $\tau^2$. In the
+Matern kernel, an additional parameter ($\nu$) exists, which controls the smoothness
+of the estimated surface. But we will not estimate the smoothness parameter here and
+instead set $\nu = \frac{5}{2}$ (\ref{eq:matern}), following common practice due to
+it allowing the kernel function to be expressed in a simpler form. All
+hyperparameters can be estimated using your preferred method (i.e. maximum
+likelihood, method of moments). We will use Bayesian methods, specifically MCMC.
+\begin{align}
+\Sigma(x, x'|\sigma^2, \theta, \nu, g) &= \sigma^2 \frac{2^{1-\nu}}{\Gamma(\nu)}
+\left(\sqrt{2\nu} \frac{\|x-x'\|}{\theta}\right)^2 K_{\nu} \left(\sqrt{2 \nu}
+\frac{\|x - x'\|}{\theta}\right) + g \cdot \mathbb{I} \nonumber \\
+&= \sigma^2 \left(1 + \frac{\sqrt{5} \cdot \|x - x'\|}{\theta} +
+\frac{5\cdot\|x-x'\|^2}{3\theta^2} \right) \text{exp}\left(-\frac{\sqrt{5} \cdot \|x
+- x'\|}{\theta}\right) + g \cdot \mathbb{I}
+\label{eq:matern}
+\end{align}
+GPs provide a flexible, nonparametric regression tool. They were popularized as
+surrogate models for computer experiments due to their ability to interpolate between
+observed data points (setting nugget $g = 0$). Although stochastic computer models
+are becoming more common, computer experiments are often deterministic. This
+motivates the desire for a model that interpolates. GPs are then useful by providing
+predictive surfaces that give higher estimates of variance away from observed data,
+and virtually no variance at observed locations. GPs also naturally provide excellent
+uncertainty quantification for out-of-sample predictions, a matter of importance to
+scientists exploring these computer models. In computer model calibration, we use a
+GP to model the simulator of interest.
+
+Now, let's go back to our example in Section \ref{sec:poisson_calib}. There, we were
+given a certain amount of observed field data and access to a computer model that
+could immediately spit out results for any unique combination of parameters we were
+interested in. Here, we only have the observed field data and a fixed number of runs
+from our computer model, usually evaluated over some space-filling design.
+Specifically, we use a Latin hypercube sample \citep{mckay1979} of size 40 over our
+two parameters, $\mu$ and $\nu$. So, we need to fit a GP on these 40 runs and make
+predictions at other input combinations of interest using \ref{eq:mvn_eq}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%------------------------------------------------------------------------------
+\subsubsection{Principal Components Analysis}
+\label{sec:pca}
+%------------------------------------------------------------------------------
+
+In the early 2000s, \citet{higdoncalib2008} faced a similar challenge. Expensive
+computer models at Los Alamos National Laboratory (LANL) produced limited runs with
+extremely high-dimensional output in the form of images, shape description, time
+series, etc. In order to efficiently fit a surrogate model to the simulator, they
+needed to perform an approximation to limit the size of the data. As a solution, they
+employed principal components analysis (PCA) to reduce the dimensionality of the
+response. Specifically, they represented the output of a simulator model as the sum
+of $n_k$ basis functions $\textbf{k}_1, \textbf{k}_2, \ldots , \textbf{k}_{n_k}$,
+each scaled by a corresponding weight $w_i$, as shown in Eq. \ref{eq:higdon_pca}.
+Instead of modeling the high-dimensional response, the GP only modeled the small set
+of component weights. Bayesian inference was used to obtain the posterior
+distribution of those component weights. Combining estimates the weights with the
+calculated basis functions allowed for predictions out of sample. As a result of this
+approximation, the dimension of the covariance matrix $\Sigma(X)$ in the predictive
+equations of \ref{eq:mvn_eq} remained small.
+\begin{align}
+\textbf{y}(\textbf{x}, \textbf{u}) \approx \sum_{i=1}^{n_k} \textbf{k}_i \cdot w_i (\textbf{x}, \textbf{u}), \quad n_k \ll n \ \nonumber \\
+w_i (\textbf{x}, \textbf{u}) \sim GP(\textbf{0}, \Sigma_{w_i}),
+\label{eq:higdon_pca}
+\end{align}
+where $\Sigma_{w_i}$, dependent only on a limited number of combinations of
+$\textbf{x}$ and $\textbf{u}$, is a $n_k \times n_k$ matrix. Hence, the decomposition
+of $\Sigma_{w_i}$ avoids the O($n^3$) bottleneck in computation and can be completed
+in a reasonable amount of time.
+
+We propose a simpler approach, devoid of the definition and selection of how many
+basis functions to use. Although this basis representation was successful, we argue
+that what \citet{higdoncalib2008} really wanted to do was represent the functional
+output as a univariate response. That is, replicate the entry in the input matrix $X$
+for each response the number of times equal to the length of the output vector. In
+essence, implicitly encode the index (e.g. pixel in image, moment in time series)
+into the response vector for each observation in the input matrix. We believe that
+had \citet{higdoncalib2008} had access to the capacity of modern-day computing, along
+with the novel methodology proposed since the early 2000s that leverages that
+compute, they would have steered their implementation in a significantly different
+way. We propose that approach next and illustrate the improved performance in both
+predictive accuracy and uncertainty quantification, along with a reduction in
+computational expense.
+
+%% Limitations:
+%% Poisson response. Clunky way to deal with large data. Not generalizable.
+
+%------------------------------------------------------------------------------
+\subsection{Vecchia Approximation}
+\label{sec:vecchia}
+%------------------------------------------------------------------------------
+
+%%% List versions of approximations for GPs
+Perhaps the primary weakness of GPs is the need to decompose an $n \times n$
+covariance matrix, making it difficult to scale to large datasets. Many methods have
+been introduced to address this computational burden. These include, but are not
+limited to, fixed-rank kriging \citep{cressie2008fixed}, inducing points
+\citep{banerjee2008gaussian}, compactly supported kernels
+\citep{kaufman2011efficient}, divide-and-conquer \citep{gramacy2015local}, and
+nearest neighbors \citep{datta2016hierarchical, wu2022variational}. In the context of
+computer model calibration, \citet{higdoncalib2008} use a basis representation via
+principal components to accommodate high-dimensional output. However, with the
+dramatic increase in computing capacity over the past decade and the aforementioned
+advances in methodology, we believe there are better GP approximations available to
+model the output of a computer simulation. We propose the recently popularized
+Vecchia approximation \citep{vecchia1988estimation, katzfuss2020vecchia,
+katzfuss2021general, zhang2022multi}.
+
+The Vecchia approximation relies on the ability to write a likelihood function as the
+product of conditional likelihoods as shown below.
+\begin{align}
+L(Y)&=\prod_{i=1}^n L(Y_i \mid Y_{g(i)})
+\hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and } g(i)=\{1, 2,
+\ldots, i-1\} \nonumber \\
+&\approx \prod_{i=1}^{n}L(Y_i \mid Y_{h(i)}) \hspace{0.3em} \mbox{ where } h(i)
+\subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| = m \ll n
+\label{eq:vecchia}
+\end{align}
+Reducing the size of the conditioning set ($h(i)$ above) induces sparsity in the
+precision matrix, speeding up the evaluation of the likelihood. This takes an
+operation of order $O(n^3)$ down to $O(nm^3)$, motivating small values of $m$. As the
+size of the conditioning set $m$ increases, the quality of the approximation
+improves, until $n=m-1$, and the likelihood is no longer an approximation. We
+find a value of $m < 30$ is more than sufficient. The conditioning set can be
+constructed in many ways, but we default to a nearest-neighbors approach, which has
+been done previously \citep{sauer2023active}.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Generalized Computer Model Calibration}
@@ -410,88 +630,6 @@ process (middle, right).
 \label{sec:surr_mod}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Motivate need for surrogate (computer model is expensive)
-In Section \ref{sec:poisson_calib}, both toy examples had access to essentially
-unlimited output from our ``computer model.'' For each set of proposed computer model
-parameters, we could generate a novel run of the simulation almost instantaneously.
-This allowed us to retrieve exact evaluations at any point in the entire input space.
-However, in most scientific applications, the computer model of interest is
-computationally expensive. Due to complex and costly operations, such as solving
-partial differential equations, simulations can take hours, days, or even weeks to
-complete \citep{santner2018design}. This limits the ability to thoroughly explore the
-parameter input space in computer model calibration, thereby reducing the predictive
-performance and accuracy of parameter estimates. Therefore, we need a model (what we
-call a surrogate, or emulator) fit to the simulator output to make accurate and
-reliable predictions for out-of-sample values of our calibration parameters. Any
-statistical model can serve as a surrogate, ranging from linear regression to complex
-neural networks \citep{??}. However, the canonical surrogate for computer experiments and
-computer model calibration is the Gaussian process \citep{gramacy2020surrogates}.
-
-%------------------------------------------------------------------------------
-\subsection{Gaussian Processes}
-\label{sec:gp_surr}
-%------------------------------------------------------------------------------
-
-%% Review Gaussian processes and their use in surrogate modeling
-A Gaussian process (GP) is a realization of a multivariate normal distribution,
-governed by some mean and covariance functions. GPs are fit to observed data and then
-used to make predictions at new input locations, relying on the conditional
-multivariate normal equations, also known as the \textit{kriging} equations
-\citep{??}. For example, suppose we have a vector of observations $Y$ at input
-locations $X$. $Y$ is an $n \times 1$ vector and $X$ is an $n \times p$ matrix. We
-make the assumption that $Y$ is normally distributed with some mean function
-$(\mu(X))$ and covariance function $(\Sigma(X))$. However, more important than how we
-model observed data is what our model predicts at a new location $x$.
-Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean predictions $\mu^*(x)$ and
-corresponding uncertainty quantification $\Sigma^*(x)$.
-\begin{align}
-Y(X) \sim N\!\left(\mu(X), \Sigma(X)\right) \quad y^*(x) \mid Y(X) \sim
-N\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
-\mu^*(x)=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
-\Sigma^*(x)=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
-\end{align}
-Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is common
-to set $\mu(x)=0$. In practice, $Y$ is centered by subtracting off the sample mean. In
-the zero-mean context, all the action takes place in the covariance function. Many
-covariance kernels exists, such as the Gaussian, Exponential, Matern, etc \citep{??}.
-We use the Matern kernel in our work, of which both the Gaussian and Exponential
-kernels are special cases. Covariance kernels typically depend on three
-hyperparameters: a nugget $g$, a lengthscale $\theta$, and a scale $\tau^2$. In the
-Matern kernel, an additional parameter ($\nu$) exists, which controls the smoothness
-of the estimated surface. But we will not estimate the smoothness parameter here and
-instead set $\nu = \frac{5}{2}$ (\ref{eq:matern}), following common practice due to
-it allowing the kernel function to be expressed in a simpler form. All
-hyperparameters can be estimated using your preferred method (i.e. maximum
-likelihood, method of moments). We will use Bayesian methods, specifically MCMC.
-\begin{align}
-\Sigma(x, x'|\sigma^2, \theta, \nu, g) &= \sigma^2 \frac{2^{1-\nu}}{\Gamma(\nu)}
-\left(\sqrt{2\nu} \frac{\|x-x'\|}{\theta}\right)^2 K_{\nu} \left(\sqrt{2 \nu}
-\frac{\|x - x'\|}{\theta}\right) + g \cdot \mathbb{I} \nonumber \\
-&= \sigma^2 \left(1 + \frac{\sqrt{5} \cdot \|x - x'\|}{\theta} +
-\frac{5\cdot\|x-x'\|^2}{3\theta^2} \right) \text{exp}\left(-\frac{\sqrt{5} \cdot \|x
-- x'\|}{\theta}\right) + g \cdot \mathbb{I}
-\label{eq:matern}
-\end{align}
-GPs provide a flexible, nonparametric regression tool. They were popularized as
-surrogate models for computer experiments due to their ability to interpolate between
-observed data points (setting nugget $g = 0$). Although stochastic computer models
-are becoming more common, computer experiments are often deterministic. This
-motivates the desire for a model that interpolates. GPs are then useful by providing
-predictive surfaces that give higher estimates of variance away from observed data,
-and virtually no variance at observed locations. GPs also naturally provide excellent
-uncertainty quantification for out-of-sample predictions, a matter of importance to
-scientists exploring these computer models. In computer model calibration, we use a
-GP to model the simulator of interest.
-
-Now, let's go back to our example in Section \ref{sec:poisson_calib}. There, we were
-given a certain amount of observed field data and access to a computer model that
-could immediately spit out results for any unique combination of parameters we were
-interested in. Here, we only have the observed field data and a fixed number of runs
-from our computer model, usually evaluated over some space-filling design.
-Specifically, we use a Latin hypercube sample \citep{mckay1979} of size 40 over our
-two parameters, $\mu$ and $\nu$. So, we need to fit a GP on these 40 runs and make
-predictions at other input combinations of interest using \ref{eq:mvn_eq}.
-
 \subsubsection{Poisson Calibration with GP Surrogate Example}
 
 \begin{figure}[ht!]
@@ -545,88 +683,6 @@ propose a modern and better-perfoming approach.
 \label{f:calib2d_surr}}
 \end{figure}
 
-%------------------------------------------------------------------------------
-\subsection{Principal Components Analysis}
-\label{sec:pca}
-%------------------------------------------------------------------------------
-
-In the early 2000s, \citet{higdoncalib2008} faced a similar challenge. Expensive
-computer models at Los Alamos National Laboratory produced limited runs with
-extremely high-dimensional output in the form of images, shape description, time
-series, etc. In order to efficiently fit a surrogate model to the simulator, they
-needed to perform an approximation to limit the size of the data. As a solution, they
-employed principal components analysis (PCA) to reduce the dimensionality of the
-response. Specifically, they represented the output of a simulator model as the sum
-of $n_k$ basis functions $\textbf{k}_1, \textbf{k}_2, \ldots , \textbf{k}_{n_k}$,
-each scaled by a corresponding weight $w_i$, as shown in Eq. \ref{eq:higdon_pca}.
-Instead of modeling the high-dimensional response, the GP only modeled the small set
-of component weights. Bayesian inference was used to obtain the posterior
-distribution of those component weights. Combining estimates the weights with the
-calculated basis functions allowed for predictions out of sample. As a result of this
-approximation, the dimension of the covariance matrix $\Sigma(X)$ in the predictive
-equations of \ref{eq:mvn_eq} remained small.
-\begin{align}
-\textbf{y}(\textbf{x}, \textbf{u}) \approx \sum_{i=1}^{n_k} \textbf{k}_i \cdot w_i (\textbf{x}, \textbf{u}), \quad n_k \ll n \ \nonumber \\
-w_i (\textbf{x}, \textbf{u}) \sim GP(\textbf{0}, \Sigma_{w_i}),
-\label{eq:higdon_pca}
-\end{align}
-where $\Sigma_{w_i}$, dependent only on a limited number of combinations of
-$\textbf{x}$ and $\textbf{u}$, is a $n_k \times n_k$ matrix. Hence, the decomposition
-of $\Sigma_{w_i}$ avoids the O($n^3$) bottleneck in computation and can be completed
-in a reasonable amount of time.
-
-We propose a simpler approach, devoid of the definition and selection of how many
-basis functions to use. Although this basis representation was successful, we argue
-that what \citet{higdoncalib2008} really wanted to do was represent the functional
-output as a univariate response. That is, replicate the entry in the input matrix $X$
-for each response the number of times equal to the length of the output vector. In
-essence, implicitly encode the index (e.g. pixel in image, moment in time series)
-into the response vector for each observation in the input matrix. We believe that
-had \citet{higdoncalib2008} had access to the capacity of modern-day computing, along
-with the novel methodology proposed since the early 2000s that leverages that
-compute, they would have steered their implementation in a significantly different
-way. We propose that approach next and illustrate the improved performance in both
-predictive accuracy and uncertainty quantification, along with a reduction in
-computational expense.
-
-%------------------------------------------------------------------------------
-\subsection{Vecchia Approximation}
-\label{sec:vecchia}
-%------------------------------------------------------------------------------
-
-Perhaps the primary weakness of GPs is the need to decompose an $n \times n$
-covariance matrix, making it difficult to scale to large datasets. Many methods have
-been introduced to address this computational burden. These include, but are not
-limited to, fixed-rank kriging \citep{cressie2008fixed}, inducing points
-\citep{banerjee2008gaussian}, compactly supported kernels
-\citep{kaufman2011efficient}, divide-and-conquer \citep{gramacy2015local}, and
-nearest neighbors \citep{datta2016hierarchical, wu2022variational}. In the context of
-computer model calibration, \citet{higdoncalib2008} use a basis representation via
-principal components to accommodate high-dimensional output. However, with the
-dramatic increase in computing capacity over the past decade and the aforementioned
-advances in methodology, we believe there are better GP approximations available to
-model the output of a computer simulation. We propose the recently popularized
-Vecchia approximation \citep{vecchia1988estimation, katzfuss2020vecchia,
-katzfuss2021general, zhang2022multi}.
-
-The Vecchia approximation relies on the ability to write a likelihood function as the
-product of conditional likelihoods as shown below.
-\begin{align}
-L(Y)&=\prod_{i=1}^n L(Y_i \mid Y_{g(i)})
-\hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and } g(i)=\{1, 2,
-\ldots, i-1\} \nonumber \\
-&\approx \prod_{i=1}^{n}L(Y_i \mid Y_{h(i)}) \hspace{0.3em} \mbox{ where } h(i)
-\subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| = m \ll n
-\label{eq:vecchia}
-\end{align}
-Reducing the size of the conditioning set ($h(i)$ above) induces sparsity in the
-precision matrix, speeding up the evaluation of the likelihood. This takes an
-operation of order $O(n^3)$ down to $O(nm^3)$, motivating small values of $m$. As the
-size of the conditioning set $m$ increases, the quality of the approximation
-improves, until $n=m-1$, and the likelihood is no longer an approximation. We
-find a value of $m < 30$ is more than sufficient. The conditioning set can be
-constructed in many ways, but we default to a nearest-neighbors approach, which has
-been done previously \citep{sauer2023active}.
 
 \begin{figure}[ht!]
 \centering
