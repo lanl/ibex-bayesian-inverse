@@ -274,32 +274,90 @@ reproducing all examples is provided at
 \section{Review}
 \label{sec:review}
 
-%% Review computer model calibration
-Computer model calibration is a technique employed by statisticians to pair
-data collected from separate physical and computer experiments. The motivation
-for such a method stems from the infeasibility to collect a sufficient (or in
-some cases, any) number of physical observations. This may be due to a variety
-of limitations, such as prohibitive cost or ethical consierations. Therefore,
-in an effort to gain more insight, scientists develop computer models that
-attempt to represent that physical process. As a result of increased access to
-supercomputing resources, computer models have increased in complexity over
-the past two decades to produce extremely high-fidelity output. Data collected
-from a physical experiment can then be augmented by output from this computer
-simulation. Because of this additional source of data, scientists are able to
-make better predictions for the behavior of a physical process outside sampled
-locations. Another advantage from using a computer model is the ability for
-practitioners vary certain parameters that cannot be controlled or measured,
-at least precisely, in a physical experiment (e.g. gravity). So, in addition
-to helping achieve better prediction out-of-sample, the computer model output
-allows statisticians to estimate the distributions of certain unknown
-parameters, deepening knowledge of the physical process.
+%------------------------------------------------------------------------------
+%% SECTION 2.1 - Bayesian Inverse Problems
+\subsection{Bayesian Inverse Problems}
+\label{sec:bayes_inv}
+%------------------------------------------------------------------------------
 
-Consider observations $Y_F$ collected from a physical experiment at input
-locations $X_F$, as depicted in the left panel of Figure \ref{f:toy_calib}.
-Data $Y_M$ from a computer model supplement $Y_F$ as we attempt to uncover the
-underlying real process $y_R$, shown in black in the center panel. Before we
-move on, we need to cover one of the essential building blocks of computer
-model calibration, the Gaussian process.
+%% Review Bayesian inverse problems
+Bayesian statistical inversion (BSI) is a technique employed by statisticians to pair
+observations collected from a physical experiement with a physics-based model to
+solve the inverse problem. That is, given some noisy observations from an assumed
+model, statisticians seek to determine information about the data-generating process.
+The goals are two-fold: 1) estimate the distribution of the parameters that govern
+the physical model, and 2) if parameters are known but input is unknown, reconstruct
+the inputs from which the observations originated. The motivation for such a method
+stems from the inability to either control or precisely measure the factors (e.g. the
+force of gravity) in a physical experiment. Therefore, in an effort to gain more
+insight, scientists develop mathematical models, often resulting in a computer
+simulation, that attempt to represent that physical process. As a result of increased
+access to supercomputing resources, computer models have increased in complexity over
+the past two decades and are able to produce extremely high-fidelity output. Data
+collected from a physical experiment can then be augmented by output from this
+computer simulation. In this context, practitioners can vary those parameters that
+cannot be controlled in a physical environment. By comparing observations to
+simulator output generated via unique combinations of model parameters, statisticians
+can estimate the true, underlying parameter values. In BSI, this results in a
+distribution of likely values over some subset of the possible inputs. Another
+advantage of this additional source of data is that scientists are able to make
+better predictions for the behavior of a physical process outside sampled locations.
+In either case, BSI deepens our knowledge of physical processes.
+
+Consider observations $Y_F$ collected from a physical experiment at input locations
+$X_F$, as depicted in the left panel of Figure \ref{f:toy_calib}. Data $Y_M$ from a
+computer model supplement $Y_F$ as we attempt to uncover the underlying real process
+$y_R$, shown in black in the center panel, governed by parameters $\boldsymbol
+\theta$. Equation \ref{eq:bsi} sets up the BSI framework.
+\begin{align}
+Y_F(\boldsymbol x) &= y_R + \epsilon \nonumber \\ 
+y_R &= Y_M + \delta_b && \begin{bmatrix} Y_F \\ Y_M \end{bmatrix} \sim \left(\begin{matrix}0 \\ 0\end{matrix}, \begin{bmatrix} \Sigma_F & \Sigma_{FM} \\ \Sigma_M & \Sigma_{Mb} \end{bmatrix}\right)
+\label{eq:bsi}
+\end{align}
+%% Review Kennedy O'Hagan framework
+In 2001, \citeauthor{kennedyohagan2001} introduced what has since become the
+canonical framework for computer model calibration. In this framework, field
+data and computer simulation output are modeled jointly as following a
+multivariate normal distribution. \citeauthor{kennedyohagan2001} make two key
+suggestions: 1) Computer models, despite improvements in recent years, are
+still inherently biased. It's virtually impossible to exactly replicate a
+physical process through simulation. 2) Although often easier to conduct than
+physical experiments, computer models are still expensive in terms of
+computation, necesitating a surrogate model for the simulated output to obtain
+additional predictions. Equation \ref{eq:koh} lays out the format of their
+setup, with notation we introduced earlier.
+%% Maybe introduce a toy example (could be the mean from the poisson example, treated as normal with noise)
+Consider the left panel of Figure \ref{f:toy_calib}. Red stars denote field
+observations of some true, unknown process at different locations $X$. Note
+that these data are observed with some noise. Additionally, multiple
+observations are made at each location. This is common, due to the expense of
+changing configurations of a physical experiment, but it need not be the case.
+Dashed, green lines denote individual runs of a computer simulation, at
+different settings of parameters $\boldsymbol{\theta}$. Lastly, the black bold
+line shows the true, underlying process we want to estimate. Modeling the data
+as \citet{kennedyohagan2001} did, we can make field predictions out-of-sample
+and estimate the posterior distributions of $\boldsymbol{\theta}$. Predictions
+and posterior estimates are shown in the middle and right panels of Figure
+\ref{f:toy_calib}.
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.19,trim=0 0 65 0,clip=TRUE]{toy_calibration.jpg}
+\includegraphics[scale=0.19,trim=35 0 65 0,clip=TRUE]{toy_calib_pred.jpg}
+\includegraphics[scale=0.19,trim=35 0 0 0,clip=TRUE]{toy_calib_dist.jpg}
+\caption{Toy calibration example. Observations (left), predictions (middle),
+and posterior distribution (right).
+\label{f:toy_calib}}
+\end{figure}
+
+% Now, let's go back to our example in Section \ref{sec:poisson_calib}. There, we were
+% given a certain amount of observed field data and access to a computer model that
+% could immediately spit out results for any unique combination of parameters we were
+% interested in. Here, we only have the observed field data and a fixed number of runs
+% from our computer model, usually evaluated over some space-filling design.
+% Specifically, we use a Latin hypercube sample \citep{mckay1979} of size 40 over our
+% two parameters, $\mu$ and $\nu$. So, we need to fit a GP on these 40 runs and make
+% predictions at other input combinations of interest using \ref{eq:mvn_eq}.
+
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Gaussian Process Surrogates:
@@ -383,59 +441,6 @@ excellent uncertainty quantification for out-of-sample predictions, a matter
 of importance to scientists exploring these computer models. Therefore, GPs
 are widely used in computer model calibration, modeling both the simulator of
 interest and a discrepancy term introduced in the next section.
-
-% SECTION 2.2 - KOH Review:
-\subsection{Kennedy \& O'Hagan Computer Model Calibration}
-\label{sec:koh_review}
-
-%% Review Kennedy O'Hagan framework
-In 2001, \citeauthor{kennedyohagan2001} introduced what has since become the
-canonical framework for computer model calibration. In this framework, field
-data and computer simulation output are modeled jointly as following a
-multivariate normal distribution. \citeauthor{kennedyohagan2001} make two key
-suggestions: 1) Computer models, despite improvements in recent years, are
-still inherently biased. It's virtually impossible to exactly replicate a
-physical process through simulation. 2) Although often easier to conduct than
-physical experiments, computer models are still expensive in terms of
-computation, necesitating a surrogate model for the simulated output to obtain
-additional predictions. Equation \ref{eq:koh} lays out the format of their
-setup, with notation we introduced earlier.
-\begin{align}
-Y_F(\boldsymbol x) &= y_R + \epsilon \nonumber \\ 
-y_R &= Y_M + \delta_b && \begin{bmatrix} Y_F \\ Y_M \end{bmatrix} \sim \left(\begin{matrix}0 \\ 0\end{matrix}, \begin{bmatrix} \Sigma_F & \Sigma_{FM} \\ \Sigma_M & \Sigma_{Mb} \end{bmatrix}\right)
-\label{eq:koh}
-\end{align}
-%% Maybe introduce a toy example (could be the mean from the poisson example, treated as normal with noise)
-Consider the left panel of Figure \ref{f:toy_calib}. Red stars denote field
-observations of some true, unknown process at different locations $X$. Note
-that these data are observed with some noise. Additionally, multiple
-observations are made at each location. This is common, due to the expense of
-changing configurations of a physical experiment, but it need not be the case.
-Dashed, green lines denote individual runs of a computer simulation, at
-different settings of parameters $\boldsymbol{\theta}$. Lastly, the black bold
-line shows the true, underlying process we want to estimate. Modeling the data
-as \citet{kennedyohagan2001} did, we can make field predictions out-of-sample
-and estimate the posterior distributions of $\boldsymbol{\theta}$. Predictions
-and posterior estimates are shown in the middle and right panels of Figure
-\ref{f:toy_calib}.
-\begin{figure}[ht!]
-\centering
-\includegraphics[scale=0.19,trim=0 0 65 0,clip=TRUE]{toy_calibration.jpg}
-\includegraphics[scale=0.19,trim=35 0 65 0,clip=TRUE]{toy_calib_pred.jpg}
-\includegraphics[scale=0.19,trim=35 0 0 0,clip=TRUE]{toy_calib_dist.jpg}
-\caption{Toy calibration example. Observations (left), predictions (middle),
-and posterior distribution (right).
-\label{f:toy_calib}}
-\end{figure}
-
-% Now, let's go back to our example in Section \ref{sec:poisson_calib}. There, we were
-% given a certain amount of observed field data and access to a computer model that
-% could immediately spit out results for any unique combination of parameters we were
-% interested in. Here, we only have the observed field data and a fixed number of runs
-% from our computer model, usually evaluated over some space-filling design.
-% Specifically, we use a Latin hypercube sample \citep{mckay1979} of size 40 over our
-% two parameters, $\mu$ and $\nu$. So, we need to fit a GP on these 40 runs and make
-% predictions at other input combinations of interest using \ref{eq:mvn_eq}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
