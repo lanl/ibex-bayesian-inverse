@@ -60,6 +60,61 @@ ABSTRACT.
 %% - Introduce the idea of a computer model
 %% - Explain desire to understand the distribution of parameters
 
+The Interstellar Boundary Explorer (IBEX) satellite was launched in 2008 in an effort
+to deepen scientist's understanding of the heliosphere as part of the Small Explorer
+program \citep{mccomas2009aIBEX} sponsored by the National Aeronautics and Space
+Administration (NASA). The heliosphere is the bubble formed by the solar wind that
+encompasses our solar system that forms a barrier between our planetary system and
+interstellar space. In particular, the behavior at the edge of the heliosphere, also
+known as the heliopause, is of interest. Here, highly energized hydrogen ions in the
+solar wind interact with neutral atoms in interstellar space, occasionally undergoing
+electron exchange and become neutral themselves. Being unaffected by magnetic fields,
+these energetic neutral atoms (ENAs) then travel in a straight line. As a result,
+some ENAs make it to Earth and can be detected by IBEX. IBEX contains an instrument
+called the IBEX-Hi ENA imager \citep{funsten2009IBEXHiENA}, which records the energy
+level and approximate location of origin for each ENA that enters the satellite,
+providing sufficient data to estimate the rate at which ENAs are created throughout
+the heliopause. An example of this estimated surface or image, referred to as a
+\textit{sky map} by space scientists, can be found in the left panel of Fig.
+\ref{f:fig1}.
+
+One can think of the heliosphere as a boat moving through water, the water here
+representing interstellar space. At the outset of IBEX's mission, scientists expected
+to see a higher rate of ENAs being generated at the front (nose) and back (tail),
+much like the turbulent interaction between a boat and water at its bow and stern.
+And indeed, IBEX validated that belief in its collected data. More ENAs are produced
+at the nose and tail where there is an increased interaction between hydrogen ions
+and neutral particles in the interstellar medium. However, in a completely
+unanticipated finding, IBEX also recorded a string of higher rates of ENAs
+\citep{fuselier2009IBEXribbon} being created that wraps around the heliosphere.
+Scientists now refer to this phenomenom as the \textit{ribbon}. This unique feature
+of a \textit{sky map} is clearly visible in Fig. \ref{f:fig1}. Over the past 20
+years, space scientists have conducted extensive research to explain the existence of
+the \textit{ribbon} and have proposed dozens of theories to describe the physical
+process that generates it \citep{mccomas2014ibex, zirnstein2018role,
+zirnstein2019strong, zirnstein2021dependence}.
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.74,trim=0 0 65 0,clip=TRUE]{ibex_real1.pdf}
+\includegraphics[scale=0.74,trim=35 0 65 0,clip=TRUE]{sim1.pdf}
+\includegraphics[scale=0.74,trim=35 0 0 0,clip=TRUE]{sim2.pdf}
+\caption{Observed rate of energetic neutral atoms (ENA) detected by the
+Interstellar Boundary Explorer (IBEX) satellite (left) and output from two
+runs of the IBEX computer simulation at different settings (middle, right).
+\label{f:fig1}}
+\end{figure}
+
+In order to further explore these theories, scientists have developed computer models
+to simulate the creation sky maps. These computer simulations rely on a number of
+parameters that can be varied, thus modifying the shape and intensity of both ribbon
+and GDF. Although many simulations exist, we focus on two that are publicly
+available: a GDF model proposed by \citet{zirnstein2021heliosheath} and a ribbon-only
+model developed by \citet{zirnsteinGDFsims2015} representing the proposed Spatial
+Retention model. The ribbon-only model relies on two parameters, parallel mean free
+path and ratio. So far, minimal work has been done to validate theories or further
+understand the heliosphere by pairing the computer model output with real data
+collected by IBEX.
+
 %% PROBLEM
 %% - Classic Inverse Problem
 %% - Mathematical model is expensive (and perhaps not accurate)
@@ -76,6 +131,14 @@ ABSTRACT.
 %%   - SEPIA / GPMSA
 %%     - Not Poisson
 %%     - Simpler Approach
+%% - Insert a table on what is out there
+
+%% OUTLINE
+%% - Review Bayesian Inverse Problems, GP Surrogates, SEPIA
+%% - Introduce our framework
+%% - Explain use of Vecchia approximation
+%% - Demonstrate on simulated data
+%% - Apply to real IBEX data
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -293,6 +356,8 @@ ABSTRACT.
 % SECTION 6: Discussion
 \section{Discussion}
 \label{sec:discuss}
+
+Discussion.
 
 \subsection*{Acknowledgments}
 
