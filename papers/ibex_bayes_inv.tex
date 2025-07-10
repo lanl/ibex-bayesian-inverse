@@ -1,0 +1,739 @@
+\documentclass[12pt]{article}
+\usepackage[ruled, vlined]{algorithm2e}
+\usepackage{amsmath, amsfonts, amssymb, mathrsfs}
+\usepackage{caption}
+\usepackage{dcolumn}
+\usepackage{filemod}
+\usepackage{floatrow}
+\usepackage{gensymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{verbatim}
+
+\oddsidemargin=0.25in
+\evensidemargin=0.25in
+\textwidth=7in
+\textheight=8.75in
+\topmargin=-.5in
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\footskip=0.5in
+
+\begin{document}
+
+\title{TITLE} \author{Steven D. Barnett\thanks{Corresponding author
+\href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of Statistics,
+Virginia Tech} \and Robert B. Gramacy\thanks{Department of Statistics, Virginia
+Tech} \and Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos
+National Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{
+Nuclear and Particle Physics, AstroPhysics and Cosmology, Los Alamos National
+Laboratory} \and Fan Guo\footnotemark[4] \and Eric J. Zirnstein\thanks{
+Department of Astrophysical Sciences, Princeton University} \and Daniel B.
+Reisenfeld\thanks{Space Science and Applications Group, Los Alamos National
+Laboratory}}
+\date{}
+
+\maketitle
+
+\vspace{-0.5cm}
+
+\begin{abstract}
+ABSTRACT.
+
+\bigskip
+\noindent \textbf{Key words:} KEY WORDS
+\end{abstract}
+
+\doublespacing % no double spacing for arXiv
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+\label{sec:intro}
+
+%% IBEX
+%% - Talk about the satellite
+%% - Explain the mission
+%% - Introduce the idea of a computer model
+%% - Explain desire to understand the distribution of parameters
+
+%% PROBLEM
+%% - Classic Inverse Problem
+%% - Mathematical model is expensive (and perhaps not accurate)
+%% - Functional output is limited, but in high dimension
+%% - Physical observations are counts
+
+%% OTHER WORK
+%% - Bayesian Inverse Problems (BIP) w/ GP
+%%   - Not large scale
+%%   - Not Poisson
+%% - BIP w/ functional data
+%%   - more intuitive and scaleable way
+%% - Computer Model Calibration
+%%   - SEPIA / GPMSA
+%%     - Not Poisson
+%%     - Simpler Approach
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% SECTION 2: Review:
+\section{Review}
+\label{sec:review}
+
+%------------------------------------------------------------------------------
+%% SECTION 2.1 - Bayesian Inverse Problems
+\subsection{Bayesian Inverse Problems}
+\label{sec:bayes_inv}
+%------------------------------------------------------------------------------
+
+%% BAYESIAN INVERSE PROBLEMS
+%% - What is an inverse problem and why do we care?
+%% - Obtained observations from a physical process to learn more about it
+%% - Observations are noisy
+%% - We have some knowledge of the workings of the true process
+%% - We can build a mathematical model, and therefore a computer model
+%% - Classic IP: evaluate model as much as possible to find parameters/inputs
+%%   that produce output aligned with the observations
+%% - Desire full UQ on parameters
+%% - Go Bayesian
+%% - Show Prior / Posterior
+%% - No analytical form, must resort to MCMC
+%% - LEAD IN: Computer model is expensive. Need a surrogate.
+
+%------------------------------------------------------------------------------
+%% SECTION 2.2 - Gaussian Process Surrogates:
+\subsection{Gaussian Process Surrogates}
+\label{sec:gp_surr}
+%------------------------------------------------------------------------------
+
+%% GAUSSIAN PROCESS SURROGATES
+%% - What is the motivation? Expensive computer experiments
+%% - Set of n observations that follow a MVN
+%% - Often mean-zero. In practice this means subtracting off the mean
+%% - Results in all the action being in the covariance function
+%% - Covariance depends on pairwise distances
+%% - Explain some different kernels
+%% - Talk about prediction. Show Kriging equations
+%% - Nonparametric, flexible regression tool
+%% - A lot of different applications
+%% - Become popular in computer experiments because of interpolation
+%% - This is what we want
+%% - Bottleneck is O(n^3)
+%% - LEAD IN: Output can be large. Need an approximation.
+
+%------------------------------------------------------------------------------
+%% SECTION 2.3 - SEPIA / GPMSA
+\subsection{SEPIA / GPMSA}
+\label{sec:sepia}
+%------------------------------------------------------------------------------
+
+%% SEPIA / GPMSA
+%% - O(n^3) bottleneck is nothing new
+%% - Higdon et al. faced this at LANL in the early 2000s
+%% - Their situation is unique in that n was small, but dimension is high
+%% - Same situation as IBEX
+%% - Instead of modeling the output as scalar, they did functional
+%% - PCA
+%%   - Show some equations
+%%   - Maybe a graphic
+%% - Must choose basis
+%% - Used in calibration (an inverse problem), but does not support Poisson
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% SECTION 3: Methods
+\section{Methods}
+\label{sec:methods}
+
+%------------------------------------------------------------------------------
+%% SECTION 3.1 - Generalized Bayesian Inverse Problems with GP Surrogates
+\subsection{Generalized Bayesian Inverse Problems with GP Surrogates}
+\label{sec:gen_bayes_inv}
+%------------------------------------------------------------------------------
+
+%% GENERALIZED BAYESIAN INVERSE PROBLEMS WITH GP SURROGATES
+%% - Return to review, but with general response
+%% - Use link function
+%% - GPMSA / SEPIA cannot do this
+%% - Show some equations
+
+%------------------------------------------------------------------------------
+%% SECTION 3.1.1 - Examples
+\subsubsection{Examples}
+\label{sec:gen_bayes_inv_ex}
+%------------------------------------------------------------------------------
+
+%% EXAMPLES
+%% - 1D example with Poisson response
+%%   - note that we are treating the response as a scalar
+%%   - response is Poisson
+%%   - Graphic showing field / computer model data, fit, and posterior over parameters
+%% - 2D example with Poisson response
+%%   - Same Thing as above
+%%   - LEAD IN: capacity of GP is stretched
+
+%------------------------------------------------------------------------------
+%% SECTION 3.2 - Vecchia Approximation
+\subsection{Vecchia Approximation}
+\label{sec:vecchia}
+%------------------------------------------------------------------------------
+
+%% VECCHIA APPROXIMATION
+%% - Review improvement in computation
+%% - Higdon may have modeled it this way if he had the resources
+%% - List GP approximations from past decade
+%% - We use Vecchia
+%% - Show formulas
+%% - Specify that we use Scaled Vecchia approximation, what it is
+
+%------------------------------------------------------------------------------
+%% SECTION 3.2.1 - Examples
+\subsubsection{Examples}
+\label{sec:vecchia_ex}
+%------------------------------------------------------------------------------
+
+%% EXAMPLES
+%% - 2D example with LOTs of data
+%%   - Show results. Compare to previous
+%% - Show timing test on simulated data
+%%   - Graphic should include fitting and prediction
+%%   - Maybe show performance along with computation time
+%%   - Show 
+%%   - Show 
+
+%% - 2D example with Poisson response
+%%   - Same Thing as above
+%%   - LEAD IN: capacity of GP is stretched
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Generalized Computer Model Calibration}
+\label{sec:gen_calib}
+
+%% Rehash the need to update KOH to account for Poisson data
+%% Explain the use of a no-bias set up to initially prove the capability
+%% Briefly show the math behind this
+
+Computer models are not limited to modeling physical processes that generate a
+continous response. For instance, a field experiment may return a binary
+response, such as success or failure. Categorical responses may expand beyond
+two classes, representing a multinomial reponse. We focus on the
+Poisson-distributed counts in this paper, but our framework can be generalized
+to any response.
+
+% Introduce a charicature of the IBEX problem
+%% Progression of toy example:
+%%% 1) Limited field data, unlimited, low-dimensional simulator output
+%%% 2) Limited field data, limited, low-dimensional simulator output
+%%% 3) Limited field data, limited, high-dimensional simulator output
+
+Now, before we get ahead of ourselves, let's start with a simple problem.
+Suppose we are given counts collected from a physical experiment at different
+input locations ($x_i$), as shown in Figure \ref{f:logit1_examp}. We know that
+the underlying mean process is of the form $\lambda_i=\mu + \nu f(x_i)$. We are
+unable to modify $\mu$ and $\nu$ in a physical setting, but we can vary these
+values in a trivial, one-line ``computer model.'' If we consider all unique
+combinations for the values of $\mu \in \{5, 7.5, 10, 12.5, 15\}$ and $\nu \in
+\{0.25, 0.625, 1, 1.375, 1.75\}$, we end up with 25 different functional
+evaluations (depicted as gray lines in \ref{f:logit1_examp}). Our goal is
+two-fold: 1) Make accurate predictions at new, unobserved physical locations
+($x_i'$) with good uncertainty quantification (UQ), and 2) Estimate the
+distribution of calibration parameters $\mu$ and $\nu$ to better understand
+how the mean process is constructed.
+
+Consider the output displayed in Figure \ref{f:logit1_examp}. Suppose we are given
+counts collected from a physical experiment at different input locations ($x_i$). We
+know that the underlying mean process is of the form $\lambda_i=f(x_i, \mu, \nu)$. We
+are unable to modify $\mu$ and $\nu$ in a physical setting, but we can vary these
+values in a computer model. We run the simulation for a variety of unique
+combinations for the values of $\mu$ and $\nu$, resulting in 25 different functional
+evaluations (depicted as gray lines in \ref{f:logit1_examp}). Our goal is two-fold:
+1) Make accurate predictions at new, unobserved physical locations ($x_i'$) with good
+uncertainty quantification (UQ), and 2) Estimate the distribution of calibration
+parameters $\mu$ and $\nu$ to better understand how the mean process is constructed.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_obs.pdf}
+\caption{Counts from a Poisson process at varying $x_i$ locations along with
+evaluations of $\lambda_i=f(x_i, \mu, \nu)$ for different values of $\mu$ and
+$\nu$.
+\label{f:logit1_examp}}
+\end{figure}
+
+The canonical KOH computer model calibration framework is limited to a
+continuous response from both the computer model and the field experiment, due
+to it's reliance on modeling the two outputs jointly via a multivariate normal
+distribution. Faced with spatially distributed counts from the IBEX satellite,
+we could not apply KOH to our problem. We propose a fully Bayesian Markov
+chain Monte Carlo (MCMC) framework to sample from the posterior distribution
+of our calibration parameters. At each MCMC iteration, we propose new
+calibration parameters, generate computer model output at those new settings,
+and evaluate the Poisson likelihood of the observed data, given the simulated
+mean surface.
+
+%%%%% Explain the use of a no-bias set up to initially prove the capability
+KOH makes the presumably correct assumption that bias is inherent in any computer
+model attempting to represent a physical process. Therefore, KOH include a term for
+the discrepancy between model and reality. We initially ignore the bias to simplify
+the setup and prove the framework's capability. We will address discrepancy later in
+the paper.
+
+%%%%% Briefly show the math behind this
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Poisson Counts Response}
+\label{sec:poisson_calib}
+\begin{itemize}
+  \item Show diagram of updated framework (McMC with Poisson likelihood)
+  \item What if we have unlimited runs of the simulation?? Dave's 2004 paper
+  \item Set it up to have a Poisson response
+  \item What if we need a surrogate? Computer model takes a long time to run
+  \item Set it up to have a Poisson response, but now our data is limited
+\end{itemize}
+
+\subsubsection{Examples}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{Evaluations of model simulation at posterior draws (left) and
+posterior draws of calibration parameters $\mu$ and $\nu$ (right).
+\label{f:calib1d_nosurr}}
+\end{figure}
+
+\begin{itemize}
+  \item Results of 2D Poisson calibration (prediction, distribution of calibration
+  parameters)
+\end{itemize}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.5, trim=30 15 40 0,clip=TRUE]{logit2_obs.pdf}
+\includegraphics[scale=0.5, trim=30 15 95 0,clip=TRUE]{logit2_model1.pdf}
+\includegraphics[scale=0.5, trim=75 15 40 0,clip=TRUE]{logit2_model2.pdf}
+\caption{Poisson draws from a mean process over $x_1$ and $x_2$ (left).
+Evaluations of a computer model at different settings of four parameters
+($\mu_1$, $\nu_1$, $\mu_2$, $\nu_2$) attempting to represent the true mean
+process (middle, right).
+\label{f:logit2_examp}}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Surrogate Modeling}
+\label{sec:surr_mod}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Poisson Calibration with GP Surrogate Example}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est_wsurr.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws_wsurr.pdf}
+\caption{Predictions of GP surrogate at novel $X$ locations with accepted proposals
+of calibration parameters (left). Posterior draws of calibration parameters (right).
+\label{f:calib1d_surr}}
+\end{figure}
+
+The left panel of \ref{f:calib1d_surr} shows evaluations of our GP surrogate at
+posterior draws of the calibration parameters, shown on the right. These predictions
+are highly accurate, although that is not the focus of our discussion here, so we
+forego displaying results. Using those predictions from our surrogate, we can see
+that the MCMC does a good job of honing in on the true combination of $\mu$ and
+$\nu$. This is evidenced in the right panel of \ref{f:calib1d_surr}. Although the
+posterior distribution is not exactly centered on the truth, it covers the truth with
+a 95\% credible interval. These draws translate to predictions for what our computer
+model would output, through the use of our GP surrogate. The range of evaluations
+indicates that use of the surrogate allowed the MCMC to do extensive exploration of
+at unobserved inputs, far moreso than the 40 training runs. Most importantly, we see
+that our algorithm is able to combine the limited field data with the limited
+simulator output to capture the true, underlying mean process.
+
+We can do the same thing in higher dimension, although it's harder to visualize, even
+in 2D. But the more pressing barrier to overcome is the need for more runs of the
+simulation in higher dimensions in order to obtain good predictions from a surrogate.
+In the example above, the number of computer model evaluations was limited ($n <
+100$). As mentioned before, computational limits ensure that this is typically the
+case in computer model calibration. But note that the output of our computer is
+functional, i.e. each response is a vector. Above, each simulation was evaluated at
+20 separate points. Therefore, we are really modeling 800 ($40
+\times 20$) responses. Fitting a GP on 800 data points is already stretching the
+limitations of a GP (decomposing a $800 \times 800$ matrix). But consider our second
+example (\ref{f:logit2_examp}). To get 10 unique values of four parameters ($\mu_1$,
+$\nu_1$, $\mu_2$, $\nu_2$), a typical threshold for a good surrogate, we'd need
+upwards of 10,000 simulator runs. Combine that with a $20 \times 20$ grid over $x_1$
+and $x_2$ and our response vector will be greater than 200,000. Even if we used an
+smaller LHS space-filling design of size $n=100$, the response vector would consist of
+over 40,000 points. In that case, a GP would not feasibly be able to model each
+individual point as a separate response. For this problem, we review what has been done
+historically with high dimensional output in a calibration setting. Then, we will
+propose a modern and better-perfoming approach.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{2D POISSON CALIBRATION EXAMPLE WITH GP SURROGATE. Maybe include computation time panel?
+\label{f:calib2d_surr}}
+\end{figure}
+
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=0 10 15 50,clip=TRUE]{ibex_surr_rmse_bp.pdf}
+\includegraphics[scale=0.6, trim=0 10 15 50,clip=TRUE]{ibex_surr_crps_bp.pdf}
+\caption{Predictive performance for four methods (Scaled Vecchia
+Gaussian Processes, Locally Approximated Gaussian Processes (lagp), Fully
+Bayesian Gaussian Processes (deepgp1), and SEPIA) compared on RMSE and CRPS on
+the IBEX simulator. Each of 66 runs is held out once as test data, with the 65
+remaining runs acting as training data.
+\label{f:surr_bakeoff}}
+\end{figure}
+
+We considered multiple surrogate implementations with GP approximations to model the
+computer simulation, such as the {\tt R} packages {\tt laGP} and {\tt deepgp}.
+However, due to its superior performance in predictive accurary, uncertainty
+quantification, and execution time, we landed on the Scaled Vecchia Approximation
+\citep{scaledvecchiakatzfuss2022} to model the limited simulator output and make
+predictions at new locations. In fact, when discussing further work,
+\citet{scaledvecchiakatzfuss2022} suggest that their method would work as an
+effective tool for use in computer model calibration.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 10 15 50,clip=TRUE]{logit1_est.pdf}
+\caption{VECCHIA vs. SEPIA vs. DEEPGP vs. LAGP Timing. This could look a lot like
+Annie's plot in her Vecchia. One panel has each method, showing the exponential
+increase. And one panel has just Vecchia and SEPIA on larger and larger datasets.
+\label{f:surr_bakeoff}}
+\end{figure}
+
+In Figure \ref{f:surr_bakeoff} we show the results of a bakeoff between each
+surrogate model considered on the IBEX simulated data. We will leave the details of
+the data to \ref{sec:ibex_sim}. The only important things to note are that there are 66
+unique model runs (corresponding to unique combination of the input parameters) and
+each run produces a vector of 16,200 values. Quick math comes out to 1,069,200 unique
+observations, clearly much too large for an ordinary GP to handle. But even most
+approximate GPs struggle with a dataset of this size. For our bakeoff, we conducted
+hold-one-out cross-validation. Therefore, each boxplot in Figure \ref{f:surr_bakeoff}
+encompasses 66 points. Each method (besides SEPIA) uses a neighborhood size of
+$m=25$. Although {\tt laGP} benefits from parallelization, to keep the playing field
+level each method was restricted to using one core. {\tt BayesGP} uses MCMC, so due
+to time constaints, only 1000 iterations were allowed, with a burn in of 500 and
+thinning by 10. It's clear the Scaled Vecchia is superior in all measures. {\tt laGP}
+has no fitting time, as each call to predict encompasses the ``fitting'' process.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.6, trim=5 15 15 50,clip=TRUE]{logit1_post_draws.pdf}
+\caption{2D POISSON CALIBRATION EXAMPLE WITH VECCHIA GP SURROGATE. Maybe include
+computation time panel here as well. Maybe do calibration with other surrogates?
+\label{f:calib2d_surr_vecchia}}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interstellar Boundary Explorer}
+\label{sec:ibex}
+
+In 2008, NASA launched the IBEX satellite into Earth's orbit as part of their
+Small Explorer program \citep{mccomas2009aIBEX}. IBEX's mission is to collect
+data that will deepen the scientific community's understanding of the
+heliosphere, the egg-shaped bubble encapsulating our solar system. The
+heliosphere is created from the solar wind. The solar wind, continously
+emitted from the Sun, is primarily made up of hydrogen ions, or lone protons.
+These ions travel through the solar system and out into interstellar space. As
+the ions reach the boundary of our solar system, they encounter the
+termination shock, where they slow down, absorb significant amounts of energy,
+and become highly energetic, charged atoms. These hydrogen ions form the
+heliosphere and act as a barrier between our solar system and interstellar
+space. While in this region called the heliopause (the outer edge of the
+heliosphere), the ions can interact with other particles in the interstellar
+medium. Sometimes these encounters result in electron exchange, converting the
+charged atoms into what heliospheric physicists call energetic neutral atoms
+(ENAs). Without charge, these ENAs travel in a straight line, unaffected by
+magnetic fields. Some ENAs cross back into the solar system and, depending on
+their path, can be detected in Earth's orbit. Determining the rate at which
+ENAs are generated in different parts of the heliosphere is key to
+understanding the makeup of this region at the boundary of our solar system
+and interstellar space.
+
+IBEX records the energy level and approximate location of origin for each ENA
+that enters the satellite, providing sufficient data to estimate the rate at
+which ENAs are created throughout the heliopause. Specifically, the IBEX
+satellite contains an instrument called the IBEX-Hi ENA imager
+\citep{funsten2009IBEXHiENA}, which includes a series of plates
+\citep{moran2024statistical} that the ENAs travel through to be detected. The
+IBEX satellite rotates on an axis, and over a period of six months, is able to
+point at every part of the sky for some interval, or exposure time. This
+spatial map of ENA rates (referred to by space scientists as a \textit{sky
+map}) is used to analyze, make conjectures about, and ultimately develop
+theories for the heliosphere, its many properties, and the processes that
+govern its creation.
+
+The heliosphere is like a boat moving through water. Here the water represents
+interstellar medium. As a boat moves through water, the water is disturbed.
+However, the turbulence created is not equal at each location where the boat is
+in contact with the water. Turbulence is greater at the front (bow) and back
+(stern) than on the sides (port and starboard) of the ship. Prior to the launch
+of the IBEX satellite, space scientists had the same expectation for the
+heliosphere. Higher rates of ENAs being generated would exist at the stern
+(space scientists call this the \textit{nose}) and bow (\textit{tail}) of the
+helisophere due to its movement through interstellar space. Data observed found
+this to be true. These higher rates are referred to as \textit{globally
+distributed flux (GDF)}. But in a completely unexpected finding
+\citep{mccomas2009bIBEX}, IBEX also recorded a string of higher rates of ENAs
+\citep{fuselier2009IBEXribbon} being generated that curved around the
+heliosphere. Scientists now refer to this phenomenom as the \textit{ribbon}.
+For the past fifteen years, space scientists have conducted extensive research
+and proposed dozens of theories to explain the existence of the ribbon and the
+physical process that generates it \citep{mccomas2014ibex, zirnstein2018role,
+zirnstein2019strong, zirnstein2021dependence}.
+
+% Introduce existence of computer model simulations (ribbon, GDF).
+In conjunction with proposing explanations for the existence of the ribbon and
+GDF, theoretical physicists have developed computer models to simulate the
+creation of sky maps. These computer simulations rely on a number of
+parameters that can be varied, thus modifying the shape and intensity of both
+ribbon and GDF. Although many simulations exist, we focus on two that are
+publicly available: a GDF model proposed by \citet{zirnstein2021heliosheath}
+and a ribbon-only model developed by \citet{zirnsteinGDFsims2015} representing
+the proposed Spatial Retention model. The ribbon-only model relies on two
+parameters, parallel mean free path and ratio. So far, minimal work has been
+done to validate theories or further understand the heliosphere by pairing the
+computer model output with real data collected by IBEX.
+
+Scientific investigation of the GDF and ribbon currently involves a long,
+complex, and at times cumbersome process. For one, the noisy and irregular
+nature of the data has made it hard for space scientists to separate signal
+from noise and perform their analyses. First, a smooth surface is generated
+from the raw satellite data. Once smooth \textit{sky maps} are created, they
+are separated into GDF-only and ribbon-only maps \citet{beesleyribbonsep2023}.
+With the source of ENAs separated into two distinct maps, space scientists
+perform analysis and conduct research exclusively for either the GDF or ribbon
+with the respective map. We believe this process can be improved in two ways.
+First, both the response surface modeling and ribbon separation rely on many
+assumptions about the data and thus depart from the data generation process
+itself. Second, we believe inference about the heliosphere can be done in a
+more holistic way using the data in its original form, as counts of ENAs given
+some exposure time, regardless of source.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{IBEX Sky Map}
+\label{sec:ibex_sky}
+
+Over the past 15 years, physicists at Princeton University and Los Alamos National
+Lab have developed theoretical models to explain the existence of the GDF and ribbon,
+along with their corresponding shape and intensity. The shape and intensity of the
+GDF and ribbon are controlled by four paramters: parallel mean free path, ratio,
+parameter3, and parameter4. We leave a more in depth physical interpretation of these
+parameters to more appropriate venues (??cite). However, as an example, the parallel
+mean free path represents the distance a hydrogen ion travels beyond the heliopause
+before interacting with another particle, receiving an electron, and becoming an ENA.
+Physicists engaged in this work have developed computer models to represent the
+physical model they have proposed. Therefore, given specific values for our four
+paramters, we can run the model and output a vector of proposed ENA rates at specific
+geographical coordinates. The resolution of the output can be varied, but typical
+runs output ~16,000 rates, corresponding to a 2 degree grid over latitude and
+longitude.
+
+As stated previously, computer model calibration is concerned with leveraging
+simulator output to make more accurate predictions at out-of-sample field locations.
+Additionally, the distribution of calibration parameters can be estimated. The latter
+purpose is the primary interest of physicists involved in this project, as estimation
+of these parameters will give credence to what model best represents the data.
+However, we will also show that using computer model output enables us to make better
+predictions on holdout satellite data.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Synthetic IBEX Data}
+\label{sec:ibex_sim}
+
+In order to showcase and validate our proposed methodology on the IBEX data, we will
+first test on simulated sky maps. To do this, we will treat one output from the
+computer model simulation as the ``truth.'' Using this output as the underlying mean
+ENA rate, we will draw Poisson counts with exposure time specified by the real IBEX
+data. Figure \ref{f:ibex_synth_ex} shows both the ``truth'' from the simulation (top
+right) and the ``observed'' simulated data. Note that the spread of the data is as if
+it came from orbits of the IBEX satellite, along with strings of missing data along
+certain orbits.
+
+Now, treating the simulated data as if it came from the satellite, we run our Poisson
+computer model calibration code and estimate the underlying parameters. In Figure
+\ref{f:ibex_synth_ex}, the bivariate posterior distribution of parallel mean free
+path and ratio are displayed. We can see that our framework does a good job of
+obtaining the true combination of parameters, with the posterior mode lying near the
+truth. Additionally, the truth falls squarely in the 95\% credible interval. As a
+sanity check, we take the value of each parameter at the posterior mode and insert
+those into our fitted surrogate model. The predicted output is shown in the bottom
+right of Figure \ref{f:ibex_synth_ex}. It is obvious that there are some differences
+between the estimated sky map and the ``truth.'' The shape and intensity of the
+ribbon in each sky map is slightly different. However, it is also abundantly clear
+that each map (truth and estimated) could have reasonably generated the data we
+``observe''in the top left plot. Therefore, we can confidently assert that our
+framework recovers the truth.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.25,trim=0 0 0 0,clip=TRUE]{sim_ibex_real_calib.png}
+\caption{Simulated satellite data based on an output from the computer model (top
+left). True simulator output (top right). Estimated calibration parameters (bottom
+left). Estimated output via surrogate at estimated calibration parameters (bottom
+right).
+\label{f:ibex_synth_ex}}
+\end{figure}
+
+We can apply this method to each unique combination of calibration parameters within
+our simulator output. Due to the inability for the model to provide good
+distributions for bounday parameters, we don't consider combinations for which at
+least one parameter is on its edge. For instance, when parallel mean free path is
+either 500 or 300 and/or ratio is either 0.0001 and 0.1. This results in 36 unique
+combinations. For each combination, we follow the same procedure as described above.
+First, we elect one unique combination and create simulated observed satellite data
+based on the computer model. Next, we remove that combination from the training data
+used to fit our Scaled Vecchia Gaussian Process surrogate model. And finally, we run
+our calibration framework to retrieve estimates for the calibration parameters. Our
+results are shown in Figure \ref{f:synth_estimates_all}. In each plot of the
+posterior distributions, we have included the true combination of parameters that
+generated the simulated data. Our 95\% credible intervals encompass the truth in 34
+of the 36 of the iterations, near the nominal coverage rate we'd expect.
+
+In addition to estimating the calibration parameters, we can utilize our framework to
+achieve better prediction at out-of-sample field locations. While we have not dealt
+with real data from the satellite just yet, we can simulate satellite data as before
+and run cross-validation on holdout sets.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{calib_estimates_all.png}
+\caption{Posterior distributions for estimated calibration parameters for each unique
+combination of values that has been treated as a holdout set.
+\label{f:synth_estimates_all}}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Real IBEX Data}
+\label{sec:ibex_real}
+\begin{itemize}
+  \item Illustrate the gap between computer model output and real data
+  \item Recall how we will account for discrepancy (PCA?, GP?)
+  \item Perform tests on examples where we know what the bias is. How well
+    does our method account for this?
+  \item Lack of competitors? (could we compare to calibration of
+    ribbon-separated maps)
+  \item Run our code on IBEX real data.
+  \item We could display predictions for different values of the calibration
+    parameters. Not sure if this is of interest.
+  \item Display distributions on calibration parameters.
+\end{itemize}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{calib_estimates_real.png}
+\caption{Posterior distributions for estimated calibration parameters for each year of data IBEX has collected.
+\label{f:real_estimates_all}}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% SECTION 5.2: Discrepancy
+%%% Note that discrepancy was explored
+%%% Maybe show some plots that indicate a simple discrepancy is insufficient
+
+\subsection{Discrepancy Analysis}
+\label{sec:discrepancy}
+\begin{itemize}
+  \item Illustrate the gap between computer model output and real data
+  \item Recall how we will account for discrepancy (PCA?, GP?)
+  \item Perform tests on examples where we know what the bias is. How well
+    does our method account for this?
+\end{itemize}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{discrepancy.png}
+\caption{\textbf{Top row:} Estimated sky maps at values of parameters calibration
+returned. \textbf{Middle row:} Satellite data for years 2009-2011. \textbf{Bottom
+row:} Difference between top two rows.
+\label{f:ibex_discrep}}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discuss}
+
+We have introduced an effective tool for computer model calibration where 1) data
+from a field experiment is not normally distributed and 2) computer model output is
+extremely high-dimensional, demanding an approximation for the Gaussian process
+surrogate. In simulated experiments, our framework provides accurate predictions at
+unsampled input locations. Additionally, when provided with data where the underlying
+calibration parameters are known, we can recover the truth at the nominal rate. We
+applied this methodology to data collected from the IBEX satellite, and corresponding
+simulator output generating heliospheric sky maps. When faced with real data from the
+satellite, our method shows that large discrepancies exist between the computer model
+and the physical process it attempts to represent. Further collaboration is needed to
+inform the theoretical astrophysicists responsible for model development where the
+model is lacking, and improve its fidelity to the truth.
+
+Our framework is only applied to counts assumed to come from a Poisson distributed
+process. We encourage other practitioners to use this work in other contexts where
+data from the field may come from some other distribution (e.g. Negative Binomial,
+Bernoulli, Exponential, etc.). We recognize the limitations of our method. First, the
+Scaled Vecchia GP surrogate for the computer model fails to provide full uncertainty
+quantification on its parameter estimates. A fully Bayesian framework could be
+developed, perhaps with the use of a deep Gaussian process to handle the inherent
+non-stationarity in the response surface. Finally, this project motivates the need
+for a more exhaustive procedure to perform hypothesis testing for which theoretical
+model is most probable, considering the data observed.
+
+\subsection*{Acknowledgments}
+
+RBG and SDB are grateful for funding from NSF CMMI 2152679. This work has been
+approved for public release under LA-UR-??-?????. SDB, DO and LJB were funded
+by Laboratory Directed Research and Development (LDRD) Project 20220107DR.
+
+\bibliography{poisson_calib}
+\bibliographystyle{jasa}
+
+\appendix
+
+\end{document}
+
+%% STEPS:
+%% - Write discussion
+%% - Redesign intro to be more like Bobby suggested
+%% - Review computer model calibration (lit review)
+%% - Review KOH (lit review)
+%% - Review Higdon SEPIA (lit review)
+%% - Introduce generalized computer model calibration (can't model joint MVN)
+%%%% - 10/23
+%% - Create and introduce 1D poisson example
+%% - Write section on GP surrogates
+%%%% - 10/23
+%% - Expand on toy example and write about needing a surrogate
+%% - Talk about Scaled Vecchia
+%% - Create and introduce 2D poisson toy example
+%% - Write about IBEX stuff
+%% - Explain experiment with synthetic
+%% - Explain experiment with real data (need for discrepancy)
