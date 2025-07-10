@@ -96,15 +96,7 @@ output.
 
 % SECTION 3: Methods
 
-%%% SECTION 3.1: Generalized Computer Model Calibration
-%%%%% Maybe introduce toy example here
-%%%%% Rehash the need to update KOH to account for Poisson data
-%%%%% Explain the use of a no-bias set up to initially prove the capability
-%%%%% Briefly show the math behind this
-
-%%% SECTION 3.2: Poisson Response Examples
-%%%%% Results of 1D Poisson calibration (prediction, distribution of calibration parameters)
-%%%%% Results of 2D Poisson calibration (prediction, distribution of calibration parameters)
+ 
 
 %%% SECTION 3.3: Vecchia Approximation
 %%%%%
@@ -150,7 +142,7 @@ output.
 \label{sec:intro}
 
 %  The computer model calibration literature is great when you have noisy,
-%   Gaussian field data and smooth computer model you can model with GP(and not TOO big)
+%   Gaussian field data and smooth computer model you can model with GP (and not TOO big)
 %   However, not all calibration fit into that mold.
 %  For example, we are working with satelite detector counts. IBEX is giving a lot of count data <- that is big
 %   computer model data is big too. other problems don't fit into that mold.
@@ -279,6 +271,19 @@ reproducing all examples is provided at
 \subsection{Bayesian Inverse Problems}
 \label{sec:bayes_inv}
 %------------------------------------------------------------------------------
+
+%% Scientists need to solve the inverse problem
+%% Often there is a physics-based, mathematical model that represents the physical experiment
+%% Noisy response in the field makes it harder to infer the true parameter values of the mathematical model
+%% We don't just want a point estimate, but full uncertainty quantification of the parameters
+%% We use bayesian inverse problems to estimate parameters, but can also be used for inputs
+%% Often limited data in field <- not sure if this is a Bayesian inverse problem problem, but it fits our situation
+%% Reference that computer model calibration does this exact thing, but extends to a discrepancy
+%% Show prior/posterior for parameters in equation form
+%% Analytical solution is not possible
+%% Must resort to MCMC
+%% Classical methods might use the mathematical model and just run as many different parameter combinations as possible to fit the data <- maximum likelihood
+%% But we have an expensive computer model
 
 %% Review Bayesian inverse problems
 Bayesian statistical inversion (BSI) is a technique employed by statisticians to pair
