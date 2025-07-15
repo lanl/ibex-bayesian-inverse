@@ -12,6 +12,7 @@
 \usepackage{setspace}
 \usepackage{subcaption}
 \usepackage{verbatim}
+\usepackage{makecell}
 
 \oddsidemargin=0.25in
 \evensidemargin=0.25in
@@ -78,21 +79,24 @@ the heliopause. An example of this estimated surface or image, referred to as a
 \textit{sky map} by space scientists, can be found in the left panel of Fig.
 \ref{f:fig1}.
 
-One can think of the heliosphere as a boat moving through water, the water here
-representing interstellar space. At the outset of IBEX's mission, scientists expected
-to see a higher rate of ENAs being generated at the front (nose) and back (tail),
-much like the turbulent interaction between a boat and water at its bow and stern.
-And indeed, IBEX validated that belief in its collected data. More ENAs are produced
-at the nose and tail where there is an increased interaction between hydrogen ions
-and neutral particles in the interstellar medium. However, in a completely
-unanticipated finding, IBEX also recorded a string of higher rates of ENAs
-\citep{fuselier2009IBEXribbon} being created that wraps around the heliosphere.
-Scientists now refer to this phenomenom as the \textit{ribbon}. This unique feature
-of a \textit{sky map} is clearly visible in Fig. \ref{f:fig1}. Over the past 20
-years, space scientists have conducted extensive research to explain the existence of
-the \textit{ribbon} and have proposed dozens of theories to describe the physical
-process that generates it \citep{mccomas2014ibex, zirnstein2018role,
-zirnstein2019strong, zirnstein2021dependence}.
+One can think of the heliosphere as a boat moving through water, the water
+here representing interstellar space. At the outset of IBEX's mission,
+scientists expected to see a higher rate of ENAs being generated at the front
+(nose) and back (tail), much like the turbulent interaction between a boat and
+water at its bow and stern. And indeed, IBEX validated that belief in its
+collected data. This feature is termed \textit{globally distributed flux}, or
+GDF, by the space science community. More ENAs are produced at the nose and
+tail where there is an increased interaction between hydrogen ions and neutral
+particles in the interstellar medium. However, in a completely unanticipated
+finding, IBEX also recorded a string of higher rates of ENAs
+\citep{fuselier2009IBEXribbon} being created that wraps around the
+heliosphere. Scientists now refer to this phenomenom as the \textit{ribbon}.
+This unique feature of a \textit{sky map} is clearly visible in Fig.
+\ref{f:fig1}. Over the past 20 years, space scientists have conducted
+extensive research to explain the existence of the \textit{ribbon} and have
+proposed dozens of theories to describe the physical process that generates it
+\citep{mccomas2014ibex, zirnstein2018role, zirnstein2019strong,
+zirnstein2021dependence}.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.74,trim=0 0 65 0,clip=TRUE]{ibex_real1.pdf}
@@ -104,22 +108,40 @@ runs of the IBEX computer simulation at different settings (middle, right).
 \label{f:fig1}}
 \end{figure}
 
-In order to further explore these theories, scientists have developed computer models
-to simulate the creation sky maps. These computer simulations rely on a number of
-parameters that can be varied, thus modifying the shape and intensity of both ribbon
-and GDF. Although many simulations exist, we focus on two that are publicly
-available: a GDF model proposed by \citet{zirnstein2021heliosheath} and a ribbon-only
-model developed by \citet{zirnsteinGDFsims2015} representing the proposed Spatial
-Retention model. The ribbon-only model relies on two parameters, parallel mean free
-path and ratio. So far, minimal work has been done to validate theories or further
-understand the heliosphere by pairing the computer model output with real data
-collected by IBEX.
+In order to further explore these theories, scientists have developed computer
+models to simulate the creation of a \textit{sky map}. These computer
+simulations rely on a number of parameters that can be varied, thus modifying
+the shape and intensity of both ribbon and GDF. Although many simulations
+exist, we focus on two that are publicly available: a GDF model proposed by
+\citet{zirnstein2021heliosheath} and a ribbon-only model developed by
+\citet{zirnsteinGDFsims2015} representing the proposed Spatial Retention
+model. The ribbon-only model relies on two parameters, parallel mean free path
+and ratio, and the GDF model relies on two additional parameters, X1 and X2.
+Understaing the distribution of these variables would be instrumental in
+determining which proposed theory carries the most weight, or which
+combination of parameter values is the most probable. So far, minimal work has
+been done to validate theories or further understand the heliosphere by
+pairing the computer model output with the raw data collected by IBEX.
 
 %% PROBLEM
 %% - Classic Inverse Problem
 %% - Mathematical model is expensive (and perhaps not accurate)
 %% - Functional output is limited, but in high dimension
 %% - Physical observations are counts
+Now, this is a classical statistical inverse problem. Given observed data and
+an assumed true model that generates the data, the goal is to determine the
+values of the parameters in the model. A classic approach to solving the
+inverse problem is to evaluate the model with a myriad of unique combination
+of paramter values. Then, select the set of parameter values that minimize the
+distance between model output and real observations. However, there are
+limitations to that technique. For one, computer models are often expensive,
+often taking hours, days, or weeks (as is the case in our IBEX example),
+precluding the execution of an extensive set of parameter combinations. So, a
+Bayesian approach is often better. Apply Bayesian methods allows practitioners
+to inform the model with prior information on the paramters. Additionally,
+Bayesian statistical inversion (BSI) treats the parameters as random variables
+and provides more information through an estimated distribution over the
+most likely values.
 
 %% OTHER WORK
 %% - Bayesian Inverse Problems (BIP) w/ GP
@@ -132,6 +154,50 @@ collected by IBEX.
 %%     - Not Poisson
 %%     - Simpler Approach
 %% - Insert a table on what is out there
+Bayesian statistical inverse problems are not new. But the data collected by
+IBEX and its corresponding simulated representation present a unique
+challenge. Table \ref{tab:prev_work} summarizes the features necessary to solve the
+IBEX inverse problem and reviews the capabilities present in previous work.
+\citep{kennedyohagan2001} offer the canonical computer model calibration
+framework, which provides a fully Bayesian approach to estimate the
+distribution of calibration parameters and improve prediction out-of-sample.
+However, their framework is limited to Gaussian observations and small,
+simulator output. \citep{higdoncalib2008} also employ Bayesian methods when
+computer model output is functional and high-dimensional. In addition to the
+previous restriction to Gaussian data, \citet{higdoncalib2008} require the
+user to specify a number of basis functions to represent the data.
+\citep{gramacy2015calibrating} consider computer model calibration with
+large-scale output from a simulator, necessitating an approximation. But their
+implementation is not Bayesian, the scale of data is still orders of magnitude
+less than IBEX, and the large-scale data only applies to the computer model,
+not the field data. \citep{grosskopfcountcalib2020} provide a extension of the
+Kennedy \& O'Hagan (hereafter referred to as KOH) framework to non-Gaussian
+data that maintains a Bayesian approach. But they are limited to small amounts
+of data and do not consider high dimensions or calibration parameters. In
+contrast, our approach checks all the boxes to achieve the goal of IBEX space
+scientists.
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+& Bayesian & \makecell{Non-Gaussian \\ Observations} & \makecell{Large-Scale \\ Computer Model \\ Output} & \makecell{High-Dimensional \\ Output} \\
+\hline
+Our Contribution & \checkmark & \checkmark & \checkmark & \checkmark \\
+\hline
+\citep{kennedyohagan2001} & \checkmark & & & \\
+\hline
+\citep{higdoncalib2008} & \checkmark & & & \checkmark \\
+\hline
+\citep{gramacy2015calibrating} & & \checkmark & & \\
+\hline
+\citep{grosskopfcountcalib2020} & \checkmark & \checkmark & & \\
+\hline
+\end{tabular}
+\caption{A review of functionality for statistical inverse problems in
+previous academic works. A check mark indicates that functionality exists
+within the paper and/or accompanying software.}
+\label{tab:prev_work}
+\end{table}
 
 %% OUTLINE
 %% - Review Bayesian Inverse Problems, GP Surrogates, SEPIA
@@ -139,6 +205,18 @@ collected by IBEX.
 %% - Explain use of Vecchia approximation
 %% - Demonstrate on simulated data
 %% - Apply to real IBEX data
+Our paper is laid out as follows. First, Section \ref{sec:review} reviews some of the methodology
+that form the foundation for our work, namely Bayesian Inverse Problems and
+Gaussian process surrogate models. We also provide a brief description of the
+SEPIA implementation, the current status quo in Bayesian Inverse Problems. In
+Section \ref{sec:gen_bayes_inv} we introduce our framework for solving the
+inverse problem in non-Gaussian contexts. Section \ref{sec:vecchia} describes
+our use of the Vecchia approximation to stretch the capacity of our GP
+surrogate for large-scale simulator output. In Section \ref{sec:sims}, we
+illustrate the effectiveness of our framework in discovering the true,
+underlying calibration parameters on simulated data. We apply our methods to
+the real IBEX satellite data in Section \ref{sec:ibex_real}. To finish off, we
+discuss current and future work in this area in Section \ref{sec:discuss}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
