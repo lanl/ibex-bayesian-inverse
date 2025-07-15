@@ -25,16 +25,18 @@
 
 \begin{document}
 
-\title{TITLE} \author{Steven D. Barnett\thanks{Corresponding author
-\href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of Statistics,
-Virginia Tech} \and Robert B. Gramacy\thanks{Department of Statistics, Virginia
-Tech} \and Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos
-National Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{
-Nuclear and Particle Physics, AstroPhysics and Cosmology, Los Alamos National
-Laboratory} \and Fan Guo\footnotemark[4] \and Eric J. Zirnstein\thanks{
-Department of Astrophysical Sciences, Princeton University} \and Daniel B.
-Reisenfeld\thanks{Space Science and Applications Group, Los Alamos National
-Laboratory}}
+\title{Bayesian Statistical Inversion for High-Dimensional Computer Model
+Output and Spatially Distributed Counts}
+\author{Steven D. Barnett\thanks{Corresponding author
+\href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of
+Statistics, Virginia Tech} \and Robert B. Gramacy\thanks{Department of
+Statistics, Virginia Tech} \and Lauren J. Beesley\thanks{Statistical Sciences
+Group, Los Alamos National Laboratory} \and Dave Osthus\footnotemark[3] \and
+Yifan Huang\thanks{ Nuclear and Particle Physics, AstroPhysics and Cosmology,
+Los Alamos National Laboratory} \and Fan Guo\footnotemark[4] \and Eric J.
+Zirnstein\thanks{ Department of Astrophysical Sciences, Princeton University}
+\and Daniel B. Reisenfeld\thanks{Space Science and Applications Group, Los
+Alamos National Laboratory}}
 \date{}
 
 \maketitle
@@ -42,10 +44,29 @@ Laboratory}}
 \vspace{-0.5cm}
 
 \begin{abstract}
-ABSTRACT.
+The Interstellar Boundary Explorer (IBEX) satellite detects energetic neutral
+atoms (ENAs) and determines the rate at which they are generated in the
+heliosphere. Computer models attempt to represent the physical process that
+produces heliospheric ENAs through specified model parameters. Bayesian
+Statistical Inversion enables statisticians to use data collected in a field
+experiment along with simulator output from a variety of parameter settings to
+make out-of-sample predictions and learn the posterior distributions of model
+parameters. However, inverse problems typically assume a Gaussian or
+continuous response for both field and computer model data. We introduce a
+novel Markov chain Monte Carlo framework that accommodates the spatially
+distributed Poisson counts collected by the IBEX satellite. Additionally, the
+computer simulation in our application is limited in the amount of runs it can
+perform, but each run's output is quite large. Therefore, we propose the use
+of the Scaled Vecchia approximation as a Gaussian process (GP) surrogate. We
+demonstrate the capability of our proposed framework through multiple
+simulated examples and show that we can consistently recover the true
+parameters in a discrepancy-free environment and obtain accurate out-of-sample
+prediction. We apply this to the IBEX satellite data and the corresponding
+computer model output.
 
 \bigskip
-\noindent \textbf{Key words:} KEY WORDS
+\noindent \textbf{Key words:} Gaussian process, surrogate modeling,
+calibration, heliospheric science, IBEX, Vecchia approximation
 \end{abstract}
 
 \doublespacing % no double spacing for arXiv
@@ -60,7 +81,6 @@ ABSTRACT.
 %% - Explain the mission
 %% - Introduce the idea of a computer model
 %% - Explain desire to understand the distribution of parameters
-
 The Interstellar Boundary Explorer (IBEX) satellite was launched in 2008 in an effort
 to deepen scientist's understanding of the heliosphere as part of the Small Explorer
 program \citep{mccomas2009aIBEX} sponsored by the National Aeronautics and Space
