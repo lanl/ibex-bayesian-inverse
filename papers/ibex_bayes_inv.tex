@@ -510,7 +510,6 @@ utilize a GP surrogate (\ref{sec:gp_surr}).
 \begin{algorithm}[ht]
 \DontPrintSemicolon
 Initialize $u^{(0)}$, $\Sigma^{(0)}$. \\
-Fit GP surrogate $\hat{f}(Y, T X)$. \\
 \For{$t = 1, \dots, T$}{
   Propose $u^{(t)} \mid u^{(t-1)}, \Sigma^{(t-1)}$ via MH, \\
   Predict $\hat{f}(Y, T, X, u^{(t)})$ \\
@@ -520,31 +519,46 @@ Fit GP surrogate $\hat{f}(Y, T X)$. \\
 \caption{MCMC (Metropolis-within-Gibbs) for Poisson Inverse Bayes.}
 \label{alg:gibbs}
 \end{algorithm}
-
 Now, before we get ahead of ourselves, let’s expand upon our toy problem
 introduced in \ref{sec:bayes_inv}. Instead of directly observing the function
-$f(X)$, suppose we are given counts drawn from a Poisson process with
-$\boldsymbol \lambda = f(X)$, as shown in Figure 3.
- % We know that the
-% underlying mean process is of the form λi = µ+ νf(xi). We are unable to modify
-% µ and ν in a physical setting, but we can vary these values in a trivial,
-% one-line “computer model.” If we consider all unique combinations for the
-% values of µ ∈ {5,7.5,10,12.5,15}and ν ∈{0.25,0.625,1,1.375,1.75}, we end up
-% with 25 different functional evaluations (depicted as gray lines in 3). Our
-% goal is two-fold: 1) Make accurate predictions at new, unobserved physical
-% locations (x′
-% i) with good uncertainty quantification (UQ), and 2) Estimate the distribution of calibration
-% parameters µ and ν to better understand how the mean process is constructed.
-% Consider the output displayed in Figure 3. Suppose we are given counts collected from a physical
-% experiment at different input locations (xi). We know that the underlying mean process is of the
-% form λi = f(xi,µ,ν). We are unable to modify µand ν in a physical setting, but we can vary thes{}e
-% values in a computer model. We run the simulation for a variety of unique combinations for the
-% 11values of µand ν, resulting in 25 different functional evaluations (depicted as gray lines in 3). Our
-% goal is two-fold: 1) Make accurate predictions at new, unobserved physical locations (x′
-% i) with good
-% uncertainty quantification (UQ), and 2) Estimate the distribution of calibration parameters µ and
-% ν to better understand how the mean process is constructed.
+$f(X)$, suppose we are given counts, drawn from a Poisson process with
+$\boldsymbol \lambda = f(X)$, as shown in Figure 3. As described in
+\ref{sec:bayes_inv}, we know that the underlying mean process is a function of
+two parameters, $\mu$ and $\lambda$. We'll skip the idealized situation where
+we have access to unlimited evaluations of the computer model. Instead, we'll
+fit a GP surrogate to the model evaluations and surrogate predictions at each
+MCMC iteration. Results are shown in Figure XX. We can see that our framework
+again recovers the true values of the parameters, this time as the underlying
+mean function generating counts $Y \sim \text{Poisson}(\lambda)$.
 
+With any moderately-sized training dataset, fitting the surrogate model will
+take significantly longer than making predictions at new input locations. Such
+is the case for our application, as we will show further in \ref{sec:vecchia}.
+Therefore, both fitting a surrogate and making predictions at each MCMC
+iteration is unrealistic. So, we adopt the modularized approach of
+\citep{bayarri2009modularization}. An initial step is added to Algorithm
+\ref{alg:gibbs} to fit a GP surrogate to only the training data. Then, at each
+iteration, the same GP surrogate is used to predict at new values of the
+calibration parameters. This slight modification is illustrated in Algorithm
+\ref{alg:gibbs_mod}.
+\begin{algorithm}[ht]
+\DontPrintSemicolon
+Initialize $u^{(0)}$, $\Sigma^{(0)}$. \\
+Fit GP surrogate $\hat{f}(Y, T X)$. \\
+\For{$t = 1, \dots, T$}{
+  Propose $u^{(t)} \mid u^{(t-1)}, \Sigma^{(t-1)}$ via MH, \\
+  Predict $\hat{f}(Y, T, X, u^{(t)})$ \\
+  Evaluate $\mathcal{L}(Y|\hat{f})$ \\
+  Accept or reject $u{(t)}$
+  }
+\caption{MCMC (Metropolis-within-Gibbs) for Poisson Inverse Bayes.}
+\label{alg:gibbs_mod}
+\end{algorithm}
+Even with the supposed ``shortcut'' in Algorithm \ref{alg:gibbs_mod}, we get
+similar results, as shown in Figure XX. But the computational savings are
+dramatic, and will become moreso as we get to the real data. All this to say,
+as we make more and more approximations, we can still achieve similar or equal
+performance.
 
 % To begin
 
