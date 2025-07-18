@@ -594,6 +594,39 @@ performance.
 %% - We use Vecchia
 %% - Show formulas
 %% - Specify that we use Scaled Vecchia approximation, what it is
+Perhaps the primary weakness of GPs is the need to decompose an $n \times n$
+covariance matrix, making it difficult to scale to large datasets. Many methods have
+been introduced to address this computational burden. These include, but are not
+limited to, fixed-rank kriging \citep{cressie2008fixed}, inducing points
+\citep{banerjee2008gaussian}, compactly supported kernels
+\citep{kaufman2011efficient}, divide-and-conquer \citep{gramacy2015local}, and
+nearest neighbors \citep{datta2016hierarchical, wu2022variational}. In the context of
+computer model calibration, \citet{higdoncalib2008} use a basis representation via
+principal components to accommodate high-dimensional output. However, with the
+dramatic increase in computing capacity over the past decade and the aforementioned
+advances in methodology, we believe there are better GP approximations available to
+model the output of a computer simulation. We propose the recently popularized
+Vecchia approximation \citep{vecchia1988estimation, katzfuss2020vecchia,
+katzfuss2021general, zhang2022multi}.
+
+The Vecchia approximation relies on the ability to write a likelihood function as the
+product of conditional likelihoods as shown below.
+\begin{align}
+L(Y)&=\prod_{i=1}^n L(Y_i \mid Y_{g(i)})
+\hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and } g(i)=\{1, 2,
+\ldots, i-1\} \nonumber \\
+&\approx \prod_{i=1}^{n}L(Y_i \mid Y_{h(i)}) \hspace{0.3em} \mbox{ where } h(i)
+\subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| = m \ll n
+\label{eq:vecchia}
+\end{align}
+Reducing the size of the conditioning set ($h(i)$ above) induces sparsity in the
+precision matrix, speeding up the evaluation of the likelihood. This takes an
+operation of order $O(n^3)$ down to $O(nm^3)$, motivating small values of $m$. As the
+size of the conditioning set $m$ increases, the quality of the approximation
+improves, until $n=m-1$, and the likelihood is no longer an approximation. We
+find a value of $m < 30$ is more than sufficient. The conditioning set can be
+constructed in many ways, but we default to a nearest-neighbors approach, which has
+been done previously \citep{sauer2023active}.
 
 %------------------------------------------------------------------------------
 %% SECTION 3.2.1 - Examples
