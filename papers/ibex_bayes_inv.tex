@@ -44,29 +44,29 @@ Alamos National Laboratory}}
 \vspace{-0.5cm}
 
 \begin{abstract}
-The Interstellar Boundary Explorer (IBEX) satellite detects energetic neutral
-atoms (ENAs) and determines the rate at which they are generated in the
-heliosphere. Computer models attempt to represent the physical process that
-produces heliospheric ENAs through specified model parameters. Bayesian
-Statistical Inversion enables statisticians to use data collected in a field
-experiment along with simulator output from a variety of parameter settings to
-make out-of-sample predictions and learn the posterior distributions of model
-parameters. However, inverse problems typically assume a Gaussian or
-continuous response for both field and computer model data. We introduce a
-novel Markov chain Monte Carlo framework that accommodates the spatially
-distributed Poisson counts collected by the IBEX satellite. Additionally, the
-computer simulation in our application is limited in the amount of runs it can
-perform, but each run's output is quite large. Therefore, we propose the use
-of the Scaled Vecchia approximation as a Gaussian process (GP) surrogate. We
-demonstrate the capability of our proposed framework through multiple
+The Interstellar Boundary Explorer (IBEX) satellite orbits Earth and detects
+heliospheric energetic neutral atoms (ENAs) to determine the rate at which
+they are generated in the heliopause. Sophisticated computer models attempt to
+represent the physical process that produce ENAs through various model
+parameters. Statisticians use a Bayesian approach to solve these types of
+inverse problems by using data collected in a field experiment along with
+simulator output from different combinations of parameter settings to make
+out-of-sample field predictions and learn the posterior distributions of model
+parameters. However, inverse problems typically assume both a Gaussian
+response for both experimental observations and a limited set of computer
+model data. We introduce a novel Markov chain Monte Carlo framework that
+accommodates the spatially distributed Poisson counts collected by the IBEX
+satellite. We also propose the use of the Scaled Vecchia approximation as a
+Gaussian process (GP) surrogate for the large-scale computer model training
+data. We demonstrate the capability of our proposed framework through multiple
 simulated examples and show that we can consistently recover the true
-parameters in a discrepancy-free environment and obtain accurate out-of-sample
-prediction. We apply this to the IBEX satellite data and the corresponding
-computer model output.
+parameters in a discrepancy-free environment and obtain accurate
+out-of-sample prediction. We apply this to the raw IBEX satellite data and the
+corresponding computer model output.
 
 \bigskip
 \noindent \textbf{Key words:} Gaussian process, surrogate modeling,
-calibration, heliospheric science, IBEX, Vecchia approximation
+Poisson, calibration, heliospheric science, IBEX, Vecchia approximation
 \end{abstract}
 
 \doublespacing % no double spacing for arXiv
