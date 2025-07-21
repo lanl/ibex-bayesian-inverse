@@ -1,4 +1,171 @@
 ####################################################################
+## FIGURES 2/3: Toy 1D example for standard calibration
+####################################################################
+
+library(lhs)
+library(plgp)
+
+source("../helper.R")
+
+f <- function(x, mu, nu) {
+  if (is.null(nrow(x))) {
+    x <- matrix(x, ncol=1)
+  }
+  mu*exp(mu*x-5)/(nu+exp(mu*x-5))
+}
+
+true_mu <- 10
+true_nu <- 1
+nf <- 8
+repsf <- 4
+nm <- 20
+
+## Set up field data
+xf <- rep(seq(0, 1, length=nf), repsf)
+lam <- f(x=xf, mu=true_mu, nu=true_nu)
+set.seed(9812987)
+yf <- rnorm(n=length(lam), mean=lam)
+
+## Set up computer model data
+xm <- seq(0, 1, length=nm)
+lam_m <- f(x=xm, mu=true_mu, nu=true_nu)
+calib_params <- randomLHS(n=60, k=2)
+mu_range <- 10
+mu_min <- 5
+mu_max <- 15
+nu_range <- 2
+nu_min <- 0
+nu_max <- 2
+calib_params[,1] <- calib_params[,1]*mu_range + mu_min
+calib_params[,2] <- calib_params[,2]*nu_range + nu_min
+colnames(calib_params) <- c("mu", "nu")
+ym <- matrix(NA, ncol=nrow(calib_params), nrow=length(xm))
+for (i in 1:nrow(calib_params)) {
+  mu <- calib_params[i,1]
+  nu <- calib_params[i,2]
+  ym[,i] <- f(x=xm, mu=mu, nu=nu)
+}
+
+ylims <- range(yf, ym)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("logit1_obs.pdf", width=5, height=5)
+matplot(x=xm, y=ym[,sample(1:ncol(ym), 10)], type="l", col="lightgrey", lty=1,
+  lwd=1.5, xlab="X", ylab="Y", ylim=ylims)
+points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
+lines(x=xm, y=lam_m, lwd=2, lty=2)
+legend("topleft", c("observations", "sample computer model runs", "truth"),
+  col=c(2, "lightgrey", 1), pch=c(8, NA, NA), lty=c(NA, 1, 2), lwd=c(1, 1.5, 2),
+  bg="white", cex=0.75)
+dev.off()
+
+nmcmcs <- 20000
+u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(calib_params))
+
+colnames(u) <- colnames(uprops) <- colnames(calib_params)
+lls <- rep(NA, nmcmcs)
+umins <- umaxs <- uranges <- rep(NA, ncol(calib_params))
+
+calib_params_unit <- calib_params
+for (i in 1:ncol(calib_params)) {
+  umins[i] <- min(calib_params[,i])
+  umaxs[i] <- max(calib_params[,i])
+  uranges[i] <- diff(range(calib_params[,i]))
+  calib_params_unit[,i] <- (calib_params[,i] - umins[i])/uranges[i]
+}
+
+## initialize chains
+u[1,] <- uprops[1,] <- c(0.5, 0.5)
+
+XX <- matrix(xf, ncol=1)
+DX <- distance(XX)
+Sigma <- exp(-DX) + diag(1, nrow(DX))
+SigmaInv <- solve(Sigma)
+SigmaDet <- determinant(Sigma)$modulus
+attributes(SigmaDet) <- NULL
+tau2hat <- drop(t(yf) %*% SigmaInv %*% yf / length(yf))
+
+lhat_curr <- f(x=XX, mu=u[1,1]*uranges[1]+umins[1], nu=u[1,2]*uranges[2]+umins[2])
+lls[1] <- -0.5*nrow(XX)*tau2hat - 0.5*determinant(Sigma)$modulus - drop(0.5*t(yf - lhat_curr) %*% SigmaInv %*% (yf-lhat_curr))/tau2hat
+
+accept <- 1
+lmhs <- rep(NA, nmcmcs)
+mod_lhatps <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
+mod_lhatps[,1] <- f(x=xm, mu=uprops[1,1]*uranges[1]+umins[1],
+ nu=uprops[1,2]*uranges[2]+umins[2])
+for (t in 2:nmcmcs) {
+
+  ###########################################################################
+  ## SAMPLE CALIBRATION PARAMETERS U
+  ### Propose u_prime and calculate proposal ratio
+  up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=rep(0, 2), pmax=rep(1, 2),
+    pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
+  uprops[t,] <- up$prop
+  ## Evaluate simulator at u_prime
+  lhatp <- f(x=XX, mu=uprops[t,1]*uranges[1]+umins[1],
+    nu=uprops[t,2]*uranges[2]+umins[2])
+  mod_lhatps[,t] <- f(x=xm, mu=uprops[t,1]*uranges[1]+umins[1],
+    nu=uprops[t,2]*uranges[2]+umins[2])
+
+  ### Calculate proposed likelihood
+  llp <- -0.5*nrow(XX)*tau2hat - 0.5*SigmaDet - drop(0.5*t(yf - lhatp) %*% SigmaInv %*% (yf-lhatp))/tau2hat
+
+  ### Calculate prior on u (calibration parameters)
+  lpp <- dbeta(up$prop[1], shape1=1.1, shape2=1.1, log=TRUE) +
+   dbeta(up$prop[2], shape1=1.1, shape2=1.1, log=TRUE)
+  lp_curr <- dbeta(u[t-1,1], shape1=1.1, shape2=1.1, log=TRUE) +
+   dbeta(u[t-1,2], shape1=1.1, shape2=1.1, log=TRUE)
+  ### Calculate Metropolis-Hastings ratio
+  ### { L(xp|Y)*p(xp)*g(xt|xp) } / { L(xt|Y)*p(xt)*g(xp|xt) }
+  lmh <- llp - lls[t-1] + lpp - lp_curr + up$pr
+  lmhs[t] <- lmh
+
+  ## accept or reject
+  if (lmh > log(runif(n=1))) {
+    u[t,] <- up$prop
+    lls[t] <- llp
+    lhat_curr <- lhatp
+    accept <- accept + 1
+  } else {
+    u[t,] <- u[t-1,]
+    lls[t] <- lls[t-1]
+  }
+  if (t %% 100 == 0) {
+    print(paste("Finished iteration", t))
+  }
+}
+
+## Visualize model evaluations:
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("logit1_est.pdf", width=5, height=5)
+ylims <- range(c(mod_lhatps, yf, lam_m))
+matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
+  col="lightgrey", xlab="X", ylab="Y", ylim=ylims)
+points(x=xf, y=yf, col=2, pch=8)
+u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
+lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
+  u_postmean[2]*uranges[2]+umins[2]), col=4, lwd=2, lty=4)
+lines(x=xm, y=lam_m, lty=2, lwd=2)
+legend("topleft", c("observations", expression("model runs at u"^(t)),
+  expression("model at " * bar(u)["post"]), "truth"),
+  col=c(2, "lightgrey", 4, 1), lty=c(NA, 1, 4, 2), lwd=2, pch=c(8, rep(NA, 3)), bg="white",
+  y.intersp=1.3, cex=0.75)
+dev.off()
+
+## Visualize posterior draws of u
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("logit1_post_draws.pdf", width=5, height=5)
+plot(x=u[seq(10001, 20000, by=10),1]*uranges[1]+umins[1],
+ y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(mu),
+ ylab=expression(nu), col="lightgrey")
+points(x=true_mu, y=true_nu, col=3, pch=8, lwd=2, cex=1.5)
+points(x=u_postmean[1]*uranges[1]+umins[1],
+  y=u_postmean[2]*uranges[2]+umins[2], col=4, pch=9, lwd=2, cex=1.5)
+legend("topleft", c("posterior draws of u", "posterior mean", "truth"),
+  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=0.75, bg="white")
+dev.off()
+
+
+####################################################################
 ## FIGURES 2/3: Toy 1D example for Poisson calibration
 ####################################################################
 
