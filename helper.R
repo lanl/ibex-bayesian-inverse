@@ -33,6 +33,11 @@ propose_u <- function(curr, method, pmin=NULL, pmax=NULL, pcovar=NULL) {
       tmvtnorm::dtmvnorm(drop(prop), mean=curr, sigma=pcovar, lower=pmin,
         upper=pmax, log=TRUE)
     return(list(prop=prop, pr=pr))
+  } else if (method=="norm") {
+    prop <- rmvnorm(n=1, mean=curr, sigma=pcovar)
+    pr <- dmvnorm(curr, mean=drop(prop), sigma=pcovar, log=TRUE) -
+      dmvnorm(drop(prop), mean=curr, sigma=pcovar, log=TRUE)
+    return(list(prop=prop, pr=pr))
   } else {
     stop("specified method not implemented")
   }
