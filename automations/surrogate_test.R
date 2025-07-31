@@ -43,40 +43,43 @@ colnames(unique_runs) <- NULL
 
 ## Calculating metrics
 rmses <- crps <- fit_times <- pred_times <-
-  matrix(NA, ncol=3, nrow=nrow(unique_runs))
+  matrix(NA, ncol=6, nrow=nrow(unique_runs))
 colnames(rmses) <- colnames(crps) <- colnames(fit_times) <-
-  colnames(pred_times) <- c("svecchia", "lagp", "deepgp")
+  colnames(pred_times) <- c("svecchia25", "svecchia50", "svecchia75",
+   "svecchia100", "lagp", "deepgp")
 
 if (method=="svecchia" || method=="all") {
-  for (i in start:nrow(unique_runs)) {
-    pmfp <- unique_runs[i,1]
-    ratio <- unique_runs[i,2]
-    Xtrain <- model_data[model_data$parallel_mean_free_path != pmfp |
-      model_data$ratio != ratio,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
-    Ytrain <- model_data[model_data$parallel_mean_free_path != pmfp |
-      model_data$ratio != ratio,c("blurred_ena_rate")]
-    Xtest <- model_data[model_data$parallel_mean_free_path == pmfp &
-      model_data$ratio == ratio,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
-    Ytest <- model_data[model_data$parallel_mean_free_path == pmfp &
-      model_data$ratio == ratio,c("blurred_ena_rate")]
+  for (m in seq(25, 100, by-25)) {
+    for (i in start:nrow(unique_runs)) {
+      pmfp <- unique_runs[i,1]
+      ratio <- unique_runs[i,2]
+      Xtrain <- model_data[model_data$parallel_mean_free_path != pmfp |
+        model_data$ratio != ratio,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+      Ytrain <- model_data[model_data$parallel_mean_free_path != pmfp |
+        model_data$ratio != ratio,c("blurred_ena_rate")]
+      Xtest <- model_data[model_data$parallel_mean_free_path == pmfp &
+        model_data$ratio == ratio,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+      Ytest <- model_data[model_data$parallel_mean_free_path == pmfp &
+        model_data$ratio == ratio,c("blurred_ena_rate")]
 
-    tic <- proc.time()[3]
-    svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=50)
-    toc <- proc.time()[3]
-    fit_times[i,1] <- toc-tic
-    print("Finished SVecchia fit")
+      tic <- proc.time()[3]
+      svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=m)
+      toc <- proc.time()[3]
+      fit_times[i,1] <- toc-tic
+      print("Finished SVecchia fit")
 
-    tic <- proc.time()[3]
-    svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=50, joint=FALSE,
-      predvar=TRUE)
-    toc <- proc.time()[3]
-    pred_times[i,1] <- toc-tic
-    rmses[i,1] <- sqrt(mean((svecpreds$means - Ytest)^2))
-    crps[i,1] <- crps(y=Ytest, mu=svecpreds$means, s2=svecpreds$vars)
-    print("Finished SVecchia predictions")
-    print(paste0("Finished holdout iteration ", i))
-    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
-    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+      tic <- proc.time()[3]
+      svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=m, joint=FALSE,
+        predvar=TRUE)
+      toc <- proc.time()[3]
+      pred_times[i,1] <- toc-tic
+      rmses[i,1] <- sqrt(mean((svecpreds$means - Ytest)^2))
+      crps[i,1] <- crps(y=Ytest, mu=svecpreds$means, s2=svecpreds$vars)
+      print(paste0("Finished SVecchia predictions where m=", m))
+      print(paste0("Finished holdout iteration ", i))
+      res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
+      saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+    }
   }
 }
 
@@ -106,9 +109,9 @@ if (method=="laGP" || method=="all") {
         toc <- proc.time()[3]
       }, silent=TRUE)
     }
-    pred_times[i,2] <- toc-tic
-    rmses[i,2] <- sqrt(mean((lagppreds$mean - Ytest)^2))
-    crps[i,2] <- crps(y=Ytest, mu=lagppreds$mean, s2=lagppreds$var)
+    pred_times[i,5] <- toc-tic
+    rmses[i,5] <- sqrt(mean((lagppreds$mean - Ytest)^2))
+    crps[i,5] <- crps(y=Ytest, mu=lagppreds$mean, s2=lagppreds$var)
     print("Finished laGP fit and predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
@@ -132,15 +135,15 @@ if (method=="deepgp" || method=="all") {
     tic <- proc.time()[3]
     dgp1fit <- fit_one_layer(x=as.matrix(Xtrain), y=Ytrain, nmcmc=1000, vecchia=TRUE, m=10)
     toc <- proc.time()[3]
-    fit_times[i,3] <- toc-tic
+    fit_times[i,6] <- toc-tic
     print("Finished deep gp fit")
 
     tic <- proc.time()[3]
     dgp1preds <- predict(trim(dgp1fit, burn=100, thin=5), x_new=Xtest)
     toc <- proc.time()[3]
-    pred_times[i,3] <- toc-tic
-    rmses[i,3] <- sqrt(mean((dgp1preds$mean - Ytest)^2))
-    crps[i,3] <- crps(y=Ytest, mu=dgp1preds$mean, s2=dgp1preds$s2)
+    pred_times[i,6] <- toc-tic
+    rmses[i,6] <- sqrt(mean((dgp1preds$mean - Ytest)^2))
+    crps[i,6] <- crps(y=Ytest, mu=dgp1preds$mean, s2=dgp1preds$s2)
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
