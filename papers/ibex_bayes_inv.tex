@@ -383,49 +383,71 @@ Gaussian process \citep{gramacy2020surrogates}.
 %% - Bottleneck is O(n^3)
 %% - LEAD IN: Output can be large. Need an approximation.
 %% Review Gaussian processes and their use in surrogate modeling
-A Gaussian process, hereafter referred to as a GP, is a realization of a
-multivariate normal distribution, governed by some mean and covariance
-functions. GPs are fit to observed data and used to make predictions at new
-input locations, relying on the conditional multivariate normal or
-\textit{kriging} equations \citep{matheron1963principles}. For example,
-suppose we have a vector of observations $Y$ at input locations $X$. $Y$ is an
-$n \times 1$ vector and $X$ is an $n \times p$ matrix. We make the assumption
-that $Y$ is normally distributed with some mean $(\mu(X))$ and covariance
-$(\Sigma(X))$, both functions of $X$. Predicting at a new location $x$ is
-straightforward. Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean
-predictions $\mu^*(x)$ and corresponding uncertainty quantification
-$\Sigma^*(x)$.
+A Gaussian process is a realization of a multivariate normal distribution,
+governed by some mean and covariance functions. GPs are fit to observed data
+and used to make predictions at new input locations, relying on the
+conditional multivariate normal or \textit{kriging} equations
+\citep{matheron1963principles}. For example, suppose we have a vector of
+observations $Y$ at input locations $X$. $Y$ is an $n \times 1$ vector and $X$
+is an $n \times p$ matrix. We make the assumption that $Y$ is normally
+distributed with some mean $\mu(X)$ and covariance $\Sigma(X)$, both functions
+of $X$. Then, predicting at a new location $x$ is relatively straightforward.
+Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean predictions $\mu^*(x)$
+and corresponding uncertainty quantification estimates $\Sigma^*(x)$.
+
+\begin{minipage}[t]{0.25\linewidth}
 \begin{align}
 Y(X) &\sim \mathcal{N}\!\left(\mu(X), \Sigma(X)\right) \nonumber \\
-y^*(x) \mid Y(X) &\sim \mathcal{N}\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
-\mu^*(x)&=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
-\Sigma^*(x)&=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
+y^*(x) \mid Y(X) &\sim \mathcal{N}\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber
 \end{align}
+\end{minipage}
+\quad
+\begin{minipage}[t]{0.58\linewidth}
+\begin{align}
+\mu^*(x) &= \mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
+\Sigma^*(x) &= \Sigma(x, x)
+  - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \hspace{0.05em}
+\label{eq:mvn_eq}
+\end{align}
+\end{minipage}
+\vspace{1cm}
+
+
+% \begin{align}
+% Y(X) &\sim \mathcal{N}\!\left(\mu(X), \Sigma(X)\right) \nonumber \\
+% y^*(x) \mid Y(X) &\sim \mathcal{N}\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber \\
+% \mu^*(x)&=\mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
+% \Sigma^*(x)&=\Sigma(x, x) - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \label{eq:mvn_eq}
+% \end{align}
 Although a generic mean function is specified in Eq.~\ref{eq:mvn_eq}, it is
-common to set $\mu(x)=0$. In practice, this simply implies centering $Y$ by
+common to set $\mu(X)=0$. In practice, this simply implies centering $Y$ by
 subtracting off the sample mean, $\overline{Y}$. In this zero-mean context,
 all the action takes place in the covariance function. The covariance function
 typically depends on pairwise distances between input locations $x$ and $x'$.
 Many covariance kernels exists, such as the Gaussian, Exponential, Matern. We
 use the Matern kernel in our work, of which both the Gaussian and Exponential
-kernels are special cases. The behavior of these kernels is determined by
-three hyperparameters: a nugget $g$, a lengthscale $\theta$, and a scale
-$\tau^2$. In the Matern kernel, an additional parameter ($\nu$) exists, which
-controls the smoothness of the estimated surface. But we will not estimate the
-smoothness parameter here and instead set $\nu =
-\frac{5}{2}$ (\ref{eq:matern}), following common practice due to it allowing
-the kernel function to be expressed in a simpler form. All hyperparameters can
-be estimated using your preferred method (i.e. maximum likelihood, method of
-moments). We will use Bayesian methods, specifically MCMC.
+kernels are special cases. The Matern kernel is defined as
 \begin{align}
 \Sigma(x, x'|\sigma^2, \theta, \nu, g) &= \sigma^2 \frac{2^{1-\nu}}{\Gamma(\nu)}
 \left(\sqrt{2\nu} \frac{\|x-x'\|}{\theta}\right)^2 K_{\nu} \left(\sqrt{2 \nu}
 \frac{\|x - x'\|}{\theta}\right) + g \cdot \mathbb{I} \nonumber \\
 &= \sigma^2 \left(1 + \frac{\sqrt{5} \cdot \|x - x'\|}{\theta} +
 \frac{5\cdot\|x-x'\|^2}{3\theta^2} \right) \text{exp}\left(-\frac{\sqrt{5} \cdot \|x
-- x'\|}{\theta}\right) + g \delta_{x, x'}
+- x'\|}{\theta}\right) + g \delta_{x, x'},
 \label{eq:matern}
 \end{align}
+where $K_{\nu}$ is the modified Bessel function of the second kind. The
+behavior of these kernels is determined by three hyperparameters: a nugget
+$g$, lengthscale $\theta$, and scale $\tau^2$. In the Matern kernel, an
+additional parameter ($\nu$) exists, which controls the smoothness of the
+estimated surface. But we will not estimate the smoothness parameter here and
+instead set $\nu =
+\frac{5}{2}$ (Eq.~\ref{eq:matern}), following common practice due to it
+allowing the kernel function to be expressed in a simpler form. All
+hyperparameters can be estimated using your preferred method (i.e. maximum
+likelihood, method of moments). We will use Bayesian methods, specifically
+MCMC.
+
 GPs provide a flexible, nonparametric regression tool. In addition to computer
 experiments, they are utilized in geostatistics
 \citep{matheron1963principles}, spatial statistics
@@ -441,7 +463,8 @@ variance away from observed data, and virtually no variance at observed
 locations. In fact, perhaps the hallmark of GPs is that they naturally provide
 excellent uncertainty quantification for out-of-sample predictions, a matter
 of importance to scientists exploring these computer models. Therefore, GPs
-are widely used in computer experiments and Bayesian Inverse Problems.
+are widely used in computer experiments and Bayesian Inverse Problems, as
+illustrated next.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.3 - SEPIA / GPMSA
@@ -460,43 +483,51 @@ are widely used in computer experiments and Bayesian Inverse Problems.
 %%   - Maybe a graphic
 %% - Must choose basis
 %% - Used in calibration (an inverse problem), but does not support Poisson
-In the early 2000s, \citet{higdoncalib2008} faced a similar challenge. Expensive
-computer models at Los Alamos National Laboratory (LANL) produced limited runs with
-extremely high-dimensional output in the form of images, shape description, time
-series, etc. In order to efficiently fit a surrogate model to the simulator, they
-needed to perform an approximation to limit the size of the data. As a solution, they
-employed principal components analysis (PCA) to reduce the dimensionality of the
-response. Specifically, they represented the output of a simulator model as the sum
-of $n_k$ basis functions $\textbf{k}_1, \textbf{k}_2, \ldots , \textbf{k}_{n_k}$,
-each scaled by a corresponding weight $w_i$, as shown in Eq. \ref{eq:higdon_pca}.
-Instead of modeling the high-dimensional response, the GP only modeled the small set
-of component weights. Bayesian inference was used to obtain the posterior
-distribution of those component weights. Combining estimates the weights with the
-calculated basis functions allowed for predictions out of sample. As a result of this
-approximation, the dimension of the covariance matrix $\Sigma(X)$ in the predictive
-equations of \ref{eq:mvn_eq} remained small.
+In the early 2000s, \citet{higdoncalib2008} faced the challenge of estimating
+the parameters of a physical process from which they could gather only a small
+set of observations, but that could be represented by a simulation. But these
+expensive computer models at Los Alamos National Laboratory (LANL) produced
+limited runs with extremely high-dimensional output in the form of images,
+shape description, time series, etc. So in order to efficiently fit a
+surrogate model to the simulator, they needed to perform an approximation to
+limit the size of the data. As a solution, they employed principal components
+analysis (PCA) to reduce the dimensionality of the computer model response.
+Specifically, they represented the vector output of a simulator model as the
+sum of $n_k$ basis functions $\textbf{k}_1, \textbf{k}_2, \ldots ,
+\textbf{k}_{n_k}$, each scaled by a corresponding weight $w_i$, as shown in
 \begin{align}
-\textbf{y}(\textbf{x}, \textbf{u}) \approx \sum_{i=1}^{n_k} \textbf{k}_i \cdot w_i (\textbf{x}, \textbf{u}), \quad n_k \ll n \ \nonumber \\
-w_i (\textbf{x}, \textbf{u}) \sim GP(\textbf{0}, \Sigma_{w_i}),
+\boldsymbol y(\boldsymbol x, \boldsymbol u) \approx \sum_{i=1}^{n_k} \boldsymbol k_i \cdot w_i (\boldsymbol x, \boldsymbol u), \quad n_k \ll n \ \nonumber \\
+w_i (\boldsymbol x, \boldsymbol u) \sim GP(\boldsymbol 0, \Sigma_{w_i}),
 \label{eq:higdon_pca}
 \end{align}
-where $\Sigma_{w_i}$, dependent only on a limited number of combinations of
-$\textbf{x}$ and $\textbf{u}$, is a $n_k \times n_k$ matrix. Hence, the decomposition
-of $\Sigma_{w_i}$ avoids the O($n^3$) bottleneck in computation and can be completed
-in a reasonable amount of time.
+where $\boldsymbol x$ is a vector of controllable inputs and $\boldsymbol u$
+is the vector of model parameters we are interested in estimating.
+$\Sigma_{w_i}$, dependent only on a limited number of combinations of
+$\boldsymbol x$ and $\boldsymbol u$, is a $n_k \times n_k$ matrix. Hence, the
+decomposition of $\Sigma_{w_i}$ avoids the $O(n^3)$ bottleneck in computation
+and can be completed in a reasonable amount of time. Instead of modeling the
+high-dimensional response $\boldsymbol y$, the GP only modeled the small set
+of component weights. Bayesian inference was used to obtain the posterior
+distribution of these component weights. Combining estimates of the weights
+with the calculated basis functions allowed for predictions out of sample. As
+a result of this approximation, the dimension of the covariance matrices
+$\Sigma(X)$ and $\Sigma(X^*)$ in Eq.~\ref{eq:mvn_eq} remained small and able
+to be decomposed quickly.
 
-We propose a simpler approach, devoid of the definition and selection of how many
-basis functions to use. Although this basis representation was successful, we argue
-that what \citet{higdoncalib2008} really wanted to do was represent the functional
-output as a univariate response. That is, replicate the entry in the input matrix $X$
-for each response the number of times equal to the length of the output vector. In
-essence, implicitly encode the index (e.g. pixel in image, moment in time series)
-into the response vector for each observation in the input matrix. We believe that
-had \citet{higdoncalib2008} had access to the capacity of modern-day computing, along
-with the novel methodology proposed since the early 2000s that leverages that
-compute, they would have steered their implementation in a significantly different
-way. We propose that approach next and illustrate the improved performance in both
-predictive accuracy and uncertainty quantification, along with a reduction in
+We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the
+definition and selection of how many basis functions to use. Although this
+basis representation was and still is successful in many applications, we
+argue that what \citet{higdoncalib2008} really wanted to do was represent the
+functional output as a univariate response. That is, replicate the entry in
+the input matrix $X$ for each response the number of times equal to the length
+of the output vector. In essence, implicitly encode the index (e.g.~pixel in
+image, moment in time series) into the response vector for each observation in
+the input matrix. We believe that had \citet{higdoncalib2008} had access to
+the capacity of modern-day computing, along with the novel methodology
+proposed since the early 2000s that leverages that compute, they would have
+steered their implementation in a significantly different way. We will show
+that our approach results in equal or improved or in both predictive accuracy
+and uncertainty quantification, along with a significant reduction in
 computational expense.
 
 %% Limitations:
