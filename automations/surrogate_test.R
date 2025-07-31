@@ -49,10 +49,11 @@ colnames(rmses) <- colnames(crps) <- colnames(fit_times) <-
    "svecchia100", "lagp", "deepgp")
 
 if (method=="svecchia" || method=="all") {
-  for (m in seq(25, 100, by-25)) {
-    for (i in start:nrow(unique_runs)) {
-      pmfp <- unique_runs[i,1]
-      ratio <- unique_runs[i,2]
+  ms <- seq(25, 100, by=25)
+  for (i in 1:length(ms))) {
+    for (j in start:nrow(unique_runs)) {
+      pmfp <- unique_runs[j,1]
+      ratio <- unique_runs[j,2]
       Xtrain <- model_data[model_data$parallel_mean_free_path != pmfp |
         model_data$ratio != ratio,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
       Ytrain <- model_data[model_data$parallel_mean_free_path != pmfp |
@@ -63,20 +64,20 @@ if (method=="svecchia" || method=="all") {
         model_data$ratio == ratio,c("blurred_ena_rate")]
 
       tic <- proc.time()[3]
-      svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=m)
+      svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=ms[i])
       toc <- proc.time()[3]
-      fit_times[i,1] <- toc-tic
-      print("Finished SVecchia fit")
+      fit_times[j,i] <- toc-tic
+      print(paste0("Finished SVecchia fit where m=", ms[i]))
 
       tic <- proc.time()[3]
-      svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=m, joint=FALSE,
+      svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=ms[i], joint=FALSE,
         predvar=TRUE)
       toc <- proc.time()[3]
-      pred_times[i,1] <- toc-tic
-      rmses[i,1] <- sqrt(mean((svecpreds$means - Ytest)^2))
-      crps[i,1] <- crps(y=Ytest, mu=svecpreds$means, s2=svecpreds$vars)
-      print(paste0("Finished SVecchia predictions where m=", m))
-      print(paste0("Finished holdout iteration ", i))
+      pred_times[j,i] <- toc-tic
+      rmses[j,i] <- sqrt(mean((svecpreds$means - Ytest)^2))
+      crps[j,i] <- crps(y=Ytest, mu=svecpreds$means, s2=svecpreds$vars)
+      print(paste0("Finished SVecchia predictions where m=", ms[i]))
+      print(paste0("Finished holdout iteration ", j))
       res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
       saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
     }
