@@ -35,47 +35,50 @@ for i in range(len(yx)):
     yx[i,1] = math.sin(math.pi*latlon['lon'][i]/180)*math.cos(math.pi*latlon['lat'][i]/180)
     yx[i,2] = math.sin(math.pi*latlon['lat'][i]/180)
 
+pcs = [3,4,5,6]
 n_samp = 10000
-metrics = np.zeros((nruns, 2))
 
-for i in range(nruns):
-    yy_true = y[[i],:][0]
-    inds = np.delete(range(nruns), i)
-    data = SepiaData(x_sim=x[inds,], y_sim=y[inds,], y_ind_sim=yx)
-    data.transform_xt()
-    data.standardize_y()
-    data.create_K_basis(n_pc=0.99)
-    model = SepiaModel(data)
-    model.verbose = False
-    model.tune_step_sizes(50, 20, verbose=False)
-    print("\n")
-    model.do_mcmc(n_samp)
-    xx = x[[i], :]
-    n_pred=xx.shape[0]
-    pred_samples = model.get_samples(nburn=int(.1*n_samp),effectivesamples=True)
-    pred = SepiaEmulatorPrediction(x_pred=xx, samples=pred_samples, model=model,
-       storeMuSigma=True)
-    predy = pred.get_y()
-    meany = np.mean(predy,0)[0]
-    s2s = np.var(predy,0)[0]
-    sumsq = 0
-    for j in range(meany.shape[0]):
-        sumsq += pow(meany[j] - yy_true[j], 2)
-    metrics[i,0] = math.pow(sumsq/meany.shape[0], 0.5)
-    scores = np.zeros(yx.shape[0])
-    for j in range(meany.shape[0]):
-        sigma = pow(s2s[j], 0.5)
-        if (sigma == 0):
-            scores[j] = np.nan
-            continue
-        z = (yy_true[j] - meany[j])/sigma
-        scores[j] = sigma*(-1/(math.pow(math.pi, 0.5)) + 2*norm.pdf(z) + z*(2*norm.cdf(z)-1))
-    metrics[i,1] = np.nanmean(scores)
-    print("\n")
-    print("Finished iteration " + str(i) + "\n")
-
-with open('sepia_metrics.csv', 'w', newline='') as file:
-    # Create a CSV writer object
-    writer = csv.writer(file)  
-    # Write each row of data to the CSV file
-    writer.writerows(metrics)
+for j in range(len(pcs)):
+    metrics = np.zeros((nruns, 2))
+    iter_pc = pcs[j]
+    ofname = 'sepia_metrics_' + str(iter_pc) + '.csv'
+    for i in range(nruns):
+        yy_true = y[[i],:][0]
+        inds = np.delete(range(nruns), i)
+        data = SepiaData(x_sim=x[inds,], y_sim=y[inds,], y_ind_sim=yx)
+        data.transform_xt()
+        data.standardize_y()
+        data.create_K_basis(n_pc=iter_pc)
+        model = SepiaModel(data)
+        model.verbose = False
+        model.tune_step_sizes(50, 20, verbose=False)
+        print("\n")
+        model.do_mcmc(n_samp)
+        xx = x[[i], :]
+        n_pred=xx.shape[0]
+        pred_samples = model.get_samples(nburn=int(.1*n_samp),effectivesamples=True)
+        pred = SepiaEmulatorPrediction(x_pred=xx, samples=pred_samples, model=model,
+           storeMuSigma=True)
+        predy = pred.get_y()
+        meany = np.mean(predy,0)[0]
+        s2s = np.var(predy,0)[0]
+        sumsq = 0
+        for j in range(meany.shape[0]):
+            sumsq += pow(meany[j] - yy_true[j], 2)
+        metrics[i,0] = math.pow(sumsq/meany.shape[0], 0.5)
+        scores = np.zeros(yx.shape[0])
+        for j in range(meany.shape[0]):
+            sigma = pow(s2s[j], 0.5)
+            if (sigma == 0):
+                scores[j] = np.nan
+                continue
+            z = (yy_true[j] - meany[j])/sigma
+            scores[j] = sigma*(-1/(math.pow(math.pi, 0.5)) + 2*norm.pdf(z) + z*(2*norm.cdf(z)-1))
+        metrics[i,1] = np.nanmean(scores)
+        print("\n")
+        print("Finished iteration " + str(i) + "with nps=" + str(iter_pc) + "\n")
+    with open(ofname, 'w', newline='') as file:
+        # Create a CSV writer object
+        writer = csv.writer(file)
+        # Write each row of data to the CSV file
+        writer.writerows(metrics)
