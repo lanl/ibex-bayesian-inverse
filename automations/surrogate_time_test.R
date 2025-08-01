@@ -103,14 +103,14 @@ for (i in 1:num_ns) {
           nug=1e-4, ms=ms[j])
         toc <- proc.time()[3]
         fit_times[m,i,j] <- toc-tic
-        print(paste0("Finished SVecchia fit with m=", ms[j]))
+        print(paste0("Finished SVecchia fit with m=", ms[j], " in ", round(toc-tic, 2), " seconds."))
 
         tic <- proc.time()[3]
         svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=ms[j], joint=FALSE,
           predvar=TRUE)
         toc <- proc.time()[3]
         pred_times[m,i,j] <- toc-tic
-        print(paste0("Finished SVecchia predictions with m=", ms[j]))
+        print(paste0("Finished SVecchia predictions with m=", ms[j], " in ", round(toc-tic, 2), " seconds."))
       }
     }
 
@@ -124,7 +124,7 @@ for (i in 1:num_ns) {
        verb=0, end=25, method="nn", d=d)
       toc <- proc.time()[3]
       pred_times[m,i,5] <- toc-tic
-      print("Finished laGP fit and predictions")
+      print(paste0("Finished laGP fit and predictions in ", round(toc-tic, 2), " seconds."))
     }
 
     if (!too_long[6]) {
@@ -135,13 +135,13 @@ for (i in 1:num_ns) {
        vecchia=TRUE, m=10)
       toc <- proc.time()[3]
       fit_times[m,i,6] <- toc-tic
-      print("Finished deep gp fit")
+      print(paste0("Finished deep gp fit in ", round(toc-tic, 2), " seconds."))
 
       tic <- proc.time()[3]
       dgp1preds <- predict(trim(dgp1fit, burn=100, thin=5), x_new=Xtest)
       toc <- proc.time()[3]
       pred_times[m,i,6] <- toc-tic
-      print("Finished deep gp predictions")
+      print(paste0("Finished deep gp predictions in ", round(toc-tic, 2), " seconds."))
 
       file.remove("xtrain_iter.csv")
       file.remove("ytrain_iter.csv")
