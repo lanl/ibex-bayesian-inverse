@@ -62,7 +62,7 @@ too_long <- rep(FALSE, 6)
 for (i in 1:num_ns) {
   ## select training data size
   n <- ns[i]
-  if (i > num_ns) {
+  if (i > length(exp_pows)) {
     cat("n = ", n)
   } else {
     cat("n = 1.25^", exp_pows[i], " = ", n, "\n", sep="")
