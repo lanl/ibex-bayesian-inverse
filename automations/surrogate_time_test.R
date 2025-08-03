@@ -56,13 +56,13 @@ num_ns <- length(ns)
 ## Defining some parameters of the bakeoff
 outf <- "surrogate_time_test_"
 mcs <- 5
-fit_times <- pred_times <- array(NA, dim=c(5, length(exp_pows), 6))
+fit_times <- pred_times <- array(NA, dim=c(5, num_ns, 6))
 too_long <- rep(FALSE, 6)
 
 for (i in 1:num_ns) {
   ## select training data size
   n <- ns[i]
-  if (i > length(exp_pows)) {
+  if (i > num_ns) {
     cat("n = ", n)
   } else {
     cat("n = 1.25^", exp_pows[i], " = ", n, "\n", sep="")
