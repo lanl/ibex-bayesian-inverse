@@ -6,9 +6,10 @@ source("../helper.R")
 source('../vecchia_scaled.R')
 
 seed <- 781691
+inc_out <- 1
 
 ## read in the command line arguments
-## run with: R CMD BATCH '--args seed=1' surrogate_time_test.R
+## run with: R CMD BATCH '--args seed=1 inc_out=1' surrogate_time_test.R
 args <- commandArgs(TRUE)
 if (length(args) > 0) {
   for(i in 1:length(args)) {
@@ -49,12 +50,19 @@ for (i in 1:nrow(calib_grid)) {
 
 ## Setting data sizes
 set.seed(seed)
-exp_pows <- 7:45
-ns <- c(round(10 + 1.25^exp_pows), seq(20000, 75000, by=5000))
-num_ns <- length(ns)
+if (inc_out) {
+  exp_pows <- 7:45
+  ns <- c(round(10 + 1.25^exp_pows), seq(20000, 75000, by=5000))
+  num_ns <- length(ns)
+  outf <- "surrogate_time_test_dim_"
+} else {
+  ns <- c(seq(10, 100, by=10), seq(500, 2500, by=500))
+  num_ns <- length(ns)
+  dim_length <- 10000
+  outf <- "surrogate_time_test_n_"
+}
 
 ## Defining some parameters of the bakeoff
-outf <- "surrogate_time_test_"
 mcs <- 5
 fit_times <- pred_times <- array(NA, dim=c(5, num_ns, 6))
 too_long <- rep(FALSE, 6)
@@ -62,32 +70,57 @@ too_long <- rep(FALSE, 6)
 for (i in 1:num_ns) {
   ## select training data size
   n <- ns[i]
-  if (i > length(exp_pows)) {
-    cat("n = ", n)
+  if (inc_out) {
+    if (i > length(exp_pows)) {
+      cat("n = ", n)
+    } else {
+      cat("n = 1.25^", exp_pows[i], " = ", n, "\n", sep="")
+    }
   } else {
-    cat("n = 1.25^", exp_pows[i], " = ", n, "\n", sep="")
+    cat("n = ", n, "\n")
   }
 
   for (m in 1:mcs) {
 
-    ## Building test set, drawn from a random computer model run
-    sim_run <- sample(1:nruns, 1)
-    inds <- sample(1:nresponses, n, replace=(n > nresponses))
-    Xtest <- sim_runs[[sim_run]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
-    Ytest <- sim_runs[[sim_run]][inds,c("blurred_ena_rate")]
+    if (inc_out) {
+      ## Building test set, drawn from a random computer model run
+      sim_run <- sample(1:nruns, 1)
+      inds <- sample(1:nresponses, n, replace=(n > nresponses))
+      Xtest <- sim_runs[[sim_run]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+      Ytest <- sim_runs[[sim_run]][inds,c("blurred_ena_rate")]
 
-    ## Building training set, taken from all non-test set runs. But at the same indices
-    Xtrain_list <- Ytrain_list <- list()
-    Xtrain <- data.frame(matrix(NA, nrow=0, ncol=5))
-    Ytrain <- matrix(NA, nrow=0, ncol=1)
-    train_runs <- (1:nruns)[-sim_run]
-    for (j in 1:length(train_runs)) {
-      iter_run <- train_runs[j]
-      Xtrain_list[[j]] <- sim_runs[[iter_run]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
-      Ytrain_list[[j]] <- sim_runs[[iter_run]][inds,c("blurred_ena_rate"),drop=FALSE]
+      ## Building training set, taken from all non-test set runs. But at the same indices
+      Xtrain_list <- Ytrain_list <- list()
+      Xtrain <- data.frame(matrix(NA, nrow=0, ncol=5))
+      Ytrain <- matrix(NA, nrow=0, ncol=1)
+      train_runs <- (1:nruns)[-sim_run]
+      for (j in 1:length(train_runs)) {
+        iter_run <- train_runs[j]
+        Xtrain_list[[j]] <- sim_runs[[iter_run]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+        Ytrain_list[[j]] <- sim_runs[[iter_run]][inds,c("blurred_ena_rate"),drop=FALSE]
+      }
+      Xtrain <- do.call("rbind", Xtrain_list)
+      Ytrain <- do.call("rbind", Ytrain_list)$blurred_ena_rate
+    } else {
+      sim_run <- sample(1:nruns, 1)
+      inds <- sample(1:nresponses, dim_length)
+      Xtest <- sim_runs[[sim_run]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+      Ytest <- sim_runs[[sim_run]][inds,c("blurred_ena_rate")]
+
+      ## Building training set, taken from all non-test set runs. But at the same indices
+      Xtrain_list <- Ytrain_list <- list()
+      Xtrain <- data.frame(matrix(NA, nrow=0, ncol=5))
+      Ytrain <- matrix(NA, nrow=0, ncol=1)
+      train_runs <- (1:nruns)[-sim_run]
+      for (j in 1:n) {
+        iter_run <- sample(train_runs, 1)
+        Xtrain_list[[j]] <- sim_runs[[iter_run]][inds,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+        Ytrain_list[[j]] <- sim_runs[[iter_run]][inds,c("blurred_ena_rate"),drop=FALSE] +
+          rnorm(dim_length, 0, sd=sd(sim_runs[[iter_run]][,c("blurred_ena_rate")]))
+      }
+      Xtrain <- do.call("rbind", Xtrain_list)
+      Ytrain <- do.call("rbind", Ytrain_list)$blurred_ena_rate
     }
-    Xtrain <- do.call("rbind", Xtrain_list)
-    Ytrain <- do.call("rbind", Ytrain_list)$blurred_ena_rate
 
     ## Save training sets so that each method needs to read in the file
     write.csv(Xtrain, "xtrain_iter.csv", row.names=FALSE)
@@ -146,9 +179,10 @@ for (i in 1:num_ns) {
       file.remove("xtrain_iter.csv")
       file.remove("ytrain_iter.csv")
     }
-    res <- list(fit_times=fit_times, pred_times=pred_times)
-    saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
   }
+  res <- list(fit_times=fit_times, pred_times=pred_times)
+  saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
+
   too_long_fits <- apply(fit_times[,i,], 2, mean, na.rm=TRUE) >= 3600
   too_long_fits[is.na(too_long_fits)] <- TRUE
   too_long_preds <- apply(pred_times[,i,], 2, mean, na.rm=TRUE) >= 3600
