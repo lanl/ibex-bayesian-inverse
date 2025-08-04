@@ -188,7 +188,7 @@ for (i in 1:num_ns) {
   too_long_preds <- apply(pred_times[,i,], 2, mean, na.rm=TRUE) >= 3600
   too_long_preds[is.na(too_long_preds)] <- TRUE
   too_long <- too_long | too_long_fits | too_long_preds
-  print(paste0("Current status of each implementation after dimension size ", n, ":"))
+  print(paste0("Current status of each implementation after ", ifelse(inc_out, "dimension", "training set"), " size ", n, ":"))
   print(too_long)
 }
 
