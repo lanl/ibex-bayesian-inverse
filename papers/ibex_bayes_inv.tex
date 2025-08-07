@@ -565,8 +565,8 @@ binary response, such as success or failure. Categorical responses may expand
 beyond two classes, representing a multinomial reponse. In this paper we focus
 on Poisson-distributed counts due to our motivating application, but our
 framework can easily be generalized to any response. Revisiting Eq.
-\ref{eq:bsi}, we replace the Normal likelihood with a Poisson likelihood, as
-shown below.
+\ref{eq:bsi}, we replace the Normal likelihood with a Poisson likelihood, and
+substitute $\boldsymbol \lambda$ for $\boldsymbol \theta$, as shown below.
 \begin{align} %% IDEA: specify priors we are using here?
 \pi(\boldsymbol \lambda | \boldsymbol y, X) &= \frac{\mathcal{L}(\boldsymbol y|\boldsymbol \lambda, X)
 \pi(\boldsymbol \lambda)}{\pi(\boldsymbol y|X)} \propto \mathcal{L}(\boldsymbol y|\boldsymbol \lambda,
@@ -583,12 +583,26 @@ $t_i$. For unit exposure ($t_i=1$), the mean can simply be represented as
 $\lambda_i$. However, in our application we are not given unit exposure, but
 each data point is a total count over a specific time interval.
 
-Eq. \ref{eq:bsi_pois} gives us the form of the posterior. But without a
-conjugate prior to provide an analytical solution, and the infeasibility of
-marginalizing out $\boldsymbol \lambda$, we must sample the posterior of
-$\boldsymbol \lambda$ using MCMC. The difficulty is in the second step of the
-for loop in Algorithm \ref{alg:gibbs}. Here we need to predict $\boldsymbol
-\lambda$ at input locations $X$, but with proposed model parameters, $u^*$.
+Eq.~\ref{eq:bsi_pois} does not tell the entire story, as we (or the scientists
+we collaborate with) are not necessarily interested in the posterior
+distribution of $\boldsymbol \lambda$. The parameters of interest are those that determine what the value of $\boldsymbol \lambda$ is, not $\boldsymbol \lambda$ itself. So, we rewrite Eq. \ref{eq:bsi_pois} as
+\begin{align} %% IDEA: specify priors we are using here?
+\pi(\boldsymbol \theta | \boldsymbol y, X) &= \frac{\mathcal{L}(\boldsymbol y|\boldsymbol \theta, X)
+\pi(\boldsymbol \theta)}{\pi(\boldsymbol y|X)} \propto \mathcal{L}(\boldsymbol y|\boldsymbol \theta,
+X) \pi(\boldsymbol \theta) \nonumber \\ &\propto \left[ \prod_{i=1}^N
+   \frac{f_{\lambda}(\theta_i)^{y_i}e^{-f_{\lambda}(\theta_i)}}{y_i!} \right] \pi(\boldsymbol \theta) =
+   \left[ \prod_{i=1}^N \frac{(f_r(\theta_i) t_i)^{y_i}e^{-f_r(\theta_i) t_i}}{y_i!} \right]
+   \pi(\boldsymbol
+   \theta),
+\label{eq:bsi_pois2}
+\end{align}
+where $f()$ is simulator, which gives us the form of the posterior for the
+computer model parameters. But without a conjugate prior to provide an
+analytical solution, and the infeasibility of marginalizing out $\boldsymbol
+\theta$, we must sample the posterior of $\boldsymbol \theta$ using MCMC.
+The difficulty is in the second step of the for loop in Algorithm
+\ref{alg:gibbs}. Here we need to predict $\boldsymbol
+\lambda$ at input locations $X$, but with proposed model parameters, $\boldsymbol \theta^*$.
 Unfortunately, that falls to our computer model, which is expensive and can
 take hours or days to complete, making MCMC impractical. Therefore, we need a
 surrogate for the simulator that 1) can be fit to training data in a
@@ -597,12 +611,13 @@ the calibration parameters quickly. Here we utilize a GP surrogate
 (\ref{sec:gp_surr}).
 \begin{algorithm}[ht]
 \DontPrintSemicolon
-Initialize $u^{(0)}$, $\Sigma^{(0)}$. \\
+Fit Scaled Vecchia GP surrogate $\hat{f}_r()$ to simulator output $Y_m, X_m$. \\ 
+Initialize $\boldsymbol \theta^{(0)}$, $\Sigma_{\theta}^{(0)}$. \\
 \For{$t = 1, \dots, T$}{
-  Propose $u^{(t)} \mid u^{(t-1)}, \Sigma^{(t-1)}$ via MH, \\
-  Predict $\hat{f}(Y, T, X, u^{(t)})$ \\
-  Evaluate $\mathcal{L}(Y|\hat{f})$ \\
-  Accept or reject $u{(t)}$
+  Propose new model parameters $\boldsymbol \theta^{(t)} \mid \boldsymbol \theta^{(t-1)}$ via MH, \\
+  Make predictions $\boldsymbol \lambda^{(t)} = \hat{f}_r(\boldsymbol \theta^{(t)}, X)$, \\
+  Evaluate $\mathcal{L}(Y|\boldsymbol \lambda^{(t)}, T)$ where $T$ is the vector of exposure times paired with $Y$, \\
+  Accept or reject $\boldsymbol \theta^{(t)}$
   }
 \caption{MCMC (Metropolis-within-Gibbs) for Poisson Inverse Bayes.}
 \label{alg:gibbs}
@@ -612,22 +627,24 @@ Initialize $u^{(0)}$, $\Sigma^{(0)}$. \\
 %%   - note that we are treating the response as a scalar
 %%   - response is Poisson
 %%   - Graphic showing field / computer model data, fit, and posterior over parameters
-Now, before we get ahead of ourselves, let’s build on our toy problem
+Now, before we get ahead of ourselves, let’s build on the toy problem we
 introduced in \ref{sec:bayes_inv}. Instead of observing the function $f(X)$
 with random, Gaussian noise, suppose we are given counts, drawn from a Poisson
-process with $\boldsymbol \lambda = f(X)$, as shown in Figure 3. As described
-in \ref{sec:bayes_inv}, we know that the $f(X)$ is a function of two
-parameters, $\mu$ and $\lambda$. We'll skip the idealized situation where we
-have access to unlimited evaluations of the computer model. Instead, we'll fit
-a GP surrogate to a limited run of model evaluations to then make a surrogate
-prediction at each MCMC iteration. Results are shown in the right panel Figure
-\ref{f:toy_calib_pois}. We can see that our framework picks parameter values
-that again estimate the simulator output almost exactly. The posterior mean,
-shown in the right panel, falls close to the true values of the parameters,
-this time as the underlying mean function generating counts $\boldsymbol y
+process with $\boldsymbol \lambda = f(X)$, as shown in the left panel of
+Figure 3. As described in \ref{sec:bayes_inv}, we know that $f(X)$ is a
+function of two parameters, $\mu$ and $\lambda$. We'll skip the idealized
+situation where we have access to unlimited evaluations of the computer model
+and instead, fit a GP surrogate to a limited run of model evaluations we can
+use to make a surrogate prediction at each MCMC iteration. Results are shown
+in the middle panel of Figure \ref{f:toy_calib_pois}. We can see that the MCMC
+thoroughly explores the model input space and that our framework picks
+parameter values that again estimate the simulator output almost exactly. The
+posterior mean, shown in the right panel, falls close to the true values of
+the parameters, this time as the underlying mean function generating counts
+$\boldsymbol y
 \sim \text{Poisson}(\boldsymbol \lambda)$. We recognize that there is more distance
-between the truth and our estimate, but we attribute that extra uncertainty to
-using a surrogate rather than the computer model itself.%% IDEA: fit a surrogate to the data itself. maybe use GPVecchia
+between the truth and our estimate than before, but we attribute that extra
+uncertainty to using a surrogate rather than the computer model itself.%% IDEA: fit a surrogate to the data itself. maybe use GPVecchia
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.51,trim=0 0 25 0,clip=TRUE]{logit1_pois_obs.pdf}
@@ -641,16 +658,17 @@ evaluations of the underlying mean at posterior draws and the mean estimate
 \end{figure}
 
 Note that we adopt the modularized approach of
-\citet{bayarri2009modularization}, by both preference and necessity. That is,
+\citet{bayarri2009modularization}, by both necessity and preference. That is,
 we fit our surrogate model to simulator data only, not incorporating field
-data. \citet{kennedyohagan2001} only apply their method to situations when
-both Gaussian computer model output and Gaussian field responses. This allows
-joint modelling of simulator and field data. We aren't able to do this with
-Poisson counts as the field response. Additionally, although we do not address
-a discrepancy between simulator and reality as \citet{kennedyohagan2001} do,
-which is a motivation \citet{bayarri2009modularization} cite to their
-modularized approach, we share the belief that predictions for our surrogate
-for the computer model should only be informed by the simulator output.
+data. First, \citet{kennedyohagan2001} only apply their method to situations
+when both Gaussian computer model output and Gaussian field responses. This
+allows joint modelling of simulator and field data. We are unable to do this
+with Poisson counts as the field response. Additionally, although we do not
+address a discrepancy between simulator and reality as
+\citet{kennedyohagan2001} do, which better estimation of is a key part of the
+motivation \citet{bayarri2009modularization} cite to their modularized
+approach, we share the belief that predictions for our surrogate for the
+computer model should only be informed by the simulator output itself.
 
 %------------------------------------------------------------------------------
 %% SECTION 3.1.1 - A Larger Problem
@@ -670,7 +688,7 @@ for the computer model should only be informed by the simulator output.
 %% - 2D example with Poisson response
 %%   - Same Thing as above
 %%   - LEAD IN: capacity of GP is stretched
-Let's shift gears and jump ahead to our motivating example that includes a
+Now, let's shift gears and jump ahead to our motivating example that includes a
 higher dimensional response. Although the problem is harder to visualize with
 a higher dimensional response, even in 2D, our framework and approach is
 identical.  But the more pressing barrier to overcome is the need for more runs
@@ -684,21 +702,21 @@ evaluated at 20 separate points. Therefore, although the number of runs is
 small, we are really modeling 800 ($40
 \times 20$) responses. A training set of 800 data points is already stretching
 the limitations of a GP (decomposing a $800 \times 800$ matrix). But consider
-the example in Figure \ref{f:fig1}. We leave the introduction of the IBEX
-simulator to \ref{sec:helio_comp_model}, but it's clear the output is high
-resolution. In fact, the two degree grid over latitude and longitude (under
-the hood the output is in spherical coordinates $x$, $y$, and $z$) results in
-16,200 unique locations, or pixels. So, even modeling one image results in a
+the simulated \textit{sky maps} in the middle and right panels of Figure
+\ref{f:fig1}. We leave a complete introduction of the IBEX simulator to
+\ref{sec:helio_comp_model}, but it's clear the output is high resolution. In
+fact, the two degree grid over latitude and longitude (under the hood the
+output is in spherical coordinates $x$, $y$, and $z$) results in $16,200$
+unique locations, or pixels. Therefore, even modeling one image results in a
 $16,200 \times 16,200$ grid. Combine that with $n=66$ unique pairs of model
 parameters and our response vector will have greater than one million
 elements. Even if we used a smaller LHS space-filling design of size $n=15$
-over the model parameters, the response vector would consist of over 200,000
-points. In that case, a GP would not feasibly be able to model each individual
-point as a separate response. For high dimensional output, we reviewed what
-has been done historically in a inverse problem setting in Section
+over the model parameters, the response vector would still consist of over
+200,000 points. In that case, a GP could not feasibly model each individual
+point as a separate response. We reviewed what has been done historically or
+high dimensional output in an inverse problem setting in Section
 \ref{sec:sepia}. Next, we will propose a modern, intuitive, more
-generalizable, and better-perfoming approach.
-% \begin{figure}[ht!]
+generalizable, and better-perfoming approach.% \begin{figure}[ht!]
 % \centering
 % \includegraphics[scale=0.5, trim=30 15 40 0,clip=TRUE]{logit2_obs.pdf}
 % \includegraphics[scale=0.5, trim=30 15 95 0,clip=TRUE]{logit2_model1.pdf}
@@ -733,22 +751,20 @@ limited to, fixed-rank kriging \citep{cressie2008fixed}, inducing points
 nearest neighbors \citep{datta2016hierarchical, wu2022variational}. In the
 context of computer model calibration, \citet{higdoncalib2008} use a basis
 representation via principal components to accommodate high-dimensional
-output.
+output (\ref{sec:sepia}).
 
 As indicated in Section \ref{sec:intro}, we aim to modernize this approach. We
 believe treating the data as a functional or multivariate response, then
 reducing the dimension using PCA, and fitting a GP on component weights isn't
-straightforward or natural. In fact, we argue that had \citet{higdoncalib2008}
-had access to modern-day computing, they would have modeled their application
-more simply as a univariate response. In other words, shift the dimensions of
-the response ($x_1, x_2, \ldots$) into the input matrix $X$ for each entry in
-the response vector. This clearly inflates the size (e.g. number of rows) of
-the training data. But with the dramatic increase in computing capacity and
-availability over the past decade and the aforementioned advances in
-methodology, we believe there are GP approximations available to model the
-output of a computer simulation in this manner. We propose using the recently
-popularized Vecchia approximation \citep{vecchia1988estimation,
-katzfuss2020vecchia, katzfuss2021general, zhang2022multi}.
+straightforward or natural. We suggest shifting the dimensions of the response
+($x_1, x_2, \ldots$) into the input matrix $X$ for each entry in the response
+vector. This clearly inflates the size (e.g. number of rows) of the training
+data. But with the dramatic increase in computing capacity and availability
+over the past decade and the aforementioned advances in methodology, we
+believe there are GP approximations available to model the output of a
+computer simulation in this manner. We propose using the recently popularized
+Vecchia approximation \citep{vecchia1988estimation, katzfuss2020vecchia,
+katzfuss2021general, zhang2022multi, sauer2023vecchia}.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.5,trim=5 38 65 0,clip=TRUE]{ibex_sim_pmfp_1500_0.005.pdf}
@@ -760,15 +776,18 @@ katzfuss2020vecchia, katzfuss2021general, zhang2022multi}.
 \includegraphics[scale=0.5,trim=5 0 65 0,clip=TRUE]{ibex_sim_pmfp_1500_0.01.pdf}
 \includegraphics[scale=0.5,trim=35 0 65 0,clip=TRUE]{ibex_sim_pmfp_1625_0.01.pdf}
 \includegraphics[scale=0.5,trim=35 0 65 0,clip=TRUE]{ibex_sim_pmfp_1750_0.01.pdf}
-\caption{DGP (top row) and mw-DGP (bottom row) on cross-in-tray.
-Columns provide predictive mean (left) and warpings $W^{\cdot 1}$ and
-$W^{\cdot 2}$ (middle and right, respectively).
+\caption{Simulated and predicted outputs from the IBEX \textit{sky map}
+computer model. Corner panels represent the response for four unique
+combinations of model inputs. Panels on the cross with bold, dashed borders
+are predictions from a GP surrogate fit to $n=66$ runs of the computer model.
+Model parameter settings for the predictive panels fall between the four
+simulated runs shown.
 \label{f:ibex_sim_surr}}
 \end{figure}
 
-The Vecchia approximation relies on the ability to write a multivariate
-likelihood function as the product of univariate conditional likelihoods as
-shown below.
+The Vecchia approximation relies on the ability to write a multivariate normal
+likelihood function as the product of univariate normal conditional
+likelihoods as shown below.
 \begin{align}
 L(Y)&=\prod_{i=1}^n L(Y_i \mid Y_{g(i)})
 \hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and } g(i)=\{1, 2,
@@ -777,8 +796,8 @@ L(Y)&=\prod_{i=1}^n L(Y_i \mid Y_{g(i)})
 \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| = m \ll n
 \label{eq:vecchia}
 \end{align}
-Reducing the size of the conditioning set ($h(i)$ in Eq. \ref{eq:vecchia})
-induces sparsity in the precision matrix, speeding up the evaluation of the
+Reducing the size of the conditioning set $h(i)$ induces sparsity in the
+precision matrix, potentially dramatically speeding up the evaluation of the
 likelihood. This takes an operation of order $O(n^3)$ down to $O(nm^3)$,
 motivating small values of $m$. Logically, as the size of $h(i)$ decreases,
 the evaluation of the likelihood becomes faster, but the quality of the
@@ -807,11 +826,12 @@ Vecchia approximation introduced by \citet{scaledvecchiakatzfuss2022}. We
 refer you to their paper for a more in-depth explanation of their work. But,
 the main crux of this implementation is the pre-scaling of inputs by dimension
 before the creation of conditioning sets based on nearest neighbors.
-\citet{scaledvecchiakatzfuss2022} suggest that dimensions affect the response
-differently and at varying rates, and scaling the data beforehand addresses
-this. Publicly available code for this implementation that we directly rely on
-is readily accessible at
-\url{https://github.com/katzfuss-group/scaledVecchia}.
+\citet{scaledvecchiakatzfuss2022} point out that dimensions affect the
+response differently and at varying rates and therefore predictions should be
+made based on neighborhoods that account for this heterogeneity in each
+dimension's impact. Scaling the data beforehand addresses this. Publicly
+available code for this implementation that we directly rely on is readily
+accessible at \url{https://github.com/katzfuss-group/scaledVecchia}.
 
 %% EXAMPLES
 %% - 2D example with LOTs of data
@@ -824,14 +844,16 @@ Let's return to the example we kicked down the road in Section
 \ref{sec:gen_bayes_inv_large} and see how the Scaled Vecchia approximation
 performs. We have access to 66 model runs, each producing an image of 16,200
 points. Figure \ref{f:ibex_sim_surr} shows four of the actual simulation
-outputs (those displayed with thin, solid borders). A Scaled Vecchia GP
-surrogate was fit to all 66 simulated runs. Then, we predicted the output for
-five unobserved combinations of the model parameters. These are depicted in
-the cross of Figure \ref{f:ibex_sim_surr}, those panels with thick, dashed
-borders. To the naked eye, these predictive surfaces appear to have been
-generated by the simulator itself. Moving left to right, or top to bottom, the
-surfaces change gradually and as one would expect. But we also use empirical
-results to show that our surrogate fit is accurate.
+outputs (corner panels displayed with thin, solid borders). A Scaled Vecchia
+GP surrogate was fit to all 66 simulated runs. Then, we predicted the output
+for five unobserved combinations of the model parameters that fall in between
+the actual runs shown. These are depicted in the cross of Figure
+\ref{f:ibex_sim_surr}, those panels with thick, dashed borders. To the naked
+eye, these predictive surfaces appear to have been generated by the simulator
+itself. Moving left to right, or top to bottom, the surfaces change gradually
+and as one would expect. But we are not satisfied with simply passing the eye
+test, so we also use empirical results to show that our surrogate fit is
+accurate and outperforms other current methods.
 
 %------------------------------------------------------------------------------
 %% SECTION 3.2.2 - Empirical Results
@@ -840,41 +862,49 @@ results to show that our surrogate fit is accurate.
 %------------------------------------------------------------------------------
 
 In order to validate performance of our surrogate model, we run conduct the
-following hold-one-out experiment. For each iteration of the test, we fit our
-Scaled Vecchia approximated GP surrogate on 65 of the the $n=66$ model runs
-available. Then, we predict at the held out combination of model parameters,
-but on the same input grid as the 65 other runs. We evaluate using RMSE and
-the continuous ranked probability score (CRPS) proposed by
-\citet{gneiting2007strictly}. For the purpose of comparison, we execute the
-same test for three other competitors: {\tt R} packages {\tt laGP}
-\citep{gramacy2014lagp} and {\tt deepgp} \citep{deepGP}, and the current
-state-of-the-art, SEPIA \citep{gattiker2020lanl}, implemented in {\tt Python}.
-Figure \ref{f:ibex_surr_metrics} displays the results of this bakeoff.
+following hold-one-out experiment. For each iteration of this bakeoff, we fit
+our Scaled Vecchia approximated GP surrogate on 65 of the the $n=66$ model
+runs available. Then, we predict at the held out combination of model
+parameters, but on the same input grid as the 65 other runs. We then evaluate
+how well the model did using root mean square error (RMSE) and the continuous
+ranked probability score (CRPS) proposed by \citet{gneiting2007strictly}. For
+the purpose of comparison, we execute the same test for three other
+competitors: {\tt R} packages {\tt laGP} \citep{gramacy2014lagp} and {\tt
+deepgp} \citep{deepGP}, and the current ``status-quo,'' SEPIA
+\citep{gattiker2020lanl}, implemented in {\tt Python}. Figure
+\ref{f:ibex_surr_metrics} displays the results of this bakeoff.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.35, trim=75 150 75 150,clip=TRUE]{ibex_surr_rmse.pdf}
-\includegraphics[scale=0.35, trim=75 150 75 150,clip=TRUE]{ibex_surr_crps.pdf}
-\caption{Metrics on the IBEX simulator experiment.  Smaller is better for both.
+\includegraphics[scale=0.55, trim=0 0 0 0,clip=TRUE]{ibex_surr_rmse1.pdf}
+\includegraphics[scale=0.55, trim=0 0 0 0,clip=TRUE]{ibex_surr_crps1.pdf}
+\caption{Metrics on the IBEX simulator experiment. Smaller is better for both
+RMSE and CRPS.
 \label{f:ibex_surr_metrics}}
 \end{figure}
 
-For now, just pay attention to the SEPIA boxplots where $\#pcs=3$ and the
-Scaled Vecchia boxplots where $m=25$. We'll come back to the others in a
-moment. It's clear that the Scaled Vecchia approximation outperforms {\tt
-laGP} and {\tt deepgp} in both RMSE and CRPS. {\tt deepgp} is fully Bayesian,
-utilizing MCMC to sample from the posterior distribution. But that comes with
-a cost. Because of the significant computational burden, we were only able to
-run {\tt deepgp} for 1000 MCMC iterations, burning in 500 and thinning by 10.
-Even this limitation took a considerable amount of time. SEPIA performed
-similarly to our Scaled Vecchia approximation, illustrating why it's had such
-staying power over the past two decades. As a practitioner, it appears to be a
-toss-up between these two methods for which to use. But that's not the entire
-story.
+For now, just pay attention to left-hand side of each of the panels, where
+$pcs=3$ for the SEPIA boxplots and $m=25$ for the Scaled Vecchia boxplots.
+We'll come back to the others in a moment. It's clear that the Scaled Vecchia
+approximation outperforms {\tt laGP} and {\tt deepgp} in both RMSE and CRPS.
+We gave {\tt laGP} a neighborhood size of 50, but the predictions are made
+based only on observations local to the predictive location, perhaps
+preventing understanding of global trends in the surface. {\tt deepgp} is
+fully Bayesian, utilizing MCMC to sample from the posterior distribution. But
+that comes with a cost. Because of the significant computational burden, we
+were only able to run {\tt deepgp} for 1000 MCMC iterations, burning in 500
+and thinning by 10. Even these limitation took a considerable amount of time,
+and likely contributed to it's poor performance. It is also important to
+mention that because of the large dataset size, we had to employ the built-in
+Vecchia approximation for the {\tt deepgp} fits with a conditioning set size
+of $m=10$. SEPIA performed similarly to our Scaled Vecchia approximation,
+illustrating why it has had such staying power over the past two decades.
+Therefore, as a practitioner, it appears to be a toss-up between these two
+methods for which to use. But that's not the entire story.
 
 In addition to assessing accuracy and uncertainty quantification through RMSE
-and CRPS, respectively, we aimed to evaluate the speed of execution for all
-competitors involved. In our situation, two factors exist that contribute to a
+and CRPS, we aimed to evaluate the speed of execution for all competitors
+involved. In our situation, two factors exist that contribute to a
 computational bottleneck. First, the dimension of the simulator response,
 which has been the main focus of our work. Additionally, the number of runs
 can be varied, based on the expense of a simulation run. To evaluate this, we
@@ -882,11 +912,8 @@ conducted two more experiments. For varying dimension, we modified the
 dimensionality of the response from 200 to 20,000, keeping the number of runs
 constant. For the two methods that are most equipped for large dimensions
 (Scaled Vecchia and SEPIA), we attempt to stretch their capacity by cranking
-up the length of the response vector from 20-100K, by 10K. Next, we consider
-modifying the size of the training dataset. We keep the dimensionality of the
-response at 10K, but slide the number of simulator runs from 10 to 100. Again,
-for the higher performing methods, we push further up to $n=200$. Results are
-displayed in Figure \ref{f:ibex_surr_timing}.
+up the length of the response vector from 20-100K, by 10K. Results are
+displayed in Figure \ref{f:ibex_surr_timing_dim}.
 
 \begin{figure}[ht!]
 \centering
@@ -894,8 +921,48 @@ displayed in Figure \ref{f:ibex_surr_timing}.
 \includegraphics[scale=0.35, trim=75 150 75 150,clip=TRUE]{ibex_surr_timing_zoom.pdf}
 \includegraphics[scale=0.35, trim=75 150 75 150,clip=TRUE]{ibex_surr_timing_zoom.pdf}
 \caption{Timing metrics on the IBEX simulator experiment.
-\label{f:ibex_surr_timing}}
+\label{f:ibex_surr_timing_dim}}
 \end{figure}
+
+Figure \ref{f:ibex_surr_timing_dim} makes it apparent that Scaled Vecchia and
+SEPIA are both well-suited for increasing dimensionality in the response. {\tt
+laGP}, while built for prediction with large-scale datasets, is unable to keep
+pace at a certain point, likely due to the need to fit a mounting number of
+local GPs. Reducing the neighborhood size (set to the default of 50 in our
+experiment) for {\tt laGP} could certainly aid in the computation expense, but
+that would further degrade it's performance, which already lags being Scaled
+Vecchia and SEPIA (Figure \ref{f:ibex_surr_metrics}). {\tt deepgp}'s need to
+decompose an $n \times n$ matrix at each MCMC iteration, even aided by the
+Vecchia approximation, causes it's cost to quickly grows as dimensionality
+expands. Comparing Scaled Vecchia and SEPIA, we see that Scaled Vecchia comes
+out on top, even as the response dimension is pushed to an even greater extent
+in the right panel of Figure \ref{f:ibex_surr_timing_dim}. Therefore, although
+both Scaled Vecchia and SEPIA perform similarly in predictive performance,
+Scaled Vecchia saves on compute time. We'll see that illustrated again in our
+next experiment.
+
+%% NEXT EXPERIMENT
+Next, we consider modifying the size of the training dataset. SEPIA was
+specifically built for computer experiments with high-dimensional output.
+While it performs well in these situations, it's also fairly inflexible to
+other contexts, such as a large number of simulation runs. Scaled Vecchia does
+not face this hurdle, as it treats both high-dimensional output and
+large-scale univariate datasets similarly, as a univariate response. We show
+this invariance in our next bakeoff. We keep the dimensionality of the
+response at 10K, but slide the number of simulator runs from 10 to 100. For
+the higher performing methods, we push further up to $n=200$. Results are
+shown in Figure \ref{f:ibex_surr_timing_size}.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.35, trim=75 150 75 150,clip=TRUE]{ibex_surr_timing.pdf}
+\includegraphics[scale=0.35, trim=75 150 75 150,clip=TRUE]{ibex_surr_timing_zoom.pdf}
+\includegraphics[scale=0.35, trim=75 150 75 150,clip=TRUE]{ibex_surr_timing_zoom.pdf}
+\caption{Timing metrics on the IBEX simulator experiment.
+\label{f:ibex_surr_timing_size}}
+\end{figure}
+
+Waiting on results. Insert interpretation here.
 
 % Field observations are made at 40 unique locations via an LHS design
 % over $x_1$ and $x_2$. At each location, exposure time (in this simulated
@@ -933,32 +1000,26 @@ displayed in Figure \ref{f:ibex_surr_timing}.
 %% HELIOSPHERIC SCIENCE
 %% - Short review of heliosphere
 %% - Behavior of Energetic Neutral Atoms
-Over the past 15 years, physicists at Princeton University and Los Alamos
-National Lab have developed theoretical models to explain the existence of the
-GDF and \textit{ribbon}, along with their corresponding shape and intensity.
-In these models, the shape and intensity of the GDF is controlled by
-parameter3 and parameter4, and the shape and intensity of the \textit{ribbon}
-is controlled by parallel mean free path and ratio. We leave a more in-depth
-physical interpretation and analysis of these parameters to more appropriate
-venues \citep{zirnstein2021dependence,zirnsteinGDFsims2015}. However, for
-simple reasoning, one can think of the parallel mean free path as the distance
-a hydrogen ion travels beyond the heliopause before interacting with another
-particle, receiving an electron, and becoming an ENA. The ratio parameter is
-the fraction of perpendicular mean free path and parallel mean free path.
-Physicists engaged in this work have developed computer models to represent
-the physical model they have proposed. Therefore, given specific values for
-our four parameters, we can run the model and output a vector of proposed ENA
-rates at specific spherical coordinates. The resolution of the output can be
-varied, but typical runs output 16,200 rates, corresponding to a 2 degree grid
-over latitude and longitude.
+Over the past 15 years, physicists have developed theoretical models
+\citep{heerikhuisen2009pick,schwadron2013spatial,mccomas2017seven} to explain
+the existence of the \textit{ribbon}, the process by which it is generated,
+and it's corresponding shape and intensity. Dozens of theories emerged in the
+few years immediately after the IBEX satellite was launched and began
+returning data, and more have followed in the ensuing years. Different factors
+that have been proposed to affect the shape and intensity of the
+\textit{ribbon} include, but are not limited to, the extent to which hydrogen
+ions in the solar wind are scattered, the number of interactions the ions have
+with other particles, the makeup and affect of the interstellar magnetic
+field, and additional secondary sources of ENAs.
 
-As stated previously, Bayesian Inverse problems are concerned with leveraging
-simulator output to make more accurate predictions at out-of-sample field
-locations. Additionally, the distribution of calibration parameters can be
-estimated. The latter purpose is the primary interest of physicists involved
-in this project, as estimation of these parameters will give credence to what
-model best represents the data. However, we will also show that using computer
-model output enables us to make better predictions on holdout satellite data.
+Physicists engaged in this work have developed computer models to represent
+the theoretical models they have proposed. Therefore, given specific values
+for different model parameters, a simulation can be run to output a proposed
+\textit{sky map}. As stated previously, Bayesian Inverse problems are
+concerned with leveraging simulator output for the purpose of estimating the
+distribution of model parameters. This is the primary interest of physicists
+involved in this project, as estimation of these parameters will give credence
+to what model best represents the data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -974,13 +1035,30 @@ model output enables us to make better predictions on holdout satellite data.
 %% - Explanation of parameters in computer model
 %% - Introduce the data from the computer model
 
+In this paper, we make use of two models developed by scientists at LANL and
+Princeton University. In these models, the shape and intensity of the GDF is
+controlled by parameter3 and parameter4, and the shape and intensity of the
+\textit{ribbon} is controlled by parallel mean free path and ratio. We leave a
+more in-depth physical interpretation and analysis of these parameters to more
+appropriate venues \citep{zirnstein2021dependence,zirnsteinGDFsims2015}.
+However, for simple reasoning, one can think of the parallel mean free path as
+the distance a hydrogen ion travels beyond the heliopause before interacting
+with another particle, receiving an electron, and becoming an ENA. The ratio
+parameter is closely related, being the fraction of perpendicular mean free
+path and parallel mean free path. We can run this model and output a vector of
+proposed ENA rates at specific spherical coordinates. The resolution of the
+output can be varied, but typical runs output 16,200 rates, corresponding to a
+2 degree grid over latitude and longitude.
+
 We have access to $n=66$ runs of the simulator. These runs represent all
 combinations of 11 unique values of parallel mean free path and 6 unique
 values of ratio. The spread of parameter values was determined by the space
 scientists to include all values considered reasonable. Parallel mean free
-path ranges from 500-300 astronomical units (AU) in increments of 500 AU.
+path ranges from 500-3000 astronomical units (AU) in increments of 500 AU.
 Ratio values are unitless, and span from 0.001 to 0.1. Each computer model run
-is executed on an identical grid over $x$, $y$, and $z$.
+is executed on an identical grid over $x$, $y$, and $z$ (although all our
+visuals will be shown after converting to geographical coordinates, latitude
+and longitude).
 
 In order to showcase and validate our proposed methodology on the IBEX data,
 we will first test on simulated sky maps. To do this, we will treat one output
@@ -989,12 +1067,20 @@ underlying mean ENA rate, we will draw Poisson counts with exposure time
 specified by the real IBEX data. Figure \ref{f:ibex_synth_ex} shows both the
 ``truth'' from the simulation (top right) and the ``observed'' simulated data
 (top left). Note that the locations of the simulated data are the recorded
-coordinates for ENAs captured by the IBEX satellite. This accounts for the
-strings of missing data, which corresponding to certain orbits of the
-satellite.
-
+coordinates for ENAs captured by the IBEX satellite in it's orbit. This
+accounts for the unique spread of points and the strings of missing data,
+which corresponding to certain orbits of the satellite.
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.25,trim=0 0 0 0,clip=TRUE]{sim_ibex_real_calib.png}
+\caption{Simulated satellite data based on an output from the computer model (top
+left). True simulator output (top right). Estimated calibration parameters (bottom
+left). Estimated output via surrogate at estimated calibration parameters (bottom
+right).
+\label{f:ibex_synth_ex}}
+\end{figure}
 Now, treating the simulated data as if it came from the satellite, we run our
-Poisson computer model calibration code and estimate the underlying
+Poisson Bayesian Inverse Problem framework and estimate the underlying
 parameters. In Figure \ref{f:ibex_synth_ex}, the bivariate posterior
 distribution of parallel mean free path and ratio are displayed (bottom left).
 We can see that our framework does a good job of obtaining the true
@@ -1008,15 +1094,6 @@ and intensity of the ribbon in each sky map is slightly different. However, it
 is also abundantly clear that each map (truth and estimated) could have
 reasonably generated the data we ``observe''in the top left panel. Therefore,
 we can confidently assert that our framework recovers the truth.
-\begin{figure}[ht!]
-\centering
-\includegraphics[scale=0.25,trim=0 0 0 0,clip=TRUE]{sim_ibex_real_calib.png}
-\caption{Simulated satellite data based on an output from the computer model (top
-left). True simulator output (top right). Estimated calibration parameters (bottom
-left). Estimated output via surrogate at estimated calibration parameters (bottom
-right).
-\label{f:ibex_synth_ex}}
-\end{figure}
 
 %------------------------------------------------------------------------------
 %% SECTION 4.3 - Experiment
@@ -1029,25 +1106,25 @@ right).
 %% - Show results from simulated data
 %% - Lead-in to real data
 
-Figure \ref{f:ibex_synth_ex} is just one data point. But to further validate
-our framework, we can apply this method to each unique combination of
-calibration parameters within our simulator output. Due to the inability for
-the model to provide good posterior distributions for boundary parameters, we
-do not consider combinations for which at least one parameter is on its edge.
-For instance, when parallel mean free path is either 500 or 3000 AU and/or
-ratio is either 0.0001 and 0.1. Removing these edge cases results in 36
-remaining unique combinations. For each combination, we follow the same
-procedure as described above. First, we elect one unique combination and
-create simulated observed satellite data based on the computer model. Next, we
-remove that combination from the training data used to fit our Scaled Vecchia
-Gaussian Process surrogate model in our calibration framework. Finally, we run
-MCMC to sample from the posterior distribution of our calibration parameters
-and obtain an estimates for the posterior mean. Our results are shown in
-Figure \ref{f:synth_estimates_all}. In each plot of the posterior
-distributions, we have included as a blue star the true combination of
-parameters that generated the simulated data. Our 95\% credible intervals
-encompass the truth in 34 of the 36 of the iterations, near the nominal
-coverage rate we'd expect.
+Before we get ahead of ourselves, we recognize that Figure
+\ref{f:ibex_synth_ex} is just one data point. So, to further validate our
+framework, we can apply this method to each unique combination of calibration
+parameters within our simulator output. Due to the inability for the model to
+provide good posterior distributions for boundary parameters, we do not
+consider combinations for which at least one parameter is on its edge. For
+instance, when parallel mean free path is either 500 or 3000 AU and/or ratio
+is either 0.0001 and 0.1. Removing these edge cases results in 36 remaining
+unique combinations. For each combination, we follow the same procedure as
+described above. First, we elect one unique combination and create simulated
+observed satellite data based on the computer model. Next, we remove that
+combination from the training data used to fit our Scaled Vecchia Gaussian
+Process surrogate model in our calibration framework. Finally, we run MCMC to
+sample from the posterior distribution of our calibration parameters and
+obtain an estimates for the posterior mean. Our results are shown in Figure
+\ref{f:synth_estimates_all}. In each plot of the posterior distributions, we
+have included as a blue star the true combination of parameters that generated
+the simulated data. Our 95\% credible intervals encompass the truth in 34 of
+the 36 of the iterations, near the nominal coverage rate we'd expect.
 
 %%% Can we put something in here that shows using the computer model improves prediction
 %%% over just modeling field data? Hard to do without spoiling my next paper?
@@ -1100,7 +1177,7 @@ section of sky. These adjustments, along with the satellite's orbit, allows
 IBEX to view the entire sky over a period of six months. Therefore, dating
 back to 2008, we have access to $\sim$35 estimated \textit{sky maps}.
 
-Here's another paragraph for Bobby.
+Add another paragraph.
 
 %------------------------------------------------------------------------------
 %% SECTION 5.2 - EXPERIMENT
