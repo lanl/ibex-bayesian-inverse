@@ -14,7 +14,7 @@ from sepia.SepiaData import SepiaData
 from sepia.SepiaPredict import SepiaEmulatorPrediction
 
 ## Flag for incrementing output by dimension, or by number of runs
-inc_out = False
+inc_out = False 
 
 ## Read in the data
 model_data = np.genfromtxt('../data/sims.csv', delimiter=',', names=True)
@@ -126,7 +126,7 @@ for j in range(len(pcs)):
             data.transform_xt()
             data.standardize_y()
             ## create basis
-            data.create_K_basis(n_pc=0.99)
+            data.create_K_basis(n_pc=iter_pc)
             model = SepiaModel(data)
             model.verbose = False
             ## fit model
@@ -143,7 +143,7 @@ for j in range(len(pcs)):
                storeMuSigma=True)
             toc = time.time()
             pred_times[j,i] = toc - tic
-            print("Finished Monte Carlo iteration " + str(j+1) + "/5 of n=" + str(n))
+            print("Finished Monte Carlo iteration " + str(j+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc))
             ## Delete old files
             os.remove('x_iter.csv')
             os.remove('y_iter.csv')
