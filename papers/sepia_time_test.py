@@ -83,7 +83,7 @@ for j in range(len(pcs)):
             sim_num = sample(range(66), 1)
             non_sim_nums = np.delete(range(66), sim_num)
             if not inc_out:
-                non_sim_nums = non_sim_nums[sample(range(len(non_sim_nums)), n)] if n <= len(non_sim_nums) else non_sim_nums[choices(range(len(non_sim_nums), k=n))]
+                non_sim_nums = non_sim_nums[sample(range(len(non_sim_nums)), n)] if n <= len(non_sim_nums) else non_sim_nums[choices(range(len(non_sim_nums)), k=n)]
             x_write = x[non_sim_nums,:]
             if inc_out:
                 inds = sample(range(nresponses), n) if n <= nresponses else choices(range(nresponses), k=n)
