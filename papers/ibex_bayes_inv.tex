@@ -41,28 +41,27 @@ Alamos National Laboratory}}
 
 \maketitle
 
-\vspace{-0.5cm}
+%\vspace{-0.5cm}
 
 \begin{abstract}
-The Interstellar Boundary Explorer (IBEX) satellite orbits Earth and detects
-heliospheric energetic neutral atoms (ENAs) to determine the rate at which
-they are generated in the heliopause. Sophisticated computer models attempt to
-represent the physical process that produce ENAs through various model
-parameters. Statisticians use a Bayesian approach to solve these types of
-inverse problems by using data collected in a field experiment along with
-simulator output from different combinations of parameter settings to learn
-the posterior distributions of model parameters and make improved
-out-of-sample field predictions. However, inverse problems typically assume a
-Gaussian response for both experimental observations and a limited set of
-computer model data. We introduce a novel Markov chain Monte Carlo framework
-that accommodates the spatially distributed Poisson counts collected by the
-IBEX satellite. We also propose the use of the Scaled Vecchia approximation as
-a Gaussian process (GP) surrogate for the large-scale, high-dimensional
-computer model training data. We demonstrate the capability of our proposed
-framework through multiple simulated examples and show that we can
-consistently recover the true parameters in a discrepancy-free environment and
-obtain accurate out-of-sample prediction. We apply this to the raw IBEX
-satellite data and the corresponding computer model output.
+Data collected by the Interstellar Boundary Explorer (IBEX) satellite,
+recording heliospheric energetic neutral atoms (ENAs), exhibit a phenomena
+that have caused space scients to revise hypotheses about the physical
+processes, and computrer simulations under those models, in play at the
+boundary of our solar system.  Evaluating the fit of these computer models
+involves tuning their parameters to observational data from IBEX. This would
+be a classic (Bayesian) inverse problem if not for three challenges: (1) the
+computer simulations are slow, limiting the size of campaigns of runs; so (2)
+surrogate modeling is essential but outputs are high-resolution images
+thwarting convetional methods; and (3) IBEX observations are counts, whereas
+most inverse problem techniques assume Gaussian field data. To fill that gap
+we propose a novel approach to Bayesian inverse problems coupling a Poisson
+response with a sparse Gaussian process surrogate using the Vecchia
+approximation.  We demonstrate the capibilities of our proposed framework,
+which compare favorably to to alternatives, through multiple simulated
+examples in terms of recovering ``true'' computer model parameters and accurate
+out-of-sample prediction. We then apply this new technology to IBEX satellite
+data and associted computer models developed at Los Alamos National Lab.
 
 \bigskip
 \noindent \textbf{Key words:} Gaussian process, surrogate modeling,
@@ -81,112 +80,99 @@ Poisson, calibration, heliospheric science, IBEX, Vecchia approximation
 %% - Explain the mission
 %% - Introduce the idea of a computer model
 %% - Explain desire to understand the distribution of parameters
-The National Aeronautics and Space Administration (NASA) launched the Interstellar
-Boundary Explorer (IBEX) satellite in 2008 as part of their Small Explorer program
-\citep{mccomas2009aIBEX} to deepen our understanding of the heliosphere. The
-heliosphere is the bubble formed by the solar wind that encompasses our solar system
-and acts as a barrier to interstellar space. Of particular interest is the behavior
-at the edge of the heliosphere, known as the heliopause. Here, highly energized
-hydrogen ions that make up the solar wind interact with neutral atoms, occasionally
-undergo electro exchange, and become neutral themselves. These energetic neutral
-atoms (ENAs) are unaffected by magnetic fields and therefore travel in a straight
-line. Some ENAs eventually make their way to Earth and can be detected by an
+The National Aeronautics and Space Administration (NASA) launched the
+Interstellar Boundary Explorer (IBEX) satellite in 2008 as part of their Small
+Explorer program \citep{mccomas2009aIBEX} to deepen our understanding of the
+heliosphere. The heliosphere is the bubble formed by the solar wind that
+encompasses our solar system and acts as a barrier to interstellar space. Of
+particular interest is the behavior at the edge of the heliosphere, known as
+the heliopause. Here, highly energized hydrogen ions that make up the solar
+wind interact with neutral atoms, occasionally undergo electro exchange, and
+become neutral themselves. These energetic neutral atoms (ENAs) are unaffected
+by magnetic fields and therefore travel in a straight line.
+
+Some ENAs eventually make their way to Earth and can be detected by an
 instrument on the IBEX satellite called the IBEX-Hi ENA imager
-\citep{funsten2009IBEXHiENA}. This apparatus records the energy level and approximate
-location of origin for each ENA that enters the detector. IBEX's raw collected data
-consist of ENA counts and exposure times for each area of the sky at which the
-satellite points, providing sufficient information to estimate the rate at which
-these particles are created throughout the heliopause. An example of this estimated
-surface or image, referred to by space scientists as a \textit{sky map}, can be found
-in the left panel of Fig. \ref{f:fig1}. Sky maps are integral to better understand the
-heliosphere's creation and evolution.
+\citep{funsten2009IBEXHiENA}. This apparatus records the energy level and
+approximate location of origin for each ENA that enters the detector. IBEX's
+raw collected data consist of ENA counts and exposure times for each area of
+the sky at which the satellite points, providing sufficient information to
+estimate the rate at which these particles are created throughout the
+heliopause. An example of this estimated surface or image, referred to by
+space scientists as a \textit{sky map}, can be found in the left panel of Fig.
+\ref{f:fig1}. Sky maps are integral to better understand the heliosphere's
+creation and evolution.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.74,trim=0 0 65 0,clip=TRUE]{ibex_real1.pdf}
-\includegraphics[scale=0.74,trim=35 0 65 0,clip=TRUE]{sim1.pdf}
-\includegraphics[scale=0.74,trim=35 0 0 0,clip=TRUE]{sim2.pdf}
-\caption{Observed rate of energetic neutral atoms (ENA) detected by the
-Interstellar Boundary Explorer (IBEX) satellite (left) and output from two
-runs of the IBEX computer simulation at different settings (middle, right).
+\includegraphics[scale=0.75,trim=0 0 65 0,clip=TRUE]{ibex_real1.pdf}
+\includegraphics[scale=0.75,trim=35 0 65 0,clip=TRUE]{sim1.pdf}
+\includegraphics[scale=0.75,trim=35 0 20 0,clip=TRUE]{sim2.pdf}
+\caption{Observed ENA rate detected by the
+IBEX satellite (left) and output from two IBEX  simuations under
+different parameter settings (middle, right).
 \label{f:fig1}}
 \end{figure}
 
-One can think of the heliosphere as a boat moving through water representing
-interstellar space. At the outset of IBEX's mission, scientists expected to see an
-elevated rate of ENAs being generated at the front (nose) and back (tail), much like
-the turbulent interaction with water at a boat's bow and stern. And indeed, that
-belief was validated by IBEX data. These predicted regions of raised ENA rates are
-known as \textit{globally distributed flux}, or GDF. More ENAs are produced at the
-nose and tail, where there is an increased number of collisions between hydrogen ions
-and neutral particles in the interstellar medium. However, in a completely
-unanticipated finding, IBEX also recorded a thin string of higher rates of ENAs
-\citep{fuselier2009IBEXribbon} wrapping around the heliosphere. Scientists now refer
-to this phenomenom as the \textit{ribbon}. This unique feature of a sky map is
-clearly visible in Fig. \ref{f:fig1}. Since this discovery, space scientists have
-proposed several theories attempting to describe the physical process that generates
-the ribbon \citep{mccomas2014ibex, zirnstein2018role, zirnstein2019strong,
+One can think of the heliosphere as a "boat" moving through interstellar
+space. At the outset of IBEX's mission, scientists expected to see an elevated
+rate of ENAs being generated at the front (nose) and back (tail), much like
+the turbulent interaction with water at a boat's bow and stern. And indeed,
+that belief was validated by IBEX data. These predicted regions of raised ENA
+rates are known as \textit{globally distributed flux}, or GDF. At the nose and
+tail there are an increased number of collisions between hydrogen ions and
+neutral particles in the interstellar medium.
+
+However, in a completely unanticipated finding, IBEX also recorded a thin
+string of higher rates of ENAs \citep{fuselier2009IBEXribbon} wrapping around
+the heliosphere. Scientists now refer to this phenomenom as the
+\textit{ribbon}. This unique feature of a sky map is clearly visible in Fig.
+\ref{f:fig1}. Since this discovery, space scientists have proposed several
+theories attempting to describe the physical process that generates the ribbon
+\citep{mccomas2014ibex, zirnstein2018role, zirnstein2019strong,
 zirnstein2021dependence}.
 
-Computer models encapsulating competing theories have been built which generate
-high-resolution (i.e, a high-dimensional response) synthetic sky maps (middle and
-right panels of Figure \ref{f:fig1}). These simulations are extremely sophisticated
-and involve many complex and expensive operations, such as the solving of partial
-differential equations. Consequently, executing a single run of the computer model at
-a specified set of model parameters can take days or even weeks to complete,
-depending on the amount of parallelization afforded by computational resources, thus
-limiting the number of unique simulated sky maps available. Although many simulations
-exist, we focus on two that are publicly accessible: a GDF model proposed by
-\citet{zirnstein2021heliosheath} and a ribbon-only model developed by
-\citet{zirnsteinGDFsims2015}. These simulators take inputs that can be varied to
-modify the shape and intensity of both ribbon and GDF. The ribbon-only model relies
-on two parameters, \textit{parallel mean free path} and \textit{ratio}, while the GDF
-model takes \textit{kappa} and \textit{pickup ions (PUI) cooling index} as inputs.
-Dialing in good settings for and understanding the posterior distribution of these
-variables is instrumental in furthering theory development and validation. But so
-far, minimal work has been done to achieve this by pairing the computer model output
-with the raw ENA counts collected by IBEX.
+Computer models encapsulating competing theories have been built which
+generate high-resolution (i.e, a high-dimensional response) synthetic sky maps
+(middle and right panels of Figure \ref{f:fig1}). These simulations are
+extremely sophisticated and involve many complex and expensive operations,
+such as the solving of partial differential equations. Consequently, executing
+a single run of the computer model at a specified set of model parameters can
+take thousands of core hours.  This severely limit the number of unique 
+runs generating simulated sky in various conditions. 
 
-Space scientists at Los Alamos National Lab (LANL) aim to solve this as a Bayesian
-inverse problem \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. But
-the data IBEX provides and its simulated representation present some unique
-challenges: 1) a non-Gaussian field response (Poisson counts), 2) a computationally
-intensive simulator, and 3) high-dimensional model output (simulated sky maps).
-Further compounding the computational bottleneck of the latter two hurdles is the
-need for Bayesian posterior sampling via Markov chain Monte Carlo (MCMC) methods.
-Therefore, not only is a surrogate required for the computer model, it's essential to
-have one that can make repeated predictions of sky maps for proposed values of model
-parameters at each MCMC iteration in a reasonable time frame. Methods exist to solve
-each of the aforementioned situations, but nothing has been proposed to address the
-intersection of all three. We propose a framework for Bayesian inverse problems that
+Our work here focuses on two, publicly accessible computer models: a GDF
+model proposed by \citet{zirnstein2021heliosheath}; and a ribbon-only model
+developed by \citet{zirnsteinGDFsims2015}. These simulators take inputs that
+can be varied to modify the shape and intensity of both ribbon and GDF. The
+ribbon-only model relies on two parameters, \textit{parallel mean free path}
+and \textit{ratio}, while the GDF model takes \textit{kappa} and
+\textit{pickup ions (PUI) cooling index} as inputs. Dialing in good settings
+for these input parameters, in light of observed ENA counts from IBEX, is
+instrumental in furthering theory development and validation.
+
+Space scientists at Los Alamos National Lab (LANL) wish to solve this
+``parameter tuning'' exercise as a Bayesian inverse problem
+\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}, obtaining a
+posterior distribution over likely settings.  However, the exposure and count
+data IBEX provides, and along with computer simulated rates, present some
+unique challenges: 1) computationally intensive models limiting simulation,
+necessitating surrogate modeling; 2) high-dimensional model output (simulated
+sky maps, each containing tens of thousands of pixels), thwarting conventional
+surrogate modeling techniques; 3) a non-Gaussian field response (Poisson
+counts).  It is worth noting that Bayesian posterior sampling, say via via
+Markov chain Monte Carlo (MCMC), compounds computational bottlenecks (2).
+
+Methods exist separately, in the literature, to address needs each of the
+aforementioned situations 1)--3), but we are not aware of anything in the
+intersection. We propose a framework for Bayesian inverse problems that
 utilizes the Vecchia approximation
 \citep{katzfuss2021general,scaledvecchiakatzfuss2022} with a Gaussian process
-surrogate or emulator for high dimensional computer simulations, and couple that with
-a Poisson observational model to furnish posterior samples of unknown parameters to
-these models given observed data.
+surrogate or emulator for high dimensional computer simulations, and couple
+that with a Poisson observational model to furnish posterior samples of
+unknown parameters to these models given observed data.
 
-%% OTHER WORK / CHALLENGES
-Table \ref{tab:prev_work} summarizes the features of the IBEX inverse problem and
-reviews the necessary capabilities that are present in separate, previous works.
-\citet{kennedyohagan2001} offer the canonical computer model calibration framework,
-which provides a fully Bayesian approach to estimate the posterior distribution of
-calibration parameters and improve prediction at new, unobserved field locations.
-However, their methodology is limited to Gaussian field observations and small,
-simulator output. \citet{higdoncalib2008} and SEPIA \citep{gattiker2020lanl}, its
-more recent incarnation, also employ Bayesian methods while accounting for computer
-model output that is functional. But SEPIA is somewhat rigid, does not scale well
-with added model runs, and requires the user to specify a number of basis functions
-to represent the simulator response. \citet{gramacy2015calibrating} consider computer
-model calibration with large-scale output from a computer experiment, necessitating
-an approximation. But their implementation is not Bayesian and the scale of simulator
-data is still orders of magnitude less than IBEX. \citet{grosskopfcountcalib2020}
-provide an extension of the Kennedy \& O'Hagan (hereafter referred to as KOH)
-framework to non-Gaussian data that maintains a Bayesian approach. But they are
-limited to small amounts of computer model data and do not consider higher
-dimensional responses. In contrast, our approach checks all the boxes to achieve the
-goal of IBEX space scientists and therefore applies to a wider class of problems than
-previous work.
-\begin{table}[h]
+\begin{table}[ht!]
 \centering
 \renewcommand{\arraystretch}{1.5}
 \begin{tabular}{|l|c|c|c|c|}
@@ -205,10 +191,38 @@ Our Contribution & \checkmark & \checkmark & \checkmark & \checkmark \\
 \hline
 \end{tabular}
 \caption{Check marks indicate that functionality exists within the cited paper and/or
-accompanying software. To save space, only one citation is listed for each row,
-although we recognize these may be replaced with other studies.}
+accompanying software. To save space, only one citation is listed for each
+row.}
 \label{tab:prev_work}
 \end{table}
+
+%% OTHER WORK / CHALLENGES
+Table \ref{tab:prev_work} summarizes the features of the IBEX inverse problem
+and reviews the necessary capabilities, alongside recent papers offering
+partial solutions.  References provided are representative.  We acknowledge
+that there are, in most cases, several works that may fit the bill.
+\citet{kennedyohagan2001} offer the canonical computer model calibration
+framework, which provides a fully Bayesian approach to estimate the posterior
+distribution of calibration parameters and improve prediction at new,
+unobserved field locations. However, their methodology is limited to Gaussian
+field observations and small, simulator output. \citet{higdoncalib2008} and
+SEPIA \citep{gattiker2020lanl}, its more recent incarnation, also employ
+Bayesian methods while accounting for computer model output that is
+functional. But SEPIA is somewhat rigid, does not scale well with added model
+runs, and requires the user to specify a number of basis functions to
+represent the simulator response. \citet{gramacy2015calibrating} consider
+computer model calibration with large-scale output from a computer experiment,
+necessitating an approximation. But their implementation is not Bayesian and
+the scale of simulator data is still orders of magnitude less than IBEX.
+\citet{grosskopfcountcalib2020} provide an extension of the Kennedy \& O'Hagan
+(hereafter referred to as KOH) framework to non-Gaussian data that maintains a
+Bayesian approach. But they are limited to small amounts of computer model
+data and do not consider higher dimensional responses. In contrast, our
+approach checks all the boxes to achieve the goal of IBEX space scientists and
+therefore applies to a wider class of problems than previous work.
+
+{\em Steven, you still don't say what you're contribution is before the
+roadmap.}
 
 %% OUTLINE
 %% - Review Bayesian Inverse Problems, GP Surrogates, SEPIA
