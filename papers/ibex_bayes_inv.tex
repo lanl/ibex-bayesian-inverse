@@ -160,24 +160,31 @@ unique challenges: 1) computationally intensive models limiting simulation,
 necessitating surrogate modeling; 2) high-dimensional model output (simulated
 sky maps, each containing tens of thousands of pixels), thwarting conventional
 surrogate modeling techniques; 3) a non-Gaussian field response (Poisson
-counts).  It is worth noting that Bayesian posterior sampling, say via via
+counts).  It is worth noting that Bayesian posterior sampling, say via
 Markov chain Monte Carlo (MCMC), compounds computational bottlenecks (2).
+
+We propose an integrated framework for Bayesian inverse problems that overcomes all
+of these obstacles together, as illustrated in the top row of Table
+\ref{tab:prev_work}. First, we introduce a Poisson observational model that correctly
+represents the particle counts observed by IBEX. Our framework employs MCMC to
+furnish posterior samples of unknown model parameters, which determine the underlying
+mean of our Poisson model, given observed data and estimate their full joint
+posterior distribution. We fit a GP surrogate or emulator on a limited set of
+expensive, high-dimensional IBEX computer simulations using the Vecchia
+\citep{katzfuss2021general,scaledvecchiakatzfuss2022} approximation to aid our MCMC
+in exploring the space of possible sky maps underlying observed ENA counts. And
+lastly, instead of modeling the maps as high-dimensional vectors, we treat each pixel
+representing an ENA rate as a scalar response of interest, differing from previous
+approaches for functional computer model output and allowing us to leverage recent
+advances in sparse GP surrogate modeling.
 
 Methods exist separately, in the literature, to address needs in each of the
 aforementioned situations 1)--3), but we are not aware of anything in the
-intersection. We propose a framework for Bayesian inverse problems that
-utilizes the Vecchia approximation
-\citep{katzfuss2021general,scaledvecchiakatzfuss2022} with a Gaussian process
-surrogate or emulator for high dimensional computer simulations, and couple
-that with a Poisson observational model to furnish posterior samples of
-unknown parameters to these models given observed data.
-
-%% OTHER WORK / CHALLENGES
-Table \ref{tab:prev_work} summarizes the features of the IBEX inverse problem
-and reviews the necessary capabilities, alongside recent papers offering
-partial solutions.  References provided are representative.  We acknowledge
-that there are, in most cases, several works that may fit the bill.  Each
-row in the table may be summarized as follows.
+intersection. Table \ref{tab:prev_work} summarizes the features of the IBEX inverse
+problem and reviews the necessary capabilities, alongside recent papers offering
+partial solutions.  References provided are representative.  We acknowledge that
+there are, in most cases, several works that may fit the bill.  Each row in the table
+may be summarized as follows.
 
 \begin{table}[ht!]
 \centering
@@ -222,9 +229,6 @@ Bayesian approach. But they are limited to small amounts of computer model
 data and do not consider higher dimensional responses. In contrast, our
 approach checks all the boxes to achieve the goal of IBEX space scientists and
 therefore applies to a wider class of problems than previous work.
-
-{\em Steven, you still don't say what you're contribution is before the
-roadmap.}
 
 %% OUTLINE
 %% - Review Bayesian Inverse Problems, GP Surrogates, SEPIA
