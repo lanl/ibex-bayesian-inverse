@@ -46,19 +46,19 @@ Alamos National Laboratory}}
 \begin{abstract}
 Data collected by the Interstellar Boundary Explorer (IBEX) satellite,
 recording heliospheric energetic neutral atoms (ENAs), exhibit a phenomena
-that have caused space scients to revise hypotheses about the physical
-processes, and computrer simulations under those models, in play at the
+that have caused space scientists to revise hypotheses about the physical
+processes, and computer simulations under those models, in play at the
 boundary of our solar system.  Evaluating the fit of these computer models
 involves tuning their parameters to observational data from IBEX. This would
 be a classic (Bayesian) inverse problem if not for three challenges: (1) the
 computer simulations are slow, limiting the size of campaigns of runs; so (2)
 surrogate modeling is essential but outputs are high-resolution images
-thwarting convetional methods; and (3) IBEX observations are counts, whereas
+thwarting conventional methods; and (3) IBEX observations are counts, whereas
 most inverse problem techniques assume Gaussian field data. To fill that gap
 we propose a novel approach to Bayesian inverse problems coupling a Poisson
 response with a sparse Gaussian process surrogate using the Vecchia
 approximation.  We demonstrate the capibilities of our proposed framework,
-which compare favorably to to alternatives, through multiple simulated
+which compare favorably to alternatives, through multiple simulated
 examples in terms of recovering ``true'' computer model parameters and accurate
 out-of-sample prediction. We then apply this new technology to IBEX satellite
 data and associted computer models developed at Los Alamos National Lab.
@@ -114,7 +114,7 @@ different parameter settings (middle, right).
 \label{f:fig1}}
 \end{figure}
 
-One can think of the heliosphere as a "boat" moving through interstellar
+One can think of the heliosphere as a ``boat'' moving through interstellar
 space. At the outset of IBEX's mission, scientists expected to see an elevated
 rate of ENAs being generated at the front (nose) and back (tail), much like
 the turbulent interaction with water at a boat's bow and stern. And indeed,
@@ -138,7 +138,7 @@ generate high-resolution (i.e, a high-dimensional response) synthetic sky maps
 extremely sophisticated and involve many complex and expensive operations,
 such as the solving of partial differential equations. Consequently, executing
 a single run of the computer model at a specified set of model parameters can
-take thousands of core hours.  This severely limit the number of unique 
+take thousands of core hours.  This severely limits the number of unique 
 runs generating simulated sky in various conditions. 
 
 Our work here focuses on two, publicly accessible computer models: a GDF
@@ -155,7 +155,7 @@ Space scientists at Los Alamos National Lab (LANL) wish to solve this
 ``parameter tuning'' exercise as a Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}, obtaining a
 posterior distribution over likely settings.  However, the exposure and count
-data IBEX provides, and along with computer simulated rates, present some
+data IBEX provides, along with computer simulated rates, present some
 unique challenges: 1) computationally intensive models limiting simulation,
 necessitating surrogate modeling; 2) high-dimensional model output (simulated
 sky maps, each containing tens of thousands of pixels), thwarting conventional
@@ -163,7 +163,7 @@ surrogate modeling techniques; 3) a non-Gaussian field response (Poisson
 counts).  It is worth noting that Bayesian posterior sampling, say via via
 Markov chain Monte Carlo (MCMC), compounds computational bottlenecks (2).
 
-Methods exist separately, in the literature, to address needs each of the
+Methods exist separately, in the literature, to address needs in each of the
 aforementioned situations 1)--3), but we are not aware of anything in the
 intersection. We propose a framework for Bayesian inverse problems that
 utilizes the Vecchia approximation
