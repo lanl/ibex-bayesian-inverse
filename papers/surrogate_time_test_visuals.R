@@ -20,7 +20,7 @@ par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_fit_times.pdf", width=4, height=5)
 fit_times_ord <- surr_fit_times[,c(1,6,7)]
   paste0("SVEC (m=", c(50, 75, 100), ")"), paste0("SEPIA (pc=", 4:6, ")"))
-exp_pows <- 7:45
+exp_pows <- 7:44
 matplot(x=exp_pows, y=fit_times_ord[1:length(exp_pows),]/60, type="l", ylim=c(0, 30),
   xlab="dim of response = 10 + 1.25^x", ylab="fitting time (minutes)",
   lwd=3)
@@ -41,7 +41,7 @@ par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_total_times.pdf", width=4, height=5)
 long_times_ord <- surr_total_times[,c(1:4,7:10)]
 match_cols <- c(1,5:7,3,8:10)
-matplot(x=large_ns, y=long_times_ord[(length(exp_pows)+1):nrow(long_times_ord),]/60, type="l",
+matplot(x=large_ns, y=long_times_ord[(length(exp_pows)+2):nrow(long_times_ord),]/60, type="l",
   xlab="dim of response", ylab="fitting + prediction time (minutes)",
   lwd=3, col=match_cols, lty=match_cols)
 legend("topleft", c(paste0("SVEC (m=", seq(25, 100, by=25), ")"),
