@@ -1,5 +1,5 @@
 ## Visuals for varying the dimension of the response
-surr_times <- readRDS("surrogate_time_test_20250811.rds")
+surr_times <- readRDS("surrogate_time_test_dim_20250811.rds")
 surr_times$fit_times <- surr_times$fit_times[,c(1:38, 40:dim(surr_times$fit_times)[2]),]
 surr_times$pred_times <- surr_times$pred_times[,c(1:38, 40:dim(surr_times$pred_times)[2]),]
 surr_fit_times <- apply(surr_times$fit_times, c(2,3), mean)
@@ -48,7 +48,7 @@ legend("topleft", c("SVEC (m=25,50,75,100)", "SEPIA (pc=3,4,5,6)"), col=c(1,3), 
 dev.off()
 
 ## Visuals for varying the number of computer experiment runs
-surr_times <- readRDS("surrogate_time_test_n_20250806.rds")
+surr_times <- readRDS("surrogate_time_test_ns_20250806.rds")
 surr_fit_times <- apply(surr_times$fit_times, c(2,3), mean)
 surr_pred_times <- apply(surr_times$pred_times, c(2,3), mean)
 sepia_fit_files <- list.files(pattern="sepia_fit_times_3_ns.csv")
