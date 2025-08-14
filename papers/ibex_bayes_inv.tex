@@ -222,26 +222,24 @@ therefore applies to a wider class of problems than previous work.
 
 Our integrated framework for Bayesian inverse problems overcomes these obstacles
 together in an all-in-one solution, as illustrated in the top row of Table
-\ref{tab:prev_work}. We adopt the approach of \citet{grosskopfcountcalib2020} to
-generalized computer model calibration, adapting to IBEX's count data with a Poisson
-likelihood and employing MCMC to garner posterior samples of model parameters, which
-determine the underlying mean of our Poisson model, given observed data. These
-samples allow us to estimate the full joint posterior distribution of the unknown
-parameters. We fit a GP surrogate or emulator on a limited set of expensive,
-high-dimensional IBEX computer simulations to more thoroughly explore the space of
-possible sky maps that serves as the basis for the observed ENA counts.
-\citet{gramacy2015calibrating} use a GP surrogate in a non-Bayesian context for
-a resource-intensive computer model with the {\tt R} package {\tt laGP}
-\citep{gramacy2014lagp}, but MCMC exacerbates the computational burden of making
-surrogate predictions, necessitating not only a sparse GP surrogate, but one that can
-swiftly generate repeated sky map proposals at each MCMC iteration. We find the
-Vecchia approximation \cite{katzfuss2020vecchia,scaledvecchiakatzfuss2022} to be
-extremely effective in this regard. Lastly, we propose a more intuitive technique to
-modeling high-dimensional vectors, treating each pixel representing an ENA rate as a
-scalar response of interest. This differs from previous approaches to functional
-computer model output, but enables us to leverage recent advances in sparse GP
-surrogate modeling. Additionally, using this strategy efficiently scales both to
-increased dimensionality of the response and to larger sizes of training sets.
+\ref{tab:prev_work}. We adopt the approach of generalized computer model calibration,
+adapting to IBEX's count data with a Poisson likelihood and employing MCMC to garner
+posterior samples of model parameters, which determine the underlying mean of our
+Poisson model, given observed data. These samples allow us to estimate the full joint
+posterior distribution of the unknown parameters. We access predicted ENA rates
+through a GP surrogate or emulator fit to a limited set of expensive,
+high-dimensional IBEX computer simulations to more thoroughly explore the domain of
+possible sky maps that serves as the basis for the observed ENA counts. As previously
+stated, MCMC exacerbates the computational burden of making surrogate predictions,
+necessitating not only a sparse GP surrogate, but one that can swiftly generate
+repeated sky map proposals at each MCMC iteration. We find the Vecchia approximation
+to be extremely effective in this regard. Lastly, we propose a more intuitive
+technique to modeling high-dimensional vectors, treating each pixel representing an
+ENA rate as a scalar response of interest. This differs from previous approaches to
+functional computer model output, but enables us to leverage recent advances in
+sparse GP surrogate modeling. Additionally, using this strategy efficiently scales
+both to increased dimensionality of the response and to larger sizes of training
+sets.
 
 %% OUTLINE
 %% - Review Bayesian Inverse Problems, GP Surrogates, SEPIA
