@@ -1,5 +1,7 @@
 ## Visuals for varying the dimension of the response
 surr_times <- readRDS("surrogate_time_test_20250811.rds")
+surr_times$fit_times <- surr_times$fit_times[,c(1:38, 40:dim(surr_times$fit_times)[2]),]
+surr_times$pred_times <- surr_times$pred_times[,c(1:38, 40:dim(surr_times$pred_times)[2]),]
 surr_fit_times <- apply(surr_times$fit_times, c(2,3), mean)
 surr_pred_times <- apply(surr_times$pred_times, c(2,3), mean)
 sepia_fit_files <- list.files(pattern="sepia_fit_times_[3-6]_dim.csv")
@@ -19,7 +21,6 @@ surr_total_times <- surr_fit_times + surr_pred_times
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_fit_times.pdf", width=4, height=5)
 fit_times_ord <- surr_fit_times[,c(1,6,7)]
-  paste0("SVEC (m=", c(50, 75, 100), ")"), paste0("SEPIA (pc=", 4:6, ")"))
 exp_pows <- 7:44
 matplot(x=exp_pows, y=fit_times_ord[1:length(exp_pows),]/60, type="l", ylim=c(0, 30),
   xlab="dim of response = 10 + 1.25^x", ylab="fitting time (minutes)",
@@ -40,12 +41,10 @@ large_ns <- seq(20000, 75000, by=5000)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_total_times.pdf", width=4, height=5)
 long_times_ord <- surr_total_times[,c(1:4,7:10)]
-match_cols <- c(1,5:7,3,8:10)
-matplot(x=large_ns, y=long_times_ord[(length(exp_pows)+2):nrow(long_times_ord),]/60, type="l",
+matplot(x=large_ns, y=long_times_ord[(length(exp_pows)+1):nrow(long_times_ord),]/60, type="l",
   xlab="dim of response", ylab="fitting + prediction time (minutes)",
-  lwd=3, col=match_cols, lty=match_cols)
-legend("topleft", c(paste0("SVEC (m=", seq(25, 100, by=25), ")"),
-  paste0("SEPIA (pc=", 3:6, ")")), col=match_cols, lty=match_cols, lwd=2, cex=0.5)
+  lwd=3, col=rep(c(1,3), each=4), lty=rep(1:4, 2))
+legend("topleft", c("SVEC (m=25,50,75,100)", "SEPIA (pc=3,4,5,6)"), col=c(1,3), lty=1, lwd=2, cex=0.75)
 dev.off()
 
 ## Visuals for varying the number of computer experiment runs
