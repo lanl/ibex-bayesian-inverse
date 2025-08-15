@@ -79,7 +79,7 @@ for j in range(len(pcs)):
                 print("n = 1.25^" + str(exp_pows[i]) + " = " + str(n))
         else:
             print("n = ", str(n))
-        for j in range(mcs):
+        for k in range(mcs):
             sim_num = sample(range(66), 1)
             non_sim_nums = np.delete(range(66), sim_num)
             if not inc_out:
@@ -93,9 +93,9 @@ for j in range(len(pcs)):
             y_write = y_write[:,inds]
             yx_write = yx[inds,:]
             if not inc_out:
-                for k in range(y_write.shape[0]):
-                    sd_k = np.std(y_write[k,:])
-                    y_write[k,:] += np.random.normal(0, sd_k, size=y_write.shape[1])
+                for l in range(y_write.shape[0]):
+                    sd_k = np.std(y_write[l,:])
+                    y_write[l,:] += np.random.normal(0, sd_l, size=y_write.shape[1])
 
             with open('x_iter.csv', 'w', newline='') as file:
                 # Create a CSV writer object
@@ -134,7 +134,8 @@ for j in range(len(pcs)):
             model.do_mcmc(n_samp)
             pred_samples = model.get_samples(nburn=int(.1*n_samp),effectivesamples=True)
             toc = time.time()
-            fit_times[j,i] = toc - tic
+            fit_times[k,i] = toc - tic
+            print("Finished fitting in Monte Carlo iteration " + str(k+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc) + " in " + str(toc-tic) " seconds.")
             tic = time.time()
             xx = x[sim_num, :]
             n_pred=xx.shape[0]
@@ -142,8 +143,8 @@ for j in range(len(pcs)):
             pred = SepiaEmulatorPrediction(x_pred=xx, samples=pred_samples, model=model,
                storeMuSigma=True)
             toc = time.time()
-            pred_times[j,i] = toc - tic
-            print("Finished Monte Carlo iteration " + str(j+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc))
+            pred_times[k,i] = toc - tic
+            print("Finished predicting in Monte Carlo iteration " + str(k+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc) + " in " + str(toc-tic) " seconds.")
             ## Delete old files
             os.remove('x_iter.csv')
             os.remove('y_iter.csv')
