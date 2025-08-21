@@ -288,22 +288,33 @@ Inverse problems involve the collection of observations from a physical
 experiment in an effort to learn more about the process that generates those
 data points. Typically, a scientist or researcher has some knowledge of the
 physical or mathematical model (i.e, the data-generating process), but is
-seeking to gain a more detailed understanding. The goal is often one of two
+seeking to gain a more in-depth understanding. The goal is often one of two
 cases: 1) estimate the parameters (or distribution of the parameters) that
 govern the physical model, or 2) if the researcher lacks some knowledge about
-how the process was initiated, but the parameters are known, reconstruct the
-inputs from which the observations originated. In this paper, we are focused
-on the former, discovering the distribution of unknown parameters. The
-motivation for such a method stems from the inability to either control or
-precisely measure the factors (e.g. the force of gravity) in a physical
-environment. Therefore, in order to acquire more insight, scientists develop
-mathematical models that attempt to represent that physical process. Often,
-this results in a computer simulation. By comparing observations to simulator
-output generated via unique combinations of model parameters, statisticians
-attempt to learn the true, underlying parameter values. As mentioned in
-Section \ref{sec:intro}, the classical approach is to find the best match
-between observed data and extensive computer model via some minimization of
-error (e.g. least squares, maximum likelihood).
+how the process was initiated, but know the value of model parameters,
+reconstruct the inputs from which the observations originated. In this paper,
+we are focused on the former, discovering the distribution of unknown
+parameters. The motivation for such a method stems from the inability to
+either control or precisely measure certain factors (e.g. the force of
+gravity) in a physical environment. Therefore, in order to acquire more
+insight, scientists develop mathematical models that attempt to represent that
+physical process. Often, this results in a sophisticated computer simulation
+with an array of input variables. By comparing physical observations to
+simulator output generated via unique combinations of model parameters,
+statisticians attempt to learn the true, underlying parameter values. A
+simple, but classical, approach to this problem is to find the best match
+between observed data and computer model output via some minimization of error
+(e.g. least squares, maximum likelihood).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.15,trim=0 0 0 70,clip=TRUE]{inv_v_classic.pdf}
+\caption{An illustration of classic Bayesian statistics (top)
+and the approach to Bayesian Inverse Problems (bottom). Output $y$ is Gaussian
+in either case, but parameters $\mu$ and $\sigma^2$ differ in where they
+originate.
+\label{f:inv_v_classic}}
+\end{figure}
 
 %% - Observations are noisy
 %% - Desire full UQ on parameters
@@ -311,38 +322,51 @@ error (e.g. least squares, maximum likelihood).
 %% - Show Prior / Posterior
 %% - No analytical form, must resort to MCMC
 %% - LEAD IN: Computer model is expensive. Need a surrogate.
-Bayes' rule, as put forth in Equation \ref{eq:bsi}, illustrates the Bayesian
-approach. First, practioners embed a certain amount of subject matter
-knowledge into the analysis by imposing a prior $\pi(\boldsymbol \theta)$ on
-model parameters. Second, Bayesians assume that the model parameters
-themselves are random variables, and therefore obtain their full joint
-posterior distribution, instead of basic point estimates and confidence
-intervals. In Equation \ref{eq:bsi}, $\boldsymbol
-\theta$ represents the parameters of a mathematical model that we wish to
-infer, $Y$ is our vector of physical observations, and $X$ is the set of input
-locations. Here we assume that the field data is Gaussian, as indicated by the
-$\mathcal{N}$ subscript on the likelihood.
-\begin{align}
-\pi(\boldsymbol \theta | Y, X) = \frac{\mathcal{L}_\mathcal{N}(Y|\boldsymbol
-\theta, X)
-\pi(\boldsymbol \theta)}{\pi(Y|X)} \propto \mathcal{L}_\mathcal{N}(Y|\boldsymbol \theta,
-X) \pi(\boldsymbol \theta)
-\label{eq:bsi}
-\end{align}
-If $\pi(\boldsymbol \theta)$ is conjugate, inference for $\boldsymbol \theta$
-is simple and can be done analytically. However, this is often not the case,
-requiring an approximation of the posterior (i.e.~Laplace, Variational Bayes).
-Our framework utilizes Markov chain Monte Carlo (MCMC) methods to sample from
-the posterior.
+Bayes' rule, $\pi(\boldsymbol \theta | Y, X) = \mathcal{L}(Y|\boldsymbol
+\theta, X) \pi(\boldsymbol \theta) / \pi(Y|X) \propto \mathcal{L}(Y|\boldsymbol \theta,
+X) \pi(\boldsymbol \theta)$, begins to illustrate the Bayesian approach to
+inverse problems
+\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Here $Y$
+represents observed output, $X$ denotes a set of controllable, measurable
+inputs, and $\boldsymbol \theta$ is a vector of unknown parameters. In
+classic Bayes, $\boldsymbol \theta$ contains statistical parameters, say a
+mean $\mu$ and variance $\sigma^2$ for Gaussian data, shown in the top half
+of Figure \ref{f:inv_v_classic}. But in Bayesian Inverse Problems, the
+elements of the vector $\boldsymbol \theta$ correspond to inputs for a
+physical or mathematical model or process. As depicted in Figure
+\ref{f:inv_v_classic}, parameters $\boldsymbol \theta$ are passed in to the
+model, blackbox or not, which in turn generates output dependent on the
+values of the input. That model response forms the statistical parameters
+underlying the data-generating process of $Y$. In classic Bayes,
+$\boldsymbol \theta$ is used to evaluate the likelihood $L(Y|\boldsymbol
+\theta, X)$. But in Bayesian Inverse Problems, $\boldsymbol
+\theta$ is only pertinent to a simulation or model, and not a direct part of
+the likelihood calcuation. Instead, the simulator or model output is used to
+compute the likelihood of the observed data.
+
+All other aspects of Bayesian inference remains the same. Practioners can
+embed a certain amount of subject matter knowledge into the analysis by
+through $\pi(\boldsymbol \theta)$ over model parameters, or rather use an
+objective, non-informative prior. Model parameters are treated as random
+variables, and therefore have a full joint posterior distribution, instead of
+basic point estimates and confidence intervals. In Figure
+\ref{f:inv_v_classic} we assume that the field data is Gaussian, a common
+approach in most of the literature. If $\pi(\boldsymbol
+\theta)$ is conjugate, inference for $\boldsymbol \theta$ is simple and can be
+done analytically. However, this is often not the case, requiring an
+approximation of the posterior (i.e.~Laplace, Variational Bayes). Markov chain
+Monte Carlo (MCMC) methods can also be employed to sample from the posterior,
+which we demonstrate next.
 
 Before we go further, let's start with a very simple example. Consider the
 left panel of Figure \ref{f:toy_calib}. Red stars denote field observations of
 some true, unknown process at different locations $X$. Note that these data
 are observed with some noise. Additionally, multiple observations are made at
-each location. This is common, due to the expense of changing configurations
-of a physical experiment, but it need not be the case. Light gray lines denote
-individual runs of a computer simulation, at different settings of parameters
-$\boldsymbol{\theta}$. Finally, the black, bold, dashed line shows the true,
+each location, providing replication. This is common, due to the expense of
+changing configurations of a physical experiment, but it need not be the case.
+Light gray lines denote individual runs of a computer simulation, at a sample
+of different settings of parameters $\boldsymbol{\theta} = \begin{pmatrix} \mu
+& \nu \end{pmatrix}^T$. Finally, the black, bold, dashed line shows the true,
 underlying process (e.g.~mean) we want to estimate. Modeling the data as
 \citet{kennedyohagan2001} did, we can make field predictions out-of-sample and
 estimate the posterior distributions of $\boldsymbol{\theta}$. Predictions and
@@ -350,26 +374,25 @@ posterior estimates are shown in the middle and right panels of Figure
 \ref{f:toy_calib}.
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.51,trim=0 0 25 0,clip=TRUE]{logit1_obs.pdf}
-\includegraphics[scale=0.51,trim=30 0 25 0,clip=TRUE]{logit1_est.pdf}
-\includegraphics[scale=0.51,trim=30 0 0 0,clip=TRUE]{logit1_post_draws.pdf}
-\caption{A simple inverse problem. Field observations and sample of computer
-model runs (left), model evaluations at posterior draws and mean (middle), and
-posterior distribution of model parameters (right).
+\includegraphics[scale=0.51,trim=0 0 26 0,clip=TRUE]{logit1_obs.pdf}
+\includegraphics[scale=0.51,trim=30 0 26 0,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.51,trim=0 0 26 0,clip=TRUE]{logit1_post_draws.pdf}
+\caption{A simple inverse problem. Field observations and a small sample of
+computer model runs (left), model evaluations at posterior draws and mean
+(middle), and posterior distribution of model parameters (right).
 \label{f:toy_calib}}
 \end{figure}
 
 %% DO A REVIEW OF OTHER METHODS (KOH? BAYES INV? STUART? TECKENTRUP? COLLINS?)
 
-One difficulty in our situation is the expense of the computer model. As a
-result of expanded access to supercomputing resources, computer models have
-increased in complexity over the past two decades and are able to produce
-extremely high-fidelity output. However, even with modern-day computing power,
-some simulations can take hours, days, or weeks to complete. This limits the
-amount of runs that can be executed and therefore restricts the exploration of
-the model parameter space. Therefore, we need a model (what we call a
-surrogate, or emulator) fit to the simulator output to make accurate and
-reliable predictions for out-of-sample values of our computer model
+One difficulty in our situation is the expense of the computer model. Even
+with modern-day computing power, some simulations can take hours, days, or
+weeks to complete, depending on the a variety of factors, including model
+complexity, necessary operations, or the fidelity of the output. This limits
+the amount of runs that can be executed and therefore restricts the
+exploration of the model parameter space. Therefore, we need a model (what we
+call a surrogate, or emulator) fit to the simulator output to make accurate
+and reliable predictions for out-of-sample values of our computer model
 parameters. Any statistical model can serve as a surrogate, ranging from
 linear regression to complex neural networks. However, the canonical surrogate
 for computer experiments and computer model calibration has come to be the
