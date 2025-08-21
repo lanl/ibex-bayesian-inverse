@@ -286,12 +286,12 @@ with code reproducing all included examples.
 %%   that produce output aligned with the observations
 Inverse problems involve the collection of observations from a physical
 experiment in an effort to learn more about the process that generates those
-data points. Typically, a scientist or researcher has some knowledge of the
-physical or mathematical model (i.e, the data-generating process), but is
-seeking to gain a more in-depth understanding. The goal is often one of two
-cases: 1) estimate the parameters (or distribution of the parameters) that
-govern the physical model, or 2) if the researcher lacks some knowledge about
-how the process was initiated, but know the value of model parameters,
+data. Typically, a scientist or researcher has some knowledge of the physical
+or mathematical model (i.e, the data-generating process), but is seeking to
+gain a more in-depth understanding. The goal is often one of two cases: 1)
+estimate the parameters (or distribution of the parameters) that govern the
+physical model, or 2) if the researcher lacks some knowledge about how the
+process was initiated, but knows the true value of model parameters,
 reconstruct the inputs from which the observations originated. In this paper,
 we are focused on the former, discovering the distribution of unknown
 parameters. The motivation for such a method stems from the inability to
@@ -302,9 +302,10 @@ physical process. Often, this results in a sophisticated computer simulation
 with an array of input variables. By comparing physical observations to
 simulator output generated via unique combinations of model parameters,
 statisticians attempt to learn the true, underlying parameter values. A
-simple, but classical, approach to this problem is to find the best match
-between observed data and computer model output via some minimization of error
-(e.g. least squares, maximum likelihood).
+simple, but classical, approach to this problem is to execute the computer
+model a large number of times and find the best match between observed data
+and the simulator response via some minimization of error (e.g. least squares,
+maximum likelihood).
 
 \begin{figure}[ht!]
 \centering
@@ -331,32 +332,30 @@ represents observed output, $X$ denotes a set of controllable, measurable
 inputs, and $\boldsymbol \theta$ is a vector of unknown parameters. In
 classic Bayes, $\boldsymbol \theta$ contains statistical parameters, say a
 mean $\mu$ and variance $\sigma^2$ for Gaussian data, shown in the top half
-of Figure \ref{f:inv_v_classic}. But in Bayesian Inverse Problems, the
-elements of the vector $\boldsymbol \theta$ correspond to inputs for a
-physical or mathematical model or process. As depicted in Figure
-\ref{f:inv_v_classic}, parameters $\boldsymbol \theta$ are passed in to the
-model, blackbox or not, which in turn generates output dependent on the
-values of the input. That model response forms the statistical parameters
-underlying the data-generating process of $Y$. In classic Bayes,
-$\boldsymbol \theta$ is used to evaluate the likelihood $L(Y|\boldsymbol
-\theta, X)$. But in Bayesian Inverse Problems, $\boldsymbol
-\theta$ is only pertinent to a simulation or model, and not a direct part of
-the likelihood calcuation. Instead, the simulator or model output is used to
-compute the likelihood of the observed data.
+of Figure \ref{f:inv_v_classic}. In Bayesian Inverse Problems, $\boldsymbol
+\theta$ remains important, but the focus is on $\boldsymbol u$
+a vector of inputs to a physical or mathematical model or process. As depicted
+in Figure \ref{f:inv_v_classic}, parameters $\boldsymbol u$ are passed in to
+the model, blackbox or not, which in turn generates output dependent on the
+values of the input. This model response forms the parameters $\boldsymbol
+\theta$ underlying the data-generating process of $Y$. In both classic Bayes
+and Bayesian Inverse Problems, $\boldsymbol \theta$ is used to evaluate the
+likelihood $L(Y|\boldsymbol
+\theta, X)$. But in Bayesian Inverse Problems, we are only interested in the
+distribution of $\boldsymbol u$, pertinent to a simulation or model and
+not a direct part of the likelihood calcuation. Instead, the simulator or
+model output is used to compute the likelihood of the observed data.
 
 All other aspects of Bayesian inference remains the same. Practioners can
 embed a certain amount of subject matter knowledge into the analysis by
-through $\pi(\boldsymbol \theta)$ over model parameters, or rather use an
+through $\pi(\boldsymbol u)$ over model parameters, or rather use an
 objective, non-informative prior. Model parameters are treated as random
 variables, and therefore have a full joint posterior distribution, instead of
 basic point estimates and confidence intervals. In Figure
 \ref{f:inv_v_classic} we assume that the field data is Gaussian, a common
-approach in most of the literature. If $\pi(\boldsymbol
-\theta)$ is conjugate, inference for $\boldsymbol \theta$ is simple and can be
-done analytically. However, this is often not the case, requiring an
-approximation of the posterior (i.e.~Laplace, Variational Bayes). Markov chain
-Monte Carlo (MCMC) methods can also be employed to sample from the posterior,
-which we demonstrate next.
+approach in most of the literature. In order to perform inference, we must
+sample from the posterior of $\boldsymbol u$ via Markov chain Monte Carlo
+(MCMC) methods, which we demonstrate next.
 
 Before we go further, let's start with a very simple example. Consider the
 left panel of Figure \ref{f:toy_calib}. Red stars denote field observations of
@@ -365,11 +364,11 @@ are observed with some noise. Additionally, multiple observations are made at
 each location, providing replication. This is common, due to the expense of
 changing configurations of a physical experiment, but it need not be the case.
 Light gray lines denote individual runs of a computer simulation, at a sample
-of different settings of parameters $\boldsymbol{\theta} = \begin{pmatrix} \mu
+of different settings of parameters $\boldsymbol{u} = \begin{pmatrix} \mu
 & \nu \end{pmatrix}^T$. Finally, the black, bold, dashed line shows the true,
 underlying process (e.g.~mean) we want to estimate. Modeling the data as
 \citet{kennedyohagan2001} did, we can make field predictions out-of-sample and
-estimate the posterior distributions of $\boldsymbol{\theta}$. Predictions and
+estimate the posterior distribution of $\boldsymbol{u}$. Predictions and
 posterior estimates are shown in the middle and right panels of Figure
 \ref{f:toy_calib}.
 \begin{figure}[ht!]
@@ -384,7 +383,6 @@ computer model runs (left), model evaluations at posterior draws and mean
 \end{figure}
 
 %% DO A REVIEW OF OTHER METHODS (KOH? BAYES INV? STUART? TECKENTRUP? COLLINS?)
-
 One difficulty in our situation is the expense of the computer model. Even
 with modern-day computing power, some simulations can take hours, days, or
 weeks to complete, depending on the a variety of factors, including model
@@ -426,10 +424,11 @@ conditional multivariate normal or \textit{kriging} equations
 \citep{matheron1963principles}. For example, suppose we have a vector of
 observations $Y$ at input locations $X$. $Y$ is an $n \times 1$ vector and $X$
 is an $n \times p$ matrix. We make the assumption that $Y$ is normally
-distributed with some mean $\mu(X)$ and covariance $\Sigma(X)$, both functions
-of $X$. Then, predicting at a new location $x$ is relatively straightforward.
-Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean predictions $\mu^*(x)$
-and corresponding uncertainty quantification estimates $\Sigma^*(x)$.
+distributed with some mean $\mu(X)$ and covariance $\Sigma(X)$, clearly both
+functions of $X$. Then, predicting at a new location $x$ is relatively
+straightforward. Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean
+predictions $\mu^*(x)$ and corresponding uncertainty quantification estimates
+$\Sigma^*(x)$.
 \vspace{-0.75cm}
 
 \begin{minipage}[t]{0.25\linewidth}
@@ -456,25 +455,9 @@ all the action takes place in the covariance function. The covariance function
 typically depends on pairwise distances between input locations $x$ and $x'$.
 Many covariance kernels exists, such as the Gaussian, Exponential, Matern. We
 use the Matern kernel in our work, of which both the Gaussian and Exponential
-kernels are special cases. The Matern kernel is defined as
-\begin{align}
-\Sigma(x, x'|\sigma^2, \theta, \nu, g) &= \sigma^2 \frac{2^{1-\nu}}{\Gamma(\nu)}
-\left(\sqrt{2\nu} \frac{\|x-x'\|}{\theta}\right)^2 K_{\nu} \left(\sqrt{2 \nu}
-\frac{\|x - x'\|}{\theta}\right) + g \cdot \mathbb{I} \nonumber \\
-&= \sigma^2 \left(1 + \frac{\sqrt{5} \cdot \|x - x'\|}{\theta} +
-\frac{5\cdot\|x-x'\|^2}{3\theta^2} \right) \text{exp}\left(-\frac{\sqrt{5} \cdot \|x
-- x'\|}{\theta}\right) + g \delta_{x, x'},
-\label{eq:matern}
-\end{align}
-where $K_{\nu}$ is the modified Bessel function of the second kind. The
-behavior of these kernels is determined by three hyperparameters: a nugget
-$g$, lengthscale $\theta$, and scale $\tau^2$. In the Matern kernel, an
-additional parameter ($\nu$) exists, which controls the smoothness of the
-estimated surface. But we will not estimate the smoothness parameter here and
-instead set $\nu =
-\frac{5}{2}$ (Eq.~\ref{eq:matern}), following common practice due to it
-allowing the kernel function to be expressed in a simpler form. All
-hyperparameters can be estimated using your preferred method (i.e. maximum
+kernels are special cases. The behavior of these kernels is determined by
+three hyperparameters: a nugget $g$, lengthscale $\theta$, and scale $\tau^2$.
+All hyperparameters can be estimated using your preferred method (i.e, maximum
 likelihood, method of moments). We will use Bayesian methods, specifically
 MCMC.
 
@@ -485,21 +468,21 @@ experiments, they are utilized in geostatistics
 optimization \citep{jones1998efficient}, and machine learning
 \citep{rasmussen2003gaussian}. The reason for their popularity as surrogate
 models in the world of computer experiments is their ability to interpolate
-between observed data points (i.e. setting nugget $g = 0$). Although
+between observed data points (i.e, setting nugget $g = 0$). Although
 stochastic computer models are becoming more common, computer experiments are
 often deterministic, motivating the desire for a model that interpolates. GPs
 are then useful by providing predictive surfaces that give higher estimates of
 variance away from observed data, and virtually no variance at observed
-locations. In fact, perhaps the hallmark of GPs is that they naturally provide
-excellent uncertainty quantification for out-of-sample predictions, a matter
-of importance to scientists exploring these computer models. Therefore, GPs
-are widely used in computer experiments and Bayesian Inverse Problems, as
+locations. Prhaps the hallmark of GPs is that they naturally provide excellent
+uncertainty quantification for out-of-sample predictions, a matter of
+importance to scientists exploring these computer models. Therefore, GPs are
+widely used in computer experiments and Bayesian Inverse Problems, as
 illustrated next.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.3 - SEPIA / GPMSA
-\subsection{SEPIA / GPMSA}
-\label{sec:sepia}
+\subsection{Principal Components for High-Dimensional Response}
+\label{sec:pca}
 %------------------------------------------------------------------------------
 
 %% SEPIA / GPMSA
@@ -513,14 +496,14 @@ illustrated next.
 %%   - Maybe a graphic
 %% - Must choose basis
 %% - Used in calibration (an inverse problem), but does not support Poisson
-In the early 2000s, \citet{higdoncalib2008} faced the challenge of estimating
-the parameters of a physical process from which they could gather only a small
-set of observations, but that could be represented by a simulation. But these
-expensive computer models at Los Alamos National Laboratory (LANL) produced
-limited runs with extremely high-dimensional output in the form of images,
-shape description, time series, etc. So in order to efficiently fit a
-surrogate model to the simulator, they needed to perform an approximation to
-limit the size of the data. As a solution, they employed principal components
+In the early 2000s, \citet{higdoncalib2008} faced the challenge at LANL of
+estimating the parameters of a physical process from which they could gather
+only a small set of observations, but that could be represented by a
+simulation. But these computer models were expensive, producing limited runs
+with extremely high-dimensional output in the form of images, shape
+description, time series, etc. So, in order to efficiently fit a surrogate
+model to the simulator, they needed to perform an approximation to decrease
+the size of the data. As a solution, they employed principal components
 analysis (PCA) to reduce the dimensionality of the computer model response.
 Specifically, they represented the vector output of a simulator model as the
 sum of $n_k$ basis functions $\textbf{k}_1, \textbf{k}_2, \ldots ,
@@ -531,18 +514,18 @@ w_i (\boldsymbol x, \boldsymbol u) &\sim GP(\boldsymbol 0, \Sigma_{w_i}),
 \label{eq:higdon_pca}
 \end{align}
 where $\boldsymbol x$ is a vector of controllable inputs and $\boldsymbol u$
-is the vector of model parameters we are interested in estimating.
+is the vector of model parameters they were interested in estimating.
 $\Sigma_{w_i}$, dependent only on a limited number of combinations of
 $\boldsymbol x$ and $\boldsymbol u$, is a $n_k \times n_k$ matrix. Hence, the
 decomposition of $\Sigma_{w_i}$ avoids the $O(n^3)$ bottleneck in computation
-and can be completed in a reasonable amount of time. Instead of modeling the
-high-dimensional response $\boldsymbol y$, the GP only modeled the small set
-of component weights. Bayesian inference was used to obtain the posterior
-distribution of these component weights. Combining estimates of the weights
-with the calculated basis functions allowed for predictions out of sample. As
-a result of this approximation, the dimension of the covariance matrices
-$\Sigma(X)$ and $\Sigma(X^*)$ in Eq.~\ref{eq:mvn_eq} remained small and able
-to be decomposed quickly.
+when scaling to large $n$ and can be completed in a reasonable amount of time.
+Instead of modeling the high-dimensional response $\boldsymbol y$, the GP only
+modeled the small set of component weights. Bayesian inference was used to
+obtain the posterior distribution of these component weights. Then, combining
+estimates of the weights with the calculated basis functions allowed for
+predictions out of sample. As a result of this approximation, the dimension of
+the covariance matrices $\Sigma(X)$ and $\Sigma(X^*)$ in Eq.~\ref{eq:mvn_eq}
+remained small and was able to be decomposed quickly.
 
 We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the
 definition and selection of how many basis functions to use. Although this
@@ -556,14 +539,12 @@ the input matrix. We believe that had \citet{higdoncalib2008} had access to
 the capacity of modern-day computing, along with the novel methodology
 proposed since the early 2000s that leverages that compute, they would have
 steered their implementation in a significantly different way. We will show
-that our approach results in equal or improved or in both predictive accuracy
-and uncertainty quantification, along with a significant reduction in
-computational expense.
-
-%% Limitations:
-%% Poisson response. Clunky way to deal with large data. Not generalizable.
-
-
+that our more straightforward approach results in equal or improved
+performance in both predictive accuracy and uncertainty quantification, along
+with a significant reduction in computational expense. Additionally, their
+method and implementation, originally written in {\tt MATLAB} and now deployed
+in {\tt Python} \citep{gattiker2020lanl}, is unable to model non-Gaussian
+field response, leading to our first contribution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -594,9 +575,9 @@ generate a continous response. For instance, a field experiment may return a
 binary response, such as success or failure. Categorical responses may expand
 beyond two classes, representing a multinomial reponse. In this paper we focus
 on Poisson-distributed counts due to our motivating application, but our
-framework can easily be generalized to any response. Revisiting Eq.
-\ref{eq:bsi}, we replace the Normal likelihood with a Poisson likelihood, and
-substitute $\boldsymbol \lambda$ for $\boldsymbol \theta$, as shown below.
+framework can easily be generalized to any response. In Bayes' rule, we use a
+Poisson likelihood, and substitute $\boldsymbol \lambda$ for $\boldsymbol
+\theta$, as shown below.
 \begin{align} %% IDEA: specify priors we are using here?
 \pi(\boldsymbol \lambda | \boldsymbol y, X) &= \frac{\mathcal{L}(\boldsymbol y|\boldsymbol \lambda, X)
 \pi(\boldsymbol \lambda)}{\pi(\boldsymbol y|X)} \propto \mathcal{L}(\boldsymbol y|\boldsymbol \lambda,
@@ -745,7 +726,7 @@ over the model parameters, the response vector would still consist of over
 200,000 points. In that case, a GP could not feasibly model each individual
 point as a separate response. We reviewed what has been done historically or
 high dimensional output in an inverse problem setting in Section
-\ref{sec:sepia}. Next, we will propose a modern, intuitive, more
+\ref{sec:pca}. Next, we will propose a modern, intuitive, more
 generalizable, and better-perfoming approach.% \begin{figure}[ht!]
 % \centering
 % \includegraphics[scale=0.5, trim=30 15 40 0,clip=TRUE]{logit2_obs.pdf}
@@ -781,7 +762,7 @@ limited to, fixed-rank kriging \citep{cressie2008fixed}, inducing points
 nearest neighbors \citep{datta2016hierarchical, wu2022variational}. In the
 context of computer model calibration, \citet{higdoncalib2008} use a basis
 representation via principal components to accommodate high-dimensional
-output (\ref{sec:sepia}).
+output (\ref{sec:pca}).
 
 As indicated in Section \ref{sec:intro}, we aim to modernize this approach. We
 believe treating the data as a functional or multivariate response, then
