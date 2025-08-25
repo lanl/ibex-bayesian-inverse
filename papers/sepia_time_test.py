@@ -60,23 +60,23 @@ mcs = 5
 n_samp = 10000
 pcs = [3,4,5,6]
 
-for j in range(len(pcs)):
+for i in range(len(pcs)):
     fit_times = np.zeros((mcs, num_ns))
     pred_times = np.zeros((mcs, num_ns))
-    iter_pc = pcs[j]
+    iter_pc = pcs[i]
     of_fit_name = 'sepia_fit_times_' + str(iter_pc)
     of_fit_name = of_fit_name + '_dim' if inc_out else of_fit_name + '_ns'
     of_fit_name = of_fit_name + '.csv'
     of_pred_name = 'sepia_pred_times_' + str(iter_pc)
     of_pred_name = of_pred_name + '_dim' if inc_out else of_pred_name + '_ns'
     of_pred_name = of_pred_name + '.csv'
-    for i in range(num_ns):
-        n = ns[i]
+    for j in range(num_ns):
+        n = ns[j]
         if inc_out:
-            if i >= len(exp_pows):
+            if j >= len(exp_pows):
                 print("n = ", str(n))
             else:
-                print("n = 1.25^" + str(exp_pows[i]) + " = " + str(n))
+                print("n = 1.25^" + str(exp_pows[j]) + " = " + str(n))
         else:
             print("n = ", str(n))
         for k in range(mcs):
@@ -94,7 +94,7 @@ for j in range(len(pcs)):
             yx_write = yx[inds,:]
             if not inc_out:
                 for l in range(y_write.shape[0]):
-                    sd_k = np.std(y_write[l,:])
+                    sd_l = np.std(y_write[l,:])
                     y_write[l,:] += np.random.normal(0, sd_l, size=y_write.shape[1])
 
             with open('x_iter.csv', 'w', newline='') as file:
@@ -134,8 +134,8 @@ for j in range(len(pcs)):
             model.do_mcmc(n_samp)
             pred_samples = model.get_samples(nburn=int(.1*n_samp),effectivesamples=True)
             toc = time.time()
-            fit_times[k,i] = toc - tic
-            print("Finished fitting in Monte Carlo iteration " + str(k+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc) + " in " + str(toc-tic) " seconds.")
+            fit_times[k,j] = toc - tic
+            print("Finished fitting in Monte Carlo iteration " + str(k+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc) + " in " + str(toc-tic) + " seconds.")
             tic = time.time()
             xx = x[sim_num, :]
             n_pred=xx.shape[0]
@@ -143,8 +143,8 @@ for j in range(len(pcs)):
             pred = SepiaEmulatorPrediction(x_pred=xx, samples=pred_samples, model=model,
                storeMuSigma=True)
             toc = time.time()
-            pred_times[k,i] = toc - tic
-            print("Finished predicting in Monte Carlo iteration " + str(k+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc) + " in " + str(toc-tic) " seconds.")
+            pred_times[k,j] = toc - tic
+            print("Finished predicting in Monte Carlo iteration " + str(k+1) + "/5 of n=" + str(n) + "with nps=" + str(iter_pc) + " in " + str(toc-tic) + " seconds.")
             ## Delete old files
             os.remove('x_iter.csv')
             os.remove('y_iter.csv')
