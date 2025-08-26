@@ -273,48 +273,35 @@ with code reproducing all included examples.
 
 We study IBEX through the lens of observational data $Y$ and a computer
 implementation of a physical model $m(\cdot)$ with unknown parameters
-$\boldsymbol{u}$.  Given prior information about $\boldsymbol{u}$, we want to
-know which $\boldsymbol{u}$'s lead to realizations of $m(\cdot)$ that could
-explain $Y$, i.e., the posterior for $\boldsymbol{u} \mid Y$. This is a
-classic Bayesian inverse problem
-\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. To be clear,
-we are not directly interested in the output of our computer model,
-$m(\cdot)$, or some statistical parameters $\boldsymbol{\theta} \mid Y$, shown
-in the top half of Figure \ref{f:inv_v_classic}. Although
-$m(\cdot)=\boldsymbol{\theta}$ remains important, the priority is the
-distribution of $\boldsymbol{u} \mid Y$, or the vector of inputs passed into
-the physical or mathematical model.
+$\boldsymbol{u}$. Given prior information about $\boldsymbol{u}$, we want to know
+which $\boldsymbol{u}$'s lead to realizations of $m(\cdot)$ that could explain $Y$,
+i.e., the posterior for $\boldsymbol{u} \mid Y$. This is a classic Bayesian inverse
+problem \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. To be clear,
+we are not directly interested in the output of our computer model, $m(\cdot)$, or
+some statistical parameters $\boldsymbol{\theta}$, as shown in the top half of Figure
+\ref{f:inv_v_classic}. Although $m(\cdot)=\boldsymbol{\theta}$ remains important, our
+focus is on the distribution of $\boldsymbol{u} \mid Y$, or the vector of inputs
+passed into the physical or mathematical model.
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.15,trim=0 0 0 70,clip=TRUE]{inv_v_classic.pdf}
+\includegraphics[scale=0.7,trim=0 0 0 0,clip=TRUE]{inv_v_classic.pdf}
 \caption{An illustration of classic Bayesian statistics (top)
 and the approach to Bayesian Inverse Problems (bottom). Output $y$ is Gaussian
 in either case, but parameters $\mu$ and $\sigma^2$ differ in where they
 originate.
 \label{f:inv_v_classic}}
 \end{figure}
-One drawback to the literature is that modeling is predominately Gaussian (as
-depicted in Figure \ref{f:inv_v_classic}), assuming $Y \sim \mathcal{N}\!\left(\mu(\boldsymbol{u}),
-\Sigma(\boldsymbol{u})\right)$ as a likelihood, where
-$\boldsymbol{\theta}(\boldsymbol{u})=(\mu(\boldsymbol{u}),
-\Sigma(\boldsymbol{u}))$ depend on $m(\boldsymbol{u})$. Yet our IBEX
-observations are counts. Our first contribution, which is albeit rather
-straightforward, is to depart from that literature by perusing a Poisson
-likelihood: $Y \sim Pois(\boldsymbol{\lambda}(\boldsymbol{u}))$, where
-$\boldsymbol{\lambda}(\boldsymbol{u})$ is determined by $m(\boldsymbol{u})$.
-We leave the details of this to Section \ref{sec:gen_bayes_inv}.
 
-Before we go further, let's start with a very simple example that we will
-return to in Section \ref{sec:gen_bayes_inv}. Consider the left panel of
-Figure \ref{f:toy_calib}. Red stars denote field measurements of some true,
-unknown process at different locations $X$, observed with some Gaussian noise.
-Additionally, multiple observations are made at each location, providing
-replication. This is common, due to the expense of changing configurations of
-a physical experiment, but it need not be the case. Light gray lines denote
-individual runs of a computer simulation $m(\cdot)$ at a sample of different
-settings of parameters $\boldsymbol{u} = \begin{bmatrix} u_1 & u_2
-\end{bmatrix}^T$. Finally, the black, bold, dashed line shows the underlying
-process $m(\cdot)$ when $\boldsymbol{u}$ is set to the truth.
+We start with a very simple example that we will return to in Section
+\ref{sec:gen_bayes_inv}. Consider the left panel of Figure \ref{f:toy_calib}. Red
+stars denote field measurements of some true, unknown process at different locations
+$X$, observed with Gaussian noise. Additionally, multiple observations are made
+at each location, providing replication. This is common, due to the expense of
+changing configurations of a physical experiment, but it need not be the case. Light
+gray lines indicate individual runs of a computer simulation $m(\cdot)$ at a sample of
+different settings of parameters $\boldsymbol{u} = \begin{bmatrix} u_1 & u_2
+\end{bmatrix}^T$. The black, bold, dashed line shows the underlying process
+$m(\cdot)$ when $\boldsymbol{u}$ is set to the truth.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.51,trim=0 0 26 0,clip=TRUE]{logit1_obs.pdf}
@@ -326,26 +313,43 @@ computer model runs (left), model evaluations at posterior draws and mean
 \label{f:toy_calib}}
 \end{figure}
 
-To perform inference for $\boldsymbol{u} \mid Y$, we can follow Bayes' rule,
+To perform inference for $\boldsymbol{u} \mid Y$, we follow Bayes' rule,
 $\pi(\boldsymbol{u}|Y) \propto
-\mathcal{L}(Y|\boldsymbol{u})\pi(\boldsymbol{u})$ and utilize
-Metropolis-Hastings to sample from the posterior. At each iteration, we
-propose a new set of simulation parameters, $\boldsymbol{u}^*$, execute the
-computer model $m(\boldsymbol{u}^*)$ to get $\boldsymbol{\theta}$, and then
-evaluate the MH-ratio and either accept or reject the proposed values.
-Predictions and posterior estimates for our example are shown in the middle
-and right panels of Figure \ref{f:toy_calib}. But the hurdle in our situation
-we have not addressed with this toy example is the expense of the computer
-model. Even with modern-day computing power, some simulations can take hours,
-days, or weeks to complete. So, it's not practical to run $m(\cdot)$ inside
-the MH sampler. This constrains the amount of runs that can be executed and
-therefore restricts the exploration of the model parameter space. Therefore,
-we need a model (what we call a surrogate, or emulator) fit to the limited
-simulator output to make accurate and reliable predictions for out-of-sample
-values of our computer model parameters. Any statistical model can serve as a
-surrogate, ranging from linear regression to complex neural networks. However,
-the canonical surrogate for computer experiments has come to be the Gaussian
-process \citep{gramacy2020surrogates}.
+\mathcal{L}(Y|\boldsymbol{u})\pi(\boldsymbol{u})$, and utilize
+Metropolis-Hastings (MH) to sample from the posterior. At each iteration $t$, we
+propose a new set of simulation parameters $\boldsymbol{u}^*$ and execute the
+computer model $m(\boldsymbol{u}^*)$ to get $\boldsymbol{\theta^*}$. Then, we
+evaluate the MH-ratio and either accept or reject the proposed values. Predictions
+and posterior estimates for our example are shown in the middle and right panels of
+Figure \ref{f:toy_calib}. Note that each of the light gray lines in the middle panel
+represent a run of the simulation at one of the accepted set of model parameters,
+$\boldsymbol{u}^{(t)}$. That is, each gray line corresponds to a circle in the right
+panel, where posterior draws of $\boldsymbol{u}$ are displayed. It is evident that
+the MH sampler thoroughly explores the input space and that it successfully captures
+the true value of $\boldsymbol{u}$.
+
+Now, one drawback to the current literature is that modeling is predominately
+Gaussian (as illustrated in Figure \ref{f:inv_v_classic} and our toy example),
+assuming $Y \sim \mathcal{N}\!\left(\mu(\boldsymbol{u}),
+\Sigma(\boldsymbol{u})\right)$ as a likelihood, where
+$\boldsymbol{\theta}(\boldsymbol{u})=(\mu(\boldsymbol{u}),
+\Sigma(\boldsymbol{u}))$ depends on $m(\boldsymbol{u})$. Yet our IBEX
+observations are counts. Our first contribution, which is albeit rather
+straightforward, is to depart from that literature by perusing a Poisson likelihood:
+$Y \sim Pois(\boldsymbol{\lambda}(\boldsymbol{u}))$, where
+$\boldsymbol{\lambda}(\boldsymbol{u})$ is determined by $m(\boldsymbol{u})$. We leave
+the details of this to Section \ref{sec:gen_bayes_inv}.
+
+The biggest hurdle that we did not address in our toy example is the expense of the
+computer model. Even with modern-day computing power, some simulations can take
+hours, days, or weeks to complete. So, it's not practical to run $m(\cdot)$ inside
+the MH sampler. This constrains the amount of runs that can be executed and therefore
+restricts the exploration of the model parameter space. Therefore, we need a model
+(what we call a surrogate, or emulator) fit to the limited simulator output to make
+accurate and reliable predictions for out-of-sample values of our computer model
+parameters. Any statistical model can serve as a surrogate, ranging from linear
+regression to complex neural networks. However, the canonical surrogate for computer
+experiments has come to be the Gaussian process \citep{gramacy2020surrogates}.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Gaussian Process Surrogates:
@@ -413,22 +417,25 @@ likelihood, method of moments). We will use Bayesian methods, specifically
 MCMC.
 
 GPs provide a flexible, nonparametric regression tool. In addition to computer
-experiments, they are utilized in geostatistics
-\citep{matheron1963principles}, spatial statistics
-\citep{cressie2011statistics}, time series \citep{roberts2013gaussian},
-optimization \citep{jones1998efficient}, and machine learning
-\citep{rasmussen2003gaussian}. The reason for their popularity as surrogate
-models in the world of computer experiments is their ability to interpolate
-between observed data points (i.e, setting nugget $g = 0$). Although
-stochastic computer models are becoming more common, computer experiments are
-often deterministic, motivating the desire for a model that interpolates. GPs
-are then useful by providing predictive surfaces that give higher estimates of
-variance away from observed data, and virtually no variance at observed
-locations. Prhaps the hallmark of GPs is that they naturally provide excellent
-uncertainty quantification for out-of-sample predictions, a matter of
-importance to scientists exploring these computer models. Therefore, GPs are
-widely used in computer experiments and Bayesian Inverse Problems, as
-illustrated next.
+experiments, they are utilized in geostatistics \citep{matheron1963principles},
+spatial statistics \citep{cressie2011statistics}, time series
+\citep{roberts2013gaussian}, optimization \citep{jones1998efficient}, and machine
+learning \citep{rasmussen2003gaussian}. The reason for their popularity as surrogate
+models in the world of computer experiments is their ability to interpolate between
+observed data points (i.e, setting nugget $g = 0$). Although stochastic computer
+models are becoming more common, computer experiments are often deterministic,
+motivating the desire for a model that interpolates. GPs are then useful by providing
+predictive surfaces that give higher estimates of variance away from observed data,
+and virtually no variance at observed locations. Perhaps the hallmark of GPs is that
+they naturally provide excellent uncertainty quantification for out-of-sample
+predictions, a matter of importance to scientists exploring these computer models.
+Therefore, GPs are widely used in computer experiments and Bayesian Inverse Problems.
+
+One downside to this setup, especially for IBEX, is that the output ``images'' are
+massive ($> 15,000$ pixels). Historically, it has not been possible to fit a GP to
+such large simulation output, producing high-resolution 2d (or 3d) images for each
+$m(\boldsymbol{u})$ that is run. Next, we review what has been done for applications
+such as IBEX in the past.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.2 - Principal Components for High-Dimensional Response
@@ -494,7 +501,7 @@ that our more straightforward approach results in equal or improved
 performance in both predictive accuracy and uncertainty quantification, along
 with a significant reduction in computational expense. Additionally, their
 method and implementation, originally written in {\tt MATLAB} and now deployed
-in {\tt Python} \citep{gattiker2020lanl}, is unable to model non-Gaussian
+in {\tt Python} \citep{gattiker2020lanl}, is unable to model a non-Gaussian
 field response, leading to our first contribution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
