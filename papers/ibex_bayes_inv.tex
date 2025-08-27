@@ -271,35 +271,38 @@ with code reproducing all included examples.
 \section{Review}
 \label{sec:review}
 
-We study IBEX through the lens of observational data $Y$ and a computer
-implementation of a physical model $m(\cdot)$ with unknown parameters
-$\boldsymbol{u}$. Given prior information about $\boldsymbol{u}$, we want to know
-which $\boldsymbol{u}$'s lead to realizations of $m(\cdot)$ that could explain $Y$,
-i.e., the posterior for $\boldsymbol{u} \mid Y$. This is a classic Bayesian inverse
-problem \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. To be clear,
-we are not directly interested in the output of our computer model, $m(\cdot)$, or
-some statistical parameters $\boldsymbol{\theta}$, as shown in the top half of Figure
-\ref{f:inv_v_classic}. Although $m(\cdot)=\boldsymbol{\theta}$ remains important, our
-focus is on the distribution of $\boldsymbol{u} \mid Y$, or the vector of inputs
-passed into the physical or mathematical model.
+We study IBEX through the lens of observational data $Y^F$ ($F$ for field
+data) and a computer implementation of a physical model $m(\cdot)$ with
+unknown parameters $\boldsymbol{u}$. Given prior information about
+$\boldsymbol{u}$, we want to know which $\boldsymbol{u}$'s lead to
+realizations of $m(\cdot)$ that could explain $Y^F$, i.e., the posterior for
+$\boldsymbol{u} \mid Y^F$. This is a classic Bayesian inverse problem
+\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. To be clear,
+we are not directly interested in the output of our computer model,
+$m(\cdot)$, or some statistical parameters $\boldsymbol{\theta}$, as shown in
+the top half of Figure \ref{f:inv_v_classic}. Although
+$m(\cdot)=\boldsymbol{\theta}$ remains important, our focus is on the
+distribution of $\boldsymbol{u} \mid Y^F$, or the vector of inputs passed into
+the physical or mathematical model.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.7,trim=0 0 0 0,clip=TRUE]{inv_v_classic.pdf}
 \caption{An illustration of classic Bayesian statistics (top)
-and the approach to Bayesian Inverse Problems (bottom). Output $y$ is Gaussian
-in either case, but parameters $\mu$ and $\sigma^2$ differ in where they
+and the approach to Bayesian Inverse Problems (bottom). Output $Y^F$ is Gaussian
+in either case, but parameters $\boldsymbol{\theta}$ differ in where they
 originate.
 \label{f:inv_v_classic}}
 \end{figure}
 
 We start with a very simple example that we will return to in Section
-\ref{sec:gen_bayes_inv}. Consider the left panel of Figure \ref{f:toy_calib}. Red
-stars denote field measurements of some true, unknown process at different locations
-$X$, observed with Gaussian noise. Additionally, multiple observations are made
-at each location, providing replication. This is common, due to the expense of
-changing configurations of a physical experiment, but it need not be the case. Light
-gray lines indicate individual runs of a computer simulation $m(\cdot)$ at a sample of
-different settings of parameters $\boldsymbol{u} = \begin{bmatrix} u_1 & u_2
+\ref{sec:gen_bayes_inv}. Consider the left panel of Figure \ref{f:toy_calib}.
+Red stars denote field measurements ($Y^F$) of some true, unknown process at
+different locations $X^F$, observed with Gaussian noise. Additionally, multiple
+observations are made at each location, providing replication. This is common,
+due to the expense of changing configurations of a physical experiment, but it
+need not be the case. Light gray lines indicate individual runs of a computer
+simulation $m(\cdot)$ at a sample of different settings of parameters
+$\boldsymbol{u} = \begin{bmatrix} u_1 & u_2
 \end{bmatrix}^T$. The black, bold, dashed line shows the underlying process
 $m(\cdot)$ when $\boldsymbol{u}$ is set to the truth.
 \begin{figure}[ht!]
@@ -313,9 +316,9 @@ computer model runs (left), model evaluations at posterior draws and mean
 \label{f:toy_calib}}
 \end{figure}
 
-To perform inference for $\boldsymbol{u} \mid Y$, we follow Bayes' rule,
-$\pi(\boldsymbol{u}|Y) \propto
-\mathcal{L}(Y|\boldsymbol{u})\pi(\boldsymbol{u})$, and utilize
+To perform inference for $\boldsymbol{u} \mid Y^F$, we follow Bayes' rule,
+$\pi(\boldsymbol{u}|Y^F) \propto
+\mathcal{L}(Y^F|\boldsymbol{u})\pi(\boldsymbol{u})$, and utilize
 Metropolis-Hastings (MH) to sample from the posterior. At each iteration $t$, we
 propose a new set of simulation parameters $\boldsymbol{u}^*$ and execute the
 computer model $m(\boldsymbol{u}^*)$ to get $\boldsymbol{\theta^*}$. Then, we
@@ -330,13 +333,13 @@ the true value of $\boldsymbol{u}$.
 
 Now, one drawback to the current literature is that modeling is predominately
 Gaussian (as illustrated in Figure \ref{f:inv_v_classic} and our toy example),
-assuming $Y \sim \mathcal{N}\!\left(\mu(\boldsymbol{u}),
+assuming $Y^F \sim \mathcal{N}\!\left(\mu(\boldsymbol{u}),
 \Sigma(\boldsymbol{u})\right)$ as a likelihood, where
 $\boldsymbol{\theta}(\boldsymbol{u})=(\mu(\boldsymbol{u}),
 \Sigma(\boldsymbol{u}))$ depends on $m(\boldsymbol{u})$. Yet our IBEX
 observations are counts. Our first contribution, which is albeit rather
 straightforward, is to depart from that literature by perusing a Poisson likelihood:
-$Y \sim Pois(\boldsymbol{\lambda}(\boldsymbol{u}))$, where
+$Y^F \sim Pois(\boldsymbol{\lambda}(\boldsymbol{u}))$, where
 $\boldsymbol{\lambda}(\boldsymbol{u})$ is determined by $m(\boldsymbol{u})$. We leave
 the details of this to Section \ref{sec:gen_bayes_inv}.
 
@@ -408,13 +411,13 @@ common to set $\mu(X)=0$. In practice, this simply implies centering $Y$ by
 subtracting off the sample mean, $\overline{Y}$. In this zero-mean context,
 all the action takes place in the covariance function. The covariance function
 typically depends on pairwise distances between input locations $x$ and $x'$.
-Many covariance kernels exists, such as the Gaussian, Exponential, Matern. We
-use the Matern kernel in our work, of which both the Gaussian and Exponential
-kernels are special cases. The behavior of these kernels is determined by
-three hyperparameters: a nugget $g$, lengthscale $\theta$, and scale $\tau^2$.
-All hyperparameters can be estimated using your preferred method (i.e, maximum
-likelihood, method of moments). We will use Bayesian methods, specifically
-MCMC.
+Many covariance kernels exists, such as the Gaussian, Exponential, or Matern.
+We use the Matern kernel in our work, of which both the Gaussian and
+Exponential kernels are special cases. The behavior of these kernels is
+determined by three hyperparameters: a nugget $g$, lengthscale $\theta$, and
+scale $\tau^2$. All hyperparameters can be estimated using your preferred
+method (i.e, maximum likelihood, method of moments). We will use Bayesian
+methods, specifically MCMC.
 
 GPs provide a flexible, nonparametric regression tool. In addition to computer
 experiments, they are utilized in geostatistics \citep{matheron1963principles},
@@ -429,7 +432,7 @@ predictive surfaces that give higher estimates of variance away from observed da
 and virtually no variance at observed locations. Perhaps the hallmark of GPs is that
 they naturally provide excellent uncertainty quantification for out-of-sample
 predictions, a matter of importance to scientists exploring these computer models.
-Therefore, GPs are widely used in computer experiments and Bayesian Inverse Problems.
+Therefore, GPs are widely used in Bayesian Inverse Problems.
 
 One downside to this setup, especially for IBEX, is that the output ``images'' are
 massive ($> 15,000$ pixels). Historically, it has not been possible to fit a GP to
@@ -464,8 +467,9 @@ model to the simulator, they needed to perform an approximation to decrease
 the size of the data. As a solution, they employed principal components
 analysis (PCA) to reduce the dimensionality of the computer model response.
 Specifically, they represented the vector output of a simulator model as the
-sum of $n_k$ basis functions $\textbf{k}_1, \textbf{k}_2, \ldots ,
-\textbf{k}_{n_k}$, each scaled by a corresponding weight $w_i$, as shown in
+sum of $n_k$ basis functions $\boldsymbol{k}_1, \boldsymbol{k}_2, \ldots ,
+\boldsymbol{k}_{n_k}$, each scaled by a corresponding weight $w_i$, as shown
+in
 \begin{align}
 \boldsymbol y(\boldsymbol x, \boldsymbol u) &\approx \sum_{i=1}^{n_k} \boldsymbol k_i \cdot w_i (\boldsymbol x, \boldsymbol u), \quad n_k \ll n \ \nonumber \\
 w_i (\boldsymbol x, \boldsymbol u) &\sim GP(\boldsymbol 0, \Sigma_{w_i}),
