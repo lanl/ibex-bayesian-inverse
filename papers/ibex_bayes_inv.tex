@@ -277,41 +277,56 @@ unknown parameters $\boldsymbol{u}$. Given prior information about
 $\boldsymbol{u}$, we want to know which $\boldsymbol{u}$'s lead to
 realizations of $m(\cdot)$ that could explain $Y^F$, i.e., the posterior for
 $\boldsymbol{u} \mid Y^F$. This is a classic Bayesian inverse problem
-\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. To be clear,
-we are not directly interested in the output of our computer model,
-$m(\cdot)$, or some statistical parameters $\boldsymbol{\theta}$, as shown in
-the top half of Figure \ref{f:inv_v_classic}. Although
-$m(\cdot)=\boldsymbol{\theta}$ remains important, our focus is on the
-distribution of $\boldsymbol{u} \mid Y^F$, or the vector of inputs passed into
-the physical or mathematical model.
+\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}.  Figure
+\ref{f:inv_v_classic} provides a diagram, contrasting classical Bayesian
+inference with our computer model inverse problem setting.  
+
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.16,trim=0 0 0 0,clip=TRUE]{inv_v_classic.pdf}
 \caption{An illustration of classic Bayesian statistics (top)
-and the approach to Bayesian Inverse Problems (bottom). Output $Y^F$ is Gaussian in
-either case, but parameters $\boldsymbol{\theta}$ differ in where they originate.
-Note that the ``example'' for Bayesian Inverse Problems is also comprehensive, as it
-is the only context addressed in the current literature.
+and the approach to Bayesian Inverse Problems (bottom). Output $Y^F$ is
+Gaussian in either case, but parameters $\boldsymbol{\theta}$ differ in where
+they originate. Note that the ``example'' for Bayesian Inverse Problems is
+also comprehensive, as it is the only context addressed in the current
+literature.
 \label{f:inv_v_classic}}
 \end{figure}
 
-We start with a very simple example that we will return to in Section
-\ref{sec:gen_bayes_inv}. Consider the left panel of Figure \ref{f:toy_calib}. Red
-stars denote field measurements $\left(Y^F\right)$ of some true, unknown process at different
-field locations $X^F$, observed with Gaussian noise. Multiple
-measurements are made at each location, providing replication. This is common, due to
-the expense of changing configurations of a physical experiment, but it need not be
-the case. Light gray lines indicate individual runs of a computer simulation
-$m(\cdot)$ at a sample of different settings of parameters $\boldsymbol{u} =
-\begin{bmatrix} u_1 & u_2
-\end{bmatrix}^T$. The black, bold, dashed line shows the underlying process
-$m(\cdot)$ when $\boldsymbol{u}$ is set to the truth. It is important to point out
-that both $X^F$ and $\boldsymbol{u}$ are arguments to the simulator. But they differ
-in that $X^F$ includes inputs that are modifiable in both field and simulated
-environments, whereas $\boldsymbol{u}$ can only be controlled and ``measured'' in a
-computer model. Furthermore, in our realm of high-dimensional responses, $X^F$ simply
-act as indices, or grid points, for the output. For IBEX, they are specifically
-latitude/longitude pairs.
+One big difference with Bayesian inverse problems, as opposed to classical
+statistical modeling, is that the parameters $\boldsymbol{\theta}$ defining
+the distribution of $Y^F$ are not of direct interest. Rather, we are
+interested in the settings $\mathbf{u}$ that define $\boldsymbol{\theta}$
+through $m(\cdot)$, which depends on $\mathbf{u}$ and whatever spatial field,
+or grid, $X^F$ determines it's values.  For example, two different settings of
+$\mathbf{u}$ were used to the center and right panels of Figure \ref{f:fig1}.
+Those colors indicate output $\boldsymbol{\theta}$ values on a grid $X^F$ of
+longitude and latitude. We are interested in learning about which $\mathbf{u}$
+are likely to have generated the observed $Y^F$ values in the left panel.
+\textcolor{red}{I'm not loving the disconnect between u, $\theta$, and $X^F$,
+$Y^F$ and a dense predictive grid $X$, which is not mentioned but is clearly
+being used in these visuals.}
+
+To help fix ideas, consider the simpler example introduced in the left panel
+of Figure \ref{f:toy_calib}.   Red stars indicate noisy field measurements,
+$Y^F$, observed in replicate under some true, unknown process at
+different field locations $X^F$.  A computer simulation $m(\cdot)$ was built
+to virtualize that process under a physical model with two unknown parameters
+$\boldsymbol{u} = (u_1,  u_2)^\top$.  Each light gray line is a realization
+of $m(\cdot)$ for a different $\mathbf{u}$, whereas the bold-black-dashed
+line is $m(\cdot)$ at the (presumed unknown) truth.  
+
+% Needs to go earlier/or change
+% The black, bold, dashed line shows the underlying process
+% $m(\cdot)$ when $\boldsymbol{u}$ is set to the truth. It is important to point out
+% that both $X^F$ and $\boldsymbol{u}$ are arguments to the simulator. But they differ
+% in that $X^F$ includes inputs that are modifiable in both field and simulated
+% environments, whereas $\boldsymbol{u}$ can only be controlled and ``measured'' in a
+% computer model. 
+
+% Furthermore, in our realm of high-dimensional responses, $X^F$ simply
+% act as indices, or grid points, for the output. For IBEX, they are specifically
+% latitude/longitude pairs.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.51,trim=0 0 26 0,clip=TRUE]{logit1_obs.pdf}
@@ -323,43 +338,74 @@ computer model runs (left), model evaluations at posterior draws and mean
 \label{f:toy_calib}}
 \end{figure}
 
-To perform inference for $\boldsymbol{u} \mid Y^F$, we follow Bayes' rule,
-$\pi(\boldsymbol{u}|Y^F) \propto
-\mathcal{L}(Y^F|\boldsymbol{u})\pi(\boldsymbol{u})$, and utilize
-Metropolis-Hastings (MH) to sample from the posterior. At each iteration $t$, we
-propose a new set of simulation parameters $\boldsymbol{u}^*$ and execute the
-computer model $\left(m(\boldsymbol{u}^*)\right)$ to get $\boldsymbol{\theta^*}$.
-Then, we evaluate the MH-ratio and either accept or reject the proposed values.
-Predictions and posterior estimates for our example are shown in the middle and right
-panels of Figure \ref{f:toy_calib}. Note that each of the light gray lines in the
-middle panel represents a single run of the simulation at one of the accepted set of
-model parameters, $\boldsymbol{u}^{(t)}$. That is, each gray line corresponds to a
-circle in the right panel, where posterior draws of $\boldsymbol{u}$ are displayed.
-It is clearly evident that the MH sampler thoroughly explores the input space and
-that it successfully captures the true value of $\boldsymbol{u}$.
+The middle panel of the figure shows posterior draws of $\mathbf{u}$ obtained
+under Metropolis sampling using a multivariate normal likelihood whose mean is
+$m(\cdot)$ and whose covariance is $\sigma^2 \mathbb{I}$, where $\sigma^2$ is
+marginalized out under a reference prior. \textcolor{red}{Steven, some of
+these lines look really improbable to me.}  These are not of direct interest
+in and of themselves.  Rather, the main object of interest is summarized in
+the right panel: the posterior samples of $\mathbf{u}$.  \textcolor{red}{It would be great if this could mode directly connect back to Figure \ref{f:fig1}.}
 
-Now, one drawback to the current literature is that modeling is predominately
-Gaussian (as illustrated in Figure \ref{f:inv_v_classic} and our toy example),
-assuming $Y^F \sim \mathcal{N}\!\left(\mu\left(X^F\right),
-\Sigma\left(X^F\right)\right)$ as a likelihood, where
-$\boldsymbol{\theta}(\boldsymbol{u})=(\mu\left(X^F\right),
-\Sigma\left(X^F\right))$ depends on $m(\boldsymbol{u})$. Yet our IBEX
-observations are counts. Our first contribution, which is albeit rather
-straightforward, is to depart from that literature by perusing a Poisson likelihood:
-$Y^F \sim Pois(\boldsymbol{\lambda}(\boldsymbol{u}))$, where
-$\boldsymbol{\lambda}(\boldsymbol{u})$ is determined by $m(\boldsymbol{u})$. We leave
-the details of this to Section \ref{sec:gen_bayes_inv}.
+% To perform inference for $\boldsymbol{u} \mid Y^F$, we follow Bayes' rule,
+% $\pi(\boldsymbol{u}|Y^F) \propto
+% \mathcal{L}(Y^F|\boldsymbol{u})\pi(\boldsymbol{u})$, and utilize
+% Metropolis-Hastings (MH) to sample from the posterior. At each iteration
+% $t$, we propose a new set of simulation parameters $\boldsymbol{u}^*$ and
+% execute the computer model $\left(m(\boldsymbol{u}^*)\right)$ to get
+% $\boldsymbol{\theta^*}$. Then, we evaluate the MH-ratio and either accept or
+% reject the proposed values. Predictions and posterior estimates for our
+% example are shown in the middle and right panels of Figure
+% \ref{f:toy_calib}. Note that each of the light gray lines in the middle
+% panel represents a single run of the simulation at one of the accepted set
+% of model parameters, $\boldsymbol{u}^{(t)}$. That is, each gray line
+% corresponds to a circle in the right panel, where posterior draws of
+% $\boldsymbol{u}$ are displayed. It is clearly evident that the MH sampler
+% thoroughly explores the input space and that it successfully captures the
+% true value of $\boldsymbol{u}$.
 
-The most significant hurdle that we have not addressed in our toy example is the
-expense of the computer model. Even with modern-day computing power, some simulations
-can take hours, days, or weeks to complete. So, it's not practical to run $m(\cdot)$
-inside the MH sampler. This constrains the amount of runs that can be executed and
-therefore restricts the exploration of the model parameter space. Therefore, we need
-a model (what we call a surrogate, or emulator) fit to the limited simulator output
-to make accurate and reliable predictions for out-of-sample values of our computer
-model parameters. Any statistical model can serve as a surrogate, ranging from linear
-regression to complex neural networks. However, the canonical surrogate for computer
-experiments has come to be the Gaussian process \citep{gramacy2020surrogates}.
+The literature on Bayesian inverse problems involves methods that work
+predominantly in this way, particularly as regards the Gaussian likelihood. 
+%
+% Now, one drawback to the current literature is that modeling is predominately
+% Gaussian (as illustrated in Figure \ref{f:inv_v_classic} and our toy example),
+% assuming $Y^F \sim \mathcal{N}\!\left(\mu\left(X^F\right),
+% \Sigma\left(X^F\right)\right)$ as a likelihood, where
+% $\boldsymbol{\theta}(\boldsymbol{u})=(\mu\left(X^F\right),
+% \Sigma\left(X^F\right))$ depends on $m(\boldsymbol{u})$. 
+%
+Yet our IBEX observations are counts. Our first contribution, which is albeit
+rather straightforward, is to depart from that literature by perusing a
+Poisson likelihood: $Y^F \sim Pois(\boldsymbol{\lambda}(\boldsymbol{u}))$,
+where $\boldsymbol{\lambda}(\boldsymbol{u})$ is determined by
+$m(\boldsymbol{u})$. We leave the details of this to Section
+\ref{sec:gen_bayes_inv}.
+
+Another challenge to the conventional apparatus involves computational
+considerations.  Each run of the IBEX model $m(\cdot)$ is a Herculean effort,
+requiring thousands of core hours on a supercomputer.  That simply can't be
+embedded in a Metropolis sampler requiring thousands of iteration to
+convergence.  While it is rather conventional to deploy a surrogate model
+\citep[e.g.][]{gramacy2020surrogates} in this setting, trained on a design of
+space-filling $\mathbf{u}$-values, doing so effectively is challenged by the
+dense grid of output, over longitude and latitude via $X^F$ for each
+$\mathbf{u}$.  Herein lies our main methodological contribution. By way of
+explaining, the remainder of this section outlines the conventional surrogate
+modeling toolkit, as a jumping-off point toward explaining both our main
+comparative (Section \ref{sec:pca}), and our main methodological contribution.
+
+% Another mismatch involves the size of the spatial indexing set $X^F$ involved
+% in IBEX.  Each simulation $m(\cdot)$ outputs $\boldsymbol{\lambda}$ values 
+% on a dense longitude and latitude grid.  
+% The most significant hurdle that we have not addressed in our toy example is the
+% expense of the computer model. Even with modern-day computing power, some simulations
+% can take hours, days, or weeks to complete. So, it's not practical to run $m(\cdot)$
+% inside the MH sampler. This constrains the amount of runs that can be executed and
+% therefore restricts the exploration of the model parameter space. Therefore, we need
+% a model (what we call a surrogate, or emulator) fit to the limited simulator output
+% to make accurate and reliable predictions for out-of-sample values of our computer
+% model parameters. Any statistical model can serve as a surrogate, ranging from linear
+% regression to complex neural networks. However, the canonical surrogate for computer
+% experiments has come to be the Gaussian process \citep{gramacy2020surrogates}.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Gaussian Process Surrogates:
