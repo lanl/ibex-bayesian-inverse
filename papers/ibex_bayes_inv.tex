@@ -272,7 +272,7 @@ with code reproducing all included examples.
 \label{sec:review}
 
 We study IBEX through the lens of observational data $Y^F$ ($F$ for field
-data) and a computer implementation of a physical model $m(\cdot)$ with
+observation) and a computer implementation of a physical model $m(\cdot)$ with
 unknown parameters $\boldsymbol{u}$. Given prior information about
 $\boldsymbol{u}$, we want to know which $\boldsymbol{u}$'s lead to
 realizations of $m(\cdot)$ that could explain $Y^F$, i.e., the posterior for
@@ -286,25 +286,32 @@ distribution of $\boldsymbol{u} \mid Y^F$, or the vector of inputs passed into
 the physical or mathematical model.
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.7,trim=0 0 0 0,clip=TRUE]{inv_v_classic.pdf}
+\includegraphics[scale=0.16,trim=0 0 0 0,clip=TRUE]{inv_v_classic.pdf}
 \caption{An illustration of classic Bayesian statistics (top)
-and the approach to Bayesian Inverse Problems (bottom). Output $Y^F$ is Gaussian
-in either case, but parameters $\boldsymbol{\theta}$ differ in where they
-originate.
+and the approach to Bayesian Inverse Problems (bottom). Output $Y^F$ is Gaussian in
+either case, but parameters $\boldsymbol{\theta}$ differ in where they originate.
+Note that the ``example'' for Bayesian Inverse Problems is also comprehensive, as it
+is the only context addressed in the current literature.
 \label{f:inv_v_classic}}
 \end{figure}
 
 We start with a very simple example that we will return to in Section
-\ref{sec:gen_bayes_inv}. Consider the left panel of Figure \ref{f:toy_calib}.
-Red stars denote field measurements ($Y^F$) of some true, unknown process at
-different locations $X^F$, observed with Gaussian noise. Additionally, multiple
-observations are made at each location, providing replication. This is common,
-due to the expense of changing configurations of a physical experiment, but it
-need not be the case. Light gray lines indicate individual runs of a computer
-simulation $m(\cdot)$ at a sample of different settings of parameters
-$\boldsymbol{u} = \begin{bmatrix} u_1 & u_2
+\ref{sec:gen_bayes_inv}. Consider the left panel of Figure \ref{f:toy_calib}. Red
+stars denote field measurements $\left(Y^F\right)$ of some true, unknown process at different
+field locations $X^F$, observed with Gaussian noise. Multiple
+measurements are made at each location, providing replication. This is common, due to
+the expense of changing configurations of a physical experiment, but it need not be
+the case. Light gray lines indicate individual runs of a computer simulation
+$m(\cdot)$ at a sample of different settings of parameters $\boldsymbol{u} =
+\begin{bmatrix} u_1 & u_2
 \end{bmatrix}^T$. The black, bold, dashed line shows the underlying process
-$m(\cdot)$ when $\boldsymbol{u}$ is set to the truth.
+$m(\cdot)$ when $\boldsymbol{u}$ is set to the truth. It is important to point out
+that both $X^F$ and $\boldsymbol{u}$ are arguments to the simulator. But they differ
+in that $X^F$ includes inputs that are modifiable in both field and simulated
+environments, whereas $\boldsymbol{u}$ can only be controlled and ``measured'' in a
+computer model. Furthermore, in our realm of high-dimensional responses, $X^F$ simply
+act as indices, or grid points, for the output. For IBEX, they are specifically
+latitude/longitude pairs.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.51,trim=0 0 26 0,clip=TRUE]{logit1_obs.pdf}
@@ -321,36 +328,36 @@ $\pi(\boldsymbol{u}|Y^F) \propto
 \mathcal{L}(Y^F|\boldsymbol{u})\pi(\boldsymbol{u})$, and utilize
 Metropolis-Hastings (MH) to sample from the posterior. At each iteration $t$, we
 propose a new set of simulation parameters $\boldsymbol{u}^*$ and execute the
-computer model $m(\boldsymbol{u}^*)$ to get $\boldsymbol{\theta^*}$. Then, we
-evaluate the MH-ratio and either accept or reject the proposed values. Predictions
-and posterior estimates for our example are shown in the middle and right panels of
-Figure \ref{f:toy_calib}. Note that each of the light gray lines in the middle panel
-represent a run of the simulation at one of the accepted set of model parameters,
-$\boldsymbol{u}^{(t)}$. That is, each gray line corresponds to a circle in the right
-panel, where posterior draws of $\boldsymbol{u}$ are displayed. It is evident that
-the MH sampler thoroughly explores the input space and that it successfully captures
-the true value of $\boldsymbol{u}$.
+computer model $\left(m(\boldsymbol{u}^*)\right)$ to get $\boldsymbol{\theta^*}$.
+Then, we evaluate the MH-ratio and either accept or reject the proposed values.
+Predictions and posterior estimates for our example are shown in the middle and right
+panels of Figure \ref{f:toy_calib}. Note that each of the light gray lines in the
+middle panel represents a single run of the simulation at one of the accepted set of
+model parameters, $\boldsymbol{u}^{(t)}$. That is, each gray line corresponds to a
+circle in the right panel, where posterior draws of $\boldsymbol{u}$ are displayed.
+It is clearly evident that the MH sampler thoroughly explores the input space and
+that it successfully captures the true value of $\boldsymbol{u}$.
 
 Now, one drawback to the current literature is that modeling is predominately
 Gaussian (as illustrated in Figure \ref{f:inv_v_classic} and our toy example),
-assuming $Y^F \sim \mathcal{N}\!\left(\mu(\boldsymbol{u}),
-\Sigma(\boldsymbol{u})\right)$ as a likelihood, where
-$\boldsymbol{\theta}(\boldsymbol{u})=(\mu(\boldsymbol{u}),
-\Sigma(\boldsymbol{u}))$ depends on $m(\boldsymbol{u})$. Yet our IBEX
+assuming $Y^F \sim \mathcal{N}\!\left(\mu\left(X^F\right),
+\Sigma\left(X^F\right)\right)$ as a likelihood, where
+$\boldsymbol{\theta}(\boldsymbol{u})=(\mu\left(X^F\right),
+\Sigma\left(X^F\right))$ depends on $m(\boldsymbol{u})$. Yet our IBEX
 observations are counts. Our first contribution, which is albeit rather
 straightforward, is to depart from that literature by perusing a Poisson likelihood:
 $Y^F \sim Pois(\boldsymbol{\lambda}(\boldsymbol{u}))$, where
 $\boldsymbol{\lambda}(\boldsymbol{u})$ is determined by $m(\boldsymbol{u})$. We leave
 the details of this to Section \ref{sec:gen_bayes_inv}.
 
-The biggest hurdle that we did not address in our toy example is the expense of the
-computer model. Even with modern-day computing power, some simulations can take
-hours, days, or weeks to complete. So, it's not practical to run $m(\cdot)$ inside
-the MH sampler. This constrains the amount of runs that can be executed and therefore
-restricts the exploration of the model parameter space. Therefore, we need a model
-(what we call a surrogate, or emulator) fit to the limited simulator output to make
-accurate and reliable predictions for out-of-sample values of our computer model
-parameters. Any statistical model can serve as a surrogate, ranging from linear
+The most significant hurdle that we have not addressed in our toy example is the
+expense of the computer model. Even with modern-day computing power, some simulations
+can take hours, days, or weeks to complete. So, it's not practical to run $m(\cdot)$
+inside the MH sampler. This constrains the amount of runs that can be executed and
+therefore restricts the exploration of the model parameter space. Therefore, we need
+a model (what we call a surrogate, or emulator) fit to the limited simulator output
+to make accurate and reliable predictions for out-of-sample values of our computer
+model parameters. Any statistical model can serve as a surrogate, ranging from linear
 regression to complex neural networks. However, the canonical surrogate for computer
 experiments has come to be the Gaussian process \citep{gramacy2020surrogates}.
 
@@ -375,40 +382,42 @@ experiments has come to be the Gaussian process \citep{gramacy2020surrogates}.
 %% - Bottleneck is O(n^3)
 %% - LEAD IN: Output can be large. Need an approximation.
 %% Review Gaussian processes and their use in surrogate modeling
-A Gaussian process is a realization of a multivariate normal distribution,
-governed by some mean and covariance functions. GPs are fit to observed data
-and used to make predictions at new input locations, relying on the
-conditional multivariate normal or \textit{kriging} equations
-\citep{matheron1963principles}. For example, suppose we have a vector of
-observations $Y$ at input locations $X$. $Y$ is an $n \times 1$ vector and $X$
-is an $n \times p$ matrix. We make the assumption that $Y$ is normally
-distributed with some mean $\mu(X)$ and covariance $\Sigma(X)$, clearly both
-functions of $X$. Then, predicting at a new location $x$ is relatively
-straightforward. Eq.~(\ref{eq:mvn_eq}) articulates how to obtain mean
-predictions $\mu^*(x)$ and corresponding uncertainty quantification estimates
-$\Sigma^*(x)$.
-\vspace{-0.75cm}
+A Gaussian process is a realization of a multivariate normal distribution, governed
+by some mean and covariance function. GPs are fit to observed data and used to make
+predictions at new input locations, relying on the conditional multivariate normal or
+\textit{kriging} equations \citep{matheron1963principles}. For example, suppose we
+have a vector of observations $Y^M$ at input locations $X^M$. Here we are using the
+superscript $M$ to make it explicit that our GP surrogate is modeling the simulator
+input and output, not field data. $Y^M$ is an $n \times 1$ vector and $X^M$ is an $n
+\times p$ matrix. To connect back our model parameters of interest, note that $X^M =
+\begin{bmatrix} X^F & \boldsymbol{1}_n \boldsymbol{u}^T \end{bmatrix}$. We make the
+assumption that $Y^F$ is normally distributed with some mean $\mu(X^F)$ and
+covariance $\Sigma(X^F)$, clearly both functions of $X^F$. Then, predicting at a new
+location $x$ is relatively straightforward. Equation~\ref{eq:mvn_eq} articulates how to
+obtain mean predictions $\mu^*(x)$ and corresponding uncertainty quantification
+estimates $\Sigma^*(x)$.
+\vspace{-0.7cm}
 
 \begin{minipage}[t]{0.25\linewidth}
 \begin{align}
-Y(X) &\sim \mathcal{N}\!\left(\mu(X), \Sigma(X)\right) \nonumber \\
-y^*(x) \mid Y(X) &\sim \mathcal{N}\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber
+Y^M(X^M) &\sim \mathcal{N}\!\left(\mu(X^M), \Sigma(X^M)\right) \nonumber \\
+y^*(x) \mid Y(X^M) &\sim \mathcal{N}\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber
 \end{align}
 \end{minipage}
 \quad
 \begin{minipage}[t]{0.58\linewidth}
 \begin{align}
-\mu^*(x) &= \mu(x) + \Sigma(x, X) \Sigma(X)^{-1} (Y - \mu(X)) \nonumber \\
+\mu^*(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \nonumber \\
 \Sigma^*(x) &= \Sigma(x, x)
-  - \Sigma(x, X) \Sigma(X)^{-1} \Sigma(X, x) \hspace{0.05em}
+  - \Sigma(x, X^M) \Sigma(X^M)^{-1} \Sigma(X^M, x) \hspace{0.05em}
 \label{eq:mvn_eq}
 \end{align}
 \end{minipage}
-\vspace{1cm}
+\vspace{0.7cm}
 
 Although a generic mean function is specified in Eq.~\ref{eq:mvn_eq}, it is
-common to set $\mu(X)=0$. In practice, this simply implies centering $Y$ by
-subtracting off the sample mean, $\overline{Y}$. In this zero-mean context,
+common to set $\mu(X^M)=0$. In practice, this simply implies centering $Y^M$ by
+subtracting off the sample mean, $\overline{Y}^M$. In this zero-mean context,
 all the action takes place in the covariance function. The covariance function
 typically depends on pairwise distances between input locations $x$ and $x'$.
 Many covariance kernels exists, such as the Gaussian, Exponential, or Matern.
@@ -427,7 +436,7 @@ learning \citep{rasmussen2003gaussian}. The reason for their popularity as surro
 models in the world of computer experiments is their ability to interpolate between
 observed data points (i.e, setting nugget $g = 0$). Although stochastic computer
 models are becoming more common, computer experiments are often deterministic,
-motivating the desire for a model that interpolates. GPs are then useful by providing
+motivating the desire for a model that interpolates. GPs are useful by providing
 predictive surfaces that give higher estimates of variance away from observed data,
 and virtually no variance at observed locations. Perhaps the hallmark of GPs is that
 they naturally provide excellent uncertainty quantification for out-of-sample
@@ -438,7 +447,8 @@ One downside to this setup, especially for IBEX, is that the output ``images'' a
 massive ($> 15,000$ pixels). Historically, it has not been possible to fit a GP to
 such large simulation output, producing high-resolution 2d (or 3d) images for each
 $m(\boldsymbol{u})$ that is run. Next, we review what has been done for applications
-such as IBEX in the past.
+such as IBEX in the past and lay the groundwork for our proposed advancement
+introduced in Section \ref{sec:vecchia}.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.2 - Principal Components for High-Dimensional Response
@@ -457,37 +467,37 @@ such as IBEX in the past.
 %%   - Maybe a graphic
 %% - Must choose basis
 %% - Used in calibration (an inverse problem), but does not support Poisson
-In the early 2000s, \citet{higdoncalib2008} faced the challenge at LANL of
-estimating the parameters of a physical process from which they could gather
-only a small set of observations, but that could be represented by a
-simulation. But these computer models were expensive, producing limited runs
-with extremely high-dimensional output in the form of images, shape
-description, time series, etc. So, in order to efficiently fit a surrogate
-model to the simulator, they needed to perform an approximation to decrease
-the size of the data. As a solution, they employed principal components
-analysis (PCA) to reduce the dimensionality of the computer model response.
-Specifically, they represented the vector output of a simulator model as the
-sum of $n_k$ basis functions $\boldsymbol{k}_1, \boldsymbol{k}_2, \ldots ,
-\boldsymbol{k}_{n_k}$, each scaled by a corresponding weight $w_i$, as shown
-in
+In the early 2000s, \citet{higdoncalib2008} faced the challenge at LANL of estimating
+the parameters of a physical process from which they could only gather a small set of
+observations. For the purpose of further investigating the process, scientists
+represent the process with a simulation. However, not only are these computer models
+expensive, producing a limited number of runs, their output is extremely
+high-dimensional, in the form of images, shape description, time series, etc. So, in
+order to efficiently fit a surrogate model to the simulator, they perform an
+approximation to decrease the size of the data. As a solution, they employ principal
+components analysis (PCA) to reduce the dimensionality of the computer model
+response. Specifically, they represent the vector output of a simulator model as the
+sum of $n_k$ basis functions $\boldsymbol{k}_1,
+\boldsymbol{k}_2, \ldots ,
+\boldsymbol{k}_{n_k}$, each scaled by a corresponding weight $w_i$. They specify
 \begin{align}
 \boldsymbol y(\boldsymbol x, \boldsymbol u) &\approx \sum_{i=1}^{n_k} \boldsymbol k_i \cdot w_i (\boldsymbol x, \boldsymbol u), \quad n_k \ll n \ \nonumber \\
 w_i (\boldsymbol x, \boldsymbol u) &\sim GP(\boldsymbol 0, \Sigma_{w_i}),
 \label{eq:higdon_pca}
 \end{align}
-where $\boldsymbol x$ is a vector of controllable inputs and $\boldsymbol u$
-is the vector of model parameters they were interested in estimating.
-$\Sigma_{w_i}$, dependent only on a limited number of combinations of
+where $\boldsymbol x$ is a vector of field locations (a row of $X^F$) and
+$\boldsymbol u$ is the same vector of model parameters we've referred to throughout
+this review. $\Sigma_{w_i}$, dependent only on a limited number of combinations of
 $\boldsymbol x$ and $\boldsymbol u$, is a $n_k \times n_k$ matrix. Hence, the
-decomposition of $\Sigma_{w_i}$ avoids the $O(n^3)$ bottleneck in computation
-when scaling to large $n$ and can be completed in a reasonable amount of time.
-Instead of modeling the high-dimensional response $\boldsymbol y$, the GP only
-modeled the small set of component weights. Bayesian inference was used to
-obtain the posterior distribution of these component weights. Then, combining
-estimates of the weights with the calculated basis functions allowed for
-predictions out of sample. As a result of this approximation, the dimension of
-the covariance matrices $\Sigma(X)$ and $\Sigma(X^*)$ in Eq.~\ref{eq:mvn_eq}
-remained small and was able to be decomposed quickly.
+decomposition of $\Sigma_{w_i}$ avoids the $O(n^3)$ bottleneck in computation when
+scaling to large $n$ and can be completed in a reasonable amount of time. Instead of
+modeling the high-dimensional response $\boldsymbol y$, the GP only models the small
+set of component weights. Bayesian inference via MCMC is used to obtain the
+posterior distribution of these component weights. Then, combining estimates of the
+weights with the calculated basis functions allow for out-of-sample predictions. As
+a result of this approximation, the dimension of the covariance matrices $\Sigma(X^F)$
+and $\Sigma(x^*)$ in Eq.~\ref{eq:mvn_eq} remains small and is able to be decomposed
+quickly.
 
 We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the
 definition and selection of how many basis functions to use. Although this
