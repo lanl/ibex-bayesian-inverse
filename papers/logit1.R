@@ -50,7 +50,7 @@ ylims <- range(yf, ym)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("logit1_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym[,sample(1:ncol(ym), 10)], type="l", col="lightgrey", lty=1,
-  lwd=1.5, xlab=expression(X^F), ylab="Y", ylim=ylims)
+  lwd=1.5, xlab="X", ylab="Y", ylim=ylims)
 points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
 lines(x=xm, y=lam_m, lwd=2, lty=2)
 legend("topleft", c("observations", "computer model runs", "truth"),
@@ -139,7 +139,7 @@ par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("logit1_est.pdf", width=5, height=5)
 ylims <- range(c(mod_lhatps, yf, lam_m))
 matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
-  col="lightgrey", xlab=expression(X^F), ylab="Y", ylim=ylims)
+  col="lightgrey", xlab="X", ylab="Y", ylim=ylims)
 points(x=xf, y=yf, col=2, pch=8)
 u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
