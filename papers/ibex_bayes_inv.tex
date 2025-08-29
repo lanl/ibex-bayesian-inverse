@@ -272,44 +272,42 @@ with code reproducing all included examples.
 \label{sec:review}
 
 We study IBEX through the lens of observational data $Y^F$ ($F$ for field
-observation) and a computer implementation of a physical model $m(u, X)$, where
-parameters $u$ are unknown and $X$ represents a dense grid at which to evaluate the
-model. Given prior information about $u$, we want to know which $u$'s lead to
-realizations of $m(\cdot)$ that could explain $Y^F$, i.e., the posterior for $u \mid
-Y^F$. This is a classic Bayesian inverse problem
+measurement) and a computer implementation of a physical model $m(u, X)$,
+where parameters $u$ are unknown and $X$ represents a dense grid at which to
+evaluate the simulator. Given prior information about $u$, we want to know
+which $u$'s lead to realizations of $m(\cdot)$ that could explain $Y^F$, i.e.,
+the posterior for $u \mid Y^F$. This is a classic Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Equation
-\ref{eq:inv_bayes_mod} provides a hierarchical model, contrasting classical Bayesian
-inference with our computer model setting.
+\ref{eq:inv_bayes_mod} provides a hierarchical model, contrasting classical
+Bayesian inference with our computer model setting.
 \begin{align}
-Y^F &\sim \mathcal{N}_{n_F}\!\left(\mu\left(X^F\right),
-\Sigma\left(X^F\right)\right) \nonumber \\
+Y^F &\sim \mathcal{N}_{n_F}\!\left(\mu\!\left(X^F\right),
+\Sigma\!\left(X^F\right)\right) \nonumber \\
 \mu(X) &= m(u, X) \nonumber \\
 \Sigma(X) &\sim \pi\left(\Sigma\right) \nonumber \\
 u &\sim \pi(u)
 \label{eq:inv_bayes_mod}
 \end{align}
 One big difference with Bayesian inverse problems, as opposed to classical
-statistical modeling, is that the parameters $\mu\left(X^F\right)$ and
-$\Sigma\left(X^F\right)$ defining the distribution of $Y^F$ are not of direct interest.
-Rather, we are interested in the settings $u$ that define
-$\mu(X)$ and $\Sigma(X)$ through $m(u,
-X)$, which depends on $u$ and whatever spatial field, or grid,
-$X$ determines it's values.  For example, two different settings of
-$u$ were used to generate the center and right panels of Figure
-\ref{f:fig1}. Those colors indicate output $\mu(X)$ values on a dense grid
-$X$ of longitude and latitude. We are interested in learning about which
-$u$ are likely to have generated the observed $Y^F$ values in the left
-panel at locations $X=X^F$.
+statistical modeling, is that the parameters $\mu(X^F)$ and $\Sigma(X^F)$
+defining the distribution of $Y^F$ are not of direct interest. Rather, we are
+interested in the settings $u$ that define $\mu(X)$ and $\Sigma(X)$ through
+$m(u, X)$, which depends on $u$ and whatever spatial field, or grid, $X$
+determines it's values.  For example, two different settings of $u$ were used
+in the IBEX simulator to generate the center and right panels of Figure
+\ref{f:fig1}. Colors indicate output $\mu(X)$ values on a dense grid $X$ of
+longitude and latitude. We are interested in learning about which $u$ are
+likely to have generated the observed $Y^F$ values in the left panel at
+locations $X=X^F$ where the IBEX satellite points.
 
-To help fix ideas, consider the simpler example introduced in the left panel of
-Figure \ref{f:toy_calib}. Red stars indicate noisy field measurements,
-$Y^F$, observed in replicate under some true, unknown process at
-different field locations $X^F$. A computer simulation
-$m(u, X)$ was built to virtualize that process under a
-physical model with two unknown parameters $u = (u_1,  u_2)^\top$. Each
-light gray line is a realization of $m(\cdot)$ for a different $u$ on a
-constant, fine grid $X$. The bold-black-dashed line is $m(\cdot)$ at the
-(presumed unknown) truth.
+To help fix ideas, consider the simpler example introduced in the left panel
+of Figure \ref{f:toy_calib}. Red stars indicate noisy field measurements,
+$Y^F$, observed in replicate under some true, unknown process at different
+locations $X^F$. A computer simulation $m(u, X)$ was built to virtualize that
+process under a physical model with two unknown parameters $u = (u_1,
+u_2)^\top$. Each light gray line is a realization of $m(\cdot)$ for a
+different $u$ on an identical fine grid $X$. The bold-black-dashed line is
+$m(\cdot)$ at the (presumed unknown) truth.
 
 \begin{figure}[ht!]
 \centering
@@ -324,14 +322,16 @@ computer model runs (left), model evaluations at posterior draws and mean
 
 The middle panel of the figure shows runs of our virtual model evaluated at posterior
 draws of $u$ obtained under Metropolis sampling using a multivariate
-normal likelihood whose mean is $m(\cdot)$ and whose covariance is $\sigma^2
-\mathbb{I}$, where $\sigma^2$ is marginalized out under a reference prior. These are
-not of direct interest in and of themselves.  Rather, the main object of interest is
-summarized in the right panel: the posterior samples of $u$. It is
-clearly evident that the Metropolis sampler thoroughly explores the input space and
-that it successfully captures the true value of $u$. We aim to provide a
-method that can achieves the same goal, but for the parameters $u$ that
-underlie the IBEX satellite data (left panel of Figure \ref{f:fig1}).
+normal likelihood whose mean $\mu(X)=m(\cdot)$ and whose covariance $\Sigma(X) \sim \sigma^2
+\mathbb{I}$, where $\sigma^2$ is marginalized out under a reference prior.
+Although we display these runs on the grid $X$, the sampler only uses
+evaluations of $m(\cdot)$ at locations $X^F$ to calculate the likelihood. Even
+so, these are not of direct interest in and of themselves.  Rather, the main
+object of interest is summarized in the right panel: the posterior samples of
+$u$. These samples will inform our inference about the process that generates
+observations $Y^F$. In this toy example, it is evident that the Metropolis
+sampler successfully captures the true value of $u$ after thoroughly exploring
+the computer model space.
 
 % To perform inference for $\boldsymbol{u} \mid Y^F$, we follow Bayes' rule,
 % $\pi(\boldsymbol{u}|Y^F) \propto
@@ -351,7 +351,10 @@ underlie the IBEX satellite data (left panel of Figure \ref{f:fig1}).
 % true value of $\boldsymbol{u}$.
 
 The literature on Bayesian inverse problems involves methods that work
-predominantly in this way, particularly as regards the Gaussian likelihood. 
+predominantly in this way, particularly as regards the Gaussian likelihood. We
+aim to provide a method that achieves the same goal, but for unknown
+parameters $u$ that underlie observed IBEX satellite data (left panel of
+Figure \ref{f:fig1}).
 %
 % Now, one drawback to the current literature is that modeling is predominately
 % Gaussian (as illustrated in Figure \ref{f:inv_v_classic} and our toy example),
@@ -360,22 +363,24 @@ predominantly in this way, particularly as regards the Gaussian likelihood.
 % $\boldsymbol{\theta}(\boldsymbol{u})=(\mu\left(\boldsymbol{X}^F\right),
 % \Sigma\left(\boldsymbol{X}^F\right))$ depends on $m(\boldsymbol{u})$.
 %
-Yet our IBEX observations are counts. Our first contribution, which is albeit rather
-straightforward, is to depart from that literature by perusing a Poisson likelihood:
-$Y^F \sim Poisson(\lambda(X^F))$, where $\lambda(X^F)$ is determined by $m(u, X)$. We
+Yet our IBEX observations are counts. Our first contribution, which is albeit
+rather straightforward, is to depart from that literature and
+Eq.~\ref{eq:inv_bayes_mod} by perusing a Poisson likelihood: $Y^F \sim
+Poisson(\lambda(X^F))$, where $\lambda(X^F)$ is determined by $m(u, X)$. We
 leave the details of this to Section \ref{sec:gen_bayes_inv}.
 
-Another challenge to the conventional apparatus involves computational
+Another challenge to the typical apparatus involves computational
 considerations.  Each run of the IBEX model $m(\cdot)$ is a Herculean effort,
-requiring thousands of core hours on a supercomputer.  That simply can't be embedded
-in a Metropolis sampler requiring thousands of iteration to convergence.  While it is
-rather conventional to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates}
-in this setting, trained on a design of space-filling $u$-values, doing
-so effectively is challenged by the dense grid of output, over longitude and latitude
-via $X$ for each $u$.  Herein lies our main methodological
-contribution. The remainder of this section outlines the conventional surrogate
-modeling toolkit, as a jumping-off point toward explaining both our main comparative
-(Section \ref{sec:pca}) and our main methodological contribution.
+requiring thousands of core hours on a supercomputer.  That simply can't be
+embedded in a Metropolis sampler requiring thousands of iterations to
+convergence.  While it is rather conventional to deploy a surrogate model
+\citep[e.g.][]{gramacy2020surrogates} in this setting, trained on a design of
+space-filling $u$-values, doing so effectively is challenged by the dense grid
+of output, over longitude and latitude via $X$ for each $u$.  Herein lies our
+main methodological contribution. The remainder of this section outlines the
+standard surrogate modeling toolkit, as a jumping-off point toward explaining
+both our main comparative (Section \ref{sec:pca}) and our main methodological
+contribution.
 
 % Another mismatch involves the size of the spatial indexing set $\boldsymbol{X}^F$ involved
 % in IBEX.  Each simulation $m(\cdot)$ outputs $\boldsymbol{\lambda}$ values 
@@ -444,7 +449,7 @@ y^*(x) \mid Y(X^M) &\sim \mathcal{N}\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumb
 \vspace{0.7cm}
 
 Although a generic mean function is specified in Eq.~\ref{eq:mvn_eq}, it is
-common to set $\mu(X^M)=0$. In practice, this simply implies centering $Y^M$ by
+common to set $\mu(x)=\mu(X^M)=0$. In practice, this simply implies centering $Y^M$ by
 subtracting off the sample mean, $\overline{Y}^M$. In this zero-mean context,
 all the action takes place in the covariance function. The covariance function
 typically depends on pairwise distances between input locations $x$ and $x'$.
@@ -474,7 +479,7 @@ Therefore, GPs are widely used in Bayesian Inverse Problems.
 One downside to this setup, especially for IBEX, is that the output ``images'' are
 massive ($> 15,000$ pixels). Historically, it has not been possible to fit a GP to
 such large simulation output, producing high-resolution 2d (or 3d) images for each
-$m(u)$ that is run. Next, we review what has been done for applications
+$m(u, X)$ that is run. Next, we review what has been done for applications
 such as IBEX in the past and lay the groundwork for our proposed advancement
 introduced in Section \ref{sec:vecchia}.
 
@@ -495,53 +500,58 @@ introduced in Section \ref{sec:vecchia}.
 %%   - Maybe a graphic
 %% - Must choose basis
 %% - Used in calibration (an inverse problem), but does not support Poisson
-In the early 2000s, \citet{higdoncalib2008} faced the challenge at LANL of estimating
-the parameters of a physical process from which they could only gather a small set of
-observations. For the purpose of further investigating the process, scientists
-represent the process with a simulation. However, not only are these computer models
-expensive, producing a limited number of runs, their output is extremely
-high-dimensional, in the form of images, shape description, time series, etc. So, in
-order to efficiently fit a surrogate model to the simulator, they perform an
-approximation to decrease the size of the data. As a solution, they employ principal
-components analysis (PCA) to reduce the dimensionality of the computer model
-response. Specifically, they represent the vector output of a simulator model as the
-sum of $n_k$ basis functions $k_1, k_2, \ldots , k_{n_k}$, each scaled by a
-corresponding weight $w_i$. They specify each model response
+In the early 2000s, \citet{higdoncalib2008} faced the challenge at LANL of
+estimating the parameters of a physical process from which they could only
+gather a small set of observations. For the purpose of further investigation,
+scientists represent the process with a simulation. However, not only are
+these computer models expensive, producing a limited number of runs, their
+output is extremely high-dimensional, in the form of images, shape
+description, time series, etc. So, in order to efficiently fit a surrogate
+model to the simulator, they perform an approximation to decrease the size of
+the data. As a solution, they employ principal components analysis (PCA) to
+reduce the dimensionality of the computer model response. Specifically, they
+represent the vector output of a simulator model as the sum of $n_k$ basis
+functions $k_1, k_2, \ldots , k_{n_k}$, each scaled by a corresponding weight
+$w_i$. They specify each model response
 \begin{align}
 y(x) &\approx \sum_{i=1}^{n_k}  k_i \cdot w_i (x), \quad n_k \ll n \ \nonumber
 \\ w_i(x) &\sim \mathcal{N}( 0, \Sigma_{w_i}),
 \label{eq:higdon_pca}
 \end{align}
-where $x$ is a single row of the matrix $X^M$. Note that $X^M$ in this approach is
-small, only containing entries corresponding to the unique values of $x = u$ executed
-by the computer model. Weights $w_i$ are realizations of a GP, fit over principal
-components from the limited simulator output. Therefore, by not directly modeling the
-high-dimensional respone $y$, the decomposition of $\Sigma_{w_i}$ avoids the cubic
-bottleneck in computation when scaling to large $n$ and can be completed in a
-reasonable amount of time. Once the surrogate is fit, Bayesian inference via MCMC is
-used to obtain the posterior distribution of these component weights. Then, combining
-estimates of the weights with the calculated basis functions allow for out-of-sample
-predictions. As a result of this approximation, the dimension of the covariance
-matrices $\Sigma(X^M)$ and $\Sigma^*(x)$ in Eq.~\ref{eq:mvn_eq} remains small and is
-able to be decomposed quickly.
+where $x$ is a single row of the matrix $X^M$. Note that $X^M$ in this
+approach is small, only containing entries corresponding to the unique values
+of $x = u$ executed by the computer model, and no information on the grid
+where the simulator is evaluated. Weights $w_i$ are realizations of a GP, fit
+over principal components from the limited simulator output. Therefore, by not
+directly modeling the high-dimensional response $y$ and it's associated dense
+grid $X$, the decomposition of $\Sigma_{w_i}$ avoids the cubic bottleneck in
+computation when scaling to large $n$ and can be completed in a reasonable
+amount of time. With fitted surrogate in hand, Bayesian inference via MCMC is
+used to obtain the posterior distribution of these component weights. Then,
+combining estimates of the weights with the calculated basis functions allow
+for out-of-sample predictions. As a result of this approximation, the
+dimension of the covariance matrices $\Sigma(X^M)$ and $\Sigma^*(x)$ in
+Eq.~\ref{eq:mvn_eq} remains small and is able to be decomposed quickly.
 
-We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the definition
-and selection of how many basis functions to use. Although this basis representation
-was and still is successful in many applications, we argue that what
-\citet{higdoncalib2008} really wanted to do was represent the functional output as a
-univariate response. That is, replicate the entry in the input matrix $X^M$ for each
-response the number of times equal to the length of the output vector. In essence,
-implicitly encode the index (e.g.~pixel in image, moment in time series) into the
-response vector for each observation in the input matrix. We believe that had
-\citet{higdoncalib2008} had access to the capacity of modern-day computing, along
-with the novel methodology proposed since the early 2000s that leverages that
-compute, they would have steered their implementation in a significantly different
-way. We will show that our more straightforward approach results in equal or improved
-performance in both predictive accuracy and uncertainty quantification, along with a
-significant reduction in computational expense. Additionally, their method and
-implementation, originally written in {\tt MATLAB} and now deployed in {\tt Python}
-\citep{gattiker2020lanl}, is unable to model a non-Gaussian field response, leading
-to our first contribution.
+We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the
+definition and selection of how many basis functions to use. Although this
+basis representation was and still is successful in many applications, we
+argue that what \citet{higdoncalib2008} really wanted to do was represent the
+functional output as a univariate response. That is, replicate the entry in
+the input matrix $X^M$ for each response the number of times equal to the
+length of the output vector. In essence, implicitly encode the grid points
+(e.g.~pixel in image, moment in time series) of the response vector for each
+observation into the input matrix. We believe that had \citet{higdoncalib2008}
+had access to the capacity of modern-day computing, along with the novel
+methodology proposed since the early 2000s that leverages that compute, they
+would have steered their implementation in a significantly different way. We
+will show that our more straightforward approach results in equal or improved
+performance in both predictive accuracy and uncertainty quantification,
+greater flexibility in applications, and a significant reduction in
+computational expense. Additionally, their method and implementation,
+originally written in {\tt MATLAB} and now deployed in {\tt Python}
+\citep{gattiker2020lanl}, is unable to model a non-Gaussian field response,
+leading to our first contribution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
