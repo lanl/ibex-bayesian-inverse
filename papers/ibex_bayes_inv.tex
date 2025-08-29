@@ -333,38 +333,12 @@ observations $Y^F$. In this toy example, it is evident that the Metropolis
 sampler successfully captures the true value of $u$ (right panel) after thoroughly exploring
 the computer model space (center panel).
 
-% To perform inference for $\boldsymbol{u} \mid Y^F$, we follow Bayes' rule,
-% $\pi(\boldsymbol{u}|Y^F) \propto
-% \mathcal{L}(Y^F|\boldsymbol{u})\pi(\boldsymbol{u})$, and utilize
-% Metropolis-Hastings (MH) to sample from the posterior. At each iteration
-% $t$, we propose a new set of simulation parameters $\boldsymbol{u}^*$ and
-% execute the computer model $\left(m(\boldsymbol{u}^*)\right)$ to get
-% $\boldsymbol{\theta^*}$. Then, we evaluate the MH-ratio and either accept or
-% reject the proposed values. Predictions and posterior estimates for our
-% example are shown in the middle and right panels of Figure
-% \ref{f:toy_calib}. Note that each of the light gray lines in the middle
-% panel represents a single run of the simulation at one of the accepted set
-% of model parameters, $\boldsymbol{u}^{(t)}$. That is, each gray line
-% corresponds to a circle in the right panel, where posterior draws of
-% $\boldsymbol{u}$ are displayed. It is clearly evident that the MH sampler
-% thoroughly explores the input space and that it successfully captures the
-% true value of $\boldsymbol{u}$.
-
 The literature on Bayesian inverse problems involves methods that work
 predominantly in this way, particularly as regards the Gaussian likelihood. We
-aim to provide a method that achieves the same goal, but for unknown
-parameters $u$ that underlie observed IBEX satellite data (left panel of
-Figure \ref{f:fig1}).
-%
-% Now, one drawback to the current literature is that modeling is predominately
-% Gaussian (as illustrated in Figure \ref{f:inv_v_classic} and our toy example),
-% assuming $Y^F \sim \mathcal{N}\!\left(\mu\left(\boldsymbol{X}^F\right),
-% \Sigma\left(\boldsymbol{X}^F\right)\right)$ as a likelihood, where
-% $\boldsymbol{\theta}(\boldsymbol{u})=(\mu\left(\boldsymbol{X}^F\right),
-% \Sigma\left(\boldsymbol{X}^F\right))$ depends on $m(\boldsymbol{u})$.
-%
-Yet our IBEX observations are counts. Our first contribution, which is albeit
-rather straightforward, is to depart from that literature and
+aim to provide a method that achieves the same goal, but for unknown parameters
+$u$ that underlie observed IBEX satellite data (left panel of Figure
+\ref{f:fig1}). Yet our IBEX observations are counts. Our first contribution,
+which is albeit rather straightforward, is to depart from that literature and
 Eq.~\ref{eq:inv_bayes_mod} by perusing a Poisson likelihood: $Y^F \sim
 Poisson(\lambda(X^F))$, where $\lambda(X^F)$ is determined by $m(u, X)$. We
 leave the details of this to Section \ref{sec:gen_bayes_inv}.
@@ -381,20 +355,6 @@ main methodological contribution. The remainder of this section outlines the
 standard surrogate modeling toolkit, as a jumping-off point toward explaining
 both our main comparative (Section \ref{sec:pca}) and our main methodological
 contribution.
-
-% Another mismatch involves the size of the spatial indexing set $\boldsymbol{X}^F$ involved
-% in IBEX.  Each simulation $m(\cdot)$ outputs $\boldsymbol{\lambda}$ values 
-% on a dense longitude and latitude grid.  
-% The most significant hurdle that we have not addressed in our toy example is the
-% expense of the computer model. Even with modern-day computing power, some simulations
-% can take hours, days, or weeks to complete. So, it's not practical to run $m(\cdot)$
-% inside the MH sampler. This constrains the amount of runs that can be executed and
-% therefore restricts the exploration of the model parameter space. Therefore, we need
-% a model (what we call a surrogate, or emulator) fit to the limited simulator output
-% to make accurate and reliable predictions for out-of-sample values of our computer
-% model parameters. Any statistical model can serve as a surrogate, ranging from linear
-% regression to complex neural networks. However, the canonical surrogate for computer
-% experiments has come to be the Gaussian process \citep{gramacy2020surrogates}.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Gaussian Process Surrogates for Computer Experiments:
