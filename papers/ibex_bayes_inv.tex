@@ -273,41 +273,47 @@ with code reproducing all included examples.
 
 We study IBEX through the lens of observational data $Y^F$ ($F$ for field
 measurement) and a computer implementation of a physical model $m(u, X)$,
-where parameters $u$ are unknown and $X$ represents a dense grid at which to
-evaluate the simulator. Given prior information about $u$, we want to know
-which $u$'s lead to realizations of $m(\cdot)$ that could explain $Y^F$, i.e.,
-the posterior for $u \mid Y^F$. This is a classic Bayesian inverse problem
+where parameters $u$ are unknown and $X$ represents the spatial locations
+where the simulation output is evaluated.  These may be the locations $X^F$
+that correspond to field measurements $Y^F$, or a grid of predictive locations
+supporting high resolution visuals.  Given prior information about $u$, we
+want to know which $u$'s lead to realizations of $m(\cdot, \cdot)$ that could
+explain $Y^F$, i.e., the posterior for $u \mid Y^F$. 
+
+This is a classic Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Equation
-\ref{eq:inv_bayes_mod} provides a hierarchical model, contrasting classical
-Bayesian inference with our computer model setting.
+\ref{eq:inv_bayes_mod} provides the typical hierarchical model used in this
+setting.
 \begin{align}
 Y^F &\sim \mathcal{N}_{n_F}\!\left(\mu\!\left(X^F\right),
-\Sigma\!\left(X^F\right)\right) \nonumber \\
-\mu(X) &= m(u, X) \nonumber \\
-\Sigma(X) &\sim \pi\left(\Sigma\right) \nonumber \\
-u &\sim \pi(u)
-\label{eq:inv_bayes_mod}
+\Sigma\!\left(X^F\right)\right) \nonumber  \\
+\mu(X) &= m(u, X) \label{eq:inv_bayes_mod} \\
+\Sigma(X) &\sim \pi\left(\Sigma\right) & \mbox{e.g.,} \quad \Sigma^{-1} & \sim \mathrm{Wishart}((\rho V)^{-1}, \rho)
+\nonumber \\
+u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p \nonumber
 \end{align}
-One big difference with Bayesian inverse problems, as opposed to classical
-statistical modeling, is that the parameters $\mu(X^F)$ and $\Sigma(X^F)$
+One big difference with Bayesian inverse problems, as opposed ordinary
+Bayesian inference, is that the parameters $\mu(X^F)$ and $\Sigma(X^F)$
 defining the distribution of $Y^F$ are not of direct interest. Rather, we are
-interested in the settings $u$ that define $\mu(X)$ and $\Sigma(X)$ through
-$m(u, X)$, which depends on $u$ and whatever spatial field, or grid, $X$
-determines it's values.  For example, two different settings of $u$ were used
-in the IBEX simulator to generate the center and right panels of Figure
-\ref{f:fig1}. Colors indicate output $\mu(X)$ values on a dense grid $X$ of
-longitude and latitude. We are interested in learning which $u$ are
-likely to have generated the observed $Y^F$ values in the left panel at
-locations where the IBEX satellite points ($X=X^F$).
+interested in settings $u$, dialing a setting in thesimulation, that define
+$\mu(X)$ and $\Sigma(X)$ through $m(u, X)$.  For example, two different
+settings of $u$ were used in the IBEX simulator to generate the center and
+right panels of Figure \ref{f:fig1}. Colors indicate output $\mu(X)$ values on
+a dense grid $X$ of longitudes and latitudes. We are interested in learning
+which $u$ are likely to have generated the observed $Y^F$ values in the left
+panel, observed at locations where the IBEX satellite was pointed ($X^F$) to
+collect particles.
 
 To help fix ideas, consider the simpler example introduced in the left panel
 of Figure \ref{f:toy_calib}. Red stars indicate noisy field measurements,
-$Y^F$, observed in replicate under some true, unknown process at different
-locations $X^F$. A computer simulation $m(u, X)$ was built to virtualize that
-process under a physical model with two unknown parameters $u = (u_1,
-u_2)^\top$. Each light gray line is a realization of $m(\cdot)$ for a
-different $u$ on an identical fine grid $X$. The bold-black-dashed line is
-$m(\cdot)$ at the (presumed unknown) truth.
+$Y^F$, observed in replicate as $y_i \stackrel{\mathrm{iid}} \sim
+\mathcal{N}(m(u^\star, x_i), \sigma^2)$ for a ``true'' unkonwn $u^\star =
+(u_1^\star, u_2^\star)^\top$ and uniform $x_i \in X_F$.  In this simple
+example, the computer mode $m(\cdot, \cdot)$ was used to generate the data.
+In practice, the model represents a characacure using known or best-guess
+physics. Each light gray line is a realization of $m(\cdot, \cdot)$ for a
+different $u$ on an fine grid of spatial locations $X$. The bold-black-dashed
+line is $m(u^\star, X)$ provided as a referece.
 
 \begin{figure}[ht!]
 \centering
@@ -322,39 +328,38 @@ computer model runs (left), model evaluations at posterior draws and mean
 
 The middle panel of the figure shows runs of our virtual model evaluated at posterior
 draws of $u$ obtained under Metropolis sampling using a multivariate
-normal likelihood whose mean $\mu(X)=m(\cdot)$ and whose covariance $\Sigma(X) \sim \sigma^2
-\mathbb{I}$, where $\sigma^2$ is marginalized out under a reference prior.
-Although we display these runs on a high-resolution grid $X$, the sampler only uses
-evaluations of $m(\cdot)$ at locations $X^F$ to calculate the likelihood. Even
-so, these are not of direct interest in and of themselves.  Rather, the main
-object of interest is summarized in the right panel: the posterior samples of
-$u$. These samples will inform our inference about the nature of the process that generates
-observations $Y^F$. In this toy example, it is evident that the Metropolis
-sampler successfully captures the true value of $u$ (right panel) after thoroughly exploring
-the computer model space (center panel).
+normal likelihood whose mean $\mu(X_F)=m(\cdot)$ and whose covariance $\Sigma(X_F) \sim \sigma^2
+\mathbb{I}$, where $\sigma^2$ is marginalized out under a reference prior
+$\pi(\sigma^2) \propto 1/\sigma^2$. Although we display these runs on a
+high-resolution grid $X$, the sampler only uses evaluations of $m(u, X^F)$ in
+likelihood evaluations. The posterior samples of $u$ thus obtained are shown
+in the right panel of the figure.  In this toy example, it is evident that the
+Metropolis sampler successfully concentrates posterior mass around the true
+value of $u$.
 
 The literature on Bayesian inverse problems involves methods that work
-predominantly in this way, particularly as regards the Gaussian likelihood. We
-aim to provide a method that achieves the same goal, but for unknown parameters
-$u$ that underlie observed IBEX satellite data (left panel of Figure
-\ref{f:fig1}). Yet our IBEX observations are counts. Our first contribution,
-which is albeit rather straightforward, is to depart from that literature and
-Eq.~\ref{eq:inv_bayes_mod} by perusing a Poisson likelihood: $Y^F \sim
-Poisson(\lambda(X^F))$, where $\lambda(X^F)$ is determined by $m(u, X)$. We
-leave the details of this to Section \ref{sec:gen_bayes_inv}.
+predominantly in this way, particularly as regards a Gaussian likelihood. We
+aim to provide a method that achieves the same goal, but for unknown
+parameters $u$ that underlie observed IBEX satellite data (left panel of
+Figure \ref{f:fig1}), whose observations are counts under variable exposure.
+Our first contribution, which is albeit rather straightforward, is to depart
+from that literature and Eq.~\ref{eq:inv_bayes_mod} by perusing a Poisson
+likelihood: $Y^F \sim \mathrm{Pois}(\lambda(X^F), e(X_F))$, where
+$\lambda(X^F)$ is determined by $m(u, X_F)$ using exposures $e(X_F)$ provided
+with $Y_F$. Details are provided soon in Section \ref{sec:gen_bayes_inv}.
 
-Another challenge to the typical apparatus involves computational
-considerations.  Each run of the IBEX model $m(\cdot)$ is a Herculean effort,
-requiring thousands of core hours on a supercomputer.  That simply can't be
-embedded in a Metropolis sampler requiring thousands of iterations to
-convergence.  While it is rather conventional to deploy a surrogate model
-\citep[e.g.][]{gramacy2020surrogates} in this setting, trained on a design of
-space-filling $u$-values, doing so effectively is challenged by the dense grid
-of output, over longitude and latitude via $X$ for each $u$.  Herein lies our
-main methodological contribution. The remainder of this section outlines the
-standard surrogate modeling toolkit, as a jumping-off point toward explaining
-both our main comparative (Section \ref{sec:pca}) and our main methodological
-contribution.
+Another challenge to the typical apparatus involves computation.  Each run of
+the IBEX model $m(\cdot, \cdot)$ is a Herculean effort, requiring thousands of
+core hours on a supercomputer.  That simply can't be embedded in a Metropolis
+sampler requiring thousands of iterations to convergence.  While it's rather
+conventional to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates}
+in this setting, trained on a design of space-filling $u$-values, doing so
+effectively is challenged by the dimension of $X_F$.  Herein lies our main
+methodological contribution, using a modern sparse approach to surrogate
+modeling in a (Poisson) Bayesian inverse problem setting.  The remainder of
+this section outlines the standard surrogate modeling toolkit, as a
+jumping-off point toward explaining both our main comparative (Section
+\ref{sec:pca}) and our main methodological contribution.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Gaussian Process Surrogates for Computer Experiments:
