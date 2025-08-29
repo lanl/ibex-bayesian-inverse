@@ -382,71 +382,60 @@ jumping-off point toward explaining both our main comparative (Section
 %% - Bottleneck is O(n^3)
 %% - LEAD IN: Output can be large. Need an approximation.
 %% Review Gaussian processes and their use in surrogate modeling
-A Gaussian process is a realization of a multivariate normal distribution, governed
-by some mean and covariance function. GPs are fit to observed data and used to make
-predictions at new input locations, relying on the conditional multivariate normal or
-\textit{kriging} equations \citep{matheron1963principles}. For example, suppose we
-have a vector of observations $Y^M$ at input locations $X^M$. Here we use the
-superscript $M$ to make explicit that our GP surrogate is modeling the simulator
-input and output, not field data. We make the assumption that $Y^M$ is normally
-distributed with some mean $\mu\!\left(X^M\right)$ and covariance
-$\Sigma\!\left(X^M\right)$, clearly both functions of $X^M$. Then, predicting at a
-new location $x$ is relatively straightforward. Equation~\ref{eq:mvn_eq} articulates
-how to obtain mean predictions $\mu^*(x)$ and corresponding uncertainty
-quantification estimates $\Sigma^*(x)$.
-\vspace{-0.7cm}
-
-\begin{minipage}[t]{0.25\linewidth}
+A Gaussian process \citep[e.g.,][]{rasmussen2003gaussian} is a realization of
+a multivariate normal (MVN) distribution, governed by some mean and covariance
+function. GPs are fit to observed data and used to make predictions at new
+input locations, relying on the conditional multivariate normal or
+\textit{kriging} equations \citep{matheron1963principles}. For example,
+suppose we have a vector of observations $Y^M$ at input locations $X^M$. Here
+we use the superscript $M$ to make explicit that our GP surrogate is modeling
+the simulator input and output, not field data. Suppose $Y^M$ is MVN with mean
+$\mu\!\left(X^M\right)$ and covariance $\Sigma\!\left(X^M\right)$. 
+Then, predicting at a new location $x$ follows
 \begin{align}
-Y^M(X^M) &\sim \mathcal{N}_{n_M}\!\left(\mu(X^M), \Sigma(X^M)\right) \nonumber \\
-y^*(x) \mid Y(X^M) &\sim \mathcal{N}\!\left(\mu^*(x), \Sigma^*(x)\right) \nonumber
-\end{align}
-\end{minipage}
-\quad
-\begin{minipage}[t]{0.58\linewidth}
-\begin{align}
-\mu^*(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \nonumber \\
-\Sigma^*(x) &= \Sigma(x, x)
-  - \Sigma(x, X^M) \Sigma(X^M)^{-1} \Sigma(X^M, x) \hspace{0.05em}
+Y^M(X^M) &\sim \mathcal{N}_{n_M}(\mu(X^M), \Sigma(X^M)) &
+\hat{\mu}(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \nonumber \\
+Y(x) \mid Y(X^M) &\sim \mathcal{N}(\hat{\mu}(x), \hat{\sigma}^2(x)) &
+\hat{\sigma}^2(x) &= \Sigma(x, x) - \Sigma(x, X^M) \Sigma(X^M)^{-1} \Sigma(X^M, x).
 \label{eq:mvn_eq}
 \end{align}
-\end{minipage}
-\vspace{0.7cm}
 
 Although a generic mean function is specified in Eq.~\ref{eq:mvn_eq}, it is
-common to set $\mu(x)=\mu(X^M)=0$. In practice, this simply implies centering $Y^M$ by
-subtracting off the sample mean, $\overline{Y}^M$. In this zero-mean context,
-all the action takes place in the covariance function. The covariance function
-typically depends on pairwise distances between input locations $x$ and $x'$.
-Many covariance kernels exists, such as the Gaussian, Exponential, or Matern.
-We use the Matern kernel in our work, of which both the Gaussian and
-Exponential kernels are special cases. The behavior of these kernels is
-determined by three hyperparameters: a nugget $g$, lengthscale $\theta$, and
-scale $\tau^2$. All hyperparameters can be estimated using your preferred
-method (i.e, maximum likelihood, method of moments). We will use Bayesian
-methods, specifically MCMC.
+common to set $\mu(X^M)=0$ assuming pre-centered responses. In this zero-mean
+context, all the action takes place in the covariance function $\Sigma(x,
+x')$, which is usually specified as inversely poportional to distances between
+inputs $x$ and $x'$. We use a form known as the separable Mat\'ern kernel
+\citep{stein1999interpolation} in our work, of which both the Gaussian and
+Exponential kernels are special cases perameterized a nugget $g$, lengthscales
+$\theta$, and scale $\tau^2$, whose sampling is included along with others in
+posterior integration via MCMC. GPs provide a flexible, nonparametric
+regression tool. In addition to enjoying a canonical stats as surrgates for
+computer simulation experiments experiments, they are utilized in
+geostatistics geospatial statistics \citep{cressie2011statistics}, time series
+\citep{roberts2013gaussian}, optimization \citep{jones1998efficient}, and
+machine learning \citep{rasmussen2003gaussian}.
 
-GPs provide a flexible, nonparametric regression tool. In addition to computer
-experiments, they are utilized in geostatistics \citep{matheron1963principles},
-spatial statistics \citep{cressie2011statistics}, time series
-\citep{roberts2013gaussian}, optimization \citep{jones1998efficient}, and machine
-learning \citep{rasmussen2003gaussian}. The reason for their popularity as surrogate
-models in the world of computer experiments is their ability to interpolate between
-observed data points (i.e, setting nugget $g = 0$). Although stochastic computer
-models are becoming more common, computer experiments are often deterministic,
-motivating the desire for a model that interpolates. GPs are useful by providing
-predictive surfaces that give higher estimates of variance away from observed data,
-and virtually no variance at observed locations. Perhaps the hallmark of GPs is that
-they naturally provide excellent uncertainty quantification for out-of-sample
-predictions, a matter of importance to scientists exploring these computer models.
-Therefore, GPs are widely used in Bayesian inverse problems.
+% The reason for their popularity as surrogate
+% models for computer experiments is their ability to interpolate
+% between observed data points (i.e, setting nugget $g = 0$). Although
+% stochastic computer models are becoming more common, computer experiments are
+% often deterministic, motivating the desire for a model that interpolates. GPs
+% are useful by providing predictive surfaces that give higher estimates of
+% variance away from observed data, and virtually no variance at observed
+% locations. Perhaps the hallmark of GPs is that they naturally provide
+% excellent uncertainty quantification for out-of-sample predictions, a matter
+% of importance to scientists exploring these computer models. Therefore, GPs
+% are widely used in Bayesian inverse problems.
 
-One downside to this setup, especially for IBEX, is that the output ``images'' are
-massive ($> 15,000$ pixels). Historically, it has not been possible to fit a GP to
-such large simulation output, producing high-resolution 2d (or 3d) images for each
-$m(u, X)$ that is run. Next, we review what has been done for applications
-such as IBEX in the past and lay the groundwork for our proposed advancement
-introduced in Section \ref{sec:vecchia}.
+One downside to working with MVNs whose dimension grows with the dimension of
+the data they are trained on, $n_M$ is that building $n_M \times n_M$
+matrices, and inverting (or otherwise decomposing) them, e.g., for
+Eq.~\ref{eq:mvn_eq} requires storage and computation that is quadratic and
+cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in
+a Bayesian MCMC setting.  In our IBEX setting, the output ``images'' are
+massive ($\gg 15{,}000$ pixels) for each $u$-value.  Most of our modeling
+effort involves circumventing this bottleneck, however there is a method
+tailor-made for this setting when the likelihood (for $Y_F$) is Gaussian.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.2 - Principal Components for High-Dimensional Response
