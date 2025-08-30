@@ -382,16 +382,25 @@ jumping-off point toward explaining both our main comparative (Section
 %% - Bottleneck is O(n^3)
 %% - LEAD IN: Output can be large. Need an approximation.
 %% Review Gaussian processes and their use in surrogate modeling
-A Gaussian process \citep[e.g.,][]{rasmussen2003gaussian} is a realization of
-a multivariate normal (MVN) distribution, governed by some mean and covariance
-function. GPs are fit to observed data and used to make predictions at new
-input locations, relying on the conditional multivariate normal or
-\textit{kriging} equations \citep{matheron1963principles}. For example,
-suppose we have a vector of observations $Y^M$ at input locations $X^M$. Here
-we use the superscript $M$ to make explicit that our GP surrogate is modeling
-the simulator input and output, not field data. Suppose $Y^M$ is MVN with mean
-$\mu\!\left(X^M\right)$ and covariance $\Sigma\!\left(X^M\right)$. 
-Then, predicting at a new location $x$ follows
+A Gaussian process \citep[e.g.,][]{rasmussen2003gaussian} is a realization of a
+multivariate normal (MVN) distribution, governed by some mean and covariance
+function. GPs are fit to observed data and used to make predictions at new input
+locations, relying on the conditional multivariate normal or \textit{kriging}
+equations \citep{matheron1963principles}. For example, suppose we have a vector
+of observations $Y^M$ at input locations $X^M$. Here we use the superscript $M$
+to make explicit that our GP surrogate is modeling the simulator input and
+output, not field data. In our situation, the expensive computer model
+$m(\cdot,\cdot)$ is run over a small design of space-filling $u$-values ($U$) on
+a dense grid of spatial locations $X$. That is, $X^M = \begin{bmatrix} 1_{n_U}
+\otimes X & U \otimes 1_{n_X} \end{bmatrix}$. Two such runs are shown in Figure
+\ref{f:fig1}. But to evaluate the likelihood (for $Y_F$) in our Metroplis
+sampler, we need fast and reliable predictions at proposed (and so far
+unobserved) values of our model parameters, $u^*$, and at field locations $X^F$.
+In other words, $\hat{\mu}(X^F)$ from Eq. \ref{eq:inv_bayes_mod}.
+
+Suppose $Y^M$ is MVN with mean $\mu\!\left(X^M\right)$ and covariance
+$\Sigma\!\left(X^M\right)$. Then, predicting at a new location $x$ (think
+proposed $u^*$ and point on grid $X^F$) follows
 \begin{align}
 Y^M(X^M) &\sim \mathcal{N}_{n_M}(\mu(X^M), \Sigma(X^M)) &
 \hat{\mu}(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \nonumber \\
@@ -399,21 +408,20 @@ Y(x) \mid Y(X^M) &\sim \mathcal{N}(\hat{\mu}(x), \hat{\sigma}^2(x)) &
 \hat{\sigma}^2(x) &= \Sigma(x, x) - \Sigma(x, X^M) \Sigma(X^M)^{-1} \Sigma(X^M, x).
 \label{eq:mvn_eq}
 \end{align}
-
 Although a generic mean function is specified in Eq.~\ref{eq:mvn_eq}, it is
 common to set $\mu(X^M)=0$ assuming pre-centered responses. In this zero-mean
-context, all the action takes place in the covariance function $\Sigma(x,
-x')$, which is usually specified as inversely poportional to distances between
-inputs $x$ and $x'$. We use a form known as the separable Mat\'ern kernel
+context, all the action takes place in the covariance function $\Sigma(x, x')$,
+which is usually specified as inversely poportional to distances between inputs
+$x$ and $x'$. We use a form known as the separable Mat\'ern kernel
 \citep{stein1999interpolation} in our work, of which both the Gaussian and
-Exponential kernels are special cases perameterized a nugget $g$, lengthscales
-$\theta$, and scale $\tau^2$, whose sampling is included along with others in
-posterior integration via MCMC. GPs provide a flexible, nonparametric
-regression tool. In addition to enjoying a canonical stats as surrgates for
-computer simulation experiments experiments, they are utilized in
-geostatistics geospatial statistics \citep{cressie2011statistics}, time series
-\citep{roberts2013gaussian}, optimization \citep{jones1998efficient}, and
-machine learning \citep{rasmussen2003gaussian}.
+Exponential kernels are special cases parameterized by a nugget $g$,
+lengthscales $\theta$, and scale $\tau^2$, whose sampling is included along with
+others in posterior integration via MCMC. GPs provide a flexible, nonparametric
+regression tool. In addition to enjoying canonical status as surrogates for
+computer simulation experiments, they are utilized in geospatial statistics
+\citep{cressie2011statistics}, time series \citep{roberts2013gaussian},
+optimization \citep{jones1998efficient}, and machine learning
+\citep{rasmussen2003gaussian}.
 
 % The reason for their popularity as surrogate
 % models for computer experiments is their ability to interpolate
@@ -428,7 +436,7 @@ machine learning \citep{rasmussen2003gaussian}.
 % are widely used in Bayesian inverse problems.
 
 One downside to working with MVNs whose dimension grows with the dimension of
-the data they are trained on, $n_M$ is that building $n_M \times n_M$
+the data they are trained on, $n_M$, is that building $n_M \times n_M$
 matrices, and inverting (or otherwise decomposing) them, e.g., for
 Eq.~\ref{eq:mvn_eq} requires storage and computation that is quadratic and
 cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in
