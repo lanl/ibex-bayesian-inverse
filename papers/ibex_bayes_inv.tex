@@ -423,18 +423,6 @@ computer simulation experiments, they are utilized in geospatial statistics
 optimization \citep{jones1998efficient}, and machine learning
 \citep{rasmussen2003gaussian}.
 
-% The reason for their popularity as surrogate
-% models for computer experiments is their ability to interpolate
-% between observed data points (i.e, setting nugget $g = 0$). Although
-% stochastic computer models are becoming more common, computer experiments are
-% often deterministic, motivating the desire for a model that interpolates. GPs
-% are useful by providing predictive surfaces that give higher estimates of
-% variance away from observed data, and virtually no variance at observed
-% locations. Perhaps the hallmark of GPs is that they naturally provide
-% excellent uncertainty quantification for out-of-sample predictions, a matter
-% of importance to scientists exploring these computer models. Therefore, GPs
-% are widely used in Bayesian inverse problems.
-
 One downside to working with MVNs whose dimension grows with the dimension of
 the data they are trained on, $n_M$, is that building $n_M \times n_M$
 matrices, and inverting (or otherwise decomposing) them, e.g., for
@@ -451,68 +439,58 @@ tailor-made for this setting when the likelihood (for $Y_F$) is Gaussian.
 \label{sec:pca}
 %------------------------------------------------------------------------------
 
-%% SEPIA / GPMSA
-%% - O(n^3) bottleneck is nothing new
-%% - Higdon et al. faced this at LANL in the early 2000s
-%% - Their situation is unique in that n was small, but dimension is high
-%% - Same situation as IBEX
-%% - Instead of modeling the output as scalar, they did functional
-%% - PCA
-%%   - Show some equations
-%%   - Maybe a graphic
-%% - Must choose basis
-%% - Used in calibration (an inverse problem), but does not support Poisson
-In the early 2000s, \citet{higdoncalib2008} faced the challenge at LANL of
-estimating the parameters of a physical process from which they could only
-gather a small set of observations. For the purpose of further investigation,
-scientists commonly represent the process with a simulation. However, these computer models are not only expensive, producing a limited number of runs, but their
-output is extremely high-dimensional, in the form of images, shape
-description, time series, etc. So, in order to efficiently fit a surrogate
-model to the simulator, \citet{higdoncalib2008} perform an approximation to decrease the size of
-the data. As a solution, they employ principal components analysis (PCA) to
-reduce the dimensionality of the computer model response. Specifically, they
-represent the vector output of a simulator model as the sum of $n_k$ basis
-functions $k_1, k_2, \ldots , k_{n_k}$, each scaled by a corresponding weight
-$w_i$. They specify each model response
+In the early 2000s, \citet{higdoncalib2008} faced challenges much like the IBEX
+simulator. Not only were the computer models they worked with similarly
+expensive, producing a limited number of runs, but their output was also
+extremely high-dimensional, in the form of images, shape description, time
+series, etc. Even with today's computing resources, it would be prohibitive to
+fit a GP surrogate model on such large data. \citeauthor{higdoncalib2008}'s key
+insight is treating the dense grid $X$ on which a simulator is evaluated as part
+of the output instead of an input. In this way, $X^M$ remains small, including
+only the unique combinations of unknown parameters $u$. Furthermore, the
+dimensionality of the computer response itself can be reduced by employing
+principal components analysis (PCA), representing the vector output of a
+simulator model $m(\cdot,\cdot)$ as the sum of $n_k$ basis functions $k_1, k_2,
+\ldots , k_{n_k}$, each scaled by a corresponding weight $w_i(u)$. In this
+manner, the high-dimensional response is approximated as
 \begin{align}
-y(x) &\approx \sum_{i=1}^{n_k}  k_i \cdot w_i (x), \quad n_k \ll n \ \nonumber
-\\ w_i(x) &\sim \mathcal{N}( 0, \Sigma_{w_i}),
+m(u, X) &\approx \sum_{i=1}^{n_k}  k_i \cdot w_i (u), \quad n_k \ll n_X \ \nonumber
+\\ w_i(u) &\sim \mathcal{N}( 0, \Sigma_{w_i}).
 \label{eq:higdon_pca}
 \end{align}
-where $x$ is a single row of the matrix $X^M$. Note that $X^M$ in this
-approach is small, only containing entries corresponding to the unique values
-of unknown model parameters ($x = u$) executed by the computer simulation, and no information on the grid
-where the simulator is evaluated. Weights $w_i$ are realizations of a GP, fit
-over principal components from the limited simulator output. Therefore, by not
-directly modeling the high-dimensional response $y$ and it's associated dense
-grid $X$, the decomposition of $\Sigma_{w_i}$ avoids the cubic bottleneck in
-computation when scaling to large $n$ and can be completed in a reasonable
+Weights $w_i(u)$ are realizations of a zero-mean GP, fit over principal
+components from the limited simulator output. Therefore, by not directly
+modeling the high-dimensional response $m(\cdot,\cdot)$ and it's associated
+dense grid $X$, the decomposition of $\Sigma_{w_i}$ avoids the cubic bottleneck
+in computation when scaling to large $n$ and can be completed in a reasonable
 amount of time. With fitted surrogate in hand, Bayesian inference via MCMC is
-used to obtain the posterior distribution of these component weights. Then,
-combining estimates of the weights with the calculated basis functions allows
-for out-of-sample predictions. As a result of this approximation, the
-dimension of the covariance matrices $\Sigma(X^M)$ and $\Sigma^*(x)$ in
-Eq.~\ref{eq:mvn_eq} remains small and is able to be decomposed quickly.
+used to obtain the posterior distribution of component weights $w_i(u)$.
+Out-of-sample predictions at each iteration are obtained by combining predicted
+weights $\hat{w_i}(u^*)$ with the calculated basis functions $k_i$. As a result
+of this approximation, the dimension of the covariance matrices $\Sigma(X^M)$
+and $\Sigma^*(x)$ in Eq.~\ref{eq:mvn_eq} remains small and decomposition
+proceeds quickly.
+
 
 We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the
-definition and selection of how many basis functions to use. Although this
-basis representation was and still is successful in many applications, we
-argue that what \citet{higdoncalib2008} really wanted to do was represent the
-functional output as a univariate response. That is, replicate the entry in
-the input matrix $X^M$ for each response the number of times equal to the
-length of the output vector. In essence, implicitly encode the grid points
-(e.g.~latitude/longitude pair, pixel in image, moment in time series) of the response vector for each
-observation into the input matrix. We believe that had \citet{higdoncalib2008}
-had access to the capacity of modern-day computing, along with the novel
-methodology proposed since the early 2000s that leverages that compute, they
-would have steered their implementation in a significantly different way. We
-will show that our more straightforward approach results in equal or improved
-performance in both predictive accuracy and uncertainty quantification,
-greater flexibility in applications, and a significant reduction in
-computational expense. Additionally, their method and implementation,
-originally written in {\tt MATLAB} and now deployed in {\tt Python}
-\citep{gattiker2020lanl}, is unable to model a non-Gaussian field response,
-leading to our first contribution.
+definition and selection of how many basis functions to use. Although this basis
+representation was and still is successful in many applications, we argue that
+what \citet{higdoncalib2008} really wanted to do was represent the functional
+output as a univariate response. That is, return to the approach of Section
+\ref{sec:gp_surr} and replicate the entry in the input matrix $X^M$ for each
+unique $u$-value the number of times equal to the length of the output vector. In
+essence, implicitly encode the grid points (e.g.~latitude/longitude pair, pixel
+in image, moment in time series) of the response vector for each observation
+into the input matrix. We believe that had \citet{higdoncalib2008} had access to
+the capacity of modern-day computing, along with the novel methodology proposed
+since the early 2000s that leverages that compute, they would have steered their
+implementation in a significantly different way. We will show that our more
+straightforward approach results in equal or improved performance in both
+predictive accuracy and uncertainty quantification, a significant reduction in
+computational expense., and greater flexibility in applications Additionally,
+their method and implementation, originally written in {\tt MATLAB} and now
+deployed in {\tt Python} \citep{gattiker2020lanl}, is unable to model a
+non-Gaussian field response $Y^F$, leading to our first contribution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
