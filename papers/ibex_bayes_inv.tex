@@ -281,8 +281,8 @@ want to know which $u$'s lead to realizations of $m(\cdot, \cdot)$ that could
 explain $Y^F$, i.e., the posterior for $u \mid Y^F$. 
 
 This is a classic Bayesian inverse problem
-\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Equation
-\ref{eq:inv_bayes_mod} provides the typical hierarchical model used in this
+\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Eq.~\ref{eq:inv_bayes_mod} 
+provides the typical hierarchical model used in this
 setting.
 \begin{align}
 Y^F &\sim \mathcal{N}_{n_F}\!\left(\mu\!\left(X^F\right),
@@ -387,26 +387,25 @@ multivariate normal (MVN) distribution, governed by some mean and covariance
 function. GPs are fit to observed data and used to make predictions at new input
 locations, relying on the conditional multivariate normal or \textit{kriging}
 equations \citep{matheron1963principles}. For example, suppose we have a vector
-of observations $Y^M$ at input locations $X^M$. Here we use the superscript $M$
-to make explicit that our GP surrogate is modeling the simulator input and
+of observations $Y^M$ at input locations $X^M$. Here we use superscript $M$
+to make explicit that our GP surrogate is modeling the simulator
 output, not field data. In our situation, the expensive computer model
-$m(\cdot,\cdot)$ is run over a small design of space-filling $u$-values ($U$) on
-a dense grid of spatial locations $X$. That is, $X^M = \begin{bmatrix} 1_{n_U}
-\otimes X & U \otimes 1_{n_X} \end{bmatrix}$. Two such runs are shown in Figure
-\ref{f:fig1}. But to evaluate the likelihood (for $Y_F$) in our Metroplis
-sampler, we need fast and reliable predictions at proposed (and so far
-unobserved) values of our model parameters, $u^*$, and at field locations $X^F$.
-In other words, $\hat{\mu}(X^F)$ from Eq. \ref{eq:inv_bayes_mod}.
+$m(\cdot,\cdot)$ is run over a small design of space-filling $u$-values ($U$)
+paired via Cartesian product with $X_F$ from the field experiment, or a predictive grid $X$,
+e.g., $X^M = X^F \otimes U$.   Two such runs, i.e., for two setings $u^\top \in U$  
+and using a dense grid $X$,   are shown in Figure
+\ref{f:fig1}. 
 
-Suppose $Y^M$ is MVN with mean $\mu\!\left(X^M\right)$ and covariance
-$\Sigma\!\left(X^M\right)$. Then, predicting at a new location $x$ (think
-proposed $u^*$ and point on grid $X^F$) follows
+Evaluating the likelihood $Y_F$ in Eq. \ref{eq:inv_bayes_mod}, e.g., via
+Metroplis, may proceed via GP surrogate when {\em in situ} evaluation is too
+slow using a corpus of runs $(Y^M, X^M)$ as follows. Suppose $Y^M \sim
+\mathcal{N}_{n_m}(\mu(X^M), \Sigma(X^M))$, where $\mathcal{N}_{n_M}$ indicates
+an $n_M$-variate MVN. Then, predicting at a new location $x$ (think proposed
+$u$-value and paired $X^F$) follows $Y(x) \mid Y(X^M) \sim
+\mathcal{N}(\hat{\mu}(x), \hat{\sigma}^2(x))$, where
 \begin{align}
-Y^M(X^M) &\sim \mathcal{N}_{n_M}(\mu(X^M), \Sigma(X^M)) &
-\hat{\mu}(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \nonumber \\
-Y(x) \mid Y(X^M) &\sim \mathcal{N}(\hat{\mu}(x), \hat{\sigma}^2(x)) &
-\hat{\sigma}^2(x) &= \Sigma(x, x) - \Sigma(x, X^M) \Sigma(X^M)^{-1} \Sigma(X^M, x).
-\label{eq:mvn_eq}
+\hat{\mu}(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \label{eq:mvn_eq}\\
+\hat{\sigma}^2(x) &= \Sigma(x, x) - \Sigma(x, X^M) \Sigma(X^M)^{-1} \Sigma(X^M, x). \nonumber
 \end{align}
 Although a generic mean function is specified in Eq.~\ref{eq:mvn_eq}, it is
 common to set $\mu(X^M)=0$ assuming pre-centered responses. In this zero-mean
@@ -420,13 +419,12 @@ others in posterior integration via MCMC. GPs provide a flexible, nonparametric
 regression tool. In addition to enjoying canonical status as surrogates for
 computer simulation experiments, they are utilized in geospatial statistics
 \citep{cressie2011statistics}, time series \citep{roberts2013gaussian},
-optimization \citep{jones1998efficient}, and machine learning
-\citep{rasmussen2003gaussian}.
+optimization \citep{jones1998efficient}. %$ , and machine learning \citep{rasmussen2003gaussian}.
 
 One downside to working with MVNs whose dimension grows with the dimension of
 the data they are trained on, $n_M$, is that building $n_M \times n_M$
 matrices, and inverting (or otherwise decomposing) them, e.g., for
-Eq.~\ref{eq:mvn_eq} requires storage and computation that is quadratic and
+Eq.~(\ref{eq:mvn_eq}) requires storage and computation that is quadratic and
 cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in
 a Bayesian MCMC setting.  In our IBEX setting, the output ``images'' are
 massive ($\gg 15{,}000$ pixels) for each $u$-value.  Most of our modeling
@@ -439,71 +437,88 @@ tailor-made for this setting when the likelihood (for $Y_F$) is Gaussian.
 \label{sec:pca}
 %------------------------------------------------------------------------------
 
-In the early 2000s, \citet{higdoncalib2008} faced challenges much like the IBEX
-simulator. Not only were the computer models they worked with similarly
+In the early 2000s, \citet{higdoncalib2008} faced challenges much like the
+IBEX simulator. Not only were the computer models they worked with similarly
 expensive, producing a limited number of runs, but their output was also
 extremely high-dimensional, in the form of images, shape description, time
 series, etc. Even with today's computing resources, it would be prohibitive to
-fit a GP surrogate model on such large data. \citeauthor{higdoncalib2008}'s key
-insight is treating the dense grid $X$ on which a simulator is evaluated as part
-of the output instead of an input. In this way, $X^M$ remains small, including
-only the unique combinations of unknown parameters $u$. Furthermore, the
-dimensionality of the computer response itself can be reduced by employing
-principal components analysis (PCA), representing the vector output of a
-simulator model $m(\cdot,\cdot)$ as the sum of $n_k$ basis functions $k_1, k_2,
-\ldots , k_{n_k}$, each scaled by a corresponding weight $w_i(u)$. In this
+fit a GP surrogate model on such large data. \citeauthor{higdoncalib2008}'s
+key insight involved treating $X^F$ (or grid $X$) -- i.e., the fixed reference
+set that a simulator realizaition is evaluated on for each candidate parameter
+$u$ -- of the {\em output} instead thinking of it as an input. In this way,
+$X^M$ remains small, including only the unique combinations of unknown
+parameters $u$. 
+
+Then, rather than keep track of all of those outputs $Y^M$, indexed over $X^F$
+or $X$, they saught a reduction dimensionality via principal components
+analysis (PCA). Specifically, they proposed representing the vector output of
+a simulator model $m(\cdot,\cdot)$ as the sum of $n_k$ basis functions $k_1,
+k_2, \ldots , k_{n_k}$, each scaled by a corresponding weight $w_i(u)$. In this
 manner, the high-dimensional response is approximated as
-\begin{align}
-m(u, X) &\approx \sum_{i=1}^{n_k}  k_i \cdot w_i (u), \quad n_k \ll n_X \ \nonumber
-\\ w_i(u) &\sim \mathcal{N}( 0, \Sigma_{w_i}).
+\begin{equation}
+m(u, X) \approx \sum_{i=1}^{n_k}  k_i \cdot w_i (u),
+\quad \mbox{ where } \quad w_i(u) \sim \mathcal{N}( 0, \Sigma_{w_i}) 
+ \quad \mbox{and} \quad n_k \ll n_X.
 \label{eq:higdon_pca}
-\end{align}
-Weights $w_i(u)$ are realizations of a zero-mean GP, fit over principal
-components from the limited simulator output. Therefore, by not directly
-modeling the high-dimensional response $m(\cdot,\cdot)$ and it's associated
-dense grid $X$, the decomposition of $\Sigma_{w_i}$ avoids the cubic bottleneck
-in computation when scaling to large $n$ and can be completed in a reasonable
-amount of time. With fitted surrogate in hand, Bayesian inference via MCMC is
-used to obtain the posterior distribution of component weights $w_i(u)$.
-Out-of-sample predictions at each iteration are obtained by combining predicted
-weights $\hat{w_i}(u^*)$ with the calculated basis functions $k_i$. As a result
-of this approximation, the dimension of the covariance matrices $\Sigma(X^M)$
-and $\Sigma^*(x)$ in Eq.~\ref{eq:mvn_eq} remains small and decomposition
-proceeds quickly.
+\end{equation}
+Weights $w_i(u)$ areeach realizations of a zero-mean GP, fit over principal
+components from the limited simulator output. By not directly modeling the
+high-dimensional response $m(\cdot,\cdot)$ and it's associated dense grid $X$,
+the decomposition of $\Sigma_{w_i}$ avoids the cubic bottleneck in computation
+when scaling to large $n$ and can be completed in a reasonable amount of time.
+With fitted surrogate in hand, Bayesian inference via MCMC is used to obtain
+the posterior distribution of component weights $w_i(u)$. Out-of-sample
+predictions at each iteration are obtained by combining predicted weights
+$\hat{w_i}(u^*)$ with the calculated basis functions $k_i$. Dimension of the
+covariance matrices $\Sigma(X^M)$ and $\Sigma^*(x)$ in Eq.~(\ref{eq:mvn_eq})
+remains small and decomposition proceeds quickly.
 
+While clever, this is one of those easy-to-say hard-to-do situations. The
+implementation is complex both mathematically, and in code.  We are aware of
+only one library implemenation, originally written in {\tt MATLAB} and now
+deployed in {\tt Python} \citep{gattiker2020lanl},  We found it difficult to
+approporiate that setup for our own use in a Poisson likelihood context.
+Fortunately, GP approximation has come a long way in the last twenty or years.
+\citeauthor{higdoncalib2008} specifically lamented not having access to such
+technology, necessitating a more complex approach. It is not longer necessary
+to play the trick of moving reference grid to the output space.  A GP
+(approximation) may model $Y^M$ via all inputs $X^F$ and $U$ via $X^M$, as we
+shall demonstrate next.  The result is at once more modern, faster, and better
+compartmentalized for use in novel contexts, such as our own.
 
-We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the
-definition and selection of how many basis functions to use. Although this basis
-representation was and still is successful in many applications, we argue that
-what \citet{higdoncalib2008} really wanted to do was represent the functional
-output as a univariate response. That is, return to the approach of Section
-\ref{sec:gp_surr} and replicate the entry in the input matrix $X^M$ for each
-unique $u$-value the number of times equal to the length of the output vector. In
-essence, implicitly encode the grid points (e.g.~latitude/longitude pair, pixel
-in image, moment in time series) of the response vector for each observation
-into the input matrix. We believe that had \citet{higdoncalib2008} had access to
-the capacity of modern-day computing, along with the novel methodology proposed
-since the early 2000s that leverages that compute, they would have steered their
-implementation in a significantly different way. We will show that our more
-straightforward approach results in equal or improved performance in both
-predictive accuracy and uncertainty quantification, a significant reduction in
-computational expense., and greater flexibility in applications Additionally,
-their method and implementation, originally written in {\tt MATLAB} and now
-deployed in {\tt Python} \citep{gattiker2020lanl}, is unable to model a
-non-Gaussian field response $Y^F$, leading to our first contribution.
+% We propose a simpler approach in Section \ref{sec:vecchia}, devoid of the
+% definition and selection of how many basis functions to use. Although this basis
+% representation was and still is successful in many applications, we argue that
+% what \citet{higdoncalib2008} really wanted to do was represent the functional
+% output as a univariate response. That is, return to the approach of Section
+% \ref{sec:gp_surr} and replicate the entry in the input matrix $X^M$ for each
+% unique $u$-value the number of times equal to the length of the output vector. In
+% essence, implicitly encode the grid points (e.g.~latitude/longitude pair, pixel
+% in image, moment in time series) of the response vector for each observation
+% into the input matrix. We believe that had \citet{higdoncalib2008} had access to
+% the capacity of modern-day computing, along with the novel methodology proposed
+% since the early 2000s that leverages that compute, they would have steered their
+% implementation in a significantly different way. We will show that our more
+% straightforward approach results in equal or improved performance in both
+% predictive accuracy and uncertainty quantification, a significant reduction in
+% computational expense., and greater flexibility in applications Additionally,
+% their method and implementation, o is unable to model a
+% non-Gaussian field response $Y^F$, leading to our first contribution.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % SECTION 3: Methods
-\section{Methods}
-\label{sec:methods}
+% \section{Methods}
+% \label{sec:methods}
 
 %------------------------------------------------------------------------------
 %% SECTION 3.1 - Generalized Bayesian Inverse Problems with GP Surrogates
-\subsection{Generalized Bayesian Inverse Problems with GP Surrogates}
+\section{Generalized Bayesian inverse problems} % with GP surrogates}
+%\subsection{Generalized Bayesian Inverse Problems with GP Surrogates}
 \label{sec:gen_bayes_inv}
+\label{sec:methods}
 %------------------------------------------------------------------------------
 
 
