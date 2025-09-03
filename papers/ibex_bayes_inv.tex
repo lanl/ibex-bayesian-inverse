@@ -268,7 +268,7 @@ with code reproducing all included examples.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % SECTION 2: Review:
-\section{Review}
+\section{Bayesian inverse problems}
 \label{sec:review}
 
 We study IBEX through the lens of observational data $Y^F$ ($F$ for field
@@ -363,7 +363,7 @@ jumping-off point toward explaining both our main comparative (Section
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Gaussian Process Surrogates for Computer Experiments:
-\subsection{Gaussian Process Surrogates for Computer Experiments}
+\subsection{Gaussian process surrogates for computer experiments}
 \label{sec:gp_surr}
 %------------------------------------------------------------------------------
 
@@ -382,42 +382,46 @@ jumping-off point toward explaining both our main comparative (Section
 %% - Bottleneck is O(n^3)
 %% - LEAD IN: Output can be large. Need an approximation.
 %% Review Gaussian processes and their use in surrogate modeling
-A Gaussian process \citep[e.g.,][]{rasmussen2003gaussian} is a realization of a
-multivariate normal (MVN) distribution, governed by some mean and covariance
-function. GPs are fit to observed data and used to make predictions at new input
-locations, relying on the conditional multivariate normal or \textit{kriging}
-equations \citep{matheron1963principles}. For example, suppose we have a vector
-of observations $Y^M$ at input locations $X^M$. Here we use superscript $M$
-to make explicit that our GP surrogate is modeling the simulator
-output, not field data. In our situation, the expensive computer model
-$m(\cdot,\cdot)$ is run over a small design of space-filling $u$-values ($U$)
-paired via Cartesian product with $X_F$ from the field experiment, or a predictive grid $X$,
-e.g., $X^M = X^F \otimes U$.   Two such runs, i.e., for two setings $u^\top \in U$  
-and using a dense grid $X$,   are shown in Figure
-\ref{f:fig1}. 
 
-Evaluating the likelihood $Y_F$ in Eq. \ref{eq:inv_bayes_mod}, e.g., via
-Metroplis, may proceed via GP surrogate when {\em in situ} evaluation is too
-slow using a corpus of runs $(Y^M, X^M)$ as follows. Suppose $Y^M \sim
-\mathcal{N}_{n_m}(\mu(X^M), \Sigma(X^M))$, where $\mathcal{N}_{n_M}$ indicates
-an $n_M$-variate MVN. Then, predicting at a new location $x$ (think proposed
-$u$-value and paired $X^F$) follows $Y(x) \mid Y(X^M) \sim
+Evaluating the likelihood $Y_F$ in Eq.~(\ref{eq:inv_bayes_mod}), e.g., within
+a Metropolis step, may proceed via surrogate when {\em in situ} evaluation
+directly on $m(\cdot, \cdot)$ is too slow. Suppose we have a vector of
+observations $Y^M$ at input locations $X^M$ from a campaign of runs of
+$m(\cdot, \cdot)$ that may or may not coincide with settings in $X^M$. We
+prefer a small design of space-filling $u$-values ($U$), paired via Cartesian
+product with $X_F$ from the field experiment, or a predictive grid $X$, e.g.,
+$X^M = X^F \otimes U$, depending on the situation.   Two such runs, i.e., for
+two rows $u^\top \in U$ and a dense grid $X$, are shown in Figure
+\ref{f:fig1}.
+
+Given a corpus of runs $(Y^M, X^M)$, a surrogate synthesizes this information
+to in order to extend it to new inputs.  Many surrogates for computer
+simulations are based on Gaussian process
+\citep[e.g.,][]{rasmussen2003gaussian}, where modeling boils down to
+specifying a multivariate normal (MVN) for all responses.  This way,
+prediction is simply a matter of MVN conditioning rules, or {\em kriging}
+\citep{matheron1963principles}, to derive the distribution of unknown
+(testing) output given known (training) values. Specifically, let $Y^M
+\sim \mathcal{N}_{n_m}(\mu(X^M), \Sigma(X^M))$, where $\mathcal{N}_{n_M}$
+indicates an $n_M$-variate MVN. Then, predicting at a new location $x$ (think
+proposed $u$-value and paired $X^F$) follows $Y(x) \mid Y(X^M) \sim
 \mathcal{N}(\hat{\mu}(x), \hat{\sigma}^2(x))$, where
 \begin{align}
 \hat{\mu}(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \label{eq:mvn_eq}\\
 \hat{\sigma}^2(x) &= \Sigma(x, x) - \Sigma(x, X^M) \Sigma(X^M)^{-1} \Sigma(X^M, x). \nonumber
 \end{align}
-Although a generic mean function is specified in Eq.~\ref{eq:mvn_eq}, it is
-common to set $\mu(X^M)=0$ assuming pre-centered responses. In this zero-mean
-context, all the action takes place in the covariance function $\Sigma(x, x')$,
-which is usually specified as inversely poportional to distances between inputs
-$x$ and $x'$. We use a form known as the separable Mat\'ern kernel
-\citep{stein1999interpolation} in our work, of which both the Gaussian and
-Exponential kernels are special cases parameterized by a nugget $g$,
-lengthscales $\theta$, and scale $\tau^2$, whose sampling is included along with
-others in posterior integration via MCMC. GPs provide a flexible, nonparametric
-regression tool. In addition to enjoying canonical status as surrogates for
-computer simulation experiments, they are utilized in geospatial statistics
+Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is
+common to set $\mu(\cdot)=0$ assuming pre-centered responses. In this
+zero-mean context, all the action takes place in the covariance function
+$\Sigma(x, x')$, which is usually specified as inversely poportional to
+distances between inputs $x$ and $x'$. We use a form known as the separable
+Mat\'ern kernel \citep{stein1999interpolation} in our work, a conventional
+choice, parameterized by a nugget $g$, lengthscales $\theta$, and scale
+$\tau^2$, whose sampling is included along with others in posterior
+integration via MCMC. For details, see \citep[][Chapter
+5]{gramacy2020surrogates}. GPs provide a flexible, nonparametric regression
+tool. In addition to enjoying canonical status as surrogates for computer
+simulation experiments, they are utilized in geospatial statistics
 \citep{cressie2011statistics}, time series \citep{roberts2013gaussian},
 optimization \citep{jones1998efficient}. %$ , and machine learning \citep{rasmussen2003gaussian}.
 
@@ -426,14 +430,15 @@ the data they are trained on, $n_M$, is that building $n_M \times n_M$
 matrices, and inverting (or otherwise decomposing) them, e.g., for
 Eq.~(\ref{eq:mvn_eq}) requires storage and computation that is quadratic and
 cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in
-a Bayesian MCMC setting.  In our IBEX setting, the output ``images'' are
-massive ($\gg 15{,}000$ pixels) for each $u$-value.  Most of our modeling
-effort involves circumventing this bottleneck, however there is a method
-tailor-made for this setting when the likelihood (for $Y_F$) is Gaussian.
+a Bayesian MCMC setting.  For IBEX, the output ``images'' are massive ($\gg
+15{,}000$ pixels) for each $u$-value, a non-started without adjustment.  Most
+of our modeling effort involves circumventing this bottleneck, however there
+is a method tailor-made for this setting when the likelihood (for $Y_F$) is
+Gaussian.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.2 - Principal Components for High-Dimensional Response
-\subsection{Principal Components for High-Dimensional Response}
+\subsection{Principal components approximation}
 \label{sec:pca}
 %------------------------------------------------------------------------------
 
@@ -443,45 +448,45 @@ expensive, producing a limited number of runs, but their output was also
 extremely high-dimensional, in the form of images, shape description, time
 series, etc. Even with today's computing resources, it would be prohibitive to
 fit a GP surrogate model on such large data. \citeauthor{higdoncalib2008}'s
-key insight involved treating $X^F$ (or grid $X$) -- i.e., the fixed reference
-set that a simulator realizaition is evaluated on for each candidate parameter
-$u$ -- of the {\em output} instead thinking of it as an input. In this way,
-$X^M$ remains small, including only the unique combinations of unknown
-parameters $u$. 
+key insight involved treating $X^F$ (or gridded $X$) -- i.e., the fixed
+reference set that a simulator realization is evaluated on for each candidate
+parameter $u$ -- as a feature of {\em output}, rather than conventionally an
+input. In this way, $X^M$ remains small, including only the unique
+combinations of unknown parameters $u$.
 
 Then, rather than keep track of all of those outputs $Y^M$, indexed over $X^F$
-or $X$, they saught a reduction dimensionality via principal components
+or $X$, dimensionality may be drammatically reduced via principal components
 analysis (PCA). Specifically, they proposed representing the vector output of
 a simulator model $m(\cdot,\cdot)$ as the sum of $n_k$ basis functions $k_1,
-k_2, \ldots , k_{n_k}$, each scaled by a corresponding weight $w_i(u)$. In this
-manner, the high-dimensional response is approximated as
+k_2, \ldots , k_{n_k}$, each scaled by a corresponding weight $w_i(u)$.
 \begin{equation}
 m(u, X) \approx \sum_{i=1}^{n_k}  k_i \cdot w_i (u),
 \quad \mbox{ where } \quad w_i(u) \sim \mathcal{N}( 0, \Sigma_{w_i}) 
  \quad \mbox{and} \quad n_k \ll n_X.
 \label{eq:higdon_pca}
 \end{equation}
-Weights $w_i(u)$ areeach realizations of a zero-mean GP, fit over principal
-components from the limited simulator output. By not directly modeling the
-high-dimensional response $m(\cdot,\cdot)$ and it's associated dense grid $X$,
-the decomposition of $\Sigma_{w_i}$ avoids the cubic bottleneck in computation
-when scaling to large $n$ and can be completed in a reasonable amount of time.
-With fitted surrogate in hand, Bayesian inference via MCMC is used to obtain
-the posterior distribution of component weights $w_i(u)$. Out-of-sample
-predictions at each iteration are obtained by combining predicted weights
-$\hat{w_i}(u^*)$ with the calculated basis functions $k_i$. Dimension of the
-covariance matrices $\Sigma(X^M)$ and $\Sigma^*(x)$ in Eq.~(\ref{eq:mvn_eq})
-remains small and decomposition proceeds quickly.
+Weights $w_i(u)$ are each modeled as realizations of a zero-mean GP. By not
+directly modeling the high-dimensional response $m(\cdot,\cdot)$ and it's
+associated dense grid $X$, requesite decompositions $\Sigma_{w_i}$ avoids the
+cubic bottleneck in computation when scaling to large $n$ and can be completed
+in a reasonable amount of time.
+%  Fitted surrogate in hand, Bayesian
+% inference via MCMC is used to obtain the posterior distribution of component
+% weights $w_i(u)$. Out-of-sample predictions at each iteration are obtained by
+% combining predicted weights $\hat{w_i}(u^*)$ with the calculated basis
+% functions $k_i$. Dimension of the covariance matrices $\Sigma(X^M)$ and
+% $\Sigma^*(x)$ in Eq.~(\ref{eq:mvn_eq}) remains small and decomposition
+% proceeds quickly.
 
 While clever, this is one of those easy-to-say hard-to-do situations. The
 implementation is complex both mathematically, and in code.  We are aware of
-only one library implemenation, originally written in {\tt MATLAB} and now
-deployed in {\tt Python} \citep{gattiker2020lanl},  We found it difficult to
+only one library implemenation, originally written in {\sf MATLAB} and now
+deployed in {\sf Python} \citep{gattiker2020lanl},  We found it difficult to
 approporiate that setup for our own use in a Poisson likelihood context.
 Fortunately, GP approximation has come a long way in the last twenty or years.
 \citeauthor{higdoncalib2008} specifically lamented not having access to such
-technology, necessitating a more complex approach. It is not longer necessary
-to play the trick of moving reference grid to the output space.  A GP
+technology, necessitating a more complex approach. It is no longer necessary
+to play the trick of moving a reference grid to the output space.  A GP
 (approximation) may model $Y^M$ via all inputs $X^F$ and $U$ via $X^M$, as we
 shall demonstrate next.  The result is at once more modern, faster, and better
 compartmentalized for use in novel contexts, such as our own.
@@ -515,7 +520,7 @@ compartmentalized for use in novel contexts, such as our own.
 
 %------------------------------------------------------------------------------
 %% SECTION 3.1 - Generalized Bayesian Inverse Problems with GP Surrogates
-\section{Generalized Bayesian inverse problems} % with GP surrogates}
+\section{Large scale, generalized Bayesian inverse problems} % with GP surrogates}
 %\subsection{Generalized Bayesian Inverse Problems with GP Surrogates}
 \label{sec:gen_bayes_inv}
 \label{sec:methods}
