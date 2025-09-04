@@ -292,27 +292,27 @@ Y^F &\sim \mathcal{N}_{n_F}\!\left(\mu\!\left(X^F\right),
 \nonumber \\
 u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p \nonumber
 \end{align}
-One big difference with Bayesian inverse problems, as opposed ordinary
+One big difference with Bayesian inverse problems, as opposed to ordinary
 Bayesian inference, is that the parameters $\mu(X^F)$ and $\Sigma(X^F)$
 defining the distribution of $Y^F$ are not of direct interest. Rather, we are
-interested in settings $u$, dialing a setting in thesimulation, that define
+interested in settings $u$ that define
 $\mu(X)$ and $\Sigma(X)$ through $m(u, X)$.  For example, two different
 settings of $u$ were used in the IBEX simulator to generate the center and
 right panels of Figure \ref{f:fig1}. Colors indicate output $\mu(X)$ values on
 a dense grid $X$ of longitudes and latitudes. We are interested in learning
-which $u$ are likely to have generated the observed $Y^F$ values in the left
+which $u$ are likely to have generated the recorded $Y^F$ values in the left
 panel, observed at locations where the IBEX satellite was pointed ($X^F$) to
 collect particles.
 
 To help fix ideas, consider the simpler example introduced in the left panel
 of Figure \ref{f:toy_calib}. Red stars indicate noisy field measurements,
 $Y^F$, observed in replicate as $y_i \stackrel{\mathrm{iid}} \sim
-\mathcal{N}(m(u^\star, x_i), \sigma^2)$ for a ``true'' unkonwn $u^\star =
+\mathcal{N}(m(u^\star, x_i), \sigma^2)$ for a ``true'' unknown $u^\star =
 (u_1^\star, u_2^\star)^\top$ and uniform $x_i \in X_F$.  In this simple
 example, the computer mode $m(\cdot, \cdot)$ was used to generate the data.
 In practice, the model represents a characacure using known or best-guess
 physics. Each light gray line is a realization of $m(\cdot, \cdot)$ for a
-different $u$ on an fine grid of spatial locations $X$. The bold-black-dashed
+different $u$ on a fine grid of spatial locations $X$. The bold-black-dashed
 line is $m(u^\star, X)$ provided as a referece.
 
 \begin{figure}[ht!]
@@ -328,10 +328,10 @@ computer model runs (left), model evaluations at posterior draws and mean
 
 The middle panel of the figure shows runs of our virtual model evaluated at posterior
 draws of $u$ obtained under Metropolis sampling using a multivariate
-normal likelihood whose mean $\mu(X_F)=m(\cdot)$ and whose covariance $\Sigma(X_F) \sim \sigma^2
+normal likelihood whose mean $\mu(X_F)=m(u^{(t)}, X^F)$ and whose covariance $\Sigma(X_F) \sim \sigma^2
 \mathbb{I}$, where $\sigma^2$ is marginalized out under a reference prior
 $\pi(\sigma^2) \propto 1/\sigma^2$. Although we display these runs on a
-high-resolution grid $X$, the sampler only uses evaluations of $m(u, X^F)$ in
+high-resolution grid $X$, the sampler only uses evaluations of $m(u^{(t)}, X^F)$ in
 likelihood evaluations. The posterior samples of $u$ thus obtained are shown
 in the right panel of the figure.  In this toy example, it is evident that the
 Metropolis sampler successfully concentrates posterior mass around the true
@@ -350,7 +350,7 @@ with $Y_F$. Details are provided soon in Section \ref{sec:gen_bayes_inv}.
 
 Another challenge to the typical apparatus involves computation.  Each run of
 the IBEX model $m(\cdot, \cdot)$ is a Herculean effort, requiring thousands of
-core hours on a supercomputer.  That simply can't be embedded in a Metropolis
+core hours on a supercomputer.  That simply cannot be embedded in a Metropolis
 sampler requiring thousands of iterations to convergence.  While it's rather
 conventional to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates}
 in this setting, trained on a design of space-filling $u$-values, doing so
@@ -387,15 +387,15 @@ Evaluating the likelihood $Y_F$ in Eq.~(\ref{eq:inv_bayes_mod}), e.g., within
 a Metropolis step, may proceed via surrogate when {\em in situ} evaluation
 directly on $m(\cdot, \cdot)$ is too slow. Suppose we have a vector of
 observations $Y^M$ at input locations $X^M$ from a campaign of runs of
-$m(\cdot, \cdot)$ that may or may not coincide with settings in $X^M$. We
+$m(\cdot, \cdot)$ that may or may not coincide with settings in $X^F$. We
 prefer a small design of space-filling $u$-values ($U$), paired via Cartesian
-product with $X_F$ from the field experiment, or a predictive grid $X$, e.g.,
-$X^M = X^F \otimes U$, depending on the situation.   Two such runs, i.e., for
+product with $X^F$ from the field experiment, or a predictive grid $X$, e.g.,
+$X^M = X \otimes U$, depending on the situation.   Two such runs, i.e., for
 two rows $u^\top \in U$ and a dense grid $X$, are shown in Figure
 \ref{f:fig1}.
 
 Given a corpus of runs $(Y^M, X^M)$, a surrogate synthesizes this information
-to in order to extend it to new inputs.  Many surrogates for computer
+in order to extend it to new inputs.  Many surrogates for computer
 simulations are based on Gaussian process
 \citep[e.g.,][]{rasmussen2003gaussian}, where modeling boils down to
 specifying a multivariate normal (MVN) for all responses.  This way,
@@ -422,8 +422,8 @@ integration via MCMC. For details, see \citep[][Chapter
 5]{gramacy2020surrogates}. GPs provide a flexible, nonparametric regression
 tool. In addition to enjoying canonical status as surrogates for computer
 simulation experiments, they are utilized in geospatial statistics
-\citep{cressie2011statistics}, time series \citep{roberts2013gaussian},
-optimization \citep{jones1998efficient}. %$ , and machine learning \citep{rasmussen2003gaussian}.
+\citep{cressie2011statistics}, time series \citep{roberts2013gaussian}, and
+optimization \citep{jones1998efficient}.
 
 One downside to working with MVNs whose dimension grows with the dimension of
 the data they are trained on, $n_M$, is that building $n_M \times n_M$
@@ -431,7 +431,7 @@ matrices, and inverting (or otherwise decomposing) them, e.g., for
 Eq.~(\ref{eq:mvn_eq}) requires storage and computation that is quadratic and
 cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in
 a Bayesian MCMC setting.  For IBEX, the output ``images'' are massive ($\gg
-15{,}000$ pixels) for each $u$-value, a non-started without adjustment.  Most
+15{,}000$ pixels) for each $u$-value, a non-starter without adjustment.  Most
 of our modeling effort involves circumventing this bottleneck, however there
 is a method tailor-made for this setting when the likelihood (for $Y_F$) is
 Gaussian.
