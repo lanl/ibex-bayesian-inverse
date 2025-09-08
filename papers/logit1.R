@@ -47,15 +47,15 @@ for (i in 1:nrow(calib_params)) {
 }
 
 ylims <- range(yf, ym)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym[,sample(1:ncol(ym), 10)], type="l", col="lightgrey", lty=1,
-  lwd=1.5, xlab="X", ylab="Y", ylim=ylims)
+  lwd=1.5, xlab="X", ylab="Y", ylim=ylims, mgp=c(2,0.75,0))
 points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
 lines(x=xm, y=lam_m, lwd=2, lty=2)
 legend("topleft", c("observations", "computer model runs", "truth"),
   col=c(2, "lightgrey", 1), pch=c(8, NA, NA), lty=c(NA, 1, 2), lwd=c(1, 1.5, 2),
-  bg="white", cex=0.75)
+  bg="white", cex=0.95)
 dev.off()
 
 nmcmcs <- 20000
@@ -135,11 +135,11 @@ for (t in 2:nmcmcs) {
 }
 
 ## Visualize model evaluations:
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_est.pdf", width=5, height=5)
 ylims <- range(c(mod_lhatps, yf, lam_m))
 matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
-  col="lightgrey", xlab="X", ylab="Y", ylim=ylims)
+  col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
 u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
@@ -148,20 +148,20 @@ lines(x=xm, y=lam_m, lty=2, lwd=2)
 legend("topleft", c(expression("model runs at u"^(t)),
   expression("model at " * bar(u)["post"])),
   col=c("lightgrey", 4), lty=c(1, 4), lwd=2, pch=c(rep(NA, 2)), bg="white",
-  y.intersp=1.3, cex=0.75)
+  y.intersp=1.3, cex=0.95)
 dev.off()
 
 ## Visualize posterior draws of u
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_post_draws.pdf", width=5, height=5)
 plot(x=u[seq(10001, 20000, by=10),1]*uranges[1]+umins[1],
  y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(u[1]),
- ylab=expression(u[2]), col="lightgrey")
+ ylab=expression(u[2]), col="lightgrey", mgp=c(2,0.75,0))
 points(x=true_mu, y=true_nu, col=3, pch=8, lwd=2, cex=1.5)
 points(x=u_postmean[1]*uranges[1]+umins[1],
   y=u_postmean[2]*uranges[2]+umins[2], col=4, pch=9, lwd=2, cex=1.5)
 legend("topleft", c("posterior draws of u", "posterior mean", "truth"),
-  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=0.75, bg="white")
+  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=0.95, bg="white")
 dev.off()
 
 
@@ -212,13 +212,15 @@ for (i in 1:nrow(calib_params)) {
 }
 
 ylims <- range(yf, ym)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("logit1_obs.pdf", width=5, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
+pdf("logit1_pois_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
-  ylab=expression(lambda), ylim=ylims)
-points(x=as.vector(t(xf)), y=yf)
-legend("topleft", c("observed counts", "computer model output"),
-  col=c(1, "lightgrey"), pch=c(1, NA), lty=c(NA, 1), lwd=c(1, 1.5), cex=1.25)
+  ylab=expression(lambda), ylim=ylims, mgp=c(2,0.75,0))
+points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
+lines(x=xm, y=lam_m, lwd=2, lty=2)
+legend("topleft", c("observed counts", "computer model runs", "truth"),
+  col=c(2, "lightgrey", 1), pch=c(8, NA, NA), lty=c(NA, 1:2), lwd=c(1, 1.5, 2),
+  bg="white", cex=0.95)
 dev.off()
 
 nmcmcs <- 20000
@@ -291,32 +293,33 @@ for (t in 2:nmcmcs) {
 }
 
 ## Visualize model evaluations:
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("logit1_est.pdf", width=5, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
+pdf("logit1_pois_est.pdf", width=5, height=5)
 ylims <- range(c(mod_lhatps, yf, lam_m))
 matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
-  col="lightgrey", xlab="X", ylab="lambda", ylim=ylims)
-points(x=xf, y=yf, lwd=2)
+  col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
+points(x=xf, y=yf, col=2, pch=8)
 u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
-  u_postmean[2]*uranges[2]+umins[2]), col=2, lwd=2, lty=2)
-lines(x=xm, y=lam_m, col=3, lty=3, lwd=2)
-legend("topleft", c("field counts", "posterior draws of f(x)",
-  "posterior mean estimate", "true lambda"),
-  col=c(1, "lightgrey", 2, 3), lty=c(NA, 1:3), lwd=2, pch=c(1, rep(NA, 3)))
+  u_postmean[2]*uranges[2]+umins[2]), col=4, lwd=2, lty=4)
+lines(x=xm, y=lam_m, lty=2, lwd=2)
+legend("topleft", c(expression("model runs at u"^(t)),
+  expression("model at " * bar(u)["post"])),
+  col=c("lightgrey", 4), lty=c(1, 4), lwd=2, pch=c(rep(NA, 2)), bg="white",
+  y.intersp=1.3, cex=0.95)
 dev.off()
 
 ## Visualize posterior draws of u
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("logit1_post_draws.pdf", width=5, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
+pdf("logit1_pois_post_draws.pdf", width=5, height=5)
 plot(x=u[seq(10001, 20000, by=10),1]*uranges[1]+umins[1],
- y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(mu),
- ylab=expression(nu))
-points(x=true_mu, y=true_nu, col=2, pch=8, lwd=2, cex=1.5)
+ y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(u[1]),
+ ylab=expression(u[2]), col="lightgrey", mgp=c(2,0.75,0))
+points(x=true_mu, y=true_nu, col=3, pch=8, lwd=2, cex=1.5)
 points(x=u_postmean[1]*uranges[1]+umins[1],
-  y=u_postmean[2]*uranges[2]+umins[2], col=3, pch=8, lwd=2, cex=1.5)
+  y=u_postmean[2]*uranges[2]+umins[2], col=4, pch=9, lwd=2, cex=1.5)
 legend("topleft", c("posterior draws of u", "posterior mean", "truth"),
-  col=c(1:3), lty=NA, lwd=2, pch=c(1, 8, 8))
+  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=0.95, bg="white")
 dev.off()
 
 ####################################################################
