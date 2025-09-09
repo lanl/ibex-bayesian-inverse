@@ -1,7 +1,8 @@
 ####################################################################
-## FIGURES 2/3: Toy 1D example for standard calibration
+## FIGURE 2: Toy 1D example for standard Bayesian inverse problem
 ####################################################################
 
+library(laGP)
 library(lhs)
 library(plgp)
 
@@ -29,7 +30,7 @@ yf <- rnorm(n=length(lam), mean=lam)
 ## Set up computer model data
 xm <- seq(0, 1, length=nm)
 lam_m <- f(x=xm, mu=true_mu, nu=true_nu)
-calib_params <- randomLHS(n=60, k=2)
+calib_params <- randomLHS(n=30, k=2)
 mu_range <- 10
 mu_min <- 5
 mu_max <- 15
@@ -49,13 +50,13 @@ for (i in 1:nrow(calib_params)) {
 ylims <- range(yf, ym)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_obs.pdf", width=5, height=5)
-matplot(x=xm, y=ym[,sample(1:ncol(ym), 10)], type="l", col="lightgrey", lty=1,
+matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1,
   lwd=1.5, xlab="X", ylab="Y", ylim=ylims, mgp=c(2,0.75,0))
 points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
 lines(x=xm, y=lam_m, lwd=2, lty=2)
-legend("topleft", c("observations", "computer model runs", "truth"),
+legend("topleft", c("observations", "model runs", "truth"),
   col=c(2, "lightgrey", 1), pch=c(8, NA, NA), lty=c(NA, 1, 2), lwd=c(1, 1.5, 2),
-  bg="white", cex=0.95)
+  bg="white", cex=1.05)
 dev.off()
 
 nmcmcs <- 20000
@@ -73,6 +74,15 @@ for (i in 1:ncol(calib_params)) {
   calib_params_unit[,i] <- (calib_params[,i] - umins[i])/uranges[i]
 }
 
+Y <- as.vector(ym)
+X <- cbind(matrix(rep(xm, ncol(ym)), ncol=1),
+  matrix(rep(calib_params_unit[,1], each=length(xm)), ncol=1),
+  matrix(rep(calib_params_unit[,2], each=length(xm)), ncol=1))
+g <- garg(list(mle=TRUE, max=1), Y)
+d <- darg(list(mle=TRUE, max=0.25), X)
+gpi <- newGPsep(X, Y, d=d$start, g=g$start, dK=TRUE)
+mle <- jmleGPsep(gpi, c(d$min, d$max), c(g$min, g$max), d$ab, g$ab)
+
 ## initialize chains
 u[1,] <- uprops[1,] <- c(0.5, 0.5)
 
@@ -84,14 +94,16 @@ SigmaDet <- determinant(Sigma)$modulus
 attributes(SigmaDet) <- NULL
 tau2hat <- drop(t(yf) %*% SigmaInv %*% yf / length(yf))
 
-lhat_curr <- f(x=XX, mu=u[1,1]*uranges[1]+umins[1], nu=u[1,2]*uranges[2]+umins[2])
+lhat_curr <- predGPsep(gpi, XX=cbind(XX, matrix(rep(uprops[1,], nrow(XX)), ncol=2, byrow=TRUE)),
+  lite=TRUE, nonug=TRUE)$mean
 lls[1] <- -0.5*nrow(XX)*tau2hat - 0.5*determinant(Sigma)$modulus - drop(0.5*t(yf - lhat_curr) %*% SigmaInv %*% (yf-lhat_curr))/tau2hat
 
 accept <- 1
 lmhs <- rep(NA, nmcmcs)
 mod_lhatps <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
-mod_lhatps[,1] <- f(x=xm, mu=uprops[1,1]*uranges[1]+umins[1],
- nu=uprops[1,2]*uranges[2]+umins[2])
+mod_lhatps[,1] <- predGPsep(gpi,
+  XX=cbind(matrix(xm, ncol=1), matrix(rep(uprops[1,], length(xm)), ncol=2, byrow=TRUE)),
+  lite=TRUE, nonug=TRUE)$mean
 for (t in 2:nmcmcs) {
 
   ###########################################################################
@@ -100,11 +112,12 @@ for (t in 2:nmcmcs) {
   up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=rep(0, 2), pmax=rep(1, 2),
     pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
-  ## Evaluate simulator at u_prime
-  lhatp <- f(x=XX, mu=uprops[t,1]*uranges[1]+umins[1],
-    nu=uprops[t,2]*uranges[2]+umins[2])
-  mod_lhatps[,t] <- f(x=xm, mu=uprops[t,1]*uranges[1]+umins[1],
-    nu=uprops[t,2]*uranges[2]+umins[2])
+  ## Evaluate surrogate at u_prime
+  lhatp <- predGPsep(gpi, XX=cbind(XX, matrix(rep(uprops[t,], nrow(XX)), ncol=2, byrow=TRUE)),
+    lite=TRUE, nonug=TRUE)$mean
+  mod_lhatps[,t] <- predGPsep(gpi,
+    XX=cbind(matrix(xm, ncol=1), matrix(rep(uprops[t,], length(xm)), ncol=2, byrow=TRUE)),
+    lite=TRUE, nonug=TRUE)$mean
 
   ### Calculate proposed likelihood
   llp <- -0.5*nrow(XX)*tau2hat - 0.5*SigmaDet - drop(0.5*t(yf - lhatp) %*% SigmaInv %*% (yf-lhatp))/tau2hat
@@ -133,6 +146,7 @@ for (t in 2:nmcmcs) {
     print(paste("Finished iteration", t))
   }
 }
+deleteGPsep(gpi)
 
 ## Visualize model evaluations:
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
@@ -148,7 +162,7 @@ lines(x=xm, y=lam_m, lty=2, lwd=2)
 legend("topleft", c(expression("model runs at u"^(t)),
   expression("model at " * bar(u)["post"])),
   col=c("lightgrey", 4), lty=c(1, 4), lwd=2, pch=c(rep(NA, 2)), bg="white",
-  y.intersp=1.3, cex=0.95)
+  y.intersp=1.3, cex=1.05)
 dev.off()
 
 ## Visualize posterior draws of u
@@ -161,14 +175,15 @@ points(x=true_mu, y=true_nu, col=3, pch=8, lwd=2, cex=1.5)
 points(x=u_postmean[1]*uranges[1]+umins[1],
   y=u_postmean[2]*uranges[2]+umins[2], col=4, pch=9, lwd=2, cex=1.5)
 legend("topleft", c("posterior draws of u", "posterior mean", "truth"),
-  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=0.95, bg="white")
+  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=1.05, bg="white")
 dev.off()
 
 
 ####################################################################
-## FIGURES 2/3: Toy 1D example for Poisson calibration
+## FIGURE 3: Toy 1D example for Poisson calibration
 ####################################################################
 
+library(laGP)
 library(lhs)
 
 source("../helper.R")
@@ -183,18 +198,23 @@ f <- function(x, mu, nu) {
 true_mu <- 10
 true_nu <- 1
 nf <- 8
-repsf <- 4
+set.seed(91007)
+repsf <- sample(1:7, 8, replace=TRUE)
 nm <- 20
 
 ## Set up field data
 xf <- rep(seq(0, 1, length=nf), repsf)
+xf <- c()
+for (i in 1:nf) {
+  xf <- c(xf, rep(seq(0, 1, length=nf)[i], repsf[i]))
+}
 lam <- f(x=xf, mu=true_mu, nu=true_nu)
 yf <- rpois(lam, lam)
 
 ## Set up computer model data
 xm <- seq(0, 1, length=nm)
 lam_m <- f(x=xm, mu=true_mu, nu=true_nu)
-calib_params <- randomLHS(n=60, k=2)
+calib_params <- randomLHS(n=30, k=2)
 mu_range <- 10
 mu_min <- 5
 mu_max <- 15
@@ -217,13 +237,18 @@ pdf("logit1_pois_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
   ylab=expression(lambda), ylim=ylims, mgp=c(2,0.75,0))
 points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
-points(x=xf[1:8], y=apply(matrix(yf, nrow=4, byrow=TRUE), 2, sum)/4,
-  col=1, bg=2, pch=21)
+est_means <- rep(NA, nf)
+y_ind <- 1
+for (i in 1:nf) {
+  est_means[i] <- mean(yf[y_ind:(y_ind+repsf[i]-1)])
+  y_ind <- y_ind + repsf[i]
+}
+points(x=seq(0, 1, length=nf), y=est_means, col=1, bg=2, pch=21)
 lines(x=xm, y=lam_m, lwd=2, lty=2)
-legend("topleft", c("observed counts", "counts/exposure", "computer model runs",
+legend("topleft", c("observed counts", "counts/exposure", "model runs",
   "truth"), col=c(2, 1, "lightgrey", 1), pch=c(8, 21, NA, NA),
   lty=c(NA, NA, 1:2), lwd=c(1, 1, 1.5, 2), pt.bg=c(NA, 2, NA, NA),
-  bg="white", cex=0.95)
+  bg="white", cex=1.05)
 dev.off()
 
 nmcmcs <- 20000
@@ -241,19 +266,30 @@ for (i in 1:ncol(calib_params)) {
   calib_params_unit[,i] <- (calib_params[,i] - umins[i])/uranges[i]
 }
 
+Y <- as.vector(ym)
+X <- cbind(matrix(rep(xm, ncol(ym)), ncol=1),
+  matrix(rep(calib_params_unit[,1], each=length(xm)), ncol=1),
+  matrix(rep(calib_params_unit[,2], each=length(xm)), ncol=1))
+g <- garg(list(mle=TRUE, max=1), Y)
+d <- darg(list(mle=TRUE, max=0.25), X)
+gpi <- newGPsep(X, log(Y), d=d$start, g=g$start, dK=TRUE)
+mle <- jmleGPsep(gpi, c(d$min, d$max), c(g$min, g$max), d$ab, g$ab)
+
 ## initialize chains
 u[1,] <- uprops[1,] <- c(0.5, 0.5)
 
 XX <- matrix(xf, ncol=1)
 
-lhat_curr <- f(x=XX, mu=u[1,1]*uranges[1]+umins[1], nu=u[1,2]*uranges[2]+umins[2])
+lhat_curr <- exp(predGPsep(gpi, XX=cbind(XX, matrix(rep(uprops[1,], nrow(XX)), ncol=2, byrow=TRUE)),
+  lite=TRUE, nonug=TRUE)$mean)
 lls[1] <- sum(yf*log(lhat_curr) - lhat_curr)
 
 accept <- 1
 lmhs <- rep(NA, nmcmcs)
 mod_lhatps <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
-mod_lhatps[,1] <- f(x=xm, mu=uprops[1,1]*uranges[1]+umins[1],
- nu=uprops[1,2]*uranges[2]+umins[2])
+mod_lhatps[,1] <- exp(predGPsep(gpi,
+  XX=cbind(matrix(xm, ncol=1), matrix(rep(uprops[1,], length(xm)), ncol=2, byrow=TRUE)),
+  lite=TRUE, nonug=TRUE)$mean)
 for (t in 2:nmcmcs) {
 
   ###########################################################################
@@ -263,10 +299,11 @@ for (t in 2:nmcmcs) {
     pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
   ## Evaluate simulator at u_prime
-  lhatp <- f(x=XX, mu=uprops[t,1]*uranges[1]+umins[1],
-    nu=uprops[t,2]*uranges[2]+umins[2])
-  mod_lhatps[,t] <- f(x=xm, mu=uprops[t,1]*uranges[1]+umins[1],
-    nu=uprops[t,2]*uranges[2]+umins[2])
+  lhatp <- exp(predGPsep(gpi, XX=cbind(XX, matrix(rep(uprops[t,], nrow(XX)), ncol=2, byrow=TRUE)),
+    lite=TRUE, nonug=TRUE)$mean)
+  mod_lhatps[,t] <- exp(predGPsep(gpi,
+    XX=cbind(matrix(xm, ncol=1), matrix(rep(uprops[t,], length(xm)), ncol=2, byrow=TRUE)),
+    lite=TRUE, nonug=TRUE)$mean)
 
   ### Calculate proposed likelihood
   llp <- sum(yf*log(lhatp) - lhatp)
@@ -294,6 +331,7 @@ for (t in 2:nmcmcs) {
     print(paste("Finished iteration", t))
   }
 }
+deleteGPsep(gpi)
 
 ## Visualize model evaluations:
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
@@ -302,6 +340,7 @@ ylims <- range(c(mod_lhatps, yf, lam_m))
 matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
   col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
+points(x=seq(0, 1, length=nf), y=est_means, col=1, bg=2, pch=21)
 u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
   u_postmean[2]*uranges[2]+umins[2]), col=4, lwd=2, lty=4)
@@ -309,7 +348,7 @@ lines(x=xm, y=lam_m, lty=2, lwd=2)
 legend("topleft", c(expression("model runs at u"^(t)),
   expression("model at " * bar(u)["post"])),
   col=c("lightgrey", 4), lty=c(1, 4), lwd=2, pch=c(rep(NA, 2)), bg="white",
-  y.intersp=1.3, cex=0.95)
+  y.intersp=1.3, cex=1.05)
 dev.off()
 
 ## Visualize posterior draws of u
@@ -322,7 +361,7 @@ points(x=true_mu, y=true_nu, col=3, pch=8, lwd=2, cex=1.5)
 points(x=u_postmean[1]*uranges[1]+umins[1],
   y=u_postmean[2]*uranges[2]+umins[2], col=4, pch=9, lwd=2, cex=1.5)
 legend("topleft", c("posterior draws of u", "posterior mean", "truth"),
-  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=0.95, bg="white")
+  col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=1.05, bg="white")
 dev.off()
 
 ####################################################################
