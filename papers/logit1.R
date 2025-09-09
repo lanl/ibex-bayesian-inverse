@@ -217,9 +217,12 @@ pdf("logit1_pois_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
   ylab=expression(lambda), ylim=ylims, mgp=c(2,0.75,0))
 points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
+points(x=xf[1:8], y=apply(matrix(yf, nrow=4, byrow=TRUE), 2, sum)/4,
+  col=1, bg=2, pch=21)
 lines(x=xm, y=lam_m, lwd=2, lty=2)
-legend("topleft", c("observed counts", "computer model runs", "truth"),
-  col=c(2, "lightgrey", 1), pch=c(8, NA, NA), lty=c(NA, 1:2), lwd=c(1, 1.5, 2),
+legend("topleft", c("observed counts", "counts/exposure", "computer model runs",
+  "truth"), col=c(2, 1, "lightgrey", 1), pch=c(8, 21, NA, NA),
+  lty=c(NA, NA, 1:2), lwd=c(1, 1, 1.5, 2), pt.bg=c(NA, 2, NA, NA),
   bg="white", cex=0.95)
 dev.off()
 
