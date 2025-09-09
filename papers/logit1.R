@@ -47,18 +47,6 @@ for (i in 1:nrow(calib_params)) {
   ym[,i] <- f(x=xm, mu=mu, nu=nu)
 }
 
-ylims <- range(yf, ym)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
-pdf("logit1_obs.pdf", width=5, height=5)
-matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1,
-  lwd=1.5, xlab="X", ylab="Y", ylim=ylims, mgp=c(2,0.75,0))
-points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
-lines(x=xm, y=lam_m, lwd=2, lty=2)
-legend("topleft", c("observations", "model runs", "truth"),
-  col=c(2, "lightgrey", 1), pch=c(8, NA, NA), lty=c(NA, 1, 2), lwd=c(1, 1.5, 2),
-  bg="white", cex=1.05)
-dev.off()
-
 nmcmcs <- 20000
 u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(calib_params))
 
@@ -148,10 +136,21 @@ for (t in 2:nmcmcs) {
 }
 deleteGPsep(gpi)
 
+ylims <- range(c(mod_lhatps, yf, lam_m))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
+pdf("logit1_obs.pdf", width=5, height=5)
+matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1,
+  lwd=1.5, xlab="X", ylab="Y", ylim=ylims, mgp=c(2,0.75,0))
+points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
+lines(x=xm, y=lam_m, lwd=2, lty=2)
+legend("topleft", c("observations", "model runs", "truth"),
+  col=c(2, "lightgrey", 1), pch=c(8, NA, NA), lty=c(NA, 1, 2), lwd=c(1, 1.5, 2),
+  bg="white", cex=1.05)
+dev.off()
+
 ## Visualize model evaluations:
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_est.pdf", width=5, height=5)
-ylims <- range(c(mod_lhatps, yf, lam_m))
 matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
   col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
@@ -178,7 +177,6 @@ legend("topleft", c("posterior draws of u", "posterior mean", "truth"),
   col=c("lightgrey", 4, 3), lty=NA, lwd=2, pch=c(1, 9, 8), cex=1.05, bg="white")
 dev.off()
 
-
 ####################################################################
 ## FIGURE 3: Toy 1D example for Poisson calibration
 ####################################################################
@@ -198,8 +196,8 @@ f <- function(x, mu, nu) {
 true_mu <- 10
 true_nu <- 1
 nf <- 8
-set.seed(91007)
-repsf <- sample(1:7, 8, replace=TRUE)
+set.seed(51997)
+repsf <- sample(3:7, 8, replace=TRUE)
 nm <- 20
 
 ## Set up field data
@@ -230,26 +228,6 @@ for (i in 1:nrow(calib_params)) {
   nu <- calib_params[i,2]
   ym[,i] <- f(x=xm, mu=mu, nu=nu)
 }
-
-ylims <- range(yf, ym)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
-pdf("logit1_pois_obs.pdf", width=5, height=5)
-matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
-  ylab=expression(lambda), ylim=ylims, mgp=c(2,0.75,0))
-points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
-est_means <- rep(NA, nf)
-y_ind <- 1
-for (i in 1:nf) {
-  est_means[i] <- mean(yf[y_ind:(y_ind+repsf[i]-1)])
-  y_ind <- y_ind + repsf[i]
-}
-points(x=seq(0, 1, length=nf), y=est_means, col=1, bg=2, pch=21)
-lines(x=xm, y=lam_m, lwd=2, lty=2)
-legend("topleft", c("observed counts", "counts/exposure", "model runs",
-  "truth"), col=c(2, 1, "lightgrey", 1), pch=c(8, 21, NA, NA),
-  lty=c(NA, NA, 1:2), lwd=c(1, 1, 1.5, 2), pt.bg=c(NA, 2, NA, NA),
-  bg="white", cex=1.05)
-dev.off()
 
 nmcmcs <- 20000
 u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(calib_params))
@@ -333,10 +311,29 @@ for (t in 2:nmcmcs) {
 }
 deleteGPsep(gpi)
 
+ylims <- range(c(mod_lhatps, yf, lam_m))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
+pdf("logit1_pois_obs.pdf", width=5, height=5)
+matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
+  ylab=expression(lambda), ylim=ylims, mgp=c(2,0.75,0))
+points(x=as.vector(t(xf)), y=yf, col=2, pch=8)
+est_means <- rep(NA, nf)
+y_ind <- 1
+for (i in 1:nf) {
+  est_means[i] <- mean(yf[y_ind:(y_ind+repsf[i]-1)])
+  y_ind <- y_ind + repsf[i]
+}
+points(x=seq(0, 1, length=nf), y=est_means, col=1, bg=2, pch=21)
+lines(x=xm, y=lam_m, lwd=2, lty=2)
+legend("topleft", c("observed counts", "counts/exposure", "model runs",
+  "truth"), col=c(2, 1, "lightgrey", 1), pch=c(8, 21, NA, NA),
+  lty=c(NA, NA, 1:2), lwd=c(1, 1, 1.5, 2), pt.bg=c(NA, 2, NA, NA),
+  bg="white", cex=1.05)
+dev.off()
+
 ## Visualize model evaluations:
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_pois_est.pdf", width=5, height=5)
-ylims <- range(c(mod_lhatps, yf, lam_m))
 matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
   col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
