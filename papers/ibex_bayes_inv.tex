@@ -309,11 +309,11 @@ of Figure \ref{f:toy_calib}. Red stars indicate noisy field measurements,
 $Y^F$, observed in replicate as $y_i \stackrel{\mathrm{iid}} \sim
 \mathcal{N}(m(u^\star, x_i), \sigma^2)$ for a ``true'' unknown $u^\star =
 (u_1^\star, u_2^\star)^\top$ and uniform $x_i \in X^F$.  In this simple
-example, the computer mode $m(\cdot, \cdot)$ was used to generate the data.
-In practice, the model represents a characacure using known or best-guess
+example, the computer model $m(\cdot, \cdot)$ was used to generate the data.
+In practice, the model represents a caricature using known or best-guess
 physics. Each light gray line is a realization of $m(\cdot, \cdot)$ for a
 different $u$ on a fine grid of spatial locations $X$. The bold-black-dashed
-line is $m(u^\star, X)$ provided as a referece.
+line is $m(u^\star, X)$ provided as a reference.
 
 \begin{figure}[ht!]
 \centering
@@ -366,16 +366,21 @@ Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) \nonumber  \\
 u &\sim \pi(u), & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p \nonumber
 \end{align}
 where $e(X^F)$ represents exposure time, or the duration the satellite points at
-a specific location in the sky. Therefore, $\lambda(X^F)$ denotes a rate at
-which ENA particles are generated for rows (latitude/longitude pairs) in $X^F$.
-We note that it is common to assume unit exposure ($e(\cdot)=1$) when working
-with count data. However, in our application each data point is a total count of
-particles observed over a series of different time intervals. As mentioned
-previously, we (or the scientists we collaborate with) are not necessarily
-interested in the posterior distribution of $\lambda(X)$. We hope to understand
-the posterior $u \mid Y^F$, where $\lambda(X^F)$ is determined by a computer
-simulation $m(\cdot,\cdot)$. Our MCMC approach to learning $u \mid Y^F$ is
-summarized in our first algorithm.
+specific locations in the sky. $\lambda(X^F)$ denotes the rate at which
+ENA particles are generated for rows (latitude/longitude pairs) in $X^F$. We
+note that it is common to assume unit exposure ($e(\cdot)=1$) when working with
+count data. However, in our application each data point is a total count of
+particles observed over a series of different time intervals.
+
+As mentioned previously, we (or the scientists we collaborate with) are not
+focused on the posterior distribution of $\lambda(X)$. Instead, we aim to
+understand the posterior $u \mid Y^F$, where $\lambda(X^F)$ is determined by a
+computer simulation $m(\cdot,\cdot)$. We utilize MCMC to sample from the
+posterior, similar to our solution in Figure \ref{f:toy_calib}. The main
+distinction is the evaluation of the likelihood. For the IBEX field data, we
+evaluate a Poisson likelihood given an exposure time for each observation and a
+mean surface determined by a simulator $m(\cdot,\cdot)$ at proposed values of
+$u$. Our approach is summarized in our first algorithm.
 \begin{algorithm}[ht]
 \DontPrintSemicolon
 Initialize $u^{(0)}$. \\
@@ -395,16 +400,16 @@ in Figure \ref{f:toy_calib} and align it more closely with the IBEX data.
 Instead of observing a mean process $\mu(X^F)$ with random, Gaussian noise,
 suppose we are given counts, drawn from a Poisson process with $\lambda(X^F) =
 m(u^*, X^F)$, as shown in the left panel of Figure \ref{f:toy_calib_pois}.
-Computer model runs $m(\cdot,\cdot) = \lambda(X)$ produce mean surfaces given
-unique values of $u = (u_1, u_2)$. Observed counts are shown as red stars. In
-contrast to our previous example, each observation has an associated exposure
-time $e(\cdot)$. Red circles indicate the sum of all counts at an input location
-(i.e, a single row of $X^F$) divided by the sum of their corresponding exposure
-times. These points are the actual data we receive. Results from running
-Algorithm \ref{alg:gibbs} are shown in the middle and right panels of Figure
-\ref{f:toy_calib_pois}. Similar to the results in Figure \ref{f:toy_calib}, it
-is clear that the sampler searches a broad swath of the model input space but
-hones in on the region where the true parameter values lie.
+Computer model runs $m(\cdot,\cdot) = \lambda(X)$ produce different mean
+surfaces given unique values of $u = (u_1, u_2)$. Observed counts are shown as
+red stars. Each observation also has an associated exposure time $e(\cdot)$. Red
+circles indicate the sum of all counts at one input location (i.e, a single row
+of $X^F$) divided by the sum of their corresponding exposure times. These points
+are the actual data we receive. Results from running Algorithm \ref{alg:gibbs}
+are shown in the middle and right panels of Figure \ref{f:toy_calib_pois}.
+Similar to the results in Figure \ref{f:toy_calib}, it is clear that the sampler
+searches a broad swath of the model input space but hones in on the region where
+the true parameter values lie.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.55,trim=20 0 30 0,clip=TRUE]{logit1_pois_obs.pdf}
@@ -417,19 +422,6 @@ draws and mean (middle), and posterior distribution of model parameters
 \label{f:toy_calib_pois}}
 \end{figure}
 
-% Note that we adopt the modularized approach of
-% \citet{Liu2009ModularizationIB}, by both necessity and preference. That is,
-% we fit our surrogate model to simulator data only, not incorporating field
-% data. First, \citet{kennedyohagan2001} only apply their method to situations
-% when both Gaussian computer model output and Gaussian field responses. This
-% allows joint modelling of simulator and field data. We are unable to do this
-% with Poisson counts as the field response. Additionally, although we do not
-% address a discrepancy between simulator and reality as
-% \citet{kennedyohagan2001} do, which better estimation of is a key part of the
-% motivation \citet{Liu2009ModularizationIB} cite to their modularized
-% approach, we share the belief that predictions for our surrogate for the
-% computer model should only be informed by the simulator output itself.
-
 In each of these examples we have made the assumption that we have unlimited
 access to simulator runs (i.e, for each proposed combination of model
 parameters, we can quickly get a response from the computer simulation). But
@@ -441,14 +433,14 @@ requiring thousands of iterations to convergence.  While it's rather
 conventional to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates}
 in this setting, trained on a design of space-filling $u$-values, doing so
 effectively is challenged by the dimension of $X^F$.  We considered multiple
-surrogate models such as GPs via inducing points \citep{banerjee2008gaussian}
-and local approximate GPs \citep{gramacy2014lagp}, but found them unable to
-manage the scale of the IBEX data. Herein lies our main methodological
-contribution, using a modern sparse approach to surrogate modeling in a
-(Poisson) Bayesian inverse problem setting.  The remainder of this section
-outlines the standard surrogate modeling toolkit, as a jumping-off point toward
-explaining both our main comparative (Section \ref{sec:gp_approx}) and our main
-methodological contribution.
+surrogate models developed to accomodate such scenarios (e.g. GPs via inducing
+points \citep{banerjee2008gaussian}, local approximate GPs
+\citep{gramacy2014lagp}), but found them unable to manage the scale of the IBEX
+data. Herein lies our main methodological contribution, using a modern sparse
+approach to surrogate modeling in a (Poisson) Bayesian inverse problem setting.
+The remainder of this section outlines the standard surrogate modeling toolkit,
+as a jumping-off point toward explaining both our main comparative (Section
+\ref{sec:gp_approx}) and our main methodological contribution.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.2 - Gaussian Process Surrogates for Computer Experiments:
@@ -492,7 +484,7 @@ prediction is simply a matter of MVN conditioning rules, or {\em kriging}
 (testing) output given known (training) values. Specifically, let $Y^M
 \sim \mathcal{N}_{n_m}(\mu(X^M), \Sigma(X^M))$, where $\mathcal{N}_{n_M}$
 indicates an $n_M$-variate MVN. Then, predicting at a new location $x$ (think
-proposed $u$-value and paired $X^F$) follows $Y(x) \mid Y(X^M) \sim
+proposed $u$-value and paired row in $X^F$) follows $Y(x) \mid Y(X^M) \sim
 \mathcal{N}(\hat{\mu}(x), \hat{\sigma}^2(x))$, where
 \begin{align}
 \hat{\mu}(x) &= \mu(x) + \Sigma(x, X^M) \Sigma(X^M)^{-1} (Y^M - \mu(X^M)) \label{eq:mvn_eq}\\
@@ -511,7 +503,7 @@ simulation experiments, they are utilized in geospatial statistics
 \citep{cressie2011statistics}, time series \citep{roberts2013gaussian}, and
 optimization \citep{jones1998efficient}.
 
-GP surrogates can be extremely effective. To illustrate, recall Figures
+GP surrogates are extremely effective. To illustrate, recall Figures
 \ref{f:toy_calib} and \ref{f:toy_calib_pois} in Section \ref{sec:gen_bayes_inv},
 where limited samples of computer model evaluations ($n < 50$) are shown. For
 these toy examples, we ``assumed'' we had unlimited access to the simulator. In
@@ -519,7 +511,7 @@ reality, we fit a GP surrogate to the model runs in the left panels. Therefore,
 ``model runs'' at posterior draws of $u$ in the center panels are not in fact
 evaluations of the model, but predictions from a fitted GP surrogate. Even so,
 the Metropolis sampler used those accurate (and fast) predictions to
-successfully recover the true model parameters.
+successfully recover the true model parameters $u^*$.
 
 One downside to working with MVNs whose dimension grows with the dimension of
 the data they are trained on, $n_M$, is that building $n_M \times n_M$ matrices,
@@ -527,21 +519,17 @@ and inverting (or otherwise decomposing) them, e.g., for Eq.~(\ref{eq:mvn_eq})
 requires storage and computation that is quadratic and cubic in $n_M$,
 respectively.  This limits $n_M$ to a few thousand at most in a Bayesian MCMC
 setting, necessitating approximations for GPs that curb this prohibitive cost.
-Further complicating this example is that our computer model output is
-functional, i.e. each response is a vector. In Section \ref{sec:gen_bayes_inv},
-each run of the simulator was evaluated on a grid ($X$) of 20 unique locations.
-Therefore, although the number of model runs is small ($n=40$), we are really
-modeling 800 ($40 \times 20$) responses. A training set of 800 data points is
-already stretching the limitations of a GP (decomposing an $800
-\times 800$ matrix). But consider the high-resolution simulated \textit{sky
-maps} in the middle and right panels of Figure \ref{f:fig1}. The two degree
-grid over latitude and longitude (under the hood the output is in spherical
-coordinates $x$, $y$, and $z$) results in ($> 16{,}000$ locations, or pixels)
-for each $u$-value. Combine that with $n=66$ unique $u$-values and our response
-vector will have greater than one million elements. Even if we used a smaller
-LHS space-filling design of size $n=15$ over the model parameters, the response
-vector would still consist of over 200,000 points. In that case, a GP could not
-be fit and provide predictions in a reasonable amount of time, prompting our next section.
+Further complicating this example is the density of the predictive grid $X$,
+resulting in a large input matrix $X^M = X \otimes U$. Consider the
+high-resolution simulated \textit{sky maps} in the middle and right panels of
+Figure \ref{f:fig1}. The two degree grid over latitude and longitude (under the
+hood the output is in spherical coordinates $x$, $y$, and $z$) results in ($>
+16{,}000$ locations, or pixels) for each $u$-value. Combine that with $n=66$
+unique $u$-values and our response vector will have greater than one million
+elements. Even if we used a smaller LHS space-filling design of size $n=15$ over
+the model parameters, the response vector would still consist of over 200,000
+points. In that case, a GP could not be fit and provide predictions in a
+reasonable amount of time, prompting the next topic.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.3 - Approximations
@@ -549,15 +537,16 @@ be fit and provide predictions in a reasonable amount of time, prompting our nex
 \label{sec:gp_approx}
 %------------------------------------------------------------------------------
 
-Many methods have been introduced to address the $O(n^3)$ computational burden
-associated with GPs. The prevalence of such methods has grown in the past decade
-as increased access to computing resources leads to larger and larger training
+Most of our modeling effort in this paper involves circumventing the $O(n^3)$
+computational bottleneck associated with GPs. The prevalence of methods
+addressing this issue has grown significantly in the past decade as increased
+access to computing resources leads to problems with larger and larger training
 datasets. These methods include, but are not limited to, fixed-rank kriging
 \citep{cressie2008fixed}, inducing points \citep{banerjee2008gaussian},
 compactly supported kernels \citep{kaufman2011efficient}, divide-and-conquer
 \citep{gramacy2015local}, and nearest neighbors \citep{datta2016hierarchical,
-wu2022variational}. Most of our modeling effort in this paper involves
-circumventing this cubic bottleneck, however there is a method tailor-made for
+wu2022variational}. Most of these are general enough to be used in a variety of
+different fields and applications. However, there is a method tailor-made for
 our Bayesian inverse problem setting when the likelihood (for $Y_F$) is
 Gaussian.
 
@@ -570,8 +559,8 @@ fit a GP surrogate model on such large data. \citeauthor{higdoncalib2008}'s key
 insight involved treating $X^F$ (or gridded $X$) -- i.e., the fixed reference
 set that a simulator realization is evaluated on for each candidate parameter
 $u$ -- as a feature of {\em output}, rather than conventionally an input. As a
-result, model and field data must share the same set of measurement locations,
-that is, $X = X^F$. In this way, $X^M$ remains small, including only the unique
+result, model and field data share the same set of measurement locations, that
+is, $X = X^F$. In this way, $X^M$ remains small, including only the unique
 combinations of unknown parameters $u$.
 
 Then, rather than keep track of all of those outputs $Y^M$, indexed over $X^F$
