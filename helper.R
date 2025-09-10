@@ -190,8 +190,8 @@ geo_to_spher_coords <- function(lat, lon) {
 # @return data frame containing observations in geographical coordinates
 ###############################################################################
 spher_to_geo_coords <- function(x, y, z) {
+  lon <- (180/pi)*atan2(y, x) + 180
   lat <- (180/pi)*asin(z)
-  lon <- (180/pi)*atan2(y, x)
   return(data.frame(lat, lon))
 }
 

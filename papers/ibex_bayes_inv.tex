@@ -610,12 +610,15 @@ evaluating the multivariate normal likelihood. The Vecchia approximation relies
 on the ability to write the likelihood function  as the product of univariate
 normal conditional likelihoods, as displayed in Equation \ref{eq:vecchia}.
 \citeauthor{vecchia1988estimation}'s critical observation was that one could
-approximate this function by reducing the size of the conditioning set $g(i)$
-to a size $m$, as specified by the user. This induces sparsity (i.e, a lot of
-zero entries) in the precision matrix (e.g. $\Sigma(X^M)^{-1})$ from Eq.~\ref{eq:mvn_eq}), potentially dramatically speeding up the
-evaluation of the likelihood for large values of $n$. The Vecchia approximation
-takes an operation of order $O(n^3)$ down to $O(nm^3)$, motivating small values
-of $m$.
+approximate this function by reducing the size of the conditioning set $g(i)$ to
+a much smaller size $m$, as specified by the user. This induces sparsity (i.e, a
+lot of zero entries) in the precision matrix (e.g. $\Sigma(X^M)^{-1})$ from
+Eq.~\ref{eq:mvn_eq}), potentially dramatically speeding up the evaluation of the
+likelihood for large values of $n$. \citet{katzfuss2021general} recently made
+this approximation popular by working out its representation in matrix form,
+allowing for broad use in a variety of different fields, particularly spatial
+statistics and computer experiments
+\citep{katzfuss2020vecchia,katzfuss2021general,zhang2022multi,sauer2023vecchia}.
 \begin{align}
 L(Y^M)&=\prod_{i=1}^n L(Y^M_i \mid Y^M_{g(i)})
 \hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and } g(i)=\{1, 2,
@@ -625,24 +628,40 @@ L(Y^M)&=\prod_{i=1}^n L(Y^M_i \mid Y^M_{g(i)})
 \label{eq:vecchia}
 \end{align}
 
-\citep{katzfuss2021general} have recently made this approximation popular by
-working out its representation in matrix form, allowing for broad use in a
-variety of different fields, such as spatial statistics and computer
-experiments
-\citep{katzfuss2020vecchia,katzfuss2021general,zhang2022multi,sauer2023vecchia}.
-Logically, as the size of $h(i)$ decreases, the evaluation of the likelihood
-speeds up, but the quality of the approximation is reduced. On the flip side,
-as one increases $m$, execution time grows, but the quality of the
-approximation improves. This continues until $n=m-1$, when the likelihood is no
-longer an approximation. For the IBEX simulator data, we find a value of $m <
-30$ to be more than sufficient, but the choice can be impacted by the nature of
-the data and one's computational budget. The conditioning set can be
-constructed in many ways, first by how the data itself is ordered, and second
-by how neighbors are selected. Many different orderings have been proposed
-\citep{guinness2018permutation}, such as a maxi-min distance strategy. We
-default to a random ordering of the training data and nearest-neighbors
-approach for selecting the conditioning set, which has been done previously
-\citep{sauer2023active} with successful results.
+The Vecchia approximation takes an operation of order $O(n^3)$ down to
+$O(nm^3)$, motivating small values of $m$. Logically, as the size of $h(i)$
+decreases, the evaluation of the likelihood speeds up, but the quality of the
+approximation is reduced. On the flip side, as one increases $m$, execution time
+grows, but the degree of accuracy improves. This continues until $n=m-1$, when
+the likelihood is no longer an approximation. For the IBEX simulator data, we
+find a value of $m < 30$ to be more than sufficient, but the choice can be
+impacted by the nature of the data and one's computational budget. Figure
+\ref{f:ibex_vecchia} illustrates examples of varying sizes of conditioning sets
+for a particular observation from the IBEX computer model. Note that more points
+are concentrated near the reference point in latitude and longitude, whereas the
+neighborhood is more spread out over the unknown model parameters. We elaborate
+on the impetus for this behavior in the next section. The conditioning set can
+be constructed in many ways, first by how the data itself is ordered, and
+second, by how neighbors are selected. Many different orderings have been
+proposed \citep{guinness2018permutation}, such as a maxi-min distance strategy.
+We default to a random ordering of the training data and nearest-neighbors
+approach for selecting the conditioning, taking a page from previous
+implementations \citep{sauer2023active,cooper2025modernizing}, which yields
+successful results, as we shall demonstrate shortly.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.4, trim=0 0 0 0,clip=TRUE]{ibex_nbr_latlon.pdf}
+\includegraphics[scale=0.47, trim=0 0 0 0,clip=TRUE]{ibex_nbr_params.pdf}
+\caption{Conditioning sets $h(i)$ in a multivariate normal likelihood
+(Eq.~\ref{eq:vecchia}) for a single observation $y_i^M$ using the Scaled Vecchia
+approximation. The left panel visualizes neighborhoods in grid space (i.e. $X$
+or $X^F$). Model parameter ($u$) space is displayed in the right panel. For each
+$h_j(i)$, all points from conditioning sets where $m < m_j$ are also included in
+$h_j(i)$.
+\label{f:ibex_vecchia}}
+\end{figure}
+
 
 %------------------------------------------------------------------------------
 %% SECTION 3.1 - Scaled Vecchia Approximation

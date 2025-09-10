@@ -197,6 +197,10 @@ fit_scaled=function(y,inputs,ms=c(30),trend='pre',X,nu=3.5,nug=0,scale='parms',
     fit$vcf=fit_vcf(fit,scale=scale,scorefun=vcf.scorefun)
   } else fit$vcf=1
   
+  fit$NNarray <- NNarray
+  fit$inputs.ord <- inputs.ord
+  fit$scales <- scales
+
   return(fit)
   
 }
