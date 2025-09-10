@@ -27,12 +27,18 @@ source('../vecchia_scaled.R')
 # @return list with posterior samples of calibration parameters, along with
 # likelihoods, proposals, acceptance rates, and covariances.
 ###############################################################################
-mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
+mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, m=25, end=NA, gpmeth="nn", nmcmcs=10000,
   step=NA, thrds=2, vb=FALSE, debug=FALSE, true_u=NA, true_logscl=NA) {
+
+  nx <- ncol(Xm)
+  nu <- ncol(Um)
+  p <- nx+nu
+  nf <- nrow(Xf)
+  nm <- nrow(Xm)
 
   id <- sample(100000:999999, 1)
   ## create objects to hold posterior samples and other metrics
-  u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(Um))
+  u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=nu)
   logscl <- logsclprops <- matrix(data=NA, nrow=nmcmcs, ncol=1)
 
   if (debug) {
@@ -41,9 +47,10 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   covars <- list()
   colnames(u) <- colnames(Um)
   lls <- rep(NA, nmcmcs)
-  XUm <- cbind(Xm, Um)
+  XUm <- as.matrix(cbind(Xm, Um))
+  colnames(XUm) <- c(paste0("X", 1:nx), paste0("U", 1:nu))
   if (gpmeth=="svecchia") {
-    fit <- fit_scaled(y=Zm, inputs=as.matrix(cbind(Xm, Um)), nug=1e-4, ms=25)
+    fit <- fit_scaled(y=Zm, inputs=XUm, nug=1e-4, ms=m)
   } else {
     fit <- NA
   }
@@ -51,8 +58,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
   if (any(is.na(true_u))) {
     u[1,] <- uprops[1,] <- apply(Um, 2, mean)
   } else {
-    u <- uprops <- matrix(rep(true_u, nrow(u)), ncol=length(true_u),
-     byrow=TRUE)
+    u <- uprops <- matrix(rep(true_u, nmcmcs), ncol=nu, byrow=TRUE)
   }
   if (is.na(true_logscl)) {
     logscl[1,] <- logsclprops[1,] <- 0
@@ -60,17 +66,16 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
     logscl <- rep(true_logscl, nrow(logscl))
   }
 
-  XX <- cbind(Xf, u[1,,drop=FALSE])
-  colnames(XX) <- c("x", "y", "z", "pmfp", "ratio")
-  ## TODO: value of m should be user specified
-  lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
-    predvar=FALSE)
+  XUf <- as.matrix(cbind(Xf, u[1,,drop=FALSE]))
+  colnames(XUf) <- c(paste0("X", 1:nx), paste0("U", 1:nu))
+
+  lhat_curr <- predictions_scaled(fit, XUf, m=m, joint=FALSE, predvar=FALSE)
   lls[1] <- sum(Zf*log(lhat_curr) - lhat_curr)
   ## establish covariance for proposals
   pvar <- ifelse(is.na(step), 0.1, step)
-  pcovar <- covars[[1]] <- matrix(c(pvar, 0, 0, pvar), nrow=2, byrow=TRUE)
-  pmin <- c(0, 0)
-  pmax <- c(1, 1)
+  pcovar <- covars[[1]] <- diag(pvar, nrow=nu)
+  pmin <- rep(0, nu)
+  pmax <- rep(1, nu)
   tic <- proc.time()[3]
 
   for (t in 2:nmcmcs) {
@@ -84,17 +89,13 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
         pcovar=pcovar)
       uprops[t,] <- up$prop
       if (vb) {
-        print(paste("Iteration proposal (calib params):", up$prop[1],
-         up$prop[2]))
+        print(paste0("Iteration proposal (U", 1:nu, "): ", up$prop))
       }
       ### Predict simulator output at u_prime using fitted surrogate
       if (gpmeth=="svecchia") {
         ## Use scaled Vecchia GP
-        XX <- cbind(Xf, up$prop)
-        colnames(XX) <- c("x", "y", "z", "pmfp", "ratio")
-        ## TODO: value of m should be user specified
-        lhatp <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
-          predvar=FALSE)
+        XUf[,(nx+1):p] <- matrix(rep(up$prop, nf), nrow=nf, byrow=TRUE)
+        lhatp <- predictions_scaled(fit, XUf, m=m, joint=FALSE, predvar=FALSE)
       } else {
         ## Use laGP
         d <- darg(NULL, cbind(Xm, Um))
@@ -109,10 +110,8 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, end=NA, gpmeth="nn", nmcmcs=10000,
       llp <- sum(Zf*log(Of$time*(lhatp*exp(logscl[t-1]) + Of$bg)) -
        Of$time*(lhatp*exp(logscl[t-1]) + Of$bg))
       ### Calculate prior on u (calibration parameters)
-      lpp <- dbeta(up$prop[1], shape1=1.1, shape2=1.1, log=TRUE) +
-       dbeta(up$prop[2], shape1=1.1, shape2=1.1, log=TRUE)
-      lp_curr <- dbeta(u[t-1,1], shape1=1.1, shape2=1.1, log=TRUE) +
-       dbeta(u[t-1,2], shape1=1.1, shape2=1.1, log=TRUE)
+      lpp <- sum(dbeta(up$prop, shape1=1.1, shape2=1.1, log=TRUE))
+      lp_curr <- sum(dbeta(u[t-1,], shape1=1.1, shape2=1.1, log=TRUE))
       ### Calculate Metropolis-Hastings ratio
       ### { L(xp|Y)*p(xp)*g(xt|xp) } / { L(xt|Y)*p(xt)*g(xp|xt) }
       lmh <- llp - lls[t-1] + lpp - lp_curr + up$pr
