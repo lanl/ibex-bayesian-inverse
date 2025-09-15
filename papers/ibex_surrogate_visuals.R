@@ -32,16 +32,11 @@ colnames(unique_runs) <- NULL
 pmfp_unit <- pmfps[ceiling(length(pmfps)/2)]
 ratio_unit <- ratios[floor(length(ratios)/2)]
 
-Xtrain <- model_data[model_data$parallel_mean_free_path != pmfp_unit |
-  model_data$ratio != ratio_unit,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
-Ytrain <- model_data[model_data$parallel_mean_free_path != pmfp_unit |
-  model_data$ratio != ratio_unit,c("blurred_ena_rate")]
-Xtest <- model_data[model_data$parallel_mean_free_path == pmfp_unit &
-  model_data$ratio == ratio_unit,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
-Ytest <- model_data[model_data$parallel_mean_free_path == pmfp_unit &
-  model_data$ratio == ratio_unit,c("blurred_ena_rate")]
+Xtrain <- model_data[,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
+Ytrain <- model_data[,c("blurred_ena_rate")]
 
 ## takes 2-3 minutes
+set.seed(2349837)
 svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=100)
 all_inputs <- data.frame(svecfit$inputs.ord)
 all_inputs$x <- all_inputs$x * diff(md_ranges$x) + md_ranges$x[1]
@@ -60,7 +55,7 @@ pmfp <- pmfp_unit * diff(md_ranges$parallel_mean_free_path) +
 ratio <- ratio_unit * diff(md_ranges$ratio) + md_ranges$ratio[1]
 
 ribbon_points <- which(all_inputs$lat > -30 & all_inputs$lat < 30 &
-  all_inputs$lon < 330 & all_inputs$lon > 250 &
+  all_inputs$lon < 300 & all_inputs$lon > 270 &
   all_inputs$parallel_mean_free_path==pmfp & all_inputs$ratio==ratio)
 ref_point <- ribbon_points[length(ribbon_points)]
 
@@ -68,29 +63,25 @@ plot_data <- model_data[model_data$parallel_mean_free_path==pmfp_unit &
   model_data$ratio==ratio_unit,]
 ref_neighbors <- all_inputs[svecfit$NNarray[ref_point,-1],]
 
-ggplot(plot_data, aes(x=nlon, y=lat)) +
-  geom_raster(aes(fill=blurred_ena_rate)) +
-  scale_fill_gradientn(colours=rev(rainbow(6)[c(6,1:5)])) +
-  scale_x_continuous(trans="reverse", breaks=seq(325, 25, by=-60),
-    label=c(60, 0, 300, 240, 180, 120)) +
-  theme_bw() +
-  theme(axis.ticks.y=element_blank(),
-        axis.title.x=element_text(margin=margin(t=10, r=0, b=0, l=0)),
-        legend.position="none") +
-  labs(x="Longitude", y="Latitude") +
-  annotate("rect", xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf,
-    alpha=0.85, fill="grey") +
-  geom_point(ref_neighbors[1:25,], mapping=aes(x=nlon, y=lat),
-    pch=21, color=1, bg=3) +
-  geom_point(ref_neighbors[26:50,], mapping=aes(x=nlon, y=lat),
-    pch=22, color=1, bg=4) +
-  geom_point(ref_neighbors[51:75,], mapping=aes(x=nlon, y=lat),
-    pch=23, color=1, bg=5) +
-  geom_point(ref_neighbors[76:100,], mapping=aes(x=nlon, y=lat),
-    pch=24, color=1, bg=6) +
-  geom_point(all_inputs[ref_point,], mapping=aes(x=nlon, y=lat),
-    pch=8, color=2, size=2, stroke=2)
-ggsave("ibex_nbr_latlon.pdf", dpi=320, width=7, height=5)
+lons <- sort(unique(plot_data$nlon))
+lats <- sort(unique(plot_data$lat))
+zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=plot_data)
+cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_nbr_latlon.pdf", width=7, height=5)
+image(x=lons, y=lats, z=zmat, col=cols(500), xlab="Longitude", xaxt="n",
+  ylab="Latitude", xlim=rev(range(lons)))
+axis(1, at=seq(325, 25, by=-60),
+  labels=c(60, 0, 300, 240, 180, 120))
+usr <- par("usr")  # plotting region: c(xmin, xmax, ymin, ymax)
+rect(usr[1], usr[3], usr[2], usr[4],
+     col = rgb(0.5, 0.5, 0.5, 0.8), border = NA)
+points(lat ~ nlon, data=ref_neighbors[1:25,], pch=21, col=1, bg=3)
+points(lat ~ nlon, data=ref_neighbors[26:50,], pch=22, col=1, bg=4)
+points(lat ~ nlon, data=ref_neighbors[51:75,], pch=23, col=1, bg=5)
+points(lat ~ nlon, data=ref_neighbors[76:100,], pch=24, col=1, bg=6)
+points(lat ~ nlon, data=all_inputs[ref_point,], pch=8, col=2, cex=2, lwd=3)
+dev.off()
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_nbr_params.pdf", width=7, height=5)
@@ -105,13 +96,8 @@ points(x=jitter(ref_neighbors[51:75,c("parallel_mean_free_path")]),
 points(x=jitter(ref_neighbors[76:100,c("parallel_mean_free_path")]),
   y=jitter(ref_neighbors[76:100,c("ratio")]), pch=24, col=1, bg=6)
 points(x=all_inputs[ref_point,c("parallel_mean_free_path")],
-  y=all_inputs[ref_point,c("ratio")], pch=8, col=2, cex=2)
-# tmp <- legend("topleft", c("point of interest", paste0("m=", c(25,50,75,100))),
-#   pch=c(8, 21:24), col=c(2, rep(1, 4)), pt.bg=c(NA, 3:6), plot=FALSE)
-# inset <- 0.02
-# rect(xleft=tmp$rect$left + 10, ybottom=tmp$rect$top + tmp$rect$h - 0.035,
-#   xright=tmp$rect$left + tmp$rect$w + inset, ytop=tmp$rect$top - inset,
-#   col="white", border=NA)
+  y=all_inputs[ref_point,c("ratio")], pch=8, col=2, cex=2, lwd=3)
 legend("topleft", c("point of interest", paste0("m=", c(25,50,75,100))),
-  pch=c(8, 21:24), col=c(2, rep(1, 4)), pt.bg=c(NA, 3:6), bg="white")
+  pch=c(8, 21:24), col=c(2, rep(1, 4)), pt.bg=c(NA, 3:6),
+  lwd=c(2, NA, NA, NA, NA), lty=rep(NA, 5), bg="white", cex=1.05)
 dev.off()

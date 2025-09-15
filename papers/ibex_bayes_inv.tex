@@ -582,8 +582,8 @@ and better compartmentalized for use in novel contexts, such as our own.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %------------------------------------------------------------------------------
-%% SECTION 3 - Vecchia Approximation
-\section{Vecchia Approximation}
+%% SECTION 3 - Vecchia Approximation for IBEX Simulations
+\section{Vecchia Approximated GPs for IBEX Simulations}
 \label{sec:vecchia}
 %------------------------------------------------------------------------------
 
@@ -639,34 +639,35 @@ parallel processing. Code that that we directly rely on is readily accessible at
 %------------------------------------------------------------------------------
 
 Figure \ref{f:ibex_vecchia} illustrates examples of conditioning sets created
-by the Scaled Vecchia approximation in the context of IBEX. Neighborhoods of
-size $m \in \{25,50,75,100\}$ are generated for a particular observation
-$Y_i^M$ (denoted by a red star) from the IBEX computer model. It's difficult to
-visualize in higher dimensions, so we break the input space down into separate
-2d plots, one for grid space (latitude/longitude) and one for model parameter
-space ($u$). But to be clear, points of the same shape and color in both plots
-are elements of the same overall conditioning set. For each conditioning set
-$h_j(i)$, all points from sets where $m < m_j$ are also included in $h_j(i)$.
-That is, green circles from the neighborhood with $m=25$ would also be part of
-the conditioning set with blue squares ($m=50$). For reference, we've overlaid
-the points in grid space on a grayed-out simulated sky map corresponding with
-the observation of interest. Note that more points are concentrated near the
-reference point in latitude and longitude, whereas the neighborhood is more
-spread out over the unknown model parameters. This behavior is present in all
-conditioning sets in IBEX. Therefore, observations are depending on information
-in close proximity in grid space, but potentially distant in $u$-space.
-Furthermore, as $m$ grows, additional points in grid space are mostly farther
-away than those already included, but we don't observe the same trend in
-$u$-space.
+by the Scaled Vecchia approximation in the context of IBEX and its associated
+simulator (we will circle back to the data collected by the satellite in
+Section \ref{sec:sims}). Neighborhoods of size $m \in \{25,50,75,100\}$ are
+generated for a particular simulator observation $Y_i^M$ (denoted by a red
+star) from the IBEX computer model. It's difficult to visualize in higher
+dimensions, so we break the input space down into separate 2d plots, one for
+grid space (latitude/longitude) and one for model parameter space ($u$). But to
+be clear, points of the same shape and color in both plots are elements of the
+same overall conditioning set. For each conditioning set $h_j(i)$, all points
+from sets where $m < m_j$ are also included in $h_j(i)$. That is, green circles
+from the neighborhood with $m=25$ would also be part of the conditioning set
+with blue squares ($m=50$). For reference, we've overlaid the points in grid
+space on a grayed-out simulated sky map corresponding with the observation of
+interest. Note that more points are concentrated near the reference point in
+latitude and longitude, whereas the neighborhood is more spread out over the
+unknown model parameters. This behavior is present in all conditioning sets in
+IBEX. Therefore, observations are depending on information in close proximity
+in grid space, but potentially distant in $u$-space. Furthermore, as $m$ grows,
+additional points in grid space are mostly farther away than those already
+included, but we don't observe the same trend in $u$-space.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.4, trim=0 0 0 0,clip=TRUE]{ibex_nbr_latlon.pdf}
-\includegraphics[scale=0.47, trim=0 0 0 0,clip=TRUE]{ibex_nbr_params.pdf}
+\includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_latlon.pdf}
+\includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_params.pdf}
 \caption{Conditioning sets $h(i)$ in a multivariate normal likelihood
 (Eq.~\ref{eq:vecchia}) for a single observation $Y_i^M$ using the Scaled Vecchia
 approximation. The left panel visualizes neighborhoods in grid space (i.e. $X$
-or $X^F$). Model parameter ($u$) space is displayed in the right panel.
+or $X^F$). Model parameter ($u$) space is displayed in the right panel, with jitter added, allowing all points to be visible.
 \label{f:ibex_vecchia}}
 \end{figure}
 
