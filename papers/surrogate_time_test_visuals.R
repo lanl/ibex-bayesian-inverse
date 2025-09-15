@@ -25,8 +25,9 @@ exp_pows <- 7:44
 matplot(x=exp_pows, y=fit_times_ord[1:length(exp_pows),]/60, type="l", ylim=c(0, 30),
   xlab="dim of response = 10 + 1.25^x", ylab="fitting time (minutes)",
   lwd=3)
-legend("topleft", c("SVEC (m=25)", "deepgp", "SEPIA (pc=3)", "laGP"),
-  col=1:4, lty=1:4, lwd=2, cex=0.75)
+legend("topleft", c("SVEC (m=25)", "deepgp",
+  expression(SEPIA~"("*n[k]*"="*3*")"), "laGP"),
+  col=1:4, lty=1:4, lwd=2, cex=1.05)
 dev.off()
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
@@ -44,7 +45,8 @@ long_times_ord <- surr_total_times[,c(1:4,7:10)]
 matplot(x=large_ns, y=long_times_ord[(length(exp_pows)+1):nrow(long_times_ord),]/60, type="l",
   xlab="dim of response", ylab="fitting + prediction time (minutes)",
   lwd=3, col=rep(c(1,3), each=4), lty=rep(1:4, 2))
-legend("topleft", c("SVEC (m=25,50,75,100)", "SEPIA (pc=3,4,5,6)"), col=c(1,3), lty=1, lwd=2, cex=0.75)
+legend("topleft", c("SVEC (m=25,50,75,100)", expression(SEPIA~"("*n[k]*"=3,4,5,6)")), col=c(1,3), lty=1, lwd=2, cex=1.05,
+  bg="white")
 dev.off()
 
 ## Visuals for varying the number of computer experiment runs
@@ -72,8 +74,8 @@ ns <- seq(10, 100, by=10)
 matplot(x=ns, y=fit_times_ord[1:length(ns),]/60, type="l", ylim=c(0, 30),
   xlab="# simulator runs", ylab="fitting time (minutes)",
   lwd=3)
-legend("topright", c("SVEC (m=25)", "deepgp", "SEPIA (pc=3)", "laGP"),
-  col=1:4, lty=1:4, lwd=2, cex=0.75)
+legend("topright", c("SVEC (m=25)", "deepgp", expression(SEPIA~"("*n[k]*"=3)"), "laGP"),
+  col=1:4, lty=1:4, lwd=2, cex=1.05, bg="white")
 dev.off()
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
@@ -94,6 +96,6 @@ matplot(x=large_ns, y=long_times_ord[(length(ns)+1):nrow(long_times_ord),]/60, t
   lwd=3, col=rep(c(1,3), each=4), lty=rep(1:4, 2), ylim=c(0, 30))
 lines(x=large_ns, y=surr_total_times[(length(ns)+1):nrow(surr_total_times),5]/60,
   lwd=3, col=4, lty=4)
-legend("topright", c("SVEC (m=25,50,75,100)", "SEPIA (pc=3,4,5,6)"), col=c(1,3),
-  lty=1, lwd=2, cex=0.75)
+legend("topright", c("SVEC (m=25,50,75,100)", expression(SEPIA~"("*n[k]*"=3,4,5,6)")), col=c(1,3),
+  lty=1, lwd=2, cex=1.05, bg="white")
 dev.off()

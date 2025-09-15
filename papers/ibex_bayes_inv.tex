@@ -599,15 +599,16 @@ a much smaller size $m$, as specified by the user. This induces sparsity (i.e, a
 lot of zero entries) in the precision matrix (e.g. $\Sigma(X^M)^{-1})$ from
 Eq.~\ref{eq:mvn_eq}, potentially dramatically speeding up the evaluation of the
 likelihood for large values of $n_m$. \citet{katzfuss2021general} recently made
-this approximation popular by working out its representation in matrix form,
-allowing for broad use in a variety of different fields where GPs are employed,
-particularly spatial statistics and computer experiments
-\citep{katzfuss2020vecchia,katzfuss2021general,zhang2022multi,sauer2023vecchia}.
-\begin{align}
-\mathcal{L}(Y^M)&=\prod_{i=1}^n \mathcal{L}(Y^M_i \mid Y^M_{g(i)})
+this approximation popular by working out its representation in matrix form and
+furnishing automatic neighborhood sets and code, allowing for broad use in a
+variety of different fields where GPs are employed, particularly spatial
+statistics and computer experiments
+\citep{guinness2018permutation,katzfuss2020vecchia,katzfuss2021general,zhang2022multi,sauer2023vecchia}.
+\begin{align},
+\mathcal{L}(Y^M)&=\prod_{i=1}^{n_m} \mathcal{L}(Y^M_i \mid Y^M_{g(i)})
 \hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and }
 g(i)=\{1, 2, \ldots, i-1\} \nonumber \\
-&\approx \prod_{i=1}^{n}\mathcal{L}(Y^M_i \mid Y^M_{h(i)}) \hspace{0.3em} \mbox{
+&\approx \prod_{i=1}^{n_m}\mathcal{L}(Y^M_i \mid Y^M_{h(i)}) \hspace{0.3em} \mbox{
 where } h(i) \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| =
 \ll n
 \label{eq:vecchia}
@@ -620,19 +621,43 @@ approximation is reduced. On the flip side, as one increases $m$, execution time
 grows, but the degree of accuracy improves. This continues until $n=m-1$, when
 the likelihood is no longer an approximation. For the IBEX simulator data, we
 find a value of $m < 30$ to be more than sufficient, but the choice can be
-impacted by the nature of the data and one's computational budget. Figure
-\ref{f:ibex_vecchia} illustrates examples of varying sizes of conditioning sets
-for a particular observation from the IBEX computer model. Note that more points
-are concentrated near the reference point in latitude and longitude, whereas the
-neighborhood is more spread out over the unknown model parameters. We elaborate
-on the impetus for this behavior in the next section. The conditioning set can
-be constructed in many ways, first by how the data itself is ordered, and
-second, by how neighbors are selected. Many different orderings have been
-proposed \citep{guinness2018permutation}, such as a maxi-min distance strategy.
-We default to a random ordering of the training data and nearest-neighbors
-approach for selecting the conditioning set, taking a page from previous
-implementations \citep{sauer2023active,cooper2025modernizing}, which yields
-successful results, as we shall demonstrate shortly.
+impacted by the nature of the data and one's computational budget.
+
+Several implementations of the Vecchia approximation exist, but we employ one
+that has risen to the top in terms of predictive performance and computational
+thriftiness in the context of computer experiments, that is, the Scaled Vecchia
+approximation introduced by \citet{scaledvecchiakatzfuss2022}. We refer you to
+their manuscript for a more in-depth explanation of their work, but the primary
+draw for using it as a surrogate for the IBEX simulator is the open source
+implementation and packaging that leverages modern sparse matrix libraries and
+parallel processing. Code that that we directly rely on is readily accessible at
+\url{https://github.com/katzfuss-group/scaledVecchia}.
+
+%------------------------------------------------------------------------------
+%% SECTION 3.1 - Illustrating on IBEX
+\subsection{Illustrating on IBEX}
+\label{sec:ibex_illustrate}
+%------------------------------------------------------------------------------
+
+Figure \ref{f:ibex_vecchia} illustrates examples of conditioning sets created by
+the Scaled Vecchia approximation in the context of IBEX. Neighborhoods of size
+$m \in \{25,50,75,100\}$ are generated for a particular observation $y_i^M$
+(denoted by a red star) from the IBEX computer model. It's difficult to
+visualize in higher dimensions, so we break the input space down into separate
+2d plots, one for grid space (latitude/longitude) and one for model parameter
+space ($u$). But points of the same shape and color are elements of the same
+overall conditioning set. Additionally, for reference we've overlaid the points
+in grid space on the simulated sky map corresponding with the observation of
+interest. For each conditioning set $h_j(i)$, all points from sets where $m <
+m_j$ are also included in $h_j(i)$. That is, green circles from the neighborhood
+with $m=25$ would also be part of the conditioning set with blue squares
+($m=50$). Note that more points are concentrated near the reference point in
+latitude and longitude, whereas the neighborhood is more spread out over the
+unknown model parameters. Therefore, observations are depending on information
+in close proximity in grid space, but potentially distant in $u$-space.
+Furthermore, as $m$ grows, additional points in grid space are mostly farther
+away than those already included, but we don't observe the same trend in
+$u$-space.
 
 \begin{figure}[ht!]
 \centering
@@ -641,40 +666,24 @@ successful results, as we shall demonstrate shortly.
 \caption{Conditioning sets $h(i)$ in a multivariate normal likelihood
 (Eq.~\ref{eq:vecchia}) for a single observation $y_i^M$ using the Scaled Vecchia
 approximation. The left panel visualizes neighborhoods in grid space (i.e. $X$
-or $X^F$). Model parameter ($u$) space is displayed in the right panel. For each
-$h_j(i)$, all points from conditioning sets where $m < m_j$ are also included in
-$h_j(i)$.
+or $X^F$). Model parameter ($u$) space is displayed in the right panel.
 \label{f:ibex_vecchia}}
 \end{figure}
 
-
-%------------------------------------------------------------------------------
-%% SECTION 3.1 - Scaled Vecchia Approximation
-\subsection{Scaled Vecchia Approximation}
-\label{sec:vecchia_ex}
-%------------------------------------------------------------------------------
-
-Several implementations of the Vecchia approximation exist, but we employ one
-that has risen to the top in terms of predictive performance and computational
-thriftiness in the context of computer experiments, that is, the Scaled Vecchia
-approximation introduced by \citet{scaledvecchiakatzfuss2022}. We refer you to
-their paper for a more in-depth explanation of their work. But the main crux of
-this implementation is the pre-scaling of inputs by dimension \textit{before}
-the creation of conditioning sets based on nearest neighbors.
-\citeauthor{scaledvecchiakatzfuss2022} point out that a response can change at
-varying rates by dimension, and therefore predictions should be made based on
-neighborhoods that account for this heterogeneity in each dimension's impact.
-Scaling the data beforehand factors in these dynamics. In fact, this is why
-Figure \ref{f:ibex_vecchia} shows conditioning sets tightly clustered in
-latitude and longitude, but broadly dispersed in $u$. Internally, Scaled Vecchia
-recognizes that the response surface changes more rapidly in grid space than in
-the model parameters. Therefore, a reference point shares much in common with
-observations far away in model parameter space, but needs information about the
-nature of the response surface from latitudes and longitudes in close proximity.
-This simple yet innovative idea has propelled Scaled Vecchia to prominence in
-the computer experiments community. Publicly available code for
-\citeauthor{scaledvecchiakatzfuss2022}'s implementation that we directly rely on
-is readily accessible at \url{https://github.com/katzfuss-group/scaledVecchia}.
+We start evaluation of Scaled Vecchia's performance on the IBEX simulator with a
+visual assessment. Scientists at LANL have provided us with 66 unique model
+runs, each producing an image of 16,200 points, or pixels. Figure
+\ref{f:ibex_sim_surr} shows four of the actual simulation outputs (corner panels
+displayed with thin, solid borders). A Scaled Vecchia GP surrogate is fit to all
+66 simulated runs. Then, we predict the output for five unobserved combinations
+of the model parameters that fall in between the actual runs shown. These are
+depicted in the cross of Figure \ref{f:ibex_sim_surr}, those panels with
+thicker, dashed borders. To the naked eye, these predictive surfaces appear to
+have been generated by the computer model itself. Moving left to right, or top
+to bottom, the surfaces change gradually and as one would expect. But we are not
+satistfied with simply passing the eye test, so we turn to empirical measures
+and show that our surrogate fit is extremely accurate and outperforms other
+current methods.
 
 \begin{figure}[ht!]
 \centering
@@ -696,37 +705,42 @@ the four actual simulator runs shown.
 \label{f:ibex_sim_surr}}
 \end{figure}
 
-Next we assess Scaled Vecchia's performance on the IBEX simulator, first with a
-visual example. Scientists at LANL have provided us with 66 unique model runs,
-each producing an image of 16,200 points or pixels. Figure \ref{f:ibex_sim_surr}
-shows four of the actual simulation outputs (corner panels displayed with thin,
-solid borders). A Scaled Vecchia GP surrogate was fit to all 66 simulated runs.
-Then, we predict the output for five unobserved combinations of the model
-parameters that fall in between the actual runs shown. These are depicted in the
-cross of Figure \ref{f:ibex_sim_surr}, those panels with thicker, dashed
-borders. To the naked eye, these predictive surfaces appear to have been
-generated by the simulator itself. Moving left to right, or top to bottom, the
-surfaces change gradually and as one would expect. But we are not satisfied with
-simply passing the eye test, so we turn to empirical results and show that our
-surrogate fit is extremely accurate and outperforms other current methods.
-
 %------------------------------------------------------------------------------
-%% SECTION 3.1.1 - Assessing predictive accuracy
-\subsubsection{Assessing predictive accuracy}
-\label{sec:surr_accuracy}
+%% SECTION 3.2 - Empirical Comparison
+\subsection{Empirical Comparison}
+\label{sec:emp_comp}
 %------------------------------------------------------------------------------
 
 In order to validate performance of our surrogate, we conduct a simple
 hold-one-out experiment. For each iteration, we fit a Scaled Vecchia
 approximated GP surrogate on 65 of the $n=66$ model runs available. Then, we
-predict at the held out combination of model parameters. We then evaluate how
+predict at the held out model parameter. We then evaluate how
 well the model did using two metrics, root mean square error (RMSE) and the
 continuous ranked probability score (CRPS) proposed by
 \citet{gneiting2007strictly}. For the purpose of comparison, we conduct the same
 step for three competitors: {\sf R} packages {\sf laGP} \citep{gramacy2014lagp}
 and {\sf deepgp} \citep{deepGP}, and the current ``status-quo,'' SEPIA
-\citep{gattiker2020lanl}, implemented in {\sf Python}. Figure
-\ref{f:ibex_surr_metrics} displays the results of this bakeoff.
+\citep{gattiker2020lanl}, implemented in {\sf Python}.
+
+Figure \ref{f:ibex_surr_metrics} displays the accuracy results of this bakeoff,
+with time coming next. For now, just pay attention to left-hand side of each
+panel, where $n_k=3$ for SEPIA and $m=25$ for Scaled Vecchia. We'll come back to
+the others in a moment. It is obvious that the Scaled Vecchia approximation
+outperforms {\sf laGP} and {\sf deepgp} in both RMSE and CRPS. We gave {\sf
+laGP} the default neighborhood size of 50, but the predictions are made based
+only on observations local (without pre-scaling the inputs) to the predictive
+location, perhaps preventing understanding of global trends in the surface. {\sf
+deepgp} is fully Bayesian, utilizing MCMC to sample from the posterior
+distribution. But that comes with a cost. Because of the significant
+computational burden, we were only able to run 1000 MCMC iterations, burning in
+500 and thinning by 10. We also used the built-in Vecchia approximation with a
+conditioning set size of $m=10$. Even with these limitations, {\sf deepgp} still
+took a considerable amount of time, and likely contributed to it's poor
+performance. SEPIA performed similarly to our Scaled Vecchia approximation,
+illustrating why it has had such staying power over the past two decades. As a
+practitioner, it appears to be a toss-up between these two methods for which to
+use. But that's not the entire story.
+
 
 \begin{figure}[ht!]
 \centering
@@ -737,44 +751,17 @@ RMSE and CRPS.
 \label{f:ibex_surr_metrics}}
 \end{figure}
 
-For now, just pay attention to left-hand side of each panel, where $pc=3$ for
-SEPIA and $m=25$ for Scaled Vecchia. We'll come back to the others in a moment.
-It is obvious that the Scaled Vecchia approximation outperforms {\sf laGP} and
-{\sf deepgp} in both RMSE and CRPS. We gave {\sf laGP} the default neighborhood
-size of 50, but the predictions are made based only on observations local
-(without pre-scaling the inputs) to the predictive location, perhaps preventing
-understanding of global trends in the surface. {\sf deepgp} is fully Bayesian,
-utilizing MCMC to sample from the posterior distribution. But that comes with a
-cost. Because of the significant computational burden, we were only able to run
-1000 MCMC iterations, burning in 500 and thinning by 10. We also used the
-built-in Vecchia approximation with a conditioning set size of $m=10$. Even with
-these limitations, {\sf deepgp} still took a considerable amount of time, and
-likely contributed to it's poor performance. SEPIA performed similarly to our
-Scaled Vecchia approximation, illustrating why it has had such staying power
-over the past two decades. As a practitioner, it appears to be a toss-up between
-these two methods for which to use. But that's not the entire story.
-
-%------------------------------------------------------------------------------
-%% SECTION 3.1.2 - Assessing computational expense
-\subsubsection{Assessing computational expense}
-\label{sec:surr_timing}
-%------------------------------------------------------------------------------
-
-% Additionally, the number of runs can be varied, based on the
-% expense of a simulation run. To evaluate this, we conducted two more
-% experiments.
-
-In addition to comparing accuracy and uncertainty quantification through RMSE
-and CRPS, we aimed to evaluate the speed of execution for all competitors
-involved. Two factors exist that contribute to a computational bottleneck: the
-dimension of the simulator response, which has been the main focus of our work,
-and the number of runs of the computer model available for training. To test
-scaling dimension, we varied the dimensionality of the response from 200 to
-20,000, while keeping the number of runs constant. For the two methods that are
-most equipped for large dimensions (Scaled Vecchia and SEPIA), we attempt to
-stretch their capacity by cranking up the length of the response vector from
-20-75K, with steps of 5K. At each dimension size, we ran five Monte Carlo
-iterations for each method and recorded the elapsed time.
+Figures \ref{f:ibex_surr_timing_dim}-\ref{f:ibex_surr_timing_size} summarize
+compute times, in a similar experiment but varying data size. Two factors exist
+that contribute to a computational bottleneck: the dimension of the simulator
+response, which has been the main focus of our work, and the number of runs of
+the computer model available for training. To test scaling dimension, we varied
+the dimensionality of the response from 200 to 20,000, while keeping the number
+of runs constant. For the two methods that are most equipped for large
+dimensions (Scaled Vecchia and SEPIA), we attempt to stretch their capacity by
+cranking up the length of the response vector from 20-75K, with steps of 5K. At
+each dimension size, we ran five Monte Carlo iterations for each method and
+recorded the elapsed time.
 
 \begin{figure}[ht!]
 \centering
@@ -787,44 +774,44 @@ iterations for each method and recorded the elapsed time.
 
 Results in Figure \ref{f:ibex_surr_timing_dim} make it apparent that Scaled
 Vecchia and SEPIA are both well-suited for increasing dimensionality in the
-response. {\sf deepgp}'s need to decompose an $n \times n$ matrix at each MCMC
-iteration, even aided by the Vecchia approximation, causes it's cost to quickly
-grow as dimensionality expands. {\sf laGP}, while built for prediction with
-large-scale datasets, does better but is unable to keep pace at a certain point,
-likely due to the need to fit a mounting number of local GPs. Reducing the
-neighborhood size (set to the default of 50 in our experiment) for {\sf laGP}
-could certainly aid in the computation expense, but that would further degrade
-it's performance, which already lags being Scaled Vecchia and SEPIA (Figure
-\ref{f:ibex_surr_metrics}). The comparison between Scaled Vecchia and SEPIA is
-more nuanced. In the right panel of Figure \ref{f:ibex_surr_timing_dim}, we see
-that for a fixed value of $m$, Scaled Vecchia's runtime increases linearly with
-expanded dimensionality, as advertised by \citet{katzfuss2021general}. For a
-fixed number of principal components, SEPIA's execution time increases only
-slightly as dimension expands, showcasing it's utility. However, for response
-dimension less than 75K, Scaled Vecchia with $m=25$ still executes faster. And
-that may be the largest value of $m$ we need. Referring back to Figure
-\ref{f:ibex_surr_metrics}, it's clear that increasing conditioning set size or
-number of principal components doesn't significant improve performance. It must
-also be pointed out that the IBEX simulator surface is not particularly complex
-over the model parameters, allowing SEPIA to perform well with a low number of
-principal components. That may not be the case in other situations, requiring a
-more principal components and by extension a heavier computational load. We'll
-see one more comparison that illustrates Scaled Vecchia's superior performance
-in our next experiment.
+response. {\sf deepgp}'s need to decompose an $n_m \times n_m$ matrix at each
+MCMC iteration, even aided by the Vecchia approximation, causes it's cost to
+quickly grow as dimensionality expands. {\sf laGP}, while built for prediction
+with large-scale datasets, does better but is unable to keep pace at a certain
+point, likely due to the need to fit a mounting number of local GPs. Reducing
+the neighborhood size (set to the default of 50 in our experiment) for {\sf
+laGP} could certainly aid in the computation expense, but that would further
+degrade it's performance, which already lags being Scaled Vecchia and SEPIA
+(Figure \ref{f:ibex_surr_metrics}). The comparison between Scaled Vecchia and
+SEPIA is more nuanced. In the right panel of Figure
+\ref{f:ibex_surr_timing_dim}, we see that for a fixed value of $m$, Scaled
+Vecchia's runtime increases linearly with expanded dimensionality, as advertised
+by \citet{katzfuss2021general}. For a fixed number of principal components,
+SEPIA's execution time increases only slightly as dimension expands, showcasing
+it's utility. However, for response dimension less than 75K, Scaled Vecchia with
+$m=25$ still executes faster. And that may be the largest value of $m$ we need.
+Referring back to Figure \ref{f:ibex_surr_metrics}, it's clear that increasing
+conditioning set size or number of principal components doesn't significant
+improve performance. It must also be pointed out that the IBEX simulator surface
+is not particularly complex over the model parameters, allowing SEPIA to perform
+well with a low number of principal components. That may not be the case in
+other situations, requiring a more principal components and by extension a
+heavier computational load. We'll see one more comparison that illustrates
+Scaled Vecchia's superior performance in our next experiment.
 
 %% NEXT EXPERIMENT
-Here we consider modifying the size of the training dataset (i.e, the number of
-simulator runs $n$). SEPIA was specifically built for computer experiments with
-high-dimensional output. While it clearly performs well in these situations,
-it's also fairly inflexible to other contexts, such as a large number of
-simulation runs. Scaled Vecchia does not face this hurdle, as it treats both
-high-dimensional output and large-scale univariate datasets similarly, as a
-univariate response. We show this robustness in our next bakeoff. Our experiment
-is set up similar to the previous one, but we keep the dimensionality of the
-response at 10K, while sliding the number of simulator runs from 10 to 100.
-Again, each method is run over five MC iterations for each value of $n$. For the
-higher performing methods, we push the campaign size up further up $n=2500$.
-Results are shown in Figure \ref{f:ibex_surr_timing_size}.
+Results are shown in Figure \ref{f:ibex_surr_timing_size} from modifying the
+size of the training dataset (i.e, the number of simulator runs $n$). SEPIA was
+specifically built for computer experiments with high-dimensional output. While
+it clearly performs well in these situations, it's also fairly inflexible to
+other contexts, such as a large number of simulation runs. Scaled Vecchia does
+not face this hurdle, as it treats both high-dimensional output and large-scale
+univariate datasets similarly, as a univariate response. We show this robustness
+in our next bakeoff. Our experiment is set up similar to the previous one, but
+we keep the dimensionality of the response at 10K, while sliding the number of
+simulator runs from 10 to 100. Again, each method is run over five MC iterations
+for each value of $n$. For the higher performing methods, we push the campaign
+size up further up $n=2500$.
 
 \begin{figure}[ht!]
 \centering
