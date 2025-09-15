@@ -3,7 +3,8 @@ source('../vecchia_scaled.R')
 
 library(ggplot2)
 
-## Visuals for varying the dimension of the response
+## Visuals for comparing simulated counts, "true" simulator output
+## estimated simulator output via surrogate predictions
 res <- readRDS("sim_calib_results_20250902.rds")
 single_index <- NA
 single_pmfp <- 1750
@@ -89,3 +90,96 @@ ggplot(pred_data, aes(x=nlon, y=lat)) +
       legend.spacing.y=unit(5.5, 'mm')) +
     labs(x="", y="Latitude", fill="ENA rate\n")
 ggsave("ibex_sim_est.pdf", dpi=320, width=4, height=3.25)
+
+## Visuals for bivariate posteriors of model parameters
+library(MASS)
+library(coda)
+
+ind_files <- FALSE
+if (ind_files) {
+  calib_files <- list.files(pattern="mcmc_res_esa4_nmcmc*")
+  res <- list()
+  for (i in 1:length(calib_files)) {
+    iter_res <- readRDS(calib_files[[i]])
+    res[[i]] <- list(
+      u=data.frame(pmfp=iter_res$mcmc_res$u[,1]*2500+500,
+        ratio=iter_res$mcmc_res$u[,2]*(0.1-0.001)+0.001),
+      truth=iter_res$params)
+  }
+} else {
+  res <- readRDS("sim_calib_results_20250915.rds")
+}
+
+pmfps <- seq(750, 2750, by=250)
+ratios <- c(0.005, 0.01, 0.02, 0.05)
+pmfp_rat_grid <- data.frame(matrix(NA, ncol=2, nrow=length(res)))
+colnames(pmfp_rat_grid) <- c("pmfp", "ratio")
+for (i in 1:length(res)) {
+  pmfp_rat_grid[i,1] <- res[[i]]$truth[1]
+  pmfp_rat_grid[i,2] <- res[[i]]$truth[2]
+}
+pmfp_labs <- seq(500, 2500, by=500)
+ratio_labs <- seq(0.02, 0.1, length=5)
+
+pdf("sim_bayes_inv_res.pdf", width=7, height=5)
+par(mfrow=c(length(ratios), length(pmfps)),
+  mar=c(0.25,0.25,0.25,0.15), oma=c(7,5,0.5,0.5))
+for (i in 1:length(ratios)) {
+  for (j in 1:length(pmfps)) {
+    yticks <- j == 1
+    xticks <- i == length(ratios)
+
+    r <- ratios[i]
+    p <- pmfps[j]
+
+    index <- which(pmfp_rat_grid$pmfp==p & pmfp_rat_grid$ratio==r)
+
+    iter_pmfp <- res[[index]]$u[seq(10001, 20000, by=10),1]
+    iter_ratio <- res[[index]]$u[seq(10001, 20000, by=10),2]
+
+    xy <- cbind(iter_pmfp, iter_ratio)
+    H <- Hpi(xy)
+    fhat <- kde(x=xy, H=H, xmin=c(500, 0.001), xmax=c(3000, 0.1),
+      compute.cont=TRUE)
+    dx <- diff(fhat$eval.points[[1]][1:2])
+    dy <- diff(fhat$eval.points[[2]][1:2])
+
+    # Flatten density values
+    dens_vals <- sort(as.vector(fhat$estimate), decreasing=TRUE)
+    cum_prob <- cumsum(dens_vals)*dx*dy
+
+    # Threshold for 95% HPD
+    thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
+    if (is.na(thresh)) {
+      thresh <- dens_vals[length(cum_prob)]
+    }
+
+    cls <- contourLines(fhat$eval.points[[1]],
+      fhat$eval.points[[2]], fhat$estimate, levels=thresh)
+
+    # If multiple, keep the largest (by number of vertices)
+    largest <- cls[[which.max(sapply(cls, function(cl) length(cl$x)))]]
+
+    # Plot contour at HPD threshold
+    image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
+      col=rev(heat.colors(128)), xaxt="n", yaxt="n", xlab="", ylab="", main="",
+      xlim=c(500, 3000), ylim=c(0, 0.1))
+    abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
+    abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
+    if (xticks) {
+      axis(1, labels=FALSE, tck=-0.05)
+      text(pmfp_labs, par("usr")[3]-0.0075, labels=pmfp_labs, srt=90, adj=1, xpd=NA,
+        cex=1.05)
+    }
+    if (yticks) {
+      axis(2, labels=FALSE, tck=-0.05)
+      text(x=par("usr")[1]-225, y=ratio_labs, labels=ratio_labs, adj=1,
+        cex=1.05, xpd=NA)
+    }
+    lines(largest$x, largest$y, lty=2)
+    points(x=p, r, col=4, pch=8, cex=1.25, lwd=1.25)
+  }
+}
+mtext("Parallel Mean Free Path", side=1, outer=TRUE, line=4.25, cex=1.2)
+mtext("Ratio", side=2, outer=TRUE, line=3.0, cex=1.2)
+dev.off()
