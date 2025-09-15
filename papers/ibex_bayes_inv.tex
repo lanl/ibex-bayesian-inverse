@@ -360,12 +360,12 @@ We thereby extend Eq.~(\ref{eq:inv_bayes_mod}) as follows:
 Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
 \\ u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p,
 \end{align}
-where $e(X^F)$ represents exposure time, or the duration the satellite points at
+where $e(X^F)$ represents the duration (in seconds) the satellite points at
 specific locations in the sky. $\lambda(X^F)$ denotes the rate at which ENA
 particles are generated for rows (latitude/longitude pairs) in $X^F$. Sampling
 from the posterior could proceed via Metroplis as in Algorithm \ref{alg:gibbs}.
-For the IBEX field data, we evaluate a Poisson likelihood given an exposure time
-for each observation and a mean surface determined by a simulator
+For the IBEX field data, we evaluate a Poisson likelihood given an exposure
+time for each observation and a mean surface determined by a simulator
 $m(\cdot,\cdot)$ at proposed values of $u$, although we believe it would be
 straightforward to accommodate other observational models.
 \begin{algorithm}[ht]
@@ -373,15 +373,15 @@ straightforward to accommodate other observational models.
 Initialize $u^{(0)}$. \\
 Set $\lambda(X^F)^{(0)} = m(u^{(0)}, X^F)$. \\
 Compute and store $\mathcal{L}(Y^F|\lambda(X^F)^{(0)}, e(X^F)) =
-\prod_{i=1}^{n_f} f(y_i|\lambda_i, e_i)$, \\
+\prod_{i=1}^{n_F} f(y_i|\lambda_i, e_i)$, \\
 \For{$t = 1, \dots, T$}{
   Propose new model parameters: $u^{(t)} \sim q(u^{(t)} \mid u^{(t-1)})$, \\
   \vspace{0.2em}
-  Evaluate simulator at field locations: $\lambda(X^F)^{(t)} = m(u^{(t)}, X^F)$,
+  Evaluate simulator at field locations and $u^{(t)}$: $\lambda(X^F)^{(t)} = m(u^{(t)}, X^F)$,
   \\
   \vspace{0.2em}
   Calculate and save $\mathcal{L}(Y^F|\lambda(X^F)^{(t)}, e(X^F)) =
-  \prod_{i=1}^{n_f} f(y_i|\lambda_i(X^F)^{(t)}, e_i)$, \\
+  \prod_{i=1}^{n_F} f(y_i|\lambda_i(X^F)^{(t)}, e_i)$, \\
   \vspace{0.2em}
   Compute the acceptance ratio: $\alpha = \frac{\mathcal{L}\left(Y^F \mid
   \lambda(X^F)^{(t)}, e(X^F)\right) \pi\left(u^{(t)}\right) q\left(u^{(t-1)}
@@ -405,8 +405,8 @@ times $e(\cdot)$. These points are the actual data we receive. Results from
 running Algorithm \ref{alg:gibbs} are shown in the middle and right panels of
 Figure \ref{f:toy_calib_pois}. Similar to the results in Figure
 \ref{f:toy_calib}, it is clear that the sampler searches a broad swath of the
-model input space but hones in on the region where the true parameter values
-lie.
+model input space but hones in on the region where the true parameter value
+lies.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.55,trim=20 0 30 0,clip=TRUE]{logit1_pois_obs.pdf}
@@ -463,7 +463,7 @@ specifying a multivariate normal (MVN) for all responses.  This way,
 prediction is simply a matter of MVN conditioning rules, or {\em kriging}
 \citep{matheron1963principles}, to derive the distribution of unknown
 (testing) output given known (training) values. Specifically, let $Y^M
-\sim \mathcal{N}_{n_m}(\mu(X^M), \Sigma(X^M))$, where $\mathcal{N}_{n_M}$
+\sim \mathcal{N}_{n_M}(\mu(X^M), \Sigma(X^M))$, where $\mathcal{N}_{n_M}$
 indicates an $n_M$-variate MVN. Then, predicting at a new location $x$ (think
 proposed $u$-value and paired row in $X^F$) follows $Y(x) \mid Y(X^M) \sim
 \mathcal{N}(\hat{\mu}(x), \hat{\sigma}^2(x))$, where
@@ -500,7 +500,7 @@ and inverting (or otherwise decomposing) them, e.g., for Eq.~(\ref{eq:mvn_eq})
 requires storage and computation that is quadratic and cubic in $n_M$,
 respectively.  This limits $n_M$ to a few thousand at most in a Bayesian MCMC
 setting, necessitating approximations for GPs that curb this prohibitive cost.
-With the 1d example in Figure \ref{f:toy_calib_pois}, we have $n_m=20 \times
+With the 1d example in Figure \ref{f:toy_calib_pois}, we have $n_M=20 \times
 40$, combining $X$ and $U$, which is manageable. But for IBEX, the simulated sky
 maps like those in the middle and right panels of Figure \ref{f:fig1} are in 2d
 (under the hood the output is in spherical coordinates $x$, $y$, and $z$) and
@@ -517,7 +517,7 @@ in a reasonable amount of time, prompting the next topic.
 \label{sec:gp_approx}
 %------------------------------------------------------------------------------
 
-Most of our modeling effort in this paper involves circumventing the $O(n_m^3)$
+Most of our modeling effort in this paper involves circumventing the $O(n_M^3)$
 computational bottleneck associated with GPs. The prevalence of methods
 addressing this issue has grown significantly in the past decade as increased
 access to computing resources leads to problems with larger and larger training
@@ -598,23 +598,23 @@ approximate this function by reducing the size of the conditioning set $g(i)$ to
 a much smaller size $m$, as specified by the user. This induces sparsity (i.e, a
 lot of zero entries) in the precision matrix (e.g. $\Sigma(X^M)^{-1})$ from
 Eq.~\ref{eq:mvn_eq}, potentially dramatically speeding up the evaluation of the
-likelihood for large values of $n_m$. \citet{katzfuss2021general} recently made
+likelihood for large values of $n_M$. \citet{katzfuss2021general} recently made
 this approximation popular by working out its representation in matrix form and
 furnishing automatic neighborhood sets and code, allowing for broad use in a
 variety of different fields where GPs are employed, particularly spatial
 statistics and computer experiments
 \citep{guinness2018permutation,katzfuss2020vecchia,katzfuss2021general,zhang2022multi,sauer2023vecchia}.
 \begin{align}
-\mathcal{L}(Y^M)&=\prod_{i=1}^{n_m} \mathcal{L}(Y^M_i \mid Y^M_{g(i)})
+\mathcal{L}(Y^M)&=\prod_{i=1}^{n_M} \mathcal{L}(Y^M_i \mid Y^M_{g(i)})
 \hspace{0.3em} \mbox{ where } g(1)=\emptyset \hspace{0.3em} \mbox{ and }
 g(i)=\{1, 2, \ldots, i-1\} \nonumber \\
-&\approx \prod_{i=1}^{n_m}\mathcal{L}(Y^M_i \mid Y^M_{h(i)}) \hspace{0.3em} \mbox{
-where } h(i) \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| \ll n_m
+&\approx \prod_{i=1}^{n_M}\mathcal{L}(Y^M_i \mid Y^M_{h(i)}) \hspace{0.3em} \mbox{
+where } h(i) \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| \ll n_M
 \label{eq:vecchia}
 \end{align}
 
-The Vecchia approximation takes an operation of order $O(n_m^3)$ down to
-$O(n_m m^3)$, motivating small values of $m$. Logically, as the size of $h(i)$
+The Vecchia approximation takes an operation of order $O(n_M^3)$ down to
+$O(n_M m^3)$, motivating small values of $m$. Logically, as the size of $h(i)$
 decreases, the evaluation of the likelihood speeds up, but the quality of the
 approximation is reduced. On the flip side, as one increases $m$, execution time
 grows, but the degree of accuracy improves. This continues until $n=m-1$, when
@@ -665,9 +665,10 @@ included, but we don't observe the same trend in $u$-space.
 \includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_latlon.pdf}
 \includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_params.pdf}
 \caption{Conditioning sets $h(i)$ in a multivariate normal likelihood
-(Eq.~\ref{eq:vecchia}) for a single observation $Y_i^M$ using the Scaled Vecchia
-approximation. The left panel visualizes neighborhoods in grid space (i.e. $X$
-or $X^F$). Model parameter ($u$) space is displayed in the right panel, with jitter added, allowing all points to be visible.
+(Eq.~\ref{eq:vecchia}) for a single observation $Y_i^M$ using the Scaled
+Vecchia approximation. The left panel visualizes neighborhoods in grid space
+(i.e. $X$ or $X^F$). Model parameter ($u$) space is displayed in the right
+panel with jitter added.
 \label{f:ibex_vecchia}}
 \end{figure}
 
@@ -775,7 +776,7 @@ the average elapsed time.
 
 It is plainly visible from Figure \ref{f:ibex_surr_timing_dim} that Scaled
 Vecchia and SEPIA are both well-suited for increasing dimensionality in the
-response. {\sf deepgp}'s need to decompose an $n_m \times n_m$ matrix at each
+response. {\sf deepgp}'s need to decompose an $n_M \times n_M$ matrix at each
 MCMC iteration, even aided by the Vecchia approximation, causes it's cost to
 quickly grow as dimensionality expands. {\sf laGP}, while built for prediction
 with large-scale datasets, does better, but is unable to keep pace at a certain
