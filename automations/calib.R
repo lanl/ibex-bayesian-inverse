@@ -19,6 +19,8 @@ esa_lev <- ifelse(!is.null(args[["esa"]]), as.integer(args[["esa"]]), 4)
 nmcmcs <- ifelse(!is.null(args[["nmcmcs"]]), as.integer(args[["nmcmcs"]]), 10000)
 ## specifies type of GP to fit (e.g. svecchia, laGP w/ nearest neighbors)
 gp <- ifelse(!is.null(args[["gp"]]), as.character(args[["gp"]]), "svecchia")
+## if using svecchia, m is the conditioning set size
+m <- ifelse(!is.null(args[["m"]]), as.character(args[["m"]]), 25)
 ## if using laGP, end is the neighborhood size for each local GP
 end <- ifelse(!is.null(args[["end"]]), as.integer(args[["end"]]), 25)
 ## if using laGP, number of threads to run during each fit
@@ -55,7 +57,7 @@ tol <- ifelse(!is.null(args[["tol"]]), as.numeric(args[["tol"]]), NA)
 debug <- ifelse(!is.null(args[["debug"]]), as.logical(args[["debug"]]), FALSE)
 ## flag to print more output to screen
 vb <- ifelse(!is.null(args[["v"]]), as.logical(args[["v"]]), FALSE)
-settings <- list(esa_lev=esa_lev, nmcmcs=nmcmcs, gp=gp, end=end, thrds=thrds,
+settings <- list(esa_lev=esa_lev, nmcmcs=nmcmcs, gp=gp, m=m, end=end, thrds=thrds,
   maxprocs=maxprocs, disc=disc, disc_num=disc_num, real=real, fpmfp=fpmfp,
   fratio=fratio, fyear=fyear, infile=infile, psc=psc, rsc=rsc,
   step_size=step_size, quant=quant, tol=tol, debug=debug, vb=vb,
@@ -89,7 +91,11 @@ if (!is.na(infile)) {
     cpars <- data.frame(matrix(data=c(fpmfp, fratio), nrow=1))
     names(cpars) <- c("pmfp", "ratio")
   } else {
-    cpars <- data.frame(matrix(data=c(fyear)))
+    if (fyear=="all") {
+      cpars <- data.frame(matrix(data=paste0(2009:2022, "A")))
+    } else {
+      cpars <- data.frame(matrix(data=c(fyear)))
+    }
     names(cpars) <- c("year")
   }
 }
@@ -120,7 +126,7 @@ foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tidyverse",
     fparams=fparams, scales=c(psc, rsc), tol=tol, quant=quant, real=real,
     disc=disc)
   mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
-    Zf=pd$Zfield, Of=pd$Ofield, nmcmcs=nmcmcs, step=step_size,
+    Zf=pd$Zfield, Of=pd$Ofield, m=m, nmcmcs=nmcmcs, step=step_size,
     gpmeth=gp, end=end, thrds=thrds, vb=vb, debug=debug,
     true_u=true_u, true_logscl=true_logscl)
   settings$truth <- list(pmfp=true_pmfp, ratio=true_ratio, scl=fparams)
