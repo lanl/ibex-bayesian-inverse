@@ -18,7 +18,6 @@ then
   exit 1
 fi
 
-
 if ! [[ $2 =~ ^20[0-2][0-9]A$ ]];
 then
   echo "Argument 2 must be a year between 2009-2022."
@@ -28,5 +27,10 @@ then
 fi
 
 echo "Started script"
-R CMD BATCH "--args -r -v --procs=1 --fyear=$2" calib.R
+for (( i=1; i<=$1; i++ ))
+do
+  echo "Beginning MC iteration $i."
+  R CMD BATCH "--args -r -v --procs=14 --tls=0 --fyear=$2" calib.R
+  echo "Finished MC iteration $i."
+done
 echo "Finished calibration script"
