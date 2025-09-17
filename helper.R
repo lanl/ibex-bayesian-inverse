@@ -80,8 +80,7 @@ preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
         ratio==fparams[2], time > 0)
     }
   } else{
-    fd <- fd %>% dplyr::filter(esa==esa_lev, map==fparams[1], time > 0)
-      #ooc=="no")
+    fd <- fd %>% dplyr::filter(esa==esa_lev, map %in% fparams, time > 0)
   }
 
   Xmod <- md %>% dplyr::filter(ESA==esa_lev)
