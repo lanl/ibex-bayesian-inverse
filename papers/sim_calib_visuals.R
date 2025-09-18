@@ -94,6 +94,7 @@ ggsave("ibex_sim_est.pdf", dpi=320, width=4, height=3.25)
 ## Visuals for bivariate posteriors of model parameters
 library(MASS)
 library(coda)
+library(ks)
 
 ind_files <- FALSE
 if (ind_files) {

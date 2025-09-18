@@ -247,21 +247,22 @@ sets.
 %% - Explain use of Vecchia approximation
 %% - Demonstrate on simulated data
 %% - Apply to real IBEX data
-Our paper is laid out as follows. First, Section \ref{sec:review} reviews methods
-that form the foundation for our work, namely Bayesian Inverse Problems and Gaussian
-process surrogate models. We also give a brief description of the methodology and
-implementation behind SEPIA, which could be classified as the current ``status quo''
-in Bayesian Inverse Problems for high-dimensional computer model output. In Section
-\ref{sec:gen_bayes_inv} we introduce our framework for solving the inverse problem in
-non-Gaussian contexts. Section \ref{sec:vecchia} describes our use of the Vecchia
-approximation to stretch the capacity of a GP surrogate beyond small simulator
-training runs. In Section \ref{sec:sims}, we illustrate the effectiveness of our
-framework in discovering the true, underlying model parameters on simulated data from
-the IBEX computer model. We then return to our motivating application and apply our
-methods to the raw IBEX satellite data in Section \ref{sec:ibex_real}. To conclude,
-we discuss any extensions and future work in Section \ref{sec:discuss}. Our
-implementation may be found at \url{https://github.com/lanl/IBEX_Calibration} along
-with code reproducing all included examples.
+Our paper is laid out as follows. First, Section \ref{sec:review} reviews
+methods that form the foundation for our work, namely Bayesian Inverse Problems
+and Gaussian process surrogate models. We also give a brief description of the
+methodology and implementation behind SEPIA, which could be classified as the
+current ``status quo'' in Bayesian Inverse Problems for high-dimensional
+computer model output. In Section \ref{sec:gen_bayes_inv} we introduce our
+framework for solving the inverse problem in non-Gaussian contexts. Section
+\ref{sec:vecchia} describes our use of the Vecchia approximation to stretch the
+capacity of a GP surrogate beyond small simulator training runs. In Section
+\ref{sec:synth_data}, we illustrate the effectiveness of our framework in
+discovering the true, underlying model parameters on synthetic data. We then
+return to our motivating application and apply our methods to the raw IBEX
+satellite data in Section \ref{sec:ibex_real}. To conclude, we discuss any
+extensions and future work in Section \ref{sec:discuss}. Our implementation may
+be found at \url{https://github.com/lanl/IBEX_Calibration} along with code
+reproducing all included examples.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -582,7 +583,7 @@ and better compartmentalized for use in novel contexts, such as our own.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %------------------------------------------------------------------------------
-%% SECTION 3 - Vecchia Approximation for IBEX Simulations
+%% SECTION 3 - Vecchia Approximated GPs for IBEX Simulations
 \section{Vecchia Approximated GPs for IBEX Simulations}
 \label{sec:vecchia}
 %------------------------------------------------------------------------------
@@ -641,7 +642,7 @@ parallel processing. Code that that we directly rely on is readily accessible at
 Figure \ref{f:ibex_vecchia} illustrates examples of conditioning sets created
 by the Scaled Vecchia approximation in the context of IBEX and its associated
 simulator (we will circle back to the inverse problem and the data collected by
-the satellite in Section \ref{sec:sims}). Neighborhoods of size $m \in
+the satellite in Section \ref{sec:synth_data}). Neighborhoods of size $m \in
 \{25,50,75,100\}$ are generated for a particular simulator observation $Y_i^M$
 (denoted by a red star) from the IBEX computer model. It's difficult to
 visualize in higher dimensions, so we break the input space down into separate
@@ -845,9 +846,34 @@ to the IBEX problem next.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% SECTION 4: Simulated Sky Maps
-\section{Simulated Sky Maps}
-\label{sec:sims}
+% SECTION 4: Synthetic IBEX Satellite Data
+\section{Synthetic IBEX Satellite Data}
+\label{sec:synth_data}
+
+%% Overview
+%%% Another review of the heliosphere <- maybe about historical heliospheric research
+%%%%% Previous observations were made by Voyager 1 and Voyager 2
+%%% IBEX launched to validate and inform this
+%%% What did IBEX see?
+%%% Behavior of ENAs: inner and outer
+%%% What are ENAs important?
+% Physicists have spent the last 15-20 years developing theories to explain the
+% existence of the \textit{ribbon} and how it's presence fits in the process that
+% governs the makeup of heliosphere. First, 
+
+% inner-heliospheric
+
+%% Computer Models:
+%%% Explain computer models more in-depth
+%%% Yifan: parallel mean free path / perpendicular mean free path. What do those represent? What happens when changing them?
+%%% Eric: adindex and kappa. What do these represent and do?
+%%% Leverage these models to validate our framework
+
+%% Experiment:
+%%% What is the set up? How is data generated? How do we calculate "true" underlying rate? What about exposure time and locations? How do we do hold out? Similar to experiments in Section 3.
+%%% Show the results
+%%% Commentary on the results
+%%% Now that they are validated, move on to the real thing.
 
 %% HELIOSPHERIC SCIENCE
 %% - Short review of heliosphere
@@ -1063,7 +1089,7 @@ Results are shown in Figure \ref{f:real_estimates_all}.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.3,trim=0 0 0 0,clip=TRUE]{calib_estimates_all.png}
+\includegraphics[scale=1.0,trim=0 0 0 0,clip=TRUE]{real_bayes_inv_res.pdf}
 \caption{Posterior distributions for estimated calibration parameters for each unique
 combination of values that has been treated as a holdout set.
 \label{f:real_estimates_all}}
