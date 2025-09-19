@@ -1,11 +1,15 @@
-source("helper.R")
+source("../helper.R")
 source('../vecchia_scaled.R')
 
 library(ggplot2)
+library(MASS)
+library(coda)
+library(ks)
 
 ## Visuals for comparing simulated counts, "true" simulator output
 ## estimated simulator output via surrogate predictions
-res <- readRDS("sim_calib_results_20250902.rds")
+# res <- readRDS("final_results/sim_calib_results_20250902.rds")
+res <- readRDS("final_results/sim_calib_results_20250915.rds")
 single_index <- NA
 single_pmfp <- 1750
 single_ratio <- 0.02
@@ -17,12 +21,12 @@ for (i in 1:length(res)) {
   }
 }
 
-pred_params <- apply(res[[single_index]]$u[seq(9001, 10000, by=10),], 2, mean)
+pred_params <- apply(res[[single_index]]$u[seq(10001, 20000, by=10),], 2, mean)
 pred_params[1] <- (pred_params[1] - 500)/2500
 pred_params[2] <- (pred_params[2] - 0.001)/(0.1-0.001)
 
-model_data <- read.csv(file="../../data/sims.csv")
-field_data <- read.csv(file="../../data/sims_real.csv")
+model_data <- read.csv(file="../data/sims.csv")
+field_data <- read.csv(file="../data/sims_real.csv")
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   fparams=c(single_pmfp, single_ratio), scales=c(1, 1), tol=NA, quant=0.0,
   real=FALSE, disc=FALSE)
@@ -34,6 +38,7 @@ field_data$nlon <- nose_center_lons(field_data$lon)
 field_data <- field_data[which(!is.nan(field_data$est_rate)),]
 model_data <- model_data[model_data$parallel_mean_free_path==single_pmfp &
   model_data$ratio==single_ratio,]
+model_data$nlon <- nose_center_lons(model_data$lon)
 
 fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),
  nug=1e-4, ms=25)
@@ -49,47 +54,78 @@ lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
 pred_data <- data.frame(XX_ll, lhat_curr)
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
-# predrange <- range(c(model_data$blurred_ena_rate, field_data$est_rate), na.rm=TRUE)
 predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
+cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
+bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 
-ggplot(model_data, aes(x=ecliptic_lon_center, y=lat)) +
-  geom_raster(aes(fill=blurred_ena_rate)) +
-    scale_fill_gradientn(colours = rev(rainbow(6)[c(6,1:5)]),
-      limits=predrange, oob=scales::oob_squish) +
-    scale_x_continuous(trans = "reverse",
-      breaks = seq(325, 25, by = -60),
-      label = c(60, 0, 300, 240, 180, 120)) +
-    theme_bw() +
-    theme(axis.title.x=element_text(margin=margin(t=10, r=0, b=0, l=0))) +
-    labs(x="", y="Latitude", fill="ena_rate")
-ggsave("ibex_sim_mod.pdf", dpi=320, width=4, height=3.25)
+model_lons <- sort(unique(model_data$nlon))
+model_lats <- sort(unique(model_data$lat))
+model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_sim_mod.pdf", width=7, height=5)
+image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
+  xaxt="n", ylab="Latitude", xlim=rev(range(model_lons)), breaks=bks)
+axis(1, at=seq(325, 25, by=-60),
+  labels=c(60, 0, 300, 240, 180, 120))
 
-ggplot(field_data, aes(x=nlon, y=lat)) +
-  geom_point(aes(color=est_rate), size=0.4, na.rm=TRUE) +
-  scale_colour_gradientn(colours = rev(rainbow(6)[c(6,1:5)]),
-    limits=predrange, oob=scales::oob_squish) +
-  scale_x_continuous(trans = "reverse",
-    breaks = seq(325, 25, by = -60),
-    label = c(60, 0, 300, 240, 180, 120)) +
-  theme_bw() +
-  theme(axis.ticks.y=element_blank(),
-    axis.title.x=element_text(margin=margin(t=10, r=0, b=0, l=0))) +
-  labs(x="Longitude", y="Latitude", col="ena_rate")
-ggsave("ibex_sim_field.pdf", dpi=320, width=4, height=3.25)
+field_lons <- sort(unique(field_data$nlon))
+field_lats <- sort(unique(field_data$lat))
+field_rates <- cut(field_data$est_rate, breaks=bks,
+  labels=FALSE)
+field_rates[which(field_data$est_rate <= predrange[1])] <- 1
+field_rates[which(field_data$est_rate >= predrange[2])] <- length(cols)
+field_cols <- cols[field_rates]
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_sim_field.pdf", width=7, height=5)
+plot(x=field_data$nlon, y=field_data$lat, col=field_cols, pch=16, cex=0.7,
+  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=rev(range(field_lons)))
+axis(1, at=seq(325, 25, by=-60),
+  labels=c(60, 0, 300, 240, 180, 120))
 
-ggplot(pred_data, aes(x=nlon, y=lat)) +
-  geom_raster(aes(fill=lhat_curr)) +
-    scale_fill_gradientn(colours = rev(rainbow(6)[c(6,1:5)]),
-      limits=predrange, oob=scales::oob_squish) +
-    scale_x_continuous(trans = "reverse",
-      breaks = seq(325, 25, by = -60),
-      label = c(60, 0, 300, 240, 180, 120)) +
-    theme_bw() +
-    theme(axis.ticks.y=element_blank(),
-      axis.title.x=element_text(margin=margin(t=10, r=0, b=0, l=0)),
-      legend.spacing.y=unit(5.5, 'mm')) +
-    labs(x="", y="Latitude", fill="ENA rate\n")
-ggsave("ibex_sim_est.pdf", dpi=320, width=4, height=3.25)
+pred_lons <- sort(unique(pred_data$nlon))
+pred_lats <- sort(unique(pred_data$lat))
+pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_sim_est.pdf", width=7, height=5)
+image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
+  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=rev(range(pred_lons)))
+axis(1, at=seq(325, 25, by=-60),
+  labels=c(60, 0, 300, 240, 180, 120))
+
+iter_pmfp <- res[[single_index]]$u[seq(10001, 20000, by=10),1]
+iter_ratio <- res[[single_index]]$u[seq(10001, 20000, by=10),2]
+
+xy <- cbind(iter_pmfp, iter_ratio)
+H <- Hpi(xy)
+fhat <- kde(x=xy, H=H, xmin=c(500, 0.001), xmax=c(3000, 0.1),
+  compute.cont=TRUE)
+dx <- diff(fhat$eval.points[[1]][1:2])
+dy <- diff(fhat$eval.points[[2]][1:2])
+
+# Flatten density values
+dens_vals <- sort(as.vector(fhat$estimate), decreasing=TRUE)
+cum_prob <- cumsum(dens_vals)*dx*dy
+
+# Threshold for 95% HPD
+thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
+
+cls <- contourLines(fhat$eval.points[[1]],
+  fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
+
+# Plot contour at HPD threshold
+image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
+  col=rev(heat.colors(128)), main="",
+  xlim=c(500, 3000), ylim=c(0, 0.1))
+abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
+abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
+lines(cls$x, cls$y, lty=2)
+points(x=1750, 0.02, col=4, pch=8, cex=1.25`, lwd=1.25)
+mtext("Parallel Mean Free Path", side=1, outer=TRUE, line=4.25, cex=1.2)
+mtext("Ratio", side=2, outer=TRUE, line=3.0, cex=1.2)
+
+#########################################################################
+#########################################################################
+#########################################################################
 
 ## Visuals for bivariate posteriors of model parameters
 library(MASS)

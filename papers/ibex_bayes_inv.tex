@@ -856,11 +856,15 @@ We now return to the IBEX inverse problem: given ENAs observed from the
 satellite, we wish to determine the settings $u$ of a computer model that
 produce the (simulated) sky map that is most likely to have generated those
 counts. With the tools presented in Sections \ref{sec:review} and
-\ref{sec:vecchia} in hand, we want to validate the proposed methodology before
-applying it to the real data collected from the satellite. To do so, we run our
-Poisson Bayesian Inverse Problem framework on synthetic satellite data where we
-know the ``true'' parameter $u^*$ and can evaluate whether our method is able
-to recover it.
+\ref{sec:vecchia} in hand, we validate the proposed methodology before applying
+it to the real data collected from the satellite. To do so, we run our Poisson
+Bayesian Inverse Problem framework on synthetic satellite data where we know the
+``true'' parameter $u^*$ and can evaluate whether our method is able to recover
+it.
+
+
+% (\textit{parallel
+% mean free path} $= 1750$ and \textit{ratio} $= 0.02$). 
 
 %% To do so, we simulate from the satellite. What does that look like?
 %% - Sim Sky Map	
@@ -868,20 +872,21 @@ to recover it.
 %% - Add background rate
 %% - Poisson draws with exposure time from satellite
 Our validation process is as follows. First, we select a value $u^*$ from our
-training data and set the corresponding output ($\lambda^* = Y^M=\lambda(u^*,
-X^M)$) as the ``true'' underlying mean ENA rate. For simplicity, we choose
-$u^*$ such that it falls in the middle of the parameter space (\textit{parallel
-mean free path} $= 1750$ and \textit{ratio} $= 0.02$). Next, we gather
-information from the real data corresponding to a single year (2020) that the
-IBEX satellite has been in operation. We are only interested in the measurement
-locations (i.e. lat/lon) and their associated exposure times and background
-rates, discarding the observed counts of ENAs. For each latitude/longitude pair (i.e. a row in $X^F$), we take a draw from a Poisson, $Y_i^F \sim
-\mathrm{Pois}(\lambda^*_i, e_i)$, where $\lambda_i$ is determined by the
-computer model. The center panel of Figure \ref{f:ibex_synth_ex} shows the
-resulting data. Note that the locations of the synthetic data are not on a fine
-grid, but match the recorded coordinates for ENAs captured by the IBEX
-satellite in it's orbit. This accounts for the unique spread of points and the
-strings of missing data, which correspond to certain orbits of the satellite.
+training data and set the corresponding output ($\lambda^* = m(u^*, X^M)$) as
+the ``true'' underlying mean ENA rate. For simplicity, we choose $u^*$ such that
+it falls in the middle of the parameter space. Next, we gather information from
+the real data corresponding to a single year that the IBEX satellite has been in
+operation. We are only interested in the measurement locations (i.e. lat/lon)
+and their associated exposure times and background rates, ignoring the observed
+counts of ENAs. Then, for each latitude/longitude pair (i.e. a row in $X^F$), we
+draw synthetic satellite (or field) data from a Poisson, $Y_i^F \sim
+\mathrm{Pois}(\lambda^*_i, e_i)$, where $\lambda_i^*$ is determined by the
+computer model $m(\cdot,\cdot)$. The center panel of Figure
+\ref{f:ibex_synth_ex} shows the result, which we will treat as data we observed.
+Note that the locations of the data are not on a fine grid, but instead match
+the recorded coordinates for ENAs captured by the IBEX satellite in it's orbit.
+This accounts for the unique spread of points and the strings of missing data,
+which correspond to certain orbits of the satellite.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.75,trim=0 0 65 0,clip=TRUE]{ibex_sim_mod.pdf}
@@ -895,50 +900,40 @@ estimated calibration parameters.
 \label{f:ibex_synth_ex}}
 \end{figure}
 
-We run Algorithm \ref{alg:gibbs} treating this synthetic data as $(X^F, Y^F)$
-and omitting model output for $u^*$. After 10,000 MCMC iterations with a burnin
-of 1000 and thinning by 10, the posterior mean of $u$ is calculated as
-(\textit{parallel mean free path} $=1675.61$, \textit{ratio} $=0.0178$). Figure
-\ref{f:ibex_synth_ex} displays the the bivariate posterior of $u$ (bottom
-left). We can see that our framework does a good job of obtaining the true
-combination of parameters, with the posterior mode lying near the truth.
-Additionally, the truth falls squarely in the 95\% credible interval. As a
-sanity check, we take the value of each parameter at the posterior mean and
-insert those into our fitted Scaled Vecchia GP surrogate. The predicted output
-is shown in the bottom right of Figure \ref{f:ibex_synth_ex}. There are some
-subtle differences between the estimated sky map and the ``truth.'' The shape
-and intensity of the ribbon slightly varies between each sky map. However, it
-is abundantly clear that each map (truth and estimated) could have reasonably
-generated the data we ``observe'' in the top left panel. Therefore, we can
-confidently assert that our framework recovers the truth.
+We run Algorithm \ref{alg:gibbs}, treating this synthetic data as $(X^F, Y^F)$
+and using the provided simulator training runs (omitting model output for
+$u^*$). We execute 10,000 MCMC iterations, throwing away 1,000 as burnin and
+thinning by 10. Figure \ref{f:ibex_synth_ex} displays the remaining posterior
+samples of $u$ (bottom left). The posterior mean of $u$ lies at \textit{parallel
+mean free path} $=1675.61$ and \textit{ratio} $=0.0178$, close to $u^*$. We can
+see that our framework does a good job of concentrating mass around the true
+model parameter. As a sanity check, we take the value of the estimated parameter
+at the posterior mean and plug it in to our fitted Scaled Vecchia GP surrogate.
+The predicted output is shown in the bottom right panel of Figure
+\ref{f:ibex_synth_ex}. There are some subtle differences between the estimated
+sky map and the ``truth,'' the shape and intensity of the ribbon varying
+slightly between the two. However, each map (truth and estimated) could have
+reasonably generated the data we ``observe'' in the top left panel. Therefore,
+we are confident that our framework is able to recover the truth.
 
-We recognize that Figure \ref{f:ibex_synth_ex} is just one data point. So, to
-further validate our framework, we can apply this method to each unique
-combination of model parameters available. We have access to $n=66$ runs of the
-simulator. These runs represent all combinations of 11 unique values of
-parallel mean free path and 6 unique values of ratio. The spread of parameter
-values was determined by the space scientists to include all values considered
-reasonable. Parallel mean free path ranges from 500-3000 astronomical units
-(AU) in increments of 500 AU. Ratio values are unitless, and span from 0.001 to
-0.1. Due to the inability for the model to provide good posterior distributions
-for boundary parameters, we do not consider combinations for which at
-least one parameter is on its edge (i.e, when parallel mean free path is
-either 500 or 3000 AU and/or ratio is either 0.0001 and 0.1). Removing
-these edge cases results in 36 remaining unique combinations. For each
-combination, we follow the same procedure as described above. First, we
-elect one unique combination and create simulated observed satellite data
-based on the computer model. Next, we remove that combination from the
-training data used to fit our Scaled Vecchia Gaussian Process surrogate
-model in our calibration framework. Finally, we run MCMC to sample from
-the posterior distribution of our calibration parameters and obtain an
-estimates for the posterior mean.
-
-Our results are shown in Figure
-\ref{f:synth_estimates_all}. In each plot of the posterior distributions,
-wehave included as a blue star the true combination of parameters that
-generated the simulated data. Our 95\% credible intervals encompass the
-truth in 34 of the 36 of the iterations, near the nominal coverage rate
-we'd expect.
+Figure \ref{f:ibex_synth_ex} is just one data point. To further validate our
+framework, we apply this method to each unique model parameter available. We
+have access to $n=66$ runs of the simulator. These runs represent all
+combinations for 11 unique values of parallel mean free path and 6 unique values
+of ratio. The spread of parameter values was determined by space scientists to
+include all values considered reasonable. Parallel mean free path ranges from
+500-3000 astronomical units (AU). Ratio values are unitless, and span from 0.001
+to 0.1. Due to the inability for the model to furnish posterior samples beyond
+the boundary parameters, we do not test on hold outs those combinations for
+which at least one parameter is on its edge (i.e, when parallel mean free path
+is either 500 or 3000 AU and/or ratio is either 0.0001 and 0.1). Removing these
+edge cases results in 36 remaining test runs. For each combination, we follow
+the same procedure as described above. First, we select one model parameter $u$
+and create simulated observed satellite data based on the computer model output.
+Next, we remove that combination from the training data used to fit our Scaled
+Vecchia surrogate model in our calibration framework. Finally, we run Algorithm
+\ref{alg:gibbs} to sample from the posterior distribution of our model
+parameters and obtain an estimate for the posterior mean.
 
 \begin{figure}[ht!]
 \centering
@@ -948,12 +943,15 @@ combination of values that has been treated as a holdout set. Blue stars indicat
 \label{f:synth_estimates_all}}
 \end{figure}
 
-We have demonstrated that our framework can recover the true parameter values
-that generated simulated data. However, space scientists are interested in
-understanding the behavior of the heliosphere by estimating these parameters
-for real data. So, the natural next step is to take our approach and apply it
-to data actually observed by the IBEX satellite. This leads naturally into our
-next section.
+Results are shown in Figure \ref{f:synth_estimates_all}. Each panel shows the
+estimated posterior distribution of $u$. We have included as a blue star the
+true parameter value that generated the simulated data. Our 95\% credible
+intervals encompass the truth in 34 of the 36 of the iterations, near the
+nominal coverage rate we'd expect. This demonstrates that our framework can
+recover the true parameter values that generate simulated data. However, space
+scientists are interested in understanding the behavior of the heliosphere by
+estimating these parameters for real data. Next we take our approach and apply
+it to ENA counts actually observed by the IBEX satellite.
 
 % %  as the truth
 % % In order to showcase and validate our proposed methodology on the IBEX data,
