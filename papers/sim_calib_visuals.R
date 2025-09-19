@@ -131,7 +131,9 @@ image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
 abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
 abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
 lines(cls$x, cls$y, lty=2)
-points(x=1750, 0.02, col=4, pch=8, cex=1.5, lwd=1.25)
+points(x=1750, 0.02, col=4, pch=8, cex=2.5, lwd=2.0)
+legend("topright", c(expression(u*"\u002A"), "95% HPD"), col=c(4, 1),
+  pch=c(8, NA), lwd=2, lty=c(NA, 2), cex=1.1, bg="white")
 dev.off()
 
 #########################################################################
