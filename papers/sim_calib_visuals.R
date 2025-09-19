@@ -64,9 +64,11 @@ model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_mod.pdf", width=7, height=5)
 image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
-  xaxt="n", ylab="Latitude", xlim=rev(range(model_lons)), breaks=bks)
+  xaxt="n", ylab="Latitude", xlim=rev(range(model_lons)), breaks=bks,
+  cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+dev.off()
 
 field_lons <- sort(unique(field_data$nlon))
 field_lats <- sort(unique(field_data$lat))
@@ -78,9 +80,11 @@ field_cols <- cols[field_rates]
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_field.pdf", width=7, height=5)
 plot(x=field_data$nlon, y=field_data$lat, col=field_cols, pch=16, cex=0.7,
-  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=rev(range(field_lons)))
+  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=rev(range(field_lons)),
+  cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+dev.off()
 
 pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
@@ -88,9 +92,11 @@ pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_est.pdf", width=7, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
-  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=rev(range(pred_lons)))
+  xlab="Longitude", xaxt="n", ylab="Latitude",
+  xlim=rev(range(pred_lons)), cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+dev.off()
 
 iter_pmfp <- res[[single_index]]$u[seq(10001, 20000, by=10),1]
 iter_ratio <- res[[single_index]]$u[seq(10001, 20000, by=10),2]
@@ -113,15 +119,17 @@ cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
 # Plot contour at HPD threshold
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_post_est.pdf", width=7, height=5)
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
-  col=rev(heat.colors(128)), main="",
-  xlim=c(500, 3000), ylim=c(0, 0.1))
+  col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
+  ylab=expression("Ratio ("~u[2]~")"), xlim=c(500, 3000), ylim=c(0, 0.1),
+  cex.lab=1.1)
 abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
 abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
 lines(cls$x, cls$y, lty=2)
-points(x=1750, 0.02, col=4, pch=8, cex=1.25`, lwd=1.25)
-mtext("Parallel Mean Free Path", side=1, outer=TRUE, line=4.25, cex=1.2)
-mtext("Ratio", side=2, outer=TRUE, line=3.0, cex=1.2)
+points(x=1750, 0.02, col=4, pch=8, cex=1.5, lwd=1.25)
+dev.off()
 
 #########################################################################
 #########################################################################
