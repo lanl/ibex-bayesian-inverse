@@ -1,6 +1,3 @@
-library(doParallel)
-library(parallel)
-
 source("../helper.R")
 source("../mcmc.R")
 
