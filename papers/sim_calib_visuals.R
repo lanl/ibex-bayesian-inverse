@@ -57,6 +57,8 @@ pred_data$nlon <- nose_center_lons(pred_data$lon)
 predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
+ylims <- range(model_data$lat)
+xlims <- rev(range(model_data$nlon))
 
 model_lons <- sort(unique(model_data$nlon))
 model_lats <- sort(unique(model_data$lat))
@@ -64,8 +66,7 @@ model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_mod.pdf", width=7, height=5)
 image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
-  xaxt="n", ylab="Latitude", xlim=rev(range(model_lons)), breaks=bks,
-  cex.lab=1.1)
+  xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
@@ -80,7 +81,7 @@ field_cols <- cols[field_rates]
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_field.pdf", width=7, height=5)
 plot(x=field_data$nlon, y=field_data$lat, col=field_cols, pch=16, cex=0.7,
-  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=rev(range(field_lons)),
+  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
   cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
@@ -92,10 +93,12 @@ pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_est.pdf", width=7, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
-  xlab="Longitude", xaxt="n", ylab="Latitude",
-  xlim=rev(range(pred_lons)), cex.lab=1.1)
+  xlab="Longitude", xaxt="n", ylab="Latitude", useRaster=TRUE,
+  xlim=xlims, ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+
+
 dev.off()
 
 iter_pmfp <- res[[single_index]]$u[seq(10001, 20000, by=10),1]
