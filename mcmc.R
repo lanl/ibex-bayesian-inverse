@@ -28,7 +28,7 @@ source('../vecchia_scaled.R')
 # likelihoods, proposals, acceptance rates, and covariances.
 ###############################################################################
 mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, m=25, end=NA, gpmeth="nn", nmcmcs=10000,
-  step=NA, thrds=2, vb=FALSE, debug=FALSE, true_u=NA, true_logscl=NA) {
+  step=NA, thrds=2, vb=FALSE, debug=FALSE, true_u=NA, true_logscl=NA, betashape=1.1) {
 
   nx <- ncol(Xm)
   nu <- ncol(Um)
@@ -110,8 +110,8 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, m=25, end=NA, gpmeth="nn", nmcmcs=10000
       llp <- sum(Zf*log(Of$time*(lhatp*exp(logscl[t-1]) + Of$bg)) -
        Of$time*(lhatp*exp(logscl[t-1]) + Of$bg))
       ### Calculate prior on u (calibration parameters)
-      lpp <- sum(dbeta(up$prop, shape1=1.1, shape2=1.1, log=TRUE))
-      lp_curr <- sum(dbeta(u[t-1,], shape1=1.1, shape2=1.1, log=TRUE))
+      lpp <- sum(dbeta(up$prop, shape1=betashape, shape2=betashape, log=TRUE))
+      lp_curr <- sum(dbeta(u[t-1,], shape1=betashape, shape2=betashape, log=TRUE))
       ### Calculate Metropolis-Hastings ratio
       ### { L(xp|Y)*p(xp)*g(xt|xp) } / { L(xt|Y)*p(xt)*g(xp|xt) }
       lmh <- llp - lls[t-1] + lpp - lp_curr + up$pr
