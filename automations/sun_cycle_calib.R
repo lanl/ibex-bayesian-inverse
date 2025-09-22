@@ -38,7 +38,7 @@ fparams <- paste0(2009:settings$year, "A")
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   fparams=fparams, scales=c(1, 1), tol=NA, quant=0.0, real=TRUE)
 mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
-  Zf=pd$Zfield, Of=pd$Ofield, m=25, nmcmcs=750, step=settings$step,
+  Zf=pd$Zfield, Of=pd$Ofield, m=25, nmcmcs=10000, step=settings$step,
   gpmeth="svecchia", vb=TRUE, true_u=NA, true_logscl=settings$scl,
   betashape=settings$shape)
 res <- list(mcmc_res=mcmc_res, settings)

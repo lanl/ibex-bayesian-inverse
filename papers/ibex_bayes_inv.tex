@@ -359,7 +359,7 @@ where $f(y|\lambda, e) = \frac{(\lambda e)^y \mathrm{exp}\{-\lambda e\}}{y!}$.
 We thereby extend Eq.~(\ref{eq:inv_bayes_mod}) as follows:
 \begin{align}
 Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
-\\ u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p,
+\label{eq:pois_inv_bayes_mod} \\ u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p,
 \end{align}
 where $e(X^F)$ represents the duration (in seconds) the satellite points at
 specific locations in the sky. $\lambda(X^F)$ denotes the rate at which ENA
@@ -884,9 +884,10 @@ panel.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=1.0,trim=0 0 0 0,clip=TRUE]{sim_bayes_inv_res.pdf}
-\caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals for each
-unique model parameter $u$ that has been treated as a holdout set. Blue stars
-indicate the value $u^*$ from which the data was simulated.
+\caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals runs of
+our Poisson Bayesian inverse problems framework on 36 different synthetic
+datasets. Blue stars indicate the value $u^*$ from which the data was
+simulated.
 \label{f:synth_estimates_all}}
 \end{figure}
 
@@ -916,69 +917,68 @@ helping scientists better understand the behavior of the heliosphere by
 estimating these parameters for actual ENA counts collected by the IBEX
 satellite.
 
-%------------------------------------------------------------------------------
-% %% SECTION 4.2 - Heliospheric Computer Model
-% \subsection{Heliospheric Computer Model}
-% \label{sec:helio_comp_model}
-% %------------------------------------------------------------------------------
-
-% Physicists engaged in this work have developed computer models to represent
-% the theoretical models they have proposed. Therefore, given specific values
-% for different model parameters, a simulation can be run to output a
-% proposed % \textit{sky map}. As stated previously, Bayesian Inverse problems
-% are % concerned with leveraging simulator output for the purpose of
-% estimating the % distribution of model parameters. This is the primary
-% interest of physicists % involved in this project, as estimation of these
-% parameters will give credence % to what model best represents the data.
-
-% In this paper, we make use of two models developed by scientists at LANL and
-% Princeton University. In these models, the shape and intensity of the GDF is
-% controlled by parameter3 and parameter4, and the shape and intensity of the
-% \textit{ribbon} is controlled by parallel mean free path and ratio. We leave a
-% more in-depth physical interpretation and analysis of these parameters to more
-% appropriate venues \citep{zirnstein2021dependence,zirnsteinGDFsims2015}.
-% However, for simple reasoning, one can think of the parallel mean free path as
-% the distance a hydrogen ion travels beyond the heliopause before interacting
-% with another particle, receiving an electron, and becoming an ENA. The ratio
-% parameter is closely related, being the fraction of perpendicular mean free
-% path and parallel mean free path. We can run this model and output a vector of
-% proposed ENA rates at specific spherical coordinates. The resolution of the
-% output can be varied, but typical runs output 16,200 rates, corresponding to a
-% 2 degree grid over latitude and longitude.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% SECTION 5: Real Data
-\section{Real Data}
+% SECTION 5: IBEX Satellite Data
+\section{IBEX Satellite Data}
 \label{sec:ibex_real}
 
+Space scientists at LANL have provided us with 14 years of data collected by
+the IBEX satellite. IBEX is able to view the entire sky over a period of six
+months through a series of regular adjustments. Therefore, dating back to 2008
+we have access to $\sim$35 estimated \textit{sky maps}. The number of records
+in each sky map varies across year, ranging from $\sim$8-15K observations. Each
+row of the dataset contains the ENA origin location in Cartesian coordinates
+($x$, $y$, $z$), time the satellite point{}ed at that location (in seconds),
+counts of ENAs observed at one of six different energy levels (ESA), and a
+background rate $\lambda_b$ (ENAs/sec).
+
+ENAs are known to come from sources other than the heliosphere, so space
+scientists quantify this noise and add it as a background rate that must be
+accounted for. Although this rate is an estimate rather than an exact value, we
+follow the lead of other researchers \citep{osthustheseus2023} and treat it as
+constant in our work. For example, the left panel of Figure \ref{f:fig1}
+displays ENA rates {\em after} the background rate has been substracted out.
+For the purpose of solving the inverse problem, the mean in the Poisson
+likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} becomes $\lambda(X^F) = m(u, X^F)
+- \lambda_{b}(X^F)$. We aim to pair the observed satellite data with the $n=66$
+computer model runs to learn the distribution of IBEX simulator parameters
+\textit{parallel mean free path} and \textit{ratio}.
+
 %------------------------------------------------------------------------------
-%% SECTION 5.1 - IBEX
-\subsection{IBEX}
-\label{sec:ibex}
+%% SECTION 5.1 - Heliospheric Computer Models
+\subsection{Heliospheric Computer Models}
+\label{sec:helio_comp_model}
 %------------------------------------------------------------------------------
 
-%% IBEX
-%% - Reintroduce satellite
-%% - Explain details of data
-%% - Explain the years gathered
+We have referred to the IBEX simulator throughout the entirety of this paper
+without going into much detail. We focused on just two particular models
+available among many, one for the GDF and one for the ribbon. We leave a more
+in-depth physical interpretation and analysis of parameters to more appropriate
+venues \citep{zirnstein2021dependence,zirnsteinGDFsims2015}, but to give some
+context, we give a simple review here. The GDF model we use is constant and is
+added on to the output of the ribbon simulator. For the ribbon model, one can
+think of parallel mean free path as the distance a hydrogen ion travels beyond
+the heliopause before interacting with another particle, receiving an electron,
+and becoming an ENA. The ratio parameter is the fraction of parallel mean free
+path and another measure of distance, the perpendicular mean free path.
 
-We have referred to the IBEX satellite throughout this paper without going
-into immense detail of just how the data is collected. As stated previously,
-while the IBEX satellite orbits Earth, the IBEX-Hi ENA imager detects ENAs and
-records their energy level and approximate location of origin. ENAs can be
-sorted into six distinct energy levels, labeled as ESA 1, 2, \ldots, 6. At
-regular time intervals, the satellite is rotated slightly to point to a new
-section of sky. These adjustments, along with the satellite's orbit, allows
-IBEX to view the entire sky over a period of six months. Therefore, dating
-back to 2008, we have access to $\sim$35 estimated \textit{sky maps}.
+Real data brings some additional complications, in particular when comparing to
+computer models. The makeup of heliosphere changes over time, largely due to
+the variations in the solar wind that accompany the sun's 11 or 21-year cycle.
+Physicists therefore must account for these changes through additional
+parameters, or restricting the application of their models to a specific
+timeframe. This is the case for the GDF model, which corresponds to 2009-2011,
+the first few years of IBEX's mission. On the other hand, the ribbon model
+takes the approach of averaging over the entire sun-cycle. We factor in this
+variation by only comparing satellite data from the years 2009-2011 to
+simulator runs.
 
-Add another paragraph.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %------------------------------------------------------------------------------
-%% SECTION 5.2 - EXPERIMENT
-\subsection{Experiment}
+%% SECTION 5.2 - Estimating parameters for real data
+\subsection{Estimating parameters for real data}
 \label{sec:ibex_exp}
 %------------------------------------------------------------------------------
 
@@ -987,7 +987,7 @@ Add another paragraph.
 %% - Show results from the real data
 %% - Comment on the missalignment between simulator and reality
 
-Our setup is similar to that in Section \ref{sec:ibex_sim_exp}, only
+similar to that in Section \ref{sec:synth_data}, only
 substituting in real data for simulated data. Therefore, we execute Algorithm
 \ref{alg:gibbs} by initially fitting a Scaled Vecchia GP surrogate to all
 $n=66$ computer model runs. Then, MCMC samples from the posterior distribution
