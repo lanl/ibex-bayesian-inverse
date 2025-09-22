@@ -172,10 +172,10 @@ remove_unchanged_points <- function(md, fd, tol=NA, quant=NA) {
 # @return data frame containing observations in spherical coordinates
 ###############################################################################
 geo_to_spher_coords <- function(lat, lon) {
-  x <- cos(pi*lon/180)*cos(pi*lat/180)
-  y <- sin(pi*lon/180)*cos(pi*lat/180)
-  z <- sin(pi*lat/180)
-  return(data.frame(x, y, z))
+  x <- cos((pi/180)*(lon-180))*cos((pi/180)*lat)
+  y <- sin((pi/180)*(lon-180))*cos((pi/180)*lat)
+  z <- sin((pi/180)*lat)
+  return(data.frame("x"=x, "y"=y, "z"=z))
 }
 
 ###############################################################################
@@ -191,7 +191,7 @@ geo_to_spher_coords <- function(lat, lon) {
 spher_to_geo_coords <- function(x, y, z) {
   lon <- (180/pi)*atan2(y, x) + 180
   lat <- (180/pi)*asin(z)
-  return(data.frame(lat, lon))
+  return(data.frame("lat"=lat, "lon"=lon))
 }
 
 nose_center_lons <- function(lons) {
