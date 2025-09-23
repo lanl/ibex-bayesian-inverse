@@ -13,11 +13,11 @@ endyear <- c(2011, 2013)
 beta <- c(1.1, 2, 4, 8)
 design <- expand.grid(step_sizes, logscl, endyear, beta)
 colnames(design) <- c("step", "scl", "year", "shape")
-index <- step <- shape <- end <- ls <- NA
+index <- step <- shape <- end <- logs <- NA
 seed <- 7198701
 
 ## read in the command line arguments
-## run with: R CMD BATCH '--args index=1 step=0.05 shape=1.1 end=2011 ls=0' sun_cycle_calib.R
+## run with: R CMD BATCH '--args index=1 step=0.05 shape=1.1 end=2011 logs=0' sun_cycle_calib.R
 args <- commandArgs(TRUE)
 if (length(args) > 0) {
   for(i in 1:length(args)) {
@@ -29,7 +29,7 @@ print(args)
 if (!is.na(index)) {
   settings <- design[index,]
 } else {
-  settings <- data.frame("step"=step, "shape"=shape, "year"=end, "scl"=ls)
+  settings <- data.frame("step"=step, "shape"=shape, "year"=end, "scl"=logs)
 }
 print(settings)
 
