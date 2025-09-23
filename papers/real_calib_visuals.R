@@ -157,8 +157,11 @@ library(ks)
 source("../helper.R")
 source("../vecchia_scaled.R")
 
+## Read in all model and field data
 model_data <- read.csv(file="../data/sims.csv")
 field_data <- read.csv(file="../data/ibex_real.csv")
+
+## Rename field name columns to align with preprocessing step
 colnames(field_data)[colnames(field_data)== "counts"] <- "sim_counts"
 colnames(field_data)[colnames(field_data)== "ecliptic_lat"] <- "lat"
 colnames(field_data)[colnames(field_data)== "ecliptic_lon"] <- "lon"
@@ -170,13 +173,14 @@ pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   real=TRUE, disc=FALSE)
 model_data$nlon <- nose_center_lons(model_data$lon)
 
-## HERE LOAD DATA FROM ACTUAL RUN
-pred_params <- c((2874.519-500)/2500, (0.001548249-0.001)/(0.1-0.001))
+## Load results of run on real data
+res <- readRDS("final_results/sun_cycle_index_24.rds")
+post_mean <- apply(res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 
 fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),
  nug=1e-4, ms=25)
 
-XX_ll <- cbind(unique(model_data[,c("lon", "lat")]), matrix(pred_params, nrow=1))
+XX_ll <- cbind(unique(model_data[,c("lon", "lat")]), matrix(post_mean, nrow=1))
 XX_ll[,c("x", "y", "z")] <- geo_to_spher_coords(lat=XX_ll$lat, lon=XX_ll$lon)
 XX_ll$x <- (XX_ll$x - min(XX_ll$x)) / diff(range(XX_ll$x))
 XX_ll$y <- (XX_ll$y - min(XX_ll$y)) / diff(range(XX_ll$y))
@@ -195,50 +199,40 @@ bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
 
-# model_lons <- sort(unique(model_data$nlon))
-# model_lats <- sort(unique(model_data$lat))
-# model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
-# par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-# pdf("ibex_sim_mod.pdf", width=7, height=5)
-# image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
-#   xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
-# axis(1, at=seq(325, 25, by=-60),
-#   labels=c(60, 0, 300, 240, 180, 120))
-# dev.off()
-
-field_lons <- sort(unique(field_data$nlon))
-field_lats <- sort(unique(field_data$lat))
-field_rates <- cut(field_data$est_rate, breaks=bks,
-  labels=FALSE)
+## Determine colors for plots based on breaks
+field_rates <- cut(field_data$est_rate, breaks=bks, labels=FALSE)
 field_rates[which(field_data$est_rate <= predrange[1])] <- 1
 field_rates[which(field_data$est_rate >= predrange[2])] <- length(cols)
 field_cols <- cols[field_rates]
+field_data$col <- field_cols
+
+field_data_09 <- field_data[field_data$map=="2009A",]
+field_data_10 <- field_data[field_data$map=="2010A",]
+field_data_11 <- field_data[field_data$map=="2011A",]
+
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_sim_field_09.pdf", width=7, height=5)
-plot(x=field_data[field_data$map=="2009A",c("nlon")],
-  y=field_data[field_data$map=="2009A", c("lat")], col=field_cols, pch=16, cex=0.7,
-  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
-  cex.lab=1.1)
+pdf("ibex_field_09.pdf", width=5, height=5)
+plot(x=field_data_09$nlon, y=field_data_09$lat, col=field_data_09$col, pch=16,
+  cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
+  ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_sim_field_10.pdf", width=7, height=5)
-plot(x=field_data[field_data$map=="2010A",c("nlon")],
-  y=field_data[field_data$map=="2010A", c("lat")], col=field_cols, pch=16, cex=0.7,
-  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
-  cex.lab=1.1)
+pdf("ibex_field_10.pdf", width=5, height=5)
+plot(x=field_data_10$nlon, y=field_data_10$lat, col=field_data_10$col,
+  pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
+  ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_sim_field_11.pdf", width=7, height=5)
-plot(x=field_data[field_data$map=="2011A",c("nlon")],
-  y=field_data[field_data$map=="2011A", c("lat")], col=field_cols, pch=16, cex=0.7,
-  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
-  cex.lab=1.1)
+pdf("ibex_field_11.pdf", width=5, height=5)
+plot(x=field_data_11$nlon, y=field_data_11$lat, col=field_data_11$col,
+  pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
+  ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
@@ -247,15 +241,15 @@ pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_sim_mod.pdf", width=7, height=5)
+pdf("ibex_surr_pred_real.pdf", width=5, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, xlab="Longitude",
   xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
 
-pmfps <- res$mcmc_res$u[seq(20001, 30000, by=10),1]*2500+500
-ratios <- res$mcmc_res$u[seq(20001, 30000, by=10),2]*(0.1-0.001)+0.001
+pmfps <- res$mcmc_res$u[seq(1001, 10000, by=10),1]*2500+500
+ratios <- res$mcmc_res$u[seq(1001, 10000, by=10),2]*(0.1-0.001)+0.001
 
 xy <- cbind(pmfps, ratios)
 H <- Hpi(xy)*2
@@ -274,14 +268,20 @@ thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
 cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
+# Plot contour at HPD threshold
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_real_post_est.pdf", width=5, height=5)
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), xlab="Parallel Mean Free Path", ylab="Ratio",
   xlim=c(500, 3000), ylim=c(0, 0.1))
 abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
 abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
 lines(cls$x, cls$y, lty=2)
+dev.off()
 
-# Plot contour at HPD threshold
+# Plot contour at HPD threshold (zoomed in)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_real_post_est_zoom.pdf", width=5, height=5)
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), xlab="Parallel Mean Free Path", ylab="Ratio",
   xlim=c(2700, 3000), ylim=c(0, 0.004))
