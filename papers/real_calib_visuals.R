@@ -88,8 +88,8 @@ for (i in 1:length(years)) {
   }
   lines(largest$x, largest$y, lty=2)
 }
-mtext("Parallel Mean Free Path", side=1, outer=TRUE, line=4.25, cex=1.2)
-mtext("Ratio", side=2, outer=TRUE, line=3.0, cex=1.2)
+mtext(expression("Parallel Mean Free Path ("~u[1]~")"), side=1, outer=TRUE, line=4.25, cex=1.2)
+mtext(expression("Ratio ("~u[2]~")"), side=2, outer=TRUE, line=3.0, cex=1.2)
 dev.off()
 
 
@@ -133,8 +133,8 @@ cls <- contourLines(fhat$eval.points[[1]],
 
 # Plot contour at HPD threshold
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
-  col=rev(heat.colors(128)), xlab="Parallel Mean Free Path", ylab="Ratio",
-  xlim=c(500, 3000), ylim=c(0, 0.1))
+  col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
+  ylab=expression("Ratio ("~u[2]~")"), xlim=c(500, 3000), ylim=c(0, 0.1))
 abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
 abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
 lines(cls$x, cls$y, lty=2)
@@ -194,7 +194,7 @@ pred_data <- data.frame(XX_ll, lhat_curr)
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
 predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
-cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
+cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(128)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
@@ -211,7 +211,7 @@ field_data_10 <- field_data[field_data$map=="2010A",]
 field_data_11 <- field_data[field_data$map=="2011A",]
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_field_09.pdf", width=5, height=5)
+pdf("ibex_field_09.pdf", width=6.0, height=5)
 plot(x=field_data_09$nlon, y=field_data_09$lat, col=field_data_09$col, pch=16,
   cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
@@ -220,7 +220,7 @@ axis(1, at=seq(325, 25, by=-60),
 dev.off()
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_field_10.pdf", width=5, height=5)
+pdf("ibex_field_10.pdf", width=6.0, height=5)
 plot(x=field_data_10$nlon, y=field_data_10$lat, col=field_data_10$col,
   pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
@@ -229,7 +229,7 @@ axis(1, at=seq(325, 25, by=-60),
 dev.off()
 
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_field_11.pdf", width=5, height=5)
+pdf("ibex_field_11.pdf", width=6.0, height=5)
 plot(x=field_data_11$nlon, y=field_data_11$lat, col=field_data_11$col,
   pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
@@ -241,7 +241,7 @@ pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_surr_pred_real.pdf", width=5, height=5)
+pdf("ibex_surr_pred_real.pdf", width=6.0, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, xlab="Longitude",
   xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
 axis(1, at=seq(325, 25, by=-60),
@@ -272,8 +272,8 @@ cls <- contourLines(fhat$eval.points[[1]],
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_real_post_est.pdf", width=5, height=5)
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
-  col=rev(heat.colors(128)), xlab="Parallel Mean Free Path", ylab="Ratio",
-  xlim=c(500, 3000), ylim=c(0, 0.1))
+  col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
+  ylab=expression("Ratio ("~u[2]~")"), xlim=c(500, 3000), ylim=c(0, 0.1))
 abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
 abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
 lines(cls$x, cls$y, lty=2)
@@ -283,10 +283,8 @@ dev.off()
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_real_post_est_zoom.pdf", width=5, height=5)
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
-  col=rev(heat.colors(128)), xlab="Parallel Mean Free Path", ylab="Ratio",
-  xlim=c(2700, 3000), ylim=c(0, 0.004))
-abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
-abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
+  col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
+  ylab=expression("Ratio ("~u[2]~")"), xlim=c(2700, 3000), ylim=c(0, 0.004))
 lines(cls$x, cls$y, lty=2)
 dev.off()
 
@@ -296,12 +294,6 @@ dev.off()
 ## estimated model parameters
 ###############################################################################
 ###############################################################################
-
-noselongitude <- 256
-center = 180-(360 - noselongitude)
-orig_360 = seq(0,300,60)
-new_360 = orig_360-center+0.01
-new_360[new_360<0.01]=new_360[new_360<0.01]+360
 
 source("../helper.R")
 source("../vecchia_scaled.R")
@@ -380,9 +372,9 @@ field_data_11 <- field_data[field_data$map=="2011A",]
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
 
-pdf("ibex_field_disc_09.pdf", width=6.25, height=5)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 5))
-plot(x=field_data_09$nlon, y=field_data_09$lat, col=field_data_11$disc_col,
+pdf("ibex_field_disc_09.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
+plot(x=field_data_09$nlon, y=field_data_09$lat, col=field_data_09$disc_col,
   pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
@@ -391,9 +383,9 @@ fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
   legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
 dev.off()
 
-pdf("ibex_field_disc_10.pdf", width=6.25, height=5)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 5))
-plot(x=field_data_10$nlon, y=field_data_10$lat, col=field_data_11$disc_col,
+pdf("ibex_field_disc_10.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
+plot(x=field_data_10$nlon, y=field_data_10$lat, col=field_data_10$disc_col,
   pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
@@ -402,8 +394,8 @@ fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
   legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
 dev.off()
 
-pdf("ibex_field_disc_11.pdf", width=6.25, height=5)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 5))
+pdf("ibex_field_disc_11.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 plot(x=field_data_11$nlon, y=field_data_11$lat, col=field_data_11$disc_col,
   pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
@@ -411,4 +403,28 @@ axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
   legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
+dev.off()
+
+pdf("ibex_mult_scale_disc.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
+hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
+  xlab="multiplicative scale", main="")
+dev.off()
+
+## Another option:
+pdf("ibex_field_disc_09.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 5))
+plot(x=field_data_09$nlon, y=field_data_09$lat, col=field_data_09$disc_col,
+  pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
+  ylim=ylims, cex.lab=1.1)
+axis(1, at=seq(325, 25, by=-60),
+  labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
+dev.off()
+
+pdf("ibex_mult_scale_disc.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 5))
+hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
+  xlab="multiplicative scale", main="", breaks=12)
 dev.off()

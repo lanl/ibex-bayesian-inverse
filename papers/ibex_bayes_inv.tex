@@ -1004,12 +1004,12 @@ Results are shown in Figure \ref{f:real_estimates_all}.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.48,trim=0 15 15 45,clip=TRUE]{ibex_field_09.pdf}
-\includegraphics[scale=0.48,trim=0 15 15 45,clip=TRUE]{ibex_field_10.pdf}
-\includegraphics[scale=0.48,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est.pdf}
-\includegraphics[scale=0.48,trim=0 15 15 45,clip=TRUE]{ibex_field_11.pdf}
-\includegraphics[scale=0.48,trim=0 15 15 45,clip=TRUE]{ibex_surr_pred_real.pdf}
-\includegraphics[scale=0.48,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est_zoom.pdf}
+\includegraphics[scale=0.41,trim=0 15 20 45,clip=TRUE]{ibex_field_09.pdf}
+\includegraphics[scale=0.41,trim=55 15 10 45,clip=TRUE]{ibex_field_10.pdf}
+\includegraphics[scale=0.41,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est.pdf}
+\includegraphics[scale=0.41,trim=0 15 20 45,clip=TRUE]{ibex_field_11.pdf}
+\includegraphics[scale=0.41,trim=55 15 10 45,clip=TRUE]{ibex_surr_pred_real.pdf}
+\includegraphics[scale=0.41,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est_zoom.pdf}
 \caption{Observed IBEX satellite data for years 2009-2011 (top left, top middle, bottom left). Predicted output via a fitted Scaled Vecchia surrogate at
 estimated model parameters (bottom middle). Two views for the posterior
 distribution of sampled model parameters $u$ (top right, bottom right).
@@ -1039,11 +1039,21 @@ distribution of sampled model parameters $u$ (top right, bottom right).
 %% - Comment on complexity of discrepancy. Scale isn't sufficient.
 %% - Perhaps a stationary GP is not even sufficient
 
+% \begin{figure}[ht!]
+% \centering
+% \includegraphics[scale=0.44,trim=0 15 70 0,clip=TRUE]{ibex_field_disc_09.pdf}
+% \includegraphics[scale=0.44,trim=50 15 70 0,clip=TRUE]{ibex_field_disc_10.pdf}
+% \includegraphics[scale=0.44,trim=50 15 0 0,clip=TRUE]{ibex_field_disc_11.pdf}
+% \caption{Discrepancy between observed satellite data and the simulator output at estimated model parameters. Panels left-to-right are 2009, 2010, and 2011.
+% \label{f:ibex_disc}}
+% \end{figure}
+
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.44,trim=0 15 70 0,clip=TRUE]{ibex_field_disc_09.pdf}
-\includegraphics[scale=0.44,trim=50 15 70 0,clip=TRUE]{ibex_field_disc_10.pdf}
-\includegraphics[scale=0.44,trim=50 15 0 0,clip=TRUE]{ibex_field_disc_11.pdf}
+\includegraphics[scale=0.51,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_09.pdf}
+\includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_field_disc_10.pdf}
+\includegraphics[scale=0.51,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_11.pdf}
+\includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_mult_scale_disc.pdf}
 \caption{Discrepancy between observed satellite data and the simulator output at estimated model parameters. Panels left-to-right are 2009, 2010, and 2011.
 \label{f:ibex_disc}}
 \end{figure}
