@@ -988,19 +988,16 @@ satellite data from the years 2009-2011 to simulator runs.
 %% - Comment on the missalignment between simulator and reality
 
 Our experimental setup will be similar to that in Figure \ref{f:ibex_synth_ex},
-only substituting in real data for simulated data. Therefore, we execute
-Algorithm \ref{alg:gibbs} by initially fitting a Scaled Vecchia GP surrogate to
-all $n=66$ computer model runs. Then, MCMC samples from the posterior
-distribution of our model parameters, evaluating the likelihood of the real data
-given the surrogate predictions at new proposed parameter values. Some things of
-note are that we only use satellite data collected during the years 2011-2013.
-This comes recommended by the space scientists, as the models are developed to
-reflect the behavior of the Sun and corresponding solar wind during that time
-period. Additionally, we only use ENAs collected at energy level ESA 4. This
-energy level allows the best context for analysis, whereas lower ESAs have a
-much weaker signal and higher ENAs overwhelm the analysis.
-
-Results are shown in Figure \ref{f:ibex_real_ex}.
+only substituting in real data for simulated data. We execute Algorithm
+\ref{alg:gibbs} by fitting a Scaled Vecchia GP surrogate to all $n=66$ computer
+model runs and sample from the posterior $u \mid Y^F$ via MCMC. One difference
+from Section \ref{sec:surr_skymaps} is that field data ($Y^F, X^F$) is not be
+exclusively from one map. Instead, ($Y^F, X^F$) is formed by stacking the
+counts, exposure times, background rates, and Cartestian coordinates $x$, $y$,
+$z$ from years 2009-2011. Additionally, we only use ENAs collected at energy
+level ESA 4. ESA 4 allows the best context for analysis, whereas lower ESAs have
+a much weaker signal and higher ESAs overwhelm the analysis. Raw satellite data
+from 2009-2011 and our results are shown in Figure \ref{f:ibex_real_ex}.
 
 \begin{figure}[ht!]
 \centering
@@ -1023,6 +1020,22 @@ distribution of sampled model parameters $u$ (top right, bottom right).
 % combination of values that has been treated as a holdout set.
 % \label{f:real_estimates_all}}
 % \end{figure}
+
+These are not as clean as the results we presented in Section
+\ref{sec:surr_skymaps}. Our first observation is that the predicted GP surrogate
+output at the posterior mean of $u \mid Y^F$ marks a clear difference between
+the trends observed in real data. In particular, the intensity of the ribbon
+near latitude $-30^\circ$ and longitude $270^\circ$ appears to be much lower
+than in the satellite data. There's also a gap, but this time overestimating,
+between surrogate and reality between latitudes $60^\circ$ and $120^\circ$.
+Next, we can view another indication of this clash in the right panels of Figure
+\ref{f:ibex_real_ex}. Note that these both display the same posterior
+distribution, but the axis limits are changed. Posterior mass is concentrated in
+the corner of the model parameter space. Our priors attempt to push sampling
+away from the boundaries, but the likelihood appears to dominate. We take this
+as an indication that the computer model is lacking in it's attempt to represent
+reality, and the Metropolis sample seeks to go beyond the range of model
+parameters available. We address this next.
 
 %------------------------------------------------------------------------------
 %% SECTION 5.3 - DISCREPANCY
