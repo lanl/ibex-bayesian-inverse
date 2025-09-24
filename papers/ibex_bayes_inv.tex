@@ -1106,32 +1106,32 @@ potential nonstationarity in the discrepancy surface.
 \section{Discussion}
 \label{sec:discuss}
 
-We have introduced an effective tool for solving inverse problems using
-Bayesian methods where 1) data from a field experiment is not normally
-distributed and 2) computer model output is extremely high-dimensional,
-demanding an approximation for the Gaussian process surrogate. In simulated
-experiments, our framework provides accurate predictions at unsampled input
-locations. Additionally, when provided with data where the underlying
-calibration parameters are known, we can recover the truth at the nominal 95\%
-rate. We applied this methodology to data collected from the IBEX satellite,
-and corresponding simulator output generating heliospheric sky maps. When
-faced with real data from the satellite, our method shows that large
-discrepancies exist between the computer model and the physical process it
-attempts to represent. Further collaboration is needed to inform the
-theoretical astrophysicists responsible for model development where the model
-is lacking, and improve its fidelity to the truth.
+We have introduced an effective tool for solving inverse problems using Bayesian
+methods where 1) the simulator representing the physical model or process is
+extensive, limiting the number of runs available for analysis, demanding a GP
+surrogate, but 2) the computer model output is extremely high-dimensional,
+requiring unconventional methods to approximate the GP, and 3) data from a field
+experiment are Poisson counts, bucking the current literature that focuses
+normally distributed observations. In simulated experiments, our Scaled Vecchia
+GP surrogate provides accurate predictions at input locations not included in
+training data. Our Poisson Bayesian inverse problem framework is able to recover
+the true model parameters at the nominal 95\% rate when provided with synthetic
+data where the model parameter $u$ is known. We applied this methodology to data
+collected from the IBEX satellite, and corresponding simulator output generating
+heliospheric sky maps. When faced with real data from the satellite, our method
+shows that discrepancies exist between the computer model and the physical
+process it attempts to represent. Further collaboration is needed to inform the
+theoretical astrophysicists responsible for model development where the model is
+lacking, and improve its fidelity to the truth.
 
 Our framework is only applied to counts assumed to come from a Poisson
-distributed process. We encourage other practitioners to use this work in
-other contexts where data from the field may come from some other distribution
-(e.g. Negative Binomial, Bernoulli, Exponential, etc.). We recognize the
-limitations of our method. First, the Scaled Vecchia GP surrogate for the
-computer model fails to provide full uncertainty quantification on its
-parameter estimates. A fully Bayesian framework could be developed, perhaps
-with the use of a deep Gaussian process to handle the inherent
-non-stationarity in the response surface. Finally, this project motivates the
-need for a more exhaustive procedure to perform hypothesis testing for which
-theoretical model is most probable, considering the data observed.
+distributed process. We encourage other practitioners to use this work in other
+contexts where data from the field may come from some other distribution (e.g.
+Negative Binomial, Bernoulli, Exponential, etc.). The Scaled Vecchia GP
+surrogate used for the computer model also fails to provide full uncertainty
+quantification on its parameter estimates. A fully Bayesian framework could be
+developed, perhaps with the use of a deep Gaussian process to handle the
+inherent nonstationarity in the response surface.
 
 \subsection*{Acknowledgments}
 
