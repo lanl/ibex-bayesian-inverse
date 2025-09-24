@@ -254,7 +254,7 @@ ratios <- res$mcmc_res$u[seq(1001, 10000, by=10),2]*(0.1-0.001)+0.001
 xy <- cbind(pmfps, ratios)
 H <- Hpi(xy)*2
 fhat <- kde(x=xy, H=H, xmin=c(500, 0), xmax=c(3000, 0.1),
-  compute.cont=TRUE, gridsize=rep(1501, ncol(xy)))
+  compute.cont=TRUE, gridsize=rep(301, ncol(xy)))
 fhat$estimate <- pmax(fhat$estimate, 0)
 dx <- diff(fhat$eval.points[[1]][1:2])
 dy <- diff(fhat$eval.points[[2]][1:2])
@@ -278,6 +278,21 @@ abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
 abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
 lines(cls$x, cls$y, lty=2)
 dev.off()
+
+fhat <- kde(x=xy, H=H, xmin=c(500, 0), xmax=c(3000, 0.1),
+  compute.cont=TRUE, gridsize=rep(1001, ncol(xy)))
+fhat$estimate <- pmax(fhat$estimate, 0)
+dx <- diff(fhat$eval.points[[1]][1:2])
+dy <- diff(fhat$eval.points[[2]][1:2])
+
+# Flatten density values
+dens_vals <- sort(as.vector(fhat$estimate), decreasing=TRUE)
+cum_prob <- cumsum(dens_vals)*dx*dy
+
+# Threshold for 95% HPD
+thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
+cls <- contourLines(fhat$eval.points[[1]],
+  fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
 # Plot contour at HPD threshold (zoomed in)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))

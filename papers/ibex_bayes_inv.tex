@@ -929,7 +929,7 @@ months through a series of regular adjustments. Therefore, dating back to 2008
 we have access to $\sim$35 estimated \textit{sky maps}. The number of records
 in each sky map varies across year, ranging from $\sim$8-15K observations. Each
 row of the dataset contains the ENA origin location in Cartesian coordinates
-($x$, $y$, $z$), time the satellite point{}ed at that location (in seconds),
+($x$, $y$, $z$), time the satellite pointed at that location (in seconds),
 counts of ENAs observed at one of six different energy levels (ESA), and a
 background rate $\lambda_b$ (ENAs/sec).
 
@@ -952,27 +952,27 @@ computer model runs to learn the distribution of IBEX simulator parameters
 %------------------------------------------------------------------------------
 
 We have referred to the IBEX simulator throughout the entirety of this paper
-without going into much detail. We focused on just two particular models
-available among many, one for the GDF and one for the ribbon. We leave a more
-in-depth physical interpretation and analysis of parameters to more appropriate
-venues \citep{zirnstein2021dependence,zirnsteinGDFsims2015}, but to give some
-context, we give a simple review here. The GDF model we use is constant and is
-added on to the output of the ribbon simulator. For the ribbon model, one can
-think of parallel mean free path as the distance a hydrogen ion travels beyond
-the heliopause before interacting with another particle, receiving an electron,
-and becoming an ENA. The ratio parameter is the fraction of parallel mean free
-path and another measure of distance, the perpendicular mean free path.
+without going into much detail. We focus on two particular models available
+among many, one for the GDF and one for the ribbon. We leave a more in-depth
+physical interpretation and analysis of parameters to more appropriate venues
+\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, but to give some context,
+we give a simple review here. In the ribbon model, one can think of parallel
+mean free path as the distance a hydrogen ion travels beyond the heliopause
+before interacting with another particle, receiving an electron, and becoming an
+ENA. The ratio parameter is the fraction of parallel mean free path and another
+measure of distance, the perpendicular mean free path. The GDF model we use is
+constant and is added on to the output of the ribbon simulator.
 
 Real data brings some additional complications, in particular when comparing to
-computer models. The makeup of heliosphere changes over time, largely due to
-the variations in the solar wind that accompany the sun's 11 or 21-year cycle.
-Physicists therefore must account for these changes through additional
-parameters, or restricting the application of their models to a specific
-timeframe. This is the case for the GDF model, which corresponds to 2009-2011,
-the first few years of IBEX's mission. On the other hand, the ribbon model
-takes the approach of averaging over the entire sun-cycle. We factor in this
-variation by only comparing satellite data from the years 2009-2011 to
-simulator runs.
+computer models. Scientists know that the makeup of the heliosphere changes over
+time, largely due to the variations in the solar wind that accompany the sun's
+11 or 21-year cycle. Physicists therefore build in these changes to their
+simulators through additional parameters, or restricting the application of
+their models to a specific timeframe. This restriction is the case for the GDF
+model, which corresponds to the 2009-2011, the first few years of IBEX's
+mission. In another approach, the ribbon model is averaged over the entire
+sun-cycle. We factor in these heliospheric variations by only comparing
+satellite data from the years 2009-2011 to simulator runs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -987,20 +987,20 @@ simulator runs.
 %% - Show results from the real data
 %% - Comment on the missalignment between simulator and reality
 
-similar to that in Section \ref{sec:synth_data}, only
-substituting in real data for simulated data. Therefore, we execute Algorithm
-\ref{alg:gibbs} by initially fitting a Scaled Vecchia GP surrogate to all
-$n=66$ computer model runs. Then, MCMC samples from the posterior distribution
-of our model parameters, evaluating the likelihood of the real data given the
-surrogate predictions at new proposed parameter values. Some things of note
-are that we only use satellite data collected during the years 2011-2013. This
-comes recommended by the space scientists, as the models are developed to
+Our experimental setup will be similar to that in Figure \ref{f:ibex_synth_ex},
+only substituting in real data for simulated data. Therefore, we execute
+Algorithm \ref{alg:gibbs} by initially fitting a Scaled Vecchia GP surrogate to
+all $n=66$ computer model runs. Then, MCMC samples from the posterior
+distribution of our model parameters, evaluating the likelihood of the real data
+given the surrogate predictions at new proposed parameter values. Some things of
+note are that we only use satellite data collected during the years 2011-2013.
+This comes recommended by the space scientists, as the models are developed to
 reflect the behavior of the Sun and corresponding solar wind during that time
 period. Additionally, we only use ENAs collected at energy level ESA 4. This
 energy level allows the best context for analysis, whereas lower ESAs have a
 much weaker signal and higher ENAs overwhelm the analysis.
 
-Results are shown in Figure \ref{f:real_estimates_all}.
+Results are shown in Figure \ref{f:ibex_real_ex}.
 
 \begin{figure}[ht!]
 \centering
@@ -1030,15 +1030,6 @@ distribution of sampled model parameters $u$ (top right, bottom right).
 \label{sec:ibex_discrep}
 %------------------------------------------------------------------------------
 
-%% DISCREPANCY
-%% - Refer to KOH, Higdon, and their use of discrepancy
-%% - Introduce simple scaling discrepancy (iniclude some equations)
-%% - Refer to results in Appendix for simulated data where we discover the true scale
-%% - Explain set up for IBEX calibration with discrepancy
-%% - Show results
-%% - Comment on complexity of discrepancy. Scale isn't sufficient.
-%% - Perhaps a stationary GP is not even sufficient
-
 % \begin{figure}[ht!]
 % \centering
 % \includegraphics[scale=0.44,trim=0 15 70 0,clip=TRUE]{ibex_field_disc_09.pdf}
@@ -1047,6 +1038,42 @@ distribution of sampled model parameters $u$ (top right, bottom right).
 % \caption{Discrepancy between observed satellite data and the simulator output at estimated model parameters. Panels left-to-right are 2009, 2010, and 2011.
 % \label{f:ibex_disc}}
 % \end{figure}
+
+Figure \ref{f:ibex_disc} shows the discrepancy between what the Scaled Vecchia
+surrogate outputs at the posterior mean our framework estimates for the model
+parameter $u$ and data collected from the IBEX satellite. It's clear that the
+computer model does not sufficiently account for the behavior observed in the
+satellite data. This is not terribly surprising, as simulators are inherently
+biased simply from not be able to completely reconstruct the real process.
+\citet{kennedyohagan2001} address this limitation by introducing a discrepany
+term in canonical computer model calibration framework, a practice followed by
+other practitioners
+\citep{higdoncalib2004,higdoncalib2008,Liu2009ModularizationIB}.
+
+The KOH approach uses a GP that allows modeling of complex disparities between
+simulator and reality. Due to our field response being counts, additional
+methodology needs to be developed to apply the same GP discrepancy methods to
+IBEX, a point we leave to future work (\ref{sec:discuss}). However, we test the addition of a simple, multiplicative discrepancy term to our original model, modifying Eq.~(\ref{eq:pois_inv_bayes_mod}) as follows:
+\begin{align}
+Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
+\label{eq:mod_with_disc} \\ \lambda(X^F) &= \lambda(X)*\delta &
+\mathrm{log}(\delta) &\sim \mathcal{N}(0, 1) \nonumber \\ u &\sim \pi(u) &
+\mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p,
+\end{align}
+
+The bottom right panel of Figure \ref{f:ibex_disc} shows posterior samples of
+$\delta$. Mass is concentrated just below 1, indicating no nearly effect from
+the multiplicative discrepancy. Results displayed in Figures
+\ref{f:ibex_real_ex}-\ref{f:ibex_disc} actually include posterior sampling of
+$\delta$ via MCMC. Examining the disparities shown in Figure \ref{f:ibex_disc}
+more closely, it appears that there is some spatial dependence in whether the
+simulator overestimates or underestimates the mean surface. For instance, the
+area of the \textit{sky map} corresponding to the \textit{ribbon} shows some
+underestimation. On the flip side, areas around the ribbon are overestimated.
+Therefore, a constant multiplicative scale discrepancy is insufficient. In fact,
+we believe that $\delta$ is estimated around 1.0 because of these competing
+interests between ribbon and GDF. Future work is needed to address thie
+potential nonstationarity in the discrepancy surface.
 
 \begin{figure}[ht!]
 \centering
