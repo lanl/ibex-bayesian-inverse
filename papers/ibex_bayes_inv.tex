@@ -1112,26 +1112,26 @@ extensive, limiting the number of runs available for analysis, demanding a GP
 surrogate, but 2) the computer model output is extremely high-dimensional,
 requiring unconventional methods to approximate the GP, and 3) data from a field
 experiment are Poisson counts, bucking the current literature that focuses
-normally distributed observations. In simulated experiments, our Scaled Vecchia
-GP surrogate provides accurate predictions at input locations not included in
-training data. Our Poisson Bayesian inverse problem framework is able to recover
-the true model parameters at the nominal 95\% rate when provided with synthetic
-data where the model parameter $u$ is known. We applied this methodology to data
-collected from the IBEX satellite, and corresponding simulator output generating
-heliospheric sky maps. When faced with real data from the satellite, our method
-shows that discrepancies exist between the computer model and the physical
-process it attempts to represent. Further collaboration is needed to inform the
-theoretical astrophysicists responsible for model development where the model is
-lacking, and improve its fidelity to the truth.
+normally distributed observations. Our proposed Poisson Bayesian inverse problem
+framework is able to recover the model parameter $u^*$ at the nominal 95\% rate
+when provided with synthetic data where the truth is known. We applied this
+methodology to data collected from the IBEX satellite and corresponding
+simulated heliospheric sky maps from a computer model. When faced with data
+collected from the satellite, our method shows that complex discrepancies exist
+between the simulator and the physical process it attempts to represent and are
+unable to be resolved with a simple multiplicative constant. More advancementare
+needed to properly model this parity. Further collaboration with theoretical
+astrophysicists responsible for computer model development could also be pursued
+to improve the simulator's fidelity to the truth.
 
 Our framework is only applied to counts assumed to come from a Poisson
 distributed process. We encourage other practitioners to use this work in other
-contexts where data from the field may come from some other distribution (e.g.
-Negative Binomial, Bernoulli, Exponential, etc.). The Scaled Vecchia GP
-surrogate used for the computer model also fails to provide full uncertainty
-quantification on its parameter estimates. A fully Bayesian framework could be
-developed, perhaps with the use of a deep Gaussian process to handle the
-inherent nonstationarity in the response surface.
+contexts where field observations must be modeled differently (e.g. Negative
+Binomial, Bernoulli, Exponential, etc.). Additionally, the Scaled Vecchia GP
+surrogate used for the computer model, although extremely accurate, fails to
+provide full uncertainty quantification for it's parameter estimates. A fully
+Bayesian framework could be developed, perhaps with the use of a deep Gaussian
+process to handle the inherent nonstationarity in the response surface.
 
 \subsection*{Acknowledgments}
 
