@@ -24,15 +24,15 @@ if (ind_files) {
       year=as.integer(substr(iter_res$params, start=1, stop=4)))
   }
 } else {
-  res <- readRDS("real_calib_results_20250916.rds")
+  res <- readRDS("final_results/real_calib_results_20250916.rds")
 }
 
-years <- 2009:2022
+years <- 2012:2021
 pmfp_labs <- seq(500, 2500, by=500)
 ratio_labs <- seq(0.02, 0.1, length=5)
 
 pdf("real_bayes_inv_res.pdf", width=7, height=4)
-par(mfrow=c(2, 7), mar=c(0.25,0.25,1.25,0.15),
+par(mfrow=c(2, 5), mar=c(0.25,0.25,1.25,0.15),
   oma=c(7,5,0.5,0.5))
 for (i in 1:length(years)) {
   yticks <- i %% (length(years)/2)-1 == 0
@@ -46,7 +46,7 @@ for (i in 1:length(years)) {
   xy <- cbind(iter_pmfp, iter_ratio)
   H <- Hpi(xy)/5
   fhat <- kde(x=xy, H=H, xmin=c(500, 0.001), xmax=c(3000, 0.1),
-    compute.cont=TRUE, gridsize=rep(401, ncol(xy)))
+    compute.cont=TRUE, gridsize=rep(201, ncol(xy)))
   fhat$estimate <- pmax(fhat$estimate, 0)
   dx <- diff(fhat$eval.points[[1]][1:2])
   dy <- diff(fhat$eval.points[[2]][1:2])
