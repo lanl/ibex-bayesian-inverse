@@ -97,8 +97,6 @@ image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
   xlim=xlims, ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
-
-
 dev.off()
 
 iter_pmfp <- res[[single_index]]$u[seq(10001, 20000, by=10),1]

@@ -828,59 +828,62 @@ competitor when $m<50$, and for all values of $m$ when $n>1500$.
 \label{sec:ibex_data}
 %------------------------------------------------------------------------------
 
-We now return to the IBEX inverse problem. We wish to determine the settings $u$
-of a computer model that produce a (simulated) sky map that is most likely to
-have generated some observed counts. But before diving in, we need to describe a
-few nuances we have not yet revealed about the data collected by the IBEX
-satellite and particular implementation details of the computer model.
+We now return to the IBEX inverse problem. We wish to determine the settings
+$u$ of a computer model that produce a (simulated) sky map most likely to have
+generated some observed counts. But before diving in, we need to describe a few
+nuances we have not yet revealed about the data collected by the IBEX satellite
+and some particular implementation details of the computer model.
 
 Each row of the satellite dataset contains the ENA origin location in Cartesian
 coordinates ($x$, $y$, $z$), time the satellite pointed at that location (in
 seconds), counts of ENAs observed at one of six different energy levels (ESA),
-and a background rate $\lambda_b$ (ENAs/sec). We only use ENAs collected at
-energy level ESA 4. ESA 4 allows the best context for analysis, whereas lower
-ESA provides a much weaker signal and ENAs with higher ESA overwhelm the
-analysis. More important to consider is that ENAs are known to come from sources
-other than the heliosphere. Space scientists quantify this noise for each
-location ($X^F$) viewed by the satellite and add it as a background rate
-($\lambda_b$) that must be accounted for in the data. For example, the left
-panel of Figure \ref{f:fig1} displays ENA rates {\em after} $\lambda_b$ has been
-subtracted out. Although this rate is an estimate rather than an exact value, we
-follow the lead of other researchers \citep{osthustheseus2023} and treat it as
-constant in our work. For the purpose of solving the inverse problem, we update
-the mean expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod}
-such that $\lambda(X^F) = m(u, X^F) - \lambda_{b}(X^F)$.
+and a background rate $\lambda_b$ (ENAs/sec). Note that we only use ENAs
+collected at energy level ESA 4. This provides the best context for analysis,
+whereas lower ESA values give a much weaker signal and ENAs with higher energy
+levels overwhelm the analysis. More important to consider is that ENAs are
+known to come from sources other than the heliosphere. Space scientists
+quantify this noise for each location ($X^F$) viewed by the satellite and add
+it as a background rate ($\lambda_b$) that must be accounted for in the data.
+For example, the left panel of Figure \ref{f:fig1} displays ENA rates {\em
+after} $\lambda_b$ has been subtracted out. Although this rate is an estimate
+rather than an exact value, we follow the lead of other researchers
+\citep{osthustheseus2023} and treat it as constant in our work. For the purpose
+of solving the inverse problem, we address this through an update to the mean
+expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such
+that $\lambda(X^F) = m(u, X^F) -
+\lambda_{b}(X^F)$.
 
 We have referred to the IBEX simulator throughout this paper without going into
-much detail. While we leave a more in-depth physical interpretation and analysis
-of parameters to more appropriate venues
-\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, we give some basic context
-here. We focus on two particular models available (among many), one for the GDF
-and one for the ribbon. In the ribbon model, one can think of the parameter
-\textit{parallel mean free path} as the distance a hydrogen ion travels beyond
+much detail. While we leave a more in-depth physical interpretation and
+analysis of parameters to more appropriate venues
+\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, we give some basic
+context here. We focus on two particular models available (among many), one for
+the GDF and one for the ribbon. In the ribbon model, the parameter
+\textit{parallel mean free path} is the distance a hydrogen ion travels beyond
 the heliopause before interacting with another particle, receiving an electron,
 and becoming an ENA. The \textit{ratio} parameter is the fraction of
-\textit{parallel mean free path} and another measure of distance, the
-perpendicular mean free path. The GDF model we use is constant and is simply
-added to the output of the ribbon simulator.
+\textit{parallel mean free path} and another measure of distance, perpendicular
+mean free path. The response from the GDF model does not vary with any
+parameters of interest and is simply added to the output of the ribbon
+simulator.
 
-Scientists know that the makeup of the heliosphere changes over time, largely
-due to variations in the solar wind that accompany the sun's 11 or 21-year
-cycle. Physicists build this evolution into their simulators either through
-additional paramters, restricting the application of their models to a specific
-timeframe, or by simply averaging over the sun cycle. The GDF model we utilize
-was developed to correspond to the years 2009-2011, while the ribbon model
-averages the behavior of the heliosphere over the entire sun cycle. We factor in
-these heliospheric variations by only comparing satellite data from the years
-2009-2011 to simulator runs.
+Scientists know that the makeup of the heliosphere evolves over time, largely
+due to variations in the solar wind that accompany the sun's 11 or 22-year
+cycle. Physicists build these changes into their simulators either through
+additional parameters, restricting the application of their models to a
+specific timeframe, or simply averaging over the sun cycle. The GDF model we
+utilize was developed to correspond to the years 2009-2011, while the ribbon
+model averages the composition of the heliosphere over the entire sun cycle. We
+factor in these heliospheric variations by only comparing satellite data from
+the years 2009-2011 to simulator runs.
 
 We aim to pair the observed satellite data with the $n=66$ computer model runs
 to learn the posterior distribution of \textit{parallel mean free path} and
-\textit{ratio}. But before using the actual ENA counts collected by the IBEX
-satellite, we wish to validate our proposed methodology. Therefore, we run our
-Poisson Bayesian inverse problem framework on synthetic satellite data where we
-know the ``true'' parameter $u^*$ and can evaluate whether our method is able to
-recover it.
+\textit{ratio}. But first we wish to validate our proposed methodology.
+Therefore, we run our Poisson Bayesian inverse problem framework on synthetic
+satellite data where we know the ``true'' parameter $u^*$ and can evaluate
+whether our method is able to recover it before shifting our focus to the
+actual ENA counts collected by the IBEX satellite.
 
 %------------------------------------------------------------------------------
 % SECTION 4.1: Synthetic testbed for inverse problem validation
@@ -916,7 +919,8 @@ which correspond to certain orbits.
 model setting and varying exposure times (top left). IBEX simulator output of
 ENA rate at \textit{parallel mean free path} $= 1750$ and \textit{ratio} $=
 0.02$ (top right). Predicted output via a fitted Scaled Vecchia surrogate at
-estimated calibration parameters (bottom left). Posterior distribution of sampled model parameters $u$ (bottom right).
+estimated calibration parameters (bottom left). Posterior samples of model
+parameter $u$ as a kernel density (bottom right).
 \label{f:ibex_synth_ex}}
 \end{figure}
 
@@ -956,7 +960,7 @@ samples beyond the boundary parameters, we do not test those combinations for
 which at least one parameter is on its edge (i.e, when parallel mean free path
 $\in \{500, 3000\}$ and/or ratio $\in \{0.001, 0.1\}$). Removing these edge
 cases results in 36 remaining test runs. For each combination, we follow the
-same procedure as above: select one model parameter $u$ and create simulated
+same procedure as above: select one model parameter $u$, create simulated
 observed satellite data, fit a  Scaled Vecchia surrogate on training data
 excluding $u^*$, and run Algorithm \ref{alg:gibbs} to sample from the posterior
 $u \mid Y^F$. Results are shown in Figure \ref{f:synth_estimates_all}.
@@ -977,22 +981,22 @@ the IBEX satellite.
 \label{sec:ibex_exp}
 %------------------------------------------------------------------------------
 
-The IBEX satellite is able to view the entire sky over a period of six months
-through a series of regular adjustments. Therefore, space scientists at LANL
-have access to over 15 years of data collected by satellite and resulting sky
-maps. However, as mentioned above, we only use satellite data from the years
-2009-2011 due to alignment with the implementation of the computer model,
-leaving the remaining data for future work (\ref{sec:discuss}). The number of
-records in each sky map varies across year from $\sim$7-8K observations.
+Space scientists at LANL have access to over 15 years of data collected by the
+IBEX satellite and the resulting sky maps. However, as mentioned above, we only
+use satellite data from the years 2009-2011 due to alignment with the
+implementation of the computer model, leaving the remaining data for future
+work (\ref{sec:discuss}). The number of records in each sky map varies across
+the three years from $\sim$7-8K observations, therefore we have over 23K rows
+of field data ($X^F, Y^F$) available to use for analysis.
 
 Our experimental setup will be similar to that in Section \ref{sec:synth_data},
 only substituting in real data for simulated data. We execute Algorithm
-\ref{alg:gibbs} by fitting a Scaled Vecchia GP surrogate to all $n=66$ computer
-model runs and sample from the posterior $u \mid Y^F$ via MCMC. One difference
-from Section \ref{sec:synth_data} is that field data ($Y^F, X^F$) are not
-exclusively from one map. Instead, ($Y^F, X^F$) is formed by stacking the
-counts, exposure times, background rates, and Cartestian coordinates $x$, $y$,
-$z$ from years 2009-2011.
+\ref{alg:gibbs} by fitting a Scaled Vecchia GP surrogate to \textit{all} 66
+computer model runs and sample from the posterior $u \mid Y^F$ via MCMC. One
+difference from Section \ref{sec:synth_data} is that field data ($Y^F, X^F$)
+are not exclusively from one map (Figure \ref{f:ibex_real_ex}). Instead, ($Y^F, X^F$) is formed by stacking
+the counts, exposure times, background rates, and Cartesian coordinates $x$,
+$y$, $z$ from years 2009-2011.
 
 \begin{figure}[ht!]
 \centering
@@ -1010,18 +1014,19 @@ distribution of sampled model parameters $u$ (top right, bottom right).
 
 It is evident that the predicted GP surrogate output at the posterior mean of $u
 \mid Y^F$ marks a clear difference between the trends observed in real data. In
-particular, the intensity of the ribbon near latitude $-30^\circ$ and longitude
-$270^\circ$ appears to be much lower than what is observed in the satellite data
-for each year. There's also a gap (in this instance overestimating the ENA rate)
-between surrogate and reality between longitudes $60^\circ$ and $120^\circ$. We
-view another indication of this clash in the right panels of Figure
-\ref{f:ibex_real_ex}. Note that these both display the same posterior
-distribution, but the axis limits differ. Posterior mass is concentrated in the
-extreme corner of the model parameter space. Our priors attempt to push sampling
-away from the boundaries, but the likelihood dominates the posterior. We take
-this as an indication that the computer model is lacking in it's attempt to
-represent reality, and the Metropolis sampler seeks to go beyond the range of
-model parameters in training data.
+particular, the intensity of the ribbon in the surrogate prediction near
+latitude $-30^\circ$ and longitude $270^\circ$ appears to be much lower than
+what is observed in the satellite data for each year. There's also a gap (in
+this instance overestimating the ENA rate) between surrogate and reality
+between longitudes $60^\circ$ and $120^\circ$ and latitudes $\pm50^\circ$.
+Another another indication of this clash is visible in the right panels of
+Figure \ref{f:ibex_real_ex}. Note that these both display the same posterior
+distribution, but differ in their axis limits. Posterior mass is concentrated
+in the extreme corner of the model parameter space. Our priors attempt to push
+sampling away from the boundaries, but the likelihood dominates the posterior.
+We take this as an indication that the computer model is lacking in it's
+attempt to represent reality, and the Metropolis sampler seeks to go beyond the
+range of model parameters present in the training data.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1036,25 +1041,26 @@ We have introduced an effective tool for solving inverse problems using
 Bayesian methods where 1) the simulator representing the physical model or
 process is expensive, limiting the number of runs available for analysis and
 demanding a GP surrogate, but 2) the computer model output is extremely
-high-dimensional, requiring unconventional methods to induce sparsity and
-approximate the GP, and 3) data from a field experiment are Poisson counts,
-bucking the current Bayesian inverse problem literature that focuses on
-normally distributed field observations. Our proposed Poisson Bayesian inverse
-problem framework fills this gap by introducing a modular approach that
-satisfies all three requirements. We have shown that our framework is able to
-recover the model parameter $u^*$ at the nominal 95\% rate when provided with
-synthetic data where the ``truth'' is known. We applied this methodology to a
-subset of data (2009-2011) collected from the IBEX satellite and corresponding
-simulated heliospheric sky maps from a sophisticated computer model.
+high-dimensional, requiring novel methods to induce sparsity and approximate
+the GP, and 3) data from a field experiment are Poisson counts, bucking the
+current Bayesian inverse problem literature that focuses on normally
+distributed field observations. Our proposed Poisson Bayesian inverse problem
+framework fills this gap by introducing a modular approach that satisfies all
+three requirements. We have shown that our framework is able to recover the
+model parameter $u^*$ at the nominal 95\% rate when provided with synthetic
+data where the ``truth'' is known. We applied this methodology to a subset of
+data collected by the IBEX satellite from 2009-2011 and corresponding simulated
+heliospheric sky maps from a sophisticated computer model.
 
 The IBEX satellite has collected counts of ENAs for over 15 years. Our work
 focused on data collected in a three-year period for which the computer model
-we focused on aligned. Figure \ref{f:real_estimates_all} shows resulting
+we relied on was aligned. Figure \ref{f:real_estimates_all} shows resulting
 estimated posterior distributions for model parameter $u$ when field data is
-split by year (2012-2022). Behavior is similar to what we observed in Figure
-\ref{f:ibex_real_ex}, as the Metroplis sampler pushes up against the boundary
-of the current range of $u$. Our work is can potentially be extended with other
-computer models that are developed to match years outside of 2009-2011.
+split by year (2012-2021). Behavior is similar to what we observed in Figure
+\ref{f:ibex_real_ex}, but even more extreme, as the Metroplis sampler pushes up
+against the boundary of the current range of $u$. Our work can potentially be
+extended with other computer models that are developed more generally and/or
+match years outside of 2009-2011.
 
 \begin{figure}[ht!]
 \centering
@@ -1073,8 +1079,24 @@ is not terribly surprising. Simulators are inherently biased, simply from not
 being able to completely reconstruct the real process.
 \citet{kennedyohagan2001} address this limitation by introducing a discrepancy
 term in their canonical computer model calibration framework, a practice
-followed by other practitioners
+followed by many other practitioners
 \citep{higdoncalib2004,higdoncalib2008,Liu2009ModularizationIB}.
+
+The KOH approach uses a GP for modeling of complex disparities between
+simulator and reality. Due to our field response being counts, further
+methodology needs to be developed to apply the same GP discrepancy methods to
+IBEX, a point we leave to future work (\ref{sec:discuss}). However, we test the
+addition of a simple, multiplicative discrepancy term $\delta$ to our original
+model, modifying Eq.~(\ref{eq:pois_inv_bayes_mod}) as follows:
+\begin{align}
+Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
+\label{eq:mod_with_disc} \\ \lambda(X^F) &= \lambda(X)*\delta &
+\mathrm{log}(\delta) &\sim \mathcal{N}(0, 1) \nonumber \\ u &\sim \pi(u) &
+\mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p.
+\end{align}
+In fact, results for the real IBEX data displayed in Figure
+\ref{f:ibex_real_ex} actually include sampling of a multiplicative discrepancy
+$\delta$.
 
 \begin{figure}[ht!]
 \centering
@@ -1086,36 +1108,21 @@ followed by other practitioners
 \label{f:ibex_disc}}
 \end{figure}
 
-The KOH approach uses a GP that allows modeling of complex disparities between
-simulator and reality. Due to our field response being counts, additional
-methodology needs to be developed to apply the same GP discrepancy methods to
-IBEX, a point we leave to future work (\ref{sec:discuss}). However, we test the
-addition of a simple, multiplicative discrepancy term $\delta$ to our original
-model, modifying Eq.~(\ref{eq:pois_inv_bayes_mod}) as follows:
-\begin{align}
-Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
-\label{eq:mod_with_disc} \\ \lambda(X^F) &= \lambda(X)*\delta &
-\mathrm{log}(\delta) &\sim \mathcal{N}(0, 1) \nonumber \\ u &\sim \pi(u) &
-\mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p,
-\end{align}
-
 The bottom right panel of Figure \ref{f:ibex_disc} shows posterior samples of
 $\delta$. Mass is concentrated just below 1, indicating nearly zero effect from
-the multiplicative discrepancy. Our results for the real IBEX data displayed in
-Figure \ref{f:ibex_real_ex} actually include posterior sampling of $\delta$ via
-MCMC. Examining the disparities closer, it appears that there is some spatial
-dependence in whether the simulator overestimates or underestimates the mean
-surface. For instance, the area of the \textit{sky map} corresponding to the
-\textit{ribbon} shows some underestimation. On the flip side, areas outside of
-the ribbon are overestimated. A constant multiplicative scale discrepancy is
-insufficient. We believe that $\delta$ is estimated around 1.0 because of these
-competing interests between different regimes in the sky map. More advancements
-are needed to properly model this disparity. A fully Bayesian framework could
-be developed to provide full uncertaintly quantification, perhaps with the use
-of a deep Gaussian process to handle the inherent nonstationarity in the
-discrepancy. Further collaboration with theoretical physicists responsible for
-computer model development should also be pursued to improve the simulator's
-fidelity to the truth.
+the multiplicative discrepancy. Examining the disparities closer, it appears
+that spatial dependence exists in whether the simulator overestimates or
+underestimates the mean surface. For instance, the area of the sky map
+corresponding to the ribbon shows some underestimation. By contrast, areas
+outside of the ribbon are overestimated. A constant multiplicative scale
+discrepancy is clearly insufficient. We believe that $\delta$ is estimated
+around 1.0 because of these competing interests between different regimes in
+the sky map. More advancements are needed to properly model this disparity. A
+fully Bayesian framework could be developed to provide full uncertainty
+quantification, perhaps with the use of a deep Gaussian process to handle the
+inherent nonstationarity in the discrepancy. Further collaboration with
+theoretical physicists responsible for computer model development should also
+be pursued to improve the simulator's fidelity to the truth.
 
 \subsection*{Acknowledgments}
 
