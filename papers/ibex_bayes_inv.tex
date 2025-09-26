@@ -834,16 +834,22 @@ have generated some observed counts. But before diving in, we need to describe a
 few nuances we have not yet revealed about the data collected by the IBEX
 satellite and particular implementation details of the computer model.
 
-First, ENAs are known to come from sources other than the heliosphere. Space
-scientists quantify this noise for each location ($X^F$) viewed by the satellite
-and add it as a background rate ($\lambda_b$) that must be accounted for in the
-data. For example, the left panel of Figure \ref{f:fig1} displays ENA rates {\em
-after} $\lambda_b$ has been subtracted out. Although this rate is an estimate
-rather than an exact value, we follow the lead of other researchers
-\citep{osthustheseus2023} and treat it as constant in our work. For the purpose
-of solving the inverse problem, we update the mean expression in the Poisson
-likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such that $\lambda(X^F) = m(u,
-X^F) - \lambda_{b}(X^F)$.
+Each row of the satellite dataset contains the ENA origin location in Cartesian
+coordinates ($x$, $y$, $z$), time the satellite pointed at that location (in
+seconds), counts of ENAs observed at one of six different energy levels (ESA),
+and a background rate $\lambda_b$ (ENAs/sec). We only use ENAs collected at
+energy level ESA 4. ESA 4 allows the best context for analysis, whereas lower
+ESA provides a much weaker signal and ENAs with higher ESA overwhelm the
+analysis. More important to consider is that ENAs are known to come from sources
+other than the heliosphere. Space scientists quantify this noise for each
+location ($X^F$) viewed by the satellite and add it as a background rate
+($\lambda_b$) that must be accounted for in the data. For example, the left
+panel of Figure \ref{f:fig1} displays ENA rates {\em after} $\lambda_b$ has been
+subtracted out. Although this rate is an estimate rather than an exact value, we
+follow the lead of other researchers \citep{osthustheseus2023} and treat it as
+constant in our work. For the purpose of solving the inverse problem, we update
+the mean expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod}
+such that $\lambda(X^F) = m(u, X^F) - \lambda_{b}(X^F)$.
 
 We have referred to the IBEX simulator throughout this paper without going into
 much detail. While we leave a more in-depth physical interpretation and analysis
@@ -971,28 +977,22 @@ the IBEX satellite.
 \label{sec:ibex_exp}
 %------------------------------------------------------------------------------
 
-Space scientists at LANL have provided us with 14 years of data collected by
-the IBEX satellite. IBEX is able to view the entire sky over a period of six
-months through a series of regular adjustments. Therefore, dating back to 2008
-we have access to $\sim$35 estimated \textit{sky maps}. The number of records
-in each sky map varies across year, ranging from $\sim$8-15K observations. Each
-row of the dataset contains the ENA origin location in Cartesian coordinates
-($x$, $y$, $z$), time the satellite pointed at that location (in seconds),
-counts of ENAs observed at one of six different energy levels (ESA), and a
-background rate $\lambda_b$ (ENAs/sec).
+The IBEX satellite is able to view the entire sky over a period of six months
+through a series of regular adjustments. Therefore, space scientists at LANL
+have access to over 15 years of data collected by satellite and resulting sky
+maps. However, as mentioned above, we only use satellite data from the years
+2009-2011 due to alignment with the implementation of the computer model,
+leaving the remaining data for future work (\ref{sec:discuss}). The number of
+records in each sky map varies across year from $\sim$7-8K observations.
 
-Our experimental setup will be similar to that above in Figure
-\ref{f:ibex_synth_ex}, only substituting in real data for simulated data. We
-execute Algorithm \ref{alg:gibbs} by fitting a Scaled Vecchia GP surrogate to
-all $n=66$ computer model runs and sample from the posterior $u \mid Y^F$ via
-MCMC. One difference from Section \ref{sec:surr_skymaps} is that field data
-($Y^F, X^F$) are not exclusively from one map. Instead, ($Y^F, X^F$) is formed
-by stacking the counts, exposure times, background rates, and Cartestian
-coordinates $x$, $y$, $z$ from years 2009-2011. Additionally, we only use ENAs
-collected at energy level ESA 4. ESA 4 allows the best context for analysis,
-whereas lower ESAs have a much weaker signal and higher ESAs overwhelm the
-analysis. Raw satellite data from 2009-2011 and our results are shown in Figure
-\ref{f:ibex_real_ex}.
+Our experimental setup will be similar to that in Section \ref{sec:synth_data},
+only substituting in real data for simulated data. We execute Algorithm
+\ref{alg:gibbs} by fitting a Scaled Vecchia GP surrogate to all $n=66$ computer
+model runs and sample from the posterior $u \mid Y^F$ via MCMC. One difference
+from Section \ref{sec:synth_data} is that field data ($Y^F, X^F$) are not
+exclusively from one map. Instead, ($Y^F, X^F$) is formed by stacking the
+counts, exposure times, background rates, and Cartestian coordinates $x$, $y$,
+$z$ from years 2009-2011.
 
 \begin{figure}[ht!]
 \centering
