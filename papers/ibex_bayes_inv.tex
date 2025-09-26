@@ -828,63 +828,53 @@ competitor when $m<50$, and for all values of $m$ when $n>1500$.
 \label{sec:ibex_data}
 %------------------------------------------------------------------------------
 
-We now return to the IBEX inverse problem. We wish to determine the settings
-$u$ of a computer model that produce a (simulated) sky map that is most likely
-to have generated some observed.
+We now return to the IBEX inverse problem. We wish to determine the settings $u$
+of a computer model that produce a (simulated) sky map that is most likely to
+have generated some observed counts. But before diving in, we need to describe a
+few nuances we have not yet revealed about the data collected by the IBEX
+satellite and particular implementation details of the computer model.
 
-Before using the actual ENAs from the satellite, we run our Poisson Bayesian
-inverse problem framework on synthetic satellite data where we know the
-``true'' parameter $u^*$ and can evaluate whether our method is able to recover
-it.
+First, ENAs are known to come from sources other than the heliosphere. Space
+scientists quantify this noise for each location ($X^F$) viewed by the satellite
+and add it as a background rate ($\lambda_b$) that must be accounted for in the
+data. For example, the left panel of Figure \ref{f:fig1} displays ENA rates {\em
+after} $\lambda_b$ has been subtracted out. Although this rate is an estimate
+rather than an exact value, we follow the lead of other researchers
+\citep{osthustheseus2023} and treat it as constant in our work. For the purpose
+of solving the inverse problem, we update the mean expression in the Poisson
+likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such that $\lambda(X^F) = m(u,
+X^F) - \lambda_{b}(X^F)$.
 
-We aim to pair the observed satellite data with the $n=66$
-computer model runs to learn the distribution of the IBEX ribbon simulator
-parameters \textit{parallel mean free path} and \textit{ratio}.
+We have referred to the IBEX simulator throughout this paper without going into
+much detail. While we leave a more in-depth physical interpretation and analysis
+of parameters to more appropriate venues
+\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, we give some basic context
+here. We focus on two particular models available (among many), one for the GDF
+and one for the ribbon. In the ribbon model, one can think of the parameter
+\textit{parallel mean free path} as the distance a hydrogen ion travels beyond
+the heliopause before interacting with another particle, receiving an electron,
+and becoming an ENA. The \textit{ratio} parameter is the fraction of
+\textit{parallel mean free path} and another measure of distance, the
+perpendicular mean free path. The GDF model we use is constant and is simply
+added to the output of the ribbon simulator.
 
-Before diving in, a couple details about the data collected by the IBEX satellite and the implementation of the computer model are necessary to explain.
+Scientists know that the makeup of the heliosphere changes over time, largely
+due to variations in the solar wind that accompany the sun's 11 or 21-year
+cycle. Physicists build this evolution into their simulators either through
+additional paramters, restricting the application of their models to a specific
+timeframe, or by simply averaging over the sun cycle. The GDF model we utilize
+was developed to correspond to the years 2009-2011, while the ribbon model
+averages the behavior of the heliosphere over the entire sun cycle. We factor in
+these heliospheric variations by only comparing satellite data from the years
+2009-2011 to simulator runs.
 
-First, ENAs are known to come from sources other than the heliosphere, so space
-scientists quantify this noise and add it as a background rate ($\lambda_b$)
-that must be accounted for. Although this rate is an estimate rather than an
-exact value, we follow the lead of other researchers \citep{osthustheseus2023}
-and treat it as constant in our work. For example, the left panel of Figure
-\ref{f:fig1} displays ENA rates {\em after} $\lambda_b$ has been substracted
-out. For the purpose of solving the inverse problem, the mean in the Poisson
-likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} becomes $\lambda(X^F) = m(u, X^F)
-- \lambda_{b}(X^F)$.
-
-We have referred to the IBEX simulator throughout the entirety of this paper
-without going into much detail. We leave a more in-depth physical
-interpretation and analysis of parameters to more appropriate venues
-\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, but to give some context,
-we give a simple review here. We focus on two particular models available among
-many, one for the GDF and one for the ribbon. In the ribbon model, one can
-think of the parameter \textit{parallel mean free path} as the distance a
-hydrogen ion travels beyond the heliopause before interacting with another
-particle, receiving an electron, and becoming an ENA. The \textit{ratio}
-parameter is the fraction of \textit{parallel mean free path} and another
-measure of distance, the perpendicular mean free path. The GDF model we use is
-constant and is simply added on to the output of the ribbon simulator.
-
-Scientists know that the makeup of the helioshpere changes over time, largely
-due to the variations in the solar wind that accompany the sun's 11 or 21-year
-cycle. Physicists therefore build in this evolution to their simulators either
-through additional paramters, restricting the application of their models to a
-specific timeframe, or averaging over the entire cycle of the sun. The GDF
-model we work with corresponds to the years 2009-2011, while the ribbon model
-is averaged over the entire sun cycle. We factor in these heliospheric
-variations by only comparing satellite data from the years 2009-2011 to
-simulator runs.
-
-Space scientists at LANL have provided us with 14 years of data collected by
-the IBEX satellite. IBEX is able to view the entire sky over a period of six
-months through a series of regular adjustments. Therefore, dating back to 2008
-we have access to $\sim$35 estimated \textit{sky maps}. The number of records
-in each sky map varies across year, ranging from $\sim$8-15K observations. Each
-row of the dataset contains the ENA origin location in Cartesian coordinates
-($x$, $y$, $z$), time the satellite pointed at that location (in seconds),
-counts of ENAs observed at one of six different energy levels (ESA), and a
-background rate $\lambda_b$ (ENAs/sec).
+We aim to pair the observed satellite data with the $n=66$ computer model runs
+to learn the posterior distribution of \textit{parallel mean free path} and
+\textit{ratio}. But before using the actual ENA counts collected by the IBEX
+satellite, we wish to validate our proposed methodology. Therefore, we run our
+Poisson Bayesian inverse problem framework on synthetic satellite data where we
+know the ``true'' parameter $u^*$ and can evaluate whether our method is able to
+recover it.
 
 %------------------------------------------------------------------------------
 % SECTION 4.1: Synthetic testbed for inverse problem validation
@@ -897,16 +887,18 @@ Using the corpus of runs gathered for a design of $u$-values in Section
 ($\lambda^* = m(u^*, X^M)$) as the ``true'' underlying mean ENA rate (upper
 right panel of Figure \ref{f:ibex_synth_ex}). Next, we gather measurement
 locations $X^F$, exposure times $e$, and background rates $\lambda_b$ from a
-single year that the IBEX satellite has been in operation, ignoring the
-observed counts of ENAs. For each latitude/longitude pair (i.e.~a row in
-$X^F$), we draw synthetic satellite (or field) data from a Poisson, $Y_i^F \sim
-\mathrm{Pois}(\lambda^*_i, e_i)$, where $\lambda_i^*$ is determined by the
+single year that the IBEX satellite has been in operation, ignoring the observed
+counts of ENAs in this fabricated example. For each latitude/longitude pair
+(i.e.~a row in $X^F$), we draw synthetic satellite (or field) data from a
+Poisson, $Y_i^F \sim
+\mathrm{Pois}(\lambda^*_i + \lambda_{b_{i}}, e_i)$, where $\lambda_i^*$ is determined by the
 computer model $m(\cdot,\cdot)$. The top left panel of Figure
 \ref{f:ibex_synth_ex} shows the result, which we will regard as data we
 ``observed.'' Note that observations are not on a fine grid, but instead match
 the recorded coordinates for ENAs captured by the IBEX satellite in it's orbit.
 This accounts for the unique spread of points and the strings of missing data,
 which correspond to certain orbits.
+
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.51,trim=0 15 15 45,clip=TRUE]{ibex_sim_field.pdf}
@@ -929,13 +921,13 @@ burnin and thinning by 10. Figure \ref{f:ibex_synth_ex} displays the remaining
 posterior samples of $u$ (bottom right) as a kernel density and a 95\% highest
 posterior density (HPD) interval. The posterior mean of $u \mid Y^F$ lies near
 $u^*$, demonstrating that our framework is able to concentrate mass around the
-true model parameter. As a sanity check, we take posterior mean and plug it in
-to our fitted Scaled Vecchia GP surrogate. The predicted output is shown in the
-bottom left panel of Figure \ref{f:ibex_synth_ex}. There are some subtle
-differences between the estimated sky map and the true $\lambda^*$ (i.e, the
-shape and intensity of the ribbon vary slightly between the two). However, each
-map could have reasonably generated the data we ``observe'' in the top left
-panel.
+true model parameter. As a sanity check, we take the estimated posterior mean
+and plug it in to our fitted Scaled Vecchia GP surrogate of the IBEX simulator.
+The predicted output is shown in the bottom left panel of Figure
+\ref{f:ibex_synth_ex}. There are some subtle differences between the estimated
+sky map and the true $\lambda^*$ (i.e, the shape and intensity of the ribbon
+vary slightly between the two). However, each map could have reasonably
+generated the data we ``observe'' in the top left panel.
 
 \begin{figure}[ht!]
 \centering
@@ -963,21 +955,31 @@ observed satellite data, fit a  Scaled Vecchia surrogate on training data
 excluding $u^*$, and run Algorithm \ref{alg:gibbs} to sample from the posterior
 $u \mid Y^F$. Results are shown in Figure \ref{f:synth_estimates_all}.
 
-Each panel shows posterior samples of $u \mid Y^F$ for a unique $u^*$. We have
-indicated each $u^*$ that generated synthetic $Y^F$ as a blue star. Our 95\%
-HPD intervals encompass the truth in 34 of the 36 of the iterations, near the
-nominal coverage rate we'd expect. Therefore, we can confidently assert that
-our proposed framework is able to recover the true parameter values from
-synthetic satellite data. Next, we apply this to real data, with the goal of
-helping scientists better understand the behavior of the heliosphere by
-estimating these parameters for actual ENA counts collected by the IBEX
-satellite.
+Each panel shows posterior samples of $u \mid Y^F$ for a unique $u^*$ as a
+kernel density. We have indicated each $u^*$ that generated synthetic $Y^F$ as a
+blue star. Our 95\% HPD intervals encompass the truth in 34 of the 36 of the
+iterations, near the nominal coverage rate we'd expect. Therefore, we can
+confidently assert that our proposed framework is able to recover the true
+parameter values from synthetic satellite data. Next, we apply this to real
+data, with the goal of helping scientists better understand the behavior of the
+heliosphere by estimating these parameters for actual ENA counts collected by
+the IBEX satellite.
 
 %------------------------------------------------------------------------------
 %% SECTION 4.2 - Real IBEX ENAs
 \subsection{Real IBEX ENAs}
 \label{sec:ibex_exp}
 %------------------------------------------------------------------------------
+
+Space scientists at LANL have provided us with 14 years of data collected by
+the IBEX satellite. IBEX is able to view the entire sky over a period of six
+months through a series of regular adjustments. Therefore, dating back to 2008
+we have access to $\sim$35 estimated \textit{sky maps}. The number of records
+in each sky map varies across year, ranging from $\sim$8-15K observations. Each
+row of the dataset contains the ENA origin location in Cartesian coordinates
+($x$, $y$, $z$), time the satellite pointed at that location (in seconds),
+counts of ENAs observed at one of six different energy levels (ESA), and a
+background rate $\lambda_b$ (ENAs/sec).
 
 Our experimental setup will be similar to that above in Figure
 \ref{f:ibex_synth_ex}, only substituting in real data for simulated data. We
