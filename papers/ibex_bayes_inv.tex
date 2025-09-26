@@ -386,7 +386,7 @@ Using Algorithm \ref{alg:gibbs}, we can build on the toy problem we introduced
 in Figure \ref{f:toy_calib} and align it more closely with the IBEX data.
 Instead of observing a mean process $\mu(X^F)$ with random, Gaussian noise,
 suppose we are given counts, drawn from a Poisson process with $\lambda(X^F) =
-m(u^*, X^F)$, as shown in the left panel of Figure \ref{f:toy_calib_pois}.
+m(u^\star, X^F)$, as shown in the left panel of Figure \ref{f:toy_calib_pois}.
 Computer model runs $m(\cdot,\cdot) = \lambda(X)$ produce different mean
 surfaces given unique values of $u = (u_1, u_2)$. Observed counts are shown as
 red stars. Red circles indicate the sum of all counts at one input location
@@ -482,7 +482,7 @@ reality, we fit a GP surrogate to the model runs in the left panels. Therefore,
 ``model runs'' at posterior draws of $u$ in the center panels are not in fact
 evaluations of the model, but predictions from a fitted GP surrogate. Even so,
 the Metropolis sampler used those accurate (and fast) predictions to
-successfully recover the true model parameters $u^*$.
+successfully recover the true model parameters $u^\star$.
 
 One downside to working with MVNs whose dimension grows with the dimension of
 the data they are trained on, $n_M$, is that building $n_M \times n_M$ matrices,
@@ -818,10 +818,15 @@ competitor when $m<50$, and for all values of $m$ when $n>1500$.
 %------------------------------------------------------------------------------
 
 We now return to the IBEX inverse problem. We wish to determine the settings
-$u$ of a computer model that produce a (simulated) sky map most likely to have
-generated some observed counts. But before diving in, we need to describe a few
-nuances we have not yet revealed about the data collected by the IBEX satellite
-and some particular implementation details of the computer model.
+$u$ of a computer model that produce a sky map most likely to have generated
+observed. Before before diving in, we dispence with a few important details
+about IBEX observations and computer simulations.  We then test our modeling
+apparatus on synthetic field observations (computer model at known $u^\star$
+and with Poisson counts) to ensure good performance within the model class,
+and where we know the true calibration parameter.  Finally, we report on our
+calibration of the actual IBEX satellite observations.
+
+\subsection{IBEX details}
 
 Each row of the satellite dataset contains the ENA origin location in Cartesian
 coordinates ($x$, $y$, $z$), time the satellite pointed at that location (in
@@ -842,19 +847,19 @@ expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such
 that $\lambda(X^F) = m(u, X^F) -
 \lambda_{b}(X^F)$.
 
-We have referred to the IBEX simulator throughout this paper without going into
-much detail. While we leave a more in-depth physical interpretation and
+We have referred to the IBEX simulator throughout this paper without going
+into much detail. While we leave a more in-depth physical interpretation and
 analysis of parameters to more appropriate venues
-\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, we give some basic
-context here. We focus on two particular models available (among many), one for
-the GDF and one for the ribbon. In the ribbon model, the parameter
+\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, some basic context is
+provided here. We focus on two particular models available (among many): one
+for the GDF and one for the ribbon. In the ribbon model, the parameter
 \textit{parallel mean free path} is the distance a hydrogen ion travels beyond
-the heliopause before interacting with another particle, receiving an electron,
-and becoming an ENA. The \textit{ratio} parameter is the fraction of
-\textit{parallel mean free path} and another measure of distance, perpendicular
-mean free path. The response from the GDF model does not vary with any
-parameters of interest and is simply added to the output of the ribbon
-simulator.
+the heliopause before interacting with another particle, receiving an
+electron, and becoming an ENA. The \textit{ratio} parameter is the fraction of
+\textit{parallel mean free path} and another measure of distance,
+perpendicular mean free path. These are are our $u$ values. The response from
+the GDF model does not vary with any parameters of interest and is simply
+added to the output of the ribbon simulator.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
 due to variations in the solar wind that accompany the sun's 11 or 22-year
@@ -866,13 +871,13 @@ model averages the composition of the heliosphere over the entire sun cycle. We
 factor in these heliospheric variations by only comparing satellite data from
 the years 2009-2011 to simulator runs.
 
-We aim to pair the observed satellite data with the $n=66$ computer model runs
-to learn the posterior distribution of \textit{parallel mean free path} and
-\textit{ratio}. But first we wish to validate our proposed methodology.
-Therefore, we run our Poisson Bayesian inverse problem framework on synthetic
-satellite data where we know the ``true'' parameter $u^*$ and can evaluate
-whether our method is able to recover it before shifting our focus to the
-actual ENA counts collected by the IBEX satellite.
+% We aim to pair the observed satellite data with the $n=66$ computer model runs
+% to learn the posterior distribution of \textit{parallel mean free path} and
+% \textit{ratio}. But first we wish to validate our proposed methodology.
+% Therefore, we run our Poisson Bayesian inverse problem framework on synthetic
+% satellite data where we know the ``true'' parameter $u^\star$ and can evaluate
+% whether our method is able to recover it before shifting our focus to the
+% actual ENA counts collected by the IBEX satellite.
 
 %------------------------------------------------------------------------------
 % SECTION 4.1: Synthetic testbed for inverse problem validation
@@ -880,16 +885,17 @@ actual ENA counts collected by the IBEX satellite.
 \label{sec:synth_data}
 %------------------------------------------------------------------------------
 
-Using the corpus of runs gathered for a design of $u$-values in Section
-\ref{sec:vecchia}, we select a value $u$ and set the corresponding output
-($\lambda^* = m(u^*, X^M)$) as the ``true'' underlying mean ENA rate (upper
-right panel of Figure \ref{f:ibex_synth_ex}). Next, we gather measurement
-locations $X^F$, exposure times $e$, and background rates $\lambda_b$ from a
-single year that the IBEX satellite has been in operation, ignoring the observed
-counts of ENAs in this fabricated example. For each latitude/longitude pair
-(i.e.~a row in $X^F$), we draw synthetic satellite (or field) data from a
-Poisson, $Y_i^F \sim
-\mathrm{Pois}(\lambda^*_i + \lambda_{b_{i}}, e_i)$, where $\lambda_i^*$ is determined by the
+Using the corpus of $n=66$ computer model runs, varying a design of
+\textit{parallel mean free path} and \textit{ratio} $u$-values, described in
+in Section \ref{sec:vecchia}, we select a value $u$ and set the corresponding
+output ($\lambda^\star = m(u^\star, X^M)$) as the ``true'' underlying mean ENA rate
+(upper right panel of Figure \ref{f:ibex_synth_ex}). Next, we gather
+measurement locations $X^F$, exposure times $e$, and background rates
+$\lambda_b$ from a single year that the IBEX satellite has been in operation,
+ignoring the observed counts of ENAs in this fabricated example. For each
+latitude/longitude pair (i.e.~a row in $X^F$), we draw synthetic satellite (or
+field) data from a Poisson, $Y_i^F \sim
+\mathrm{Pois}(\lambda^\star_i + \lambda_{b_{i}}, e_i)$, where $\lambda_i^\star$ is determined by the
 computer model $m(\cdot,\cdot)$. The top left panel of Figure
 \ref{f:ibex_synth_ex} shows the result, which we will regard as data we
 ``observed.'' Note that observations are not on a fine grid, but instead match
@@ -914,17 +920,17 @@ parameter $u$ as a kernel density (bottom right).
 \end{figure}
 
 We run Algorithm \ref{alg:gibbs}, treating this synthetic data as $(X^F, Y^F)$
-and using the provided computer model output (omitting responses for $u^*$) as
+and using the provided computer model output (omitting responses for $u^\star$) as
 $(X^M, \lambda^M)$. We execute 10,000 MCMC iterations, throwing away 1,000 as
 burnin and thinning by 10. Figure \ref{f:ibex_synth_ex} displays the remaining
 posterior samples of $u$ (bottom right) as a kernel density and a 95\% highest
 posterior density (HPD) interval. The posterior mean of $u \mid Y^F$ lies near
-$u^*$, demonstrating that our framework is able to concentrate mass around the
+$u^\star$, demonstrating that our framework is able to concentrate mass around the
 true model parameter. As a sanity check, we take the estimated posterior mean
 and plug it in to our fitted Scaled Vecchia GP surrogate of the IBEX simulator.
 The predicted output is shown in the bottom left panel of Figure
 \ref{f:ibex_synth_ex}. There are some subtle differences between the estimated
-sky map and the true $\lambda^*$ (i.e, the shape and intensity of the ribbon
+sky map and the true $\lambda^\star$ (i.e, the shape and intensity of the ribbon
 vary slightly between the two). However, each map could have reasonably
 generated the data we ``observe'' in the top left panel.
 
@@ -933,7 +939,7 @@ generated the data we ``observe'' in the top left panel.
 \includegraphics[scale=1.0,trim=0 0 0 0,clip=TRUE]{sim_bayes_inv_res.pdf}
 \caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals runs of
 our Poisson Bayesian inverse problems framework on 36 different synthetic
-datasets. Blue stars indicate the value $u^*$ from which the data was
+datasets. Blue stars indicate the value $u^\star$ from which the data was
 simulated.
 \label{f:synth_estimates_all}}
 \end{figure}
@@ -951,11 +957,11 @@ $\in \{500, 3000\}$ and/or ratio $\in \{0.001, 0.1\}$). Removing these edge
 cases results in 36 remaining test runs. For each combination, we follow the
 same procedure as above: select one model parameter $u$, create simulated
 observed satellite data, fit a  Scaled Vecchia surrogate on training data
-excluding $u^*$, and run Algorithm \ref{alg:gibbs} to sample from the posterior
+excluding $u^\star$, and run Algorithm \ref{alg:gibbs} to sample from the posterior
 $u \mid Y^F$. Results are shown in Figure \ref{f:synth_estimates_all}.
 
-Each panel shows posterior samples of $u \mid Y^F$ for a unique $u^*$ as a
-kernel density. We have indicated each $u^*$ that generated synthetic $Y^F$ as a
+Each panel shows posterior samples of $u \mid Y^F$ for a unique $u^\star$ as a
+kernel density. We have indicated each $u^\star$ that generated synthetic $Y^F$ as a
 blue star. Our 95\% HPD intervals encompass the truth in 34 of the 36 of the
 iterations, near the nominal coverage rate we'd expect. Therefore, we can
 confidently assert that our proposed framework is able to recover the true
@@ -1036,7 +1042,7 @@ current Bayesian inverse problem literature that focuses on normally
 distributed field observations. Our proposed Poisson Bayesian inverse problem
 framework fills this gap by introducing a modular approach that satisfies all
 three requirements. We have shown that our framework is able to recover the
-model parameter $u^*$ at the nominal 95\% rate when provided with synthetic
+model parameter $u^\star$ at the nominal 95\% rate when provided with synthetic
 data where the ``truth'' is known. We applied this methodology to a subset of
 data collected by the IBEX satellite from 2009-2011 and corresponding simulated
 heliospheric sky maps from a sophisticated computer model.
