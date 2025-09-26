@@ -31,13 +31,15 @@ ibex_real_rates <- cut(ibex_real$est_rate, breaks=bks, labels=FALSE)
 ibex_real_rates[which(ibex_real$est_rate <= ena_range[1])] <- 1
 ibex_real_rates[which(ibex_real$est_rate >= ena_range[2])] <- length(cols)
 ibex_real_cols <- cols[ibex_real_rates]
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("ibex_real1.pdf", width=4, height=3.25)
+pdf("ibex_real1.pdf", width=5, height=3.25)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 plot(x=ibex_real$nlon, y=ibex_real$ecliptic_lat, col=ibex_real_cols, pch=16, cex=0.7,
   xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
   cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=ena_range, col=cols, legend.lab="ENAs/sec", legend.line=3,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.8, 0.84, 0.4, 0.9))
 dev.off()
 
 ibex_sim1_lons <- sort(unique(ibex_sim1$nlon))
@@ -45,8 +47,8 @@ ibex_sim1_lats <- sort(unique(ibex_sim1$lat))
 ibex_sim1_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=ibex_sim1)
 ibex_sim1_zmat[ibex_sim1_zmat < ena_range[1]] <- ena_range[1]
 ibex_sim1_zmat[ibex_sim1_zmat > ena_range[2]] <- ena_range[2]
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
-pdf("sim1.pdf", width=4, height=3.25)
+pdf("sim1.pdf", width=5, height=3.25)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 image(x=ibex_sim1_lons, y=ibex_sim1_lats, z=ibex_sim1_zmat, col=cols, xlab="Longitude",
   xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
 axis(1, at=seq(325, 25, by=-60),

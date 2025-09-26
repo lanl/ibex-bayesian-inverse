@@ -193,7 +193,8 @@ lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
 pred_data <- data.frame(XX_ll, lhat_curr)
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
-predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
+predrange <- c(0.04174779, 0.18489323)
+# predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(128)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)

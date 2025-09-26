@@ -63,14 +63,20 @@ plot_data <- model_data[model_data$parallel_mean_free_path==pmfp_unit &
   model_data$ratio==ratio_unit,]
 ref_neighbors <- all_inputs[svecfit$NNarray[ref_point,-1],]
 
+predrange <- c(0.04174779, 0.18489323)
+# predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
+cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
+bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
+ylims <- range(model_data$lat)
+xlims <- rev(range(model_data$nlon))
+
 lons <- sort(unique(plot_data$nlon))
 lats <- sort(unique(plot_data$lat))
 zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=plot_data)
-cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_nbr_latlon.pdf", width=7, height=5)
-image(x=lons, y=lats, z=zmat, col=cols(500), xlab="Longitude", xaxt="n",
-  ylab="Latitude", xlim=rev(range(lons)))
+image(x=lons, y=lats, z=zmat, col=cols, xlab="Longitude", xaxt="n",
+  ylab="Latitude", bks=bks, xlim=rev(range(lons)))
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 usr <- par("usr")  # plotting region: c(xmin, xmax, ymin, ymax)
