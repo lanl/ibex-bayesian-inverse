@@ -45,5 +45,5 @@ mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
   gpmeth="svecchia", vb=TRUE, true_u=NA, true_logscl=NA,
   betashape=2, adapt=FALSE)
 res <- list(mcmc_res=mcmc_res, settings=list(seed=seed, ncvs=ncvs, fid=fid))
-saveRDS(res, file=paste0("../results/real_data_cv_fold", index, "_seed_", seed,
+saveRDS(res, file=paste0("../results/real_data_cv_fold", fid, "_seed", seed,
   format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
