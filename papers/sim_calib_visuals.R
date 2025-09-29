@@ -30,6 +30,8 @@ field_data <- read.csv(file="../data/sims_real.csv")
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   fparams=c(single_pmfp, single_ratio), scales=c(1, 1), tol=NA, quant=0.0,
   real=FALSE, disc=FALSE)
+# predrange <- c(0.04174779, 0.18489323)
+predrange <- range(model_data$blurred_ena_rate)
 
 field_data <- field_data[field_data$parallel_mean_free_path==single_pmfp &
   field_data$ratio==single_ratio,]
@@ -54,7 +56,6 @@ lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
 pred_data <- data.frame(XX_ll, lhat_curr)
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
-predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
@@ -63,6 +64,8 @@ xlims <- rev(range(model_data$nlon))
 model_lons <- sort(unique(model_data$nlon))
 model_lats <- sort(unique(model_data$lat))
 model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
+model_zmat[model_zmat > predrange[2]] <- predrange[2]
+model_zmat[model_zmat < predrange[1]] <- predrange[1]
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_mod.pdf", width=7, height=5)
 image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
@@ -90,15 +93,15 @@ dev.off()
 pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
+pred_zmat[pred_zmat > predrange[2]] <- predrange[2]
+pred_zmat[pred_zmat < predrange[1]] <- predrange[1]
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_est.pdf", width=7, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
-  xlab="Longitude", xaxt="n", ylab="Latitude", useRaster=TRUE,
-  xlim=xlims, ylim=ylims, cex.lab=1.1)
+  xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
+  cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
-
-
 dev.off()
 
 iter_pmfp <- res[[single_index]]$u[seq(10001, 20000, by=10),1]

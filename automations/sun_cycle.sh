@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -N 4 
+#SBATCH -N 4
 #SBATCH --ntasks-per-node=16
 #SBATCH -t 4:00:00
 #SBATCH -p normal_q

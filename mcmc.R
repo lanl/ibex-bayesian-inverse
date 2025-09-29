@@ -28,7 +28,8 @@ source('../vecchia_scaled.R')
 # likelihoods, proposals, acceptance rates, and covariances.
 ###############################################################################
 mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, m=25, end=NA, gpmeth="nn", nmcmcs=10000,
-  step=NA, thrds=2, vb=FALSE, debug=FALSE, true_u=NA, true_logscl=NA, betashape=1.1) {
+  step=NA, thrds=2, vb=FALSE, debug=FALSE, true_u=NA, true_logscl=NA, betashape=1.1,
+  adapt=TRUE) {
 
   nx <- ncol(Xm)
   nu <- ncol(Um)
@@ -132,7 +133,7 @@ mcmc <- function(Xm, Um, Zm, Xf, Zf, Of, m=25, end=NA, gpmeth="nn", nmcmcs=10000
     ###########################################################################
 
     ## update u proposal covariance
-    if (any(is.na(true_u)) && t %% 100 == 0) {
+    if (adapt && any(is.na(true_u)) && t %% 100 == 0) {
       winsize <- min(t, 100)
       accepted_vals <- u[(t-winsize+1):t,] %>%
         as.data.frame() %>% tidyr::drop_na() %>% dplyr::distinct()
