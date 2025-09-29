@@ -353,32 +353,22 @@ pred_data[,c("x", "y", "z")] <- geo_to_spher_coords(lat=pred_data$lat, lon=pred_
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
 field_data <- field_data[field_data$map %in% c("2009A", "2010A", "2011A"),]
-field_data$sim_rate <- NA
-for (i in 1:nrow(field_data)) {
-  fx <- field_data$x[i]
-  fy <- field_data$y[i]
-  fz <- field_data$z[i]
-  min_dist <- 100000
-  closest_ind <- NA
+XXF <- field_data[,c("x","y","z")]
+XXF$x <- (field_data$x - min(field_data$x))/diff(range(field_data$x))
+XXF$y <- (field_data$y - min(field_data$y))/diff(range(field_data$y))
+XXF$z <- (field_data$z - min(field_data$z))/diff(range(field_data$z))
+XXF <- cbind(XXF, matrix(post_mean, nrow=1))
+colnames(XXF) <- c("x", "y", "z", "pmfp", "ratio")
+XXF <- as.matrix(XXF)
+field_data$sim_rate <- predictions_scaled(fit, XXF, m=25, joint=FALSE, predvar=FALSE)
 
-  for (j in 1:nrow(pred_data)) {
-    dist <- sqrt((pred_data$x[j]-fx)^2 + (pred_data$y[j]-fy)^2 + (pred_data$z[j]-fz)^2)
-    if (dist < min_dist) {
-      min_dist <- dist
-      closest_ind <- j
-    }
-  }
-  field_data$sim_rate[i] <- pred_data$lhat_curr[closest_ind]
-
-  if (i %% 100 == 0) {
-    print(paste0("Finished point ", i, " out of ", nrow(field_data)))
-  }
-}
 field_data$disc <- field_data$est_rate - field_data$sim_rate
 max_disc <- max(abs(quantile(field_data$disc, probs=c(0.05, 0.95))))
 disc_cols <- colorRampPalette(c("blue", "white", "red"))(128)
 bks <- seq(-max_disc, max_disc, length=length(disc_cols)+1)
 field_discs <- cut(field_data$disc, breaks=bks, labels=FALSE)
+field_discs[which(field_data$disc <= -max_disc)] <- 1
+field_discs[which(field_data$disc >= max_disc)] <- length(disc_cols)
 field_disc_cols <- disc_cols[field_discs]
 field_data$disc_col <- field_disc_cols
 
@@ -426,22 +416,4 @@ pdf("ibex_mult_scale_disc.pdf", width=7, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
   xlab="multiplicative scale", main="")
-dev.off()
-
-## Another option:
-pdf("ibex_field_disc_09.pdf", width=7, height=5)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 5))
-plot(x=field_data_09$nlon, y=field_data_09$lat, col=field_data_09$disc_col,
-  pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
-  ylim=ylims, cex.lab=1.1)
-axis(1, at=seq(325, 25, by=-60),
-  labels=c(60, 0, 300, 240, 180, 120))
-fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
-  legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
-dev.off()
-
-pdf("ibex_mult_scale_disc.pdf", width=7, height=5)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 5))
-hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
-  xlab="multiplicative scale", main="", breaks=12)
 dev.off()
