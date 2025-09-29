@@ -55,7 +55,7 @@ for (i in 1:length(files)) {
   Xfold <- field_fold[,c("xcod", "ycod", "zcod")]
 
   ### Calculate posterior mean
-  post_mean_cod <- apply(iter_res$mcmc_res$u, 2, mean)
+  post_mean_cod <- apply(iter_res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
   post_mean <- post_mean_cod
   post_mean[1] <- post_mean_cod[1]*2500 + 500
   post_mean[2] <- post_mean_cod[2]*(0.1-0.001) + 0.001
