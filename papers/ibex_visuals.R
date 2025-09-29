@@ -13,7 +13,8 @@ ibex_sim1 <- ibex_sim[ibex_sim$parallel_mean_free_path==500 &
 ibex_sim2 <- ibex_sim[ibex_sim$parallel_mean_free_path==3000 &
   ibex_sim$ratio==0.001,]
 
-ena_range <- c(0.04174779, 0.18489323)
+# ena_range <- c(0.04174779, 0.18489323)
+ena_range <- range(ibex_sim$blurred_ena_rate)
 
 ibex_sim$nlon <- nose_center_lons(ibex_sim$lon)
 ibex_real$nlon <- nose_center_lons(ibex_real$ecliptic_lon)

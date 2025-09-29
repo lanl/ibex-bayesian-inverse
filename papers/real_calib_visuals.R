@@ -193,8 +193,8 @@ lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
 pred_data <- data.frame(XX_ll, lhat_curr)
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
-predrange <- c(0.04174779, 0.18489323)
-# predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
+# predrange <- c(0.04174779, 0.18489323)
+predrange <- range(model_data$blurred_ena_rate)
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(128)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
@@ -241,6 +241,7 @@ dev.off()
 pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
+
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_pred_real.pdf", width=6.0, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, xlab="Longitude",

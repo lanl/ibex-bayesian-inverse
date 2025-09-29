@@ -30,6 +30,8 @@ field_data <- read.csv(file="../data/sims_real.csv")
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   fparams=c(single_pmfp, single_ratio), scales=c(1, 1), tol=NA, quant=0.0,
   real=FALSE, disc=FALSE)
+# predrange <- c(0.04174779, 0.18489323)
+predrange <- range(model_data$blurred_ena_rate)
 
 field_data <- field_data[field_data$parallel_mean_free_path==single_pmfp &
   field_data$ratio==single_ratio,]
@@ -54,8 +56,6 @@ lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
 pred_data <- data.frame(XX_ll, lhat_curr)
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
-predrange <- c(0.04174779, 0.18489323)
-# predrange <- range(model_data$blurred_ena_rate, na.rm=TRUE)
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
