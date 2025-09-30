@@ -1007,22 +1007,24 @@ the posterior. We take this as an indication that the computer model is lacking
 in it's attempt to represent reality, and the Metropolis sampler seeks to go
 beyond the range of model parameters present in the training data.
 
-The boundary-pushing estimate for $u$ and the plain visual gap between surrogate
-and collected data are somewhat unsatistfying. We address the potential
-discrepancy between simulator and reality in more detail in Section
-\ref{sec:discuss}. But we wish to offer some validation that our method performs
-well for the real data, given our provided computer model implementation. To do
-so, we run a final experiment using CRPS and cross validation (Figure
-\ref{f:real_cv_valid}). We split the satellite data from 2009-2011 into ten
-folds. For each fold $f$, we run our Poisson Bayesian inverse problem framework,
-only using the other nine folds as the field data, and store the resulting model
+The boundary-pushing estimate for $u$ and the gap plainly visual between
+surrogate predictions and collected data are somewhat unsatistfying. We address
+in more detail the potential discrepancy between simulator and reality in
+Section \ref{sec:discuss}. But we wish to offer some validation that our method
+performs well for the real data, given our provided computer model
+implementation. To do so, we run a final experiment using cross validation and
+calculation of CRPS at testing locations (Figure \ref{f:real_cv_valid}). We
+split the satellite data from 2009-2011 into ten equally-sized folds. For each
+fold $f$, we run our Poisson Bayesian inverse problem framework as before, but
+only use the other nine folds as field data, and store the resulting model
 parameter estimate, $\hat{u}_f$. Note that for each fold, all computer model
 output is still used to train the surrogate. We then predict the underlying ENA
-rate ($\lambda$) at the held out field data locations in three separate manners:
+rate $\lambda$ at the held out field data locations in three separate manners:
 1) over a fine grid of parallel mean free path, with ratio fixed at the
-posterior mean; 2) over a fine grid of ratio, with parallel mean free path fixed
-at the posterior mean; and 3) over a fine grid of both parallel mean free path
-and ratio. We calculate CRPS for all predictions.
+   posterior mean of $u$ (bottom right panel of Figure \ref{f:ibex_real_ex}); 2)
+   over a fine grid of ratio, with parallel mean free path fixed at the
+   posterior mean; and 3) over a fine grid of both parallel mean free path and
+   ratio. We calculate CRPS for all predictions.
 
 \begin{figure}[ht!]
 \centering
@@ -1037,17 +1039,28 @@ performance.
 \label{f:real_cv_valid}}
 \end{figure}
 
-Figure \ref{f:real_cv_valid}. First and foremost, our previous results using all
-the data provide an estimate of $u$ that resides in the region with the best
-performing values of $u$ in terms of CRPS. Next, it's obvious that the value of
-ratio largely determines how well the surrogate predictions fit the real data.
-Looking back at Figure \ref{f:ibex_real_ex}, it's interesting to note that the
-posterior is spread across a wide range of values for parallel mean free path
-($\sim$2700-3000). That range corresponds to some of the lowest values of CRPS.
-Lastly, there appears to be some interaction between the two parameters.
-Changing parallel mean free path which ratio $= 0.1$ greatly affects CRPS.
-However, when ratio $= 0.001$, varying parallel mean free path doesn't change
-results.
+Figure \ref{f:real_cv_valid} makes it obvious that the value of ratio largely
+determines how well the surrogate predictions fit the real data. CRPS changes
+significantly across the entire range of ratio, but only shifts slightly for
+parallel mean free path. Furthermore, looking back at Figure
+\ref{f:ibex_real_ex}, we note that the posterior (bottom right panel) is spread
+across a broad set of values for parallel mean free path ($\sim$2700-3000). That
+ridge or plateau-like behavior lines up with our results here, as that spectrum
+of parallel mean free path corresponds to ones that lead to low values of CRPS
+in this cross-validation experiment. Next, there appears to be some interaction
+between the two parameters. In the right panel, adjusting parallel mean free
+path when ratio $= 0.1$ greatly affects CRPS, going from red-orange to
+yellow-white. However, when ratio $= 0.001$, varying parallel mean free path
+stays fairly constant.
+
+Above all, Figure \ref{f:real_cv_valid} shows that the mean of posterior samples
+$u \mid Y^F$, when using the complete satellite dataset, performs well in terms
+of CRPS. That is, our estimate of $u$ resides in the region with values of
+parallel mean free path and ratio that result in low CRPS. Therefore, given the
+constraints of a specific computer model and the $u$-values provided in a
+campaign of simulator runs, we can be confident that our Bayesian framework
+concentrates posterior mass at the best possible value of the model parameter
+$u$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
