@@ -1015,6 +1015,17 @@ We take this as an indication that the computer model is lacking in it's
 attempt to represent reality, and the Metropolis sampler seeks to go beyond the
 range of model parameters present in the training data.
 
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.52,trim=10 0 28 0,clip=TRUE]{crps_pmfp.pdf}
+\includegraphics[scale=0.52,trim=35 0 28 0,clip=TRUE]{crps_ratio.pdf}
+\includegraphics[scale=0.52,trim=10 0 22 0,clip=TRUE]{crps_grid.pdf}
+\caption{An inverse problem for a Poisson process. Counts observed in the field
+and a sample of computer model runs (left), model evaluations at posterior
+draws and mean (middle), and posterior distribution of model parameters
+(right).
+\label{f:real_cv_valid}}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
