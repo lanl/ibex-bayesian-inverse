@@ -324,7 +324,8 @@ crps_range <- range(c(apply(cv_res$crps_pmfp, 1, mean),
 pdf("crps_pmfp.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 plot(x=cv_res$pmfp_grid, y=apply(cv_res$crps_pmfp, 1, mean), type="l",
-  xlab=expression("Parallel Mean Free Path ("~u[1]~")"), ylab="crps")
+  xlab=expression("Parallel Mean Free Path ("~u[1]~")"), ylab="crps",
+  ylim=crps_range)
 abline(v=post_mean[1], col=2, lty=2, lwd=2.5)
 legend("topleft", c("mean across folds", expression(hat(u[i])~"(2009-2011)")),
   col=1:2, lty=1:2, lwd=c(1, 2.5), bg="white", cex=1.15)
