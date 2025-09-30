@@ -53,7 +53,7 @@ mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=fd_fold_training_X,
   Zf=fd_fold_training_Z, Of=fd_fold_training_O, m=25, nmcmcs=nmcmcs, step=0.05,
   gpmeth="svecchia", vb=TRUE, true_u=NA, true_logscl=NA,
   betashape=2, adapt=FALSE)
-save.image("real_data_cv.RData")
+save.image(paste0("real_data_cv_", fold_seed, "_", seed, ".RData")
 
 sample_pmfps <- seq(500, 3000, length=200)
 sample_pmfps_cod <- (sample_pmfps - 500)/2500
@@ -96,7 +96,7 @@ for (j in 1:length(sample_pmfps_cod)) {
     print(paste0("Fold ", fid, ": Finished pmfp ", j, "/", length(sample_pmfps)))
   }
 }
-save.image("real_data_cv.RData")
+save.image(paste0("real_data_cv_", fold_seed, "_", seed, ".RData")
 
 for (j in 1:length(sample_ratios_cod)) {
   ### Pull out of sample counts
@@ -115,7 +115,7 @@ for (j in 1:length(sample_ratios_cod)) {
     print(paste0("Fold ", fid, ": Finished ratio ", j, "/", length(sample_ratios)))
   }
 }
-save.image("real_data_cv.RData")
+save.image(paste0("real_data_cv_", fold_seed, "_", seed, ".RData")
 
 for (j in 1:nrow(sample_grid_cod)) {
   ### Pull out of sample counts
@@ -134,7 +134,7 @@ for (j in 1:nrow(sample_grid_cod)) {
     print(paste0("Fold ", fid, ": Finished combo ", j, "/", nrow(sample_grid)))
   }
 }
-save.image("real_data_cv.RData")
+save.image(paste0("real_data_cv_", fold_seed, "_", seed, ".RData")
 print(paste0("Fold ", fid, ": COMPLETE"))
 
 res <- list(mcmc_res=mcmc_res, crps_pmfp=crps_pmfp, crps_ratio=crps_ratio,
