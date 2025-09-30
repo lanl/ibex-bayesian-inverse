@@ -18,7 +18,7 @@ seed=$((RANDOM))
 nf="nodes_$(( RANDOM % 9000 + 1000)).txt"
 scontrol show hostname $SLURM_NODELIST > $nf
 
-seq 1 $ncopies | parallel --slf $nf -j$nparallel --wd $PWD --env OMP_NUM_THREADS "module reset; module load R/4.4.2-gfbf-2024a; R CMD BATCH \"--args seed=$seed ncvs=10 fid={} nmcmcs=10000\" real_data_cv.R real_data_cv_{}.Rout"
+seq 1 $ncopies | parallel --slf $nf -j$nparallel --wd $PWD --env OMP_NUM_THREADS "module reset; module load R/4.4.2-gfbf-2024a; R CMD BATCH \"--args seed=$seed fold_seed=$((RANDOM)) ncvs=10 fid={} nmcmcs=10000\" real_data_cv.R real_data_cv_{}_$seed.Rout"
 
 # Collect all the results
 R CMD BATCH "--args seed=$seed" real_data_cv_collect.R

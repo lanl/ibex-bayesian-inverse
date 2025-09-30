@@ -9,12 +9,13 @@ source("../helper.R")
 source("../mcmc.R")
 
 seed <- 711930
+fold_seed <- 12937120
 ncvs <- 10
 fid <- 1
 nmcmcs <- 10000
 
 ## read in the command line arguments
-## run with: R CMD BATCH '--args seed=711930 ncvs=10 fid=1 nmcmcs=10000' real_data_cv.R
+## run with: R CMD BATCH '--args seed=711930 fold_seed=12937120 ncvs=10 fid=1 nmcmcs=10000' real_data_cv.R
 args <- commandArgs(TRUE)
 if (length(args) > 0) {
   for(i in 1:length(args)) {
@@ -40,6 +41,7 @@ field_cv_inds <- split(field_cv_inds, cut(seq_along(field_cv_inds), ncvs,
   labels=FALSE))
 field_data_fold <- field_data[-field_cv_inds[[fid]],]
 
+set.seed(fold_seed)
 fparams <- paste0(2009:2011, "A")
 pd <- preprocess_data(md=model_data, fd=field_data_fold, esa_lev=4,
   fparams=fparams, scales=c(1, 1), tol=NA, quant=0.0, real=TRUE)
@@ -49,9 +51,7 @@ mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
   Zf=pd$Zfield, Of=pd$Ofield, m=25, nmcmcs=nmcmcs, step=0.05,
   gpmeth="svecchia", vb=TRUE, true_u=NA, true_logscl=NA,
   betashape=2, adapt=FALSE)
-res <- list(mcmc_res=mcmc_res, settings=list(seed=seed, ncvs=ncvs, fid=fid))
-saveRDS(res, file=paste0("../results/real_data_cv_fold", fid, "_seed", seed,
-  format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
+save.image("real_data_cv.RData")
 
 sample_pmfps <- seq(500, 3000, length=10)
 sample_pmfps_cod <- (sample_pmfps - 500)/2500
@@ -79,7 +79,6 @@ post_mean_cod <- apply(mcmc_res$u[seq(1001, nmcmcs, by=10),], 2, mean)
 post_mean <- post_mean_cod
 post_mean[1] <- post_mean_cod[1]*2500 + 500
 post_mean[2] <- post_mean_cod[2]*(0.1-0.001) + 0.001
-post_means[fid,] <- post_mean
 
 for (j in 1:length(sample_pmfps_cod)) {
   ### Pull out of sample counts
@@ -134,3 +133,11 @@ for (j in 1:nrow(sample_grid_cod)) {
 }
 save.image("real_data_cv.RData")
 print(paste0("Fold ", fid, ": COMPLETE"))
+
+res <- list(mcmc_res=mcmc_res, crps_pmfp=crps_pmfp, crps_ratio=crps_ratio,
+  crps_grid=crps_grid, pmfp_grid=sample_pmfps, ratio_grid=sample_ratios,
+  grid=sample_grid, post_mean=post_mean,
+  settings=list(seed=seed, ncvs=ncvs, fid=fid))
+
+saveRDS(res, file=paste0("../results/real_data_cv_fold", fid, "_seed", seed,
+  format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
