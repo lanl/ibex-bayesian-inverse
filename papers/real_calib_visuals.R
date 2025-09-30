@@ -318,44 +318,25 @@ post_mean[2] <- post_mean[2]*(0.1-0.001)+0.001
 
 cv_res <- readRDS("final_results/real_data_cv_metrics_20250930111359.rds")
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05), mgp=c(0.5,0.25,0))
-pdf("crps_pmfp.pdf", width=5, height=5)
-par(mgp=c(2.25, 0.8, 0))
-matplot(x=cv_res$pmfp_grid, y=cv_res$crps_pmfp, pch=1, col="lightgrey", cex=0.5,
-  xlab=expression("Parallel Mean Free Path ("~u[1]~")"), ylab="crps")
-lines(x=cv_res$pmfp_grid, y=apply(cv_res$crps_pmfp, 1, mean))
-abline(v=cv_res$post_means[,1], col=4, lty=2, lwd=1.5)
-abline(v=post_mean[1], col=2, lty=3, lwd=2.5)
-legend("topright", c("averaged crps across folds", "individual fold estimates",
-  "all data estimate"), col=c(1,4,2), lty=1:3, lwd=c(1, 1.5, 2.5),
-  bg="white")
-dev.off()
+crps_range <- range(c(apply(cv_res$crps_pmfp, 1, mean),
+  apply(cv_res$crps_ratio, 1, mean)))
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05), mgp=c(0.5,0.25,0))
 pdf("crps_pmfp.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 plot(x=cv_res$pmfp_grid, y=apply(cv_res$crps_pmfp, 1, mean), type="l",
   xlab=expression("Parallel Mean Free Path ("~u[1]~")"), ylab="crps")
-abline(v=cv_res$post_means[,1], col=4, lty=2, lwd=1.5)
-abline(v=post_mean[1], col=2, lty=3, lwd=2.5)
-legend("topright", c("averaged crps across folds", "individual fold estimates",
-  "all data estimate"), col=c(1,4,2), lty=1:3, lwd=c(1, 1.5, 2.5),
-  bg="white")
+abline(v=post_mean[1], col=2, lty=2, lwd=2.5)
+legend("topleft", c("mean across folds", expression(hat(u[i])~"(2009-2011)")),
+  col=1:2, lty=1:2, lwd=c(1, 2.5), bg="white", cex=1.15)
 dev.off()
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05), mgp=c(0.5,0.25,0))
 pdf("crps_ratio.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 plot(x=cv_res$ratio_grid, y=apply(cv_res$crps_ratio, 1, mean), type="l",
-  xlab=expression("Ratio ("~u[2]~")"), ylab="crps")
-abline(v=cv_res$post_means[,2], col=4, lty=2, lwd=1.5)
-abline(v=post_mean[2], col=2, lty=3, lwd=2.5)
-legend("topright", c("averaged crps across folds", "individual fold estimates",
-  "all data estimate"), col=c(1,4,2), lty=1:3, lwd=c(1, 1.5, 2.5),
-  bg="white")
+  xlab=expression("Ratio ("~u[2]~")"), ylab="crps", ylim=crps_range)
+abline(v=post_mean[2], col=2, lty=2, lwd=2.5)
 dev.off()
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05), mgp=c(0.5,0.25,0))
 pdf("crps_grid.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 unique_pmfps <- sort(unique(cv_res$grid[,1]))
@@ -365,8 +346,6 @@ image(x=unique_pmfps, y=unique_ratios,
   col=heat.colors(128), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
   ylab=expression("Ratio ("~u[2]~")"))
 dev.off()
-
-
 
 ###############################################################################
 ###############################################################################
