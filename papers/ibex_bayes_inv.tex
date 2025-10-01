@@ -28,15 +28,15 @@
 \title{Bayesian Statistical Inversion for High-Dimensional Computer Model
 Output and Spatially Distributed Counts}
 \author{Steven D. Barnett\thanks{Corresponding author
-\href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of
-Statistics, Virginia Tech} \and Robert B. Gramacy\thanks{Department of
-Statistics, Virginia Tech} \and Lauren J. Beesley\thanks{Statistical Sciences
-Group, Los Alamos National Laboratory} \and Dave Osthus\footnotemark[3] \and
-Yifan Huang\thanks{ Nuclear and Particle Physics, AstroPhysics and Cosmology,
-Los Alamos National Laboratory} \and Fan Guo\footnotemark[4] \and Eric J.
-Zirnstein\thanks{ Department of Astrophysical Sciences, Princeton University}
-\and Daniel B. Reisenfeld\thanks{Space Science and Applications Group, Los
-Alamos National Laboratory}}
+\href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of Statistics,
+Virginia Tech} \and Robert B. Gramacy\thanks{Department of Statistics, Virginia
+Tech} \and Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos
+National Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{
+University of Alabama in Huntsville } \and Fan Guo\thanks{Nuclear and Particle
+Physics, AstroPhysics and Cosmology, Los Alamos National Laboratory} \and Eric
+J. Zirnstein\thanks{ Department of Astrophysical Sciences, Princeton
+University} \and Daniel B. Reisenfeld\thanks{Space Science and Applications
+Group, Los Alamos National Laboratory}}
 \date{}
 
 \maketitle
@@ -45,21 +45,21 @@ Alamos National Laboratory}}
 
 \begin{abstract}
 Data collected by the Interstellar Boundary Explorer (IBEX) satellite,
-recording heliospheric energetic neutral atoms (ENAs), exhibit a phenomena
-that have caused space scientists to revise hypotheses about the physical
-processes, and computer simulations under those models, in play at the
-boundary of our solar system.  Evaluating the fit of these computer models
-involves tuning their parameters to observational data from IBEX. This would
-be a classic (Bayesian) inverse problem if not for three challenges: (1) the
-computer simulations are slow, limiting the size of campaigns of runs; so (2)
-surrogate modeling is essential but outputs are high-resolution images
-thwarting conventional methods; and (3) IBEX observations are counts, whereas
-most inverse problem techniques assume Gaussian field data. To fill that gap
-we propose a novel approach to Bayesian inverse problems coupling a Poisson
+recording heliospheric energetic neutral atoms (ENAs), exhibit a phenomena that
+have caused space scientists to revise hypotheses about the physical processes,
+and computer simulations under those models, in play at the boundary of our
+solar system.  Evaluating the fit of these computer models involves tuning
+their parameters to observational data from IBEX. This would be a classic
+(Bayesian) inverse problem if not for three challenges: (1) the computer
+simulations are slow, limiting the size of campaigns of runs; so (2) surrogate
+modeling is essential, but outputs are high-resolution images, thwarting
+conventional methods; and (3) IBEX observations are counts, whereas most
+inverse problem techniques assume Gaussian field data. To fill that gap we
+propose a novel approach to Bayesian inverse problems coupling a Poisson
 response with a sparse Gaussian process surrogate using the Vecchia
-approximation.  We demonstrate the capibilities of our proposed framework,
-which compare favorably to alternatives, through multiple simulated
-examples in terms of recovering ``true'' computer model parameters and accurate
+approximation.  We demonstrate the capabilities of our proposed framework,
+which compare favorably to alternatives, through multiple simulated examples in
+terms of recovering ``true'' computer model parameters and accurate
 out-of-sample prediction. We then apply this new technology to IBEX satellite
 data and associated computer models developed at Los Alamos National Lab.
 
@@ -111,12 +111,13 @@ different parameter settings (middle, right).
 
 One can think of the heliosphere as a ``boat'' moving through interstellar
 space. At the outset of IBEX's mission, scientists expected to see an elevated
-rate of ENAs being generated at the front (nose) and back (tail), much like
-the turbulent interaction with water at a boat's bow and stern. And indeed,
-that belief was validated by IBEX data. These predicted regions of raised ENA
-rates are known as \textit{globally distributed flux}, or GDF. At the nose and
-tail there are an increased number of collisions between hydrogen ions and
-neutral particles in the interstellar medium.
+rate of ENAs being generated at the front (nose) and back (tail), much like the
+turbulent interaction with water at a boat's bow and stern. And indeed, that
+belief was validated by IBEX data. At the nose and tail of the heliosphere IBEX
+observed an increased number of collisions and resulting electron exchanges
+between hydrogen ions and neutral particles in the interstellar medium. These
+predicted regions of raised ENA rates are known as \textit{globally distributed
+flux}, or GDF.
 
 However, in a completely unanticipated finding, IBEX also recorded a thin
 string of higher rates of ENAs \citep{fuselier2009IBEXribbon} wrapping around
@@ -127,34 +128,37 @@ theories attempting to describe the physical process that generates the ribbon
 \citep{mccomas2014ibex, zirnstein2018role, zirnstein2019strong,
 zirnstein2021dependence}.
 
-Computer models encapsulating competing theories have been built which
-generate high-resolution (i.e, a high-dimensional response) synthetic sky maps
-(middle and right panels of Figure \ref{f:fig1}). These simulations are
-extremely sophisticated and involve many complex and expensive operations,
-such as the solving of partial differential equations. Consequently, executing
-a single run of the computer model at a specified set of model parameters can
-take thousands of core hours.  This severely limits the number of unique 
-runs generating simulated sky in various conditions. 
+Computer models encapsulating competing theories have been built which generate
+high-resolution (i.e, a high-dimensional response) synthetic sky maps (middle
+and right panels of Figure \ref{f:fig1}). These simulations are extremely
+sophisticated and involve many complex and expensive operations (e.g. solving
+differential equations). Consequently, executing a single run of the computer
+model at a specified set of model parameters can take hundreds or thousands of
+core hours. This severely limits the number of unique runs available generating
+simulated sky maps in various settings.
 
-Our work here focuses on two, publicly accessible computer models: a GDF
-model proposed by \citet{zirnstein2021heliosheath}; and a ribbon-only model
-developed by \citet{zirnsteinGDFsims2015}. These simulators take inputs that
-can be varied to modify the shape and intensity of both ribbon and GDF. The
-ribbon-only model relies on two parameters, \textit{parallel mean free path}
-and \textit{ratio}, while the GDF model takes \textit{kappa} and
-\textit{pickup ions (PUI) cooling index} as inputs. Dialing in good settings
-for these input parameters, in light of observed ENA counts from IBEX, is
-instrumental in furthering theory development and validation.
+Our work here focuses on two, publicly accessible computer models: a GDF model
+proposed by
+\citet{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density}; and a
+ribbon-only model developed by scientists at Los Alamos National Lab (LANL).
+These simulators take inputs that can be varied to modify the shape and
+intensity of the ribbon. The ribbon-only model relies on two parameters,
+\textit{parallel mean free path} and \textit{ratio}, while the GDF model we use
+remains constant and is simply added on to the output of the ribbon model.
+Dialing in good settings for these input parameters, in light of observed ENA
+counts from IBEX, is instrumental in furthering theory development and
+validation.
 
-Space scientists at Los Alamos National Lab (LANL) wish to solve this ``parameter
-tuning'' exercise as a Bayesian inverse problem
+Space scientists at Los Alamos National Lab (LANL) wish to solve this
+``parameter tuning'' exercise as a Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}, obtaining a
-posterior distribution over likely settings.  However, the exposure and count data
-IBEX provides, along with computer simulated rates, present some unique challenges:
+posterior distribution over likely settings.  However, the exposure and count
+data IBEX provides, along with computer simulated rates, present some unique
+challenges:
 1) computationally intensive models limiting simulation, necessitating surrogate
 modeling; 2) high-dimensional model output (simulated sky maps, each containing
 tens of thousands of pixels), thwarting conventional surrogate modeling
-techniques; 3) a non-Gaussian field response (Poisson counts).  It is worth noting
+techniques; and 3) a non-Gaussian field response (Poisson counts).  It is worth noting
 that Bayesian posterior sampling, say via Markov chain Monte Carlo (MCMC),
 compounds computational bottlenecks (2). We propose a framework for Bayesian
 inverse problems that utilizes the Vecchia approximation
@@ -201,19 +205,20 @@ distribution of calibration parameters and improve prediction at new,
 unobserved field locations. However, their methodology is limited to Gaussian
 field observations and small, simulator output. \citet{higdoncalib2008} and
 SEPIA \citep{gattiker2020lanl}, its more recent incarnation, also employ
-Bayesian methods while accounting for computer model output that is
-functional. But SEPIA is somewhat rigid, does not scale well with added model
-runs, and requires the user to specify a number of basis functions to
-represent the simulator response. \citet{gramacy2015calibrating} consider
-computer model calibration with large-scale output from a computer experiment,
-necessitating an approximation. But their implementation is not Bayesian and
-the scale of simulator data is still orders of magnitude less than IBEX.
-\citet{grosskopfcountcalib2020} provide an extension of the Kennedy \& O'Hagan
-(hereafter referred to as KOH) framework to non-Gaussian data that maintains a
-Bayesian approach. But they are limited to small amounts of computer model
-data and do not consider higher dimensional responses. In contrast, our
-approach checks all the boxes to achieve the goal of IBEX space scientists and
-therefore applies to a wider class of problems than previous work.
+Bayesian methods while accounting for computer model output that is functional.
+But SEPIA is somewhat rigid, only considers Gaussian field observations, does
+not scale well with added model runs, and requires the user to specify a number
+of basis functions to represent the simulator response.
+\citet{gramacy2015calibrating} consider computer model calibration with
+large-scale output from a computer experiment, necessitating an approximation.
+But their implementation is not Bayesian and the scale of simulator data is
+still orders of magnitude less than IBEX. \citet{grosskopfcountcalib2020}
+provide an extension of the Kennedy \& O'Hagan (hereafter referred to as KOH)
+framework to non-Gaussian data that maintains a Bayesian approach. But they are
+limited to small amounts of computer model data and do not consider higher
+dimensional responses. In contrast, our approach checks all the boxes to
+achieve the goal of IBEX space scientists and therefore applies to a wider
+class of problems than previous work.
 
 Our integrated framework for Bayesian inverse problems overcomes these obstacles
 together in an all-in-one solution, as illustrated in the top row of Table
@@ -237,21 +242,20 @@ both to increased dimensionality of the response and to larger sizes of training
 sets.
 
 Our paper is laid out as follows. First, Section \ref{sec:review} reviews
-methods that form the foundation for our work, namely Bayesian Inverse Problems
-and Gaussian process surrogate models. We also give a brief description of the
-methodology and implementation behind SEPIA, which could be classified as the
-current ``status quo'' in Bayesian Inverse Problems for high-dimensional
-computer model output. In Section \ref{sec:gen_bayes_inv} we introduce our
-framework for solving the inverse problem in non-Gaussian contexts. Section
-\ref{sec:vecchia} describes our use of the Vecchia approximation to stretch the
-capacity of a GP surrogate beyond small simulator training runs. In Section
-\ref{sec:ibex_data} we return to our motivating application, illustrating the
-effectiveness of our framework in discovering the true, underlying model
-parameters on synthetic data and apply our methods to the raw IBEX satellite
-data. To conclude, we discuss any extensions and future work in Section
-\ref{sec:discuss}. Our implementation may be found at
-\url{https://github.com/lanl/IBEX_Calibration} along with code reproducing all
-included examples.
+methods that form the foundation for our work, namely Bayesian inverse problems
+and Gaussian process surrogate models, and introduces our framework for solving
+the inverse problem in the context of non-Gaussian field observations. We also
+give a brief description of the methodology and implementation behind SEPIA,
+which could be classified as the current ``status quo'' in Bayesian inverse
+problems for high-dimensional computer model output. Section \ref{sec:vecchia}
+describes our use of the Vecchia approximation to stretch the capacity of a GP
+surrogate beyond small simulator training runs. In Section \ref{sec:ibex_data}
+we return to our motivating application, illustrating the effectiveness of our
+framework in discovering the true, underlying model parameters on synthetic
+data and apply our methods to the raw IBEX satellite data. To conclude, we
+discuss any extensions and future work in Section \ref{sec:discuss}. Our
+implementation may be found at \url{https://github.com/lanl/IBEX_Calibration}
+along with code reproducing all included examples.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -485,21 +489,22 @@ the Metropolis sampler used those accurate (and fast) predictions to
 successfully recover the true model parameters $u^\star$.
 
 One downside to working with MVNs whose dimension grows with the dimension of
-the data they are trained on, $n_M$, is that building $n_M \times n_M$ matrices,
-and inverting (or otherwise decomposing) them, e.g., for Eq.~(\ref{eq:mvn_eq})
-requires storage and computation that is quadratic and cubic in $n_M$,
-respectively.  This limits $n_M$ to a few thousand at most in a Bayesian MCMC
-setting, necessitating approximations for GPs that curb this prohibitive cost.
-With the 1d example in Figure \ref{f:toy_calib_pois}, we have $n_M=20 \times
-40$, combining $X$ and $U$, which is manageable. But for IBEX, the simulated sky
-maps like those in the middle and right panels of Figure \ref{f:fig1} are in 2d
-(under the hood the output is in spherical coordinates $x$, $y$, and $z$) and
-results in $>16{,}000$ locations (or pixels) for each $u$-value. Combine that
-with $n=66$ unique $u$-values and our response vector will have greater than one
-million elements. Even if we used a smaller LHS space-filling design of size
-$n=15$ over the model parameters, the response vector would still consist of
-over 200,000 points. In that case, a GP could not be fit and provide predictions
-in a reasonable amount of time, prompting the next topic.
+the data they are trained on, $n_M$, is that building $n_M \times n_M$
+matrices, and inverting (or otherwise decomposing) them, e.g., for
+Eq.~(\ref{eq:mvn_eq}) requires storage and computation that is quadratic and
+cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in a
+Bayesian MCMC setting, necessitating approximations for GPs that curb this
+prohibitive cost. With the 1d example in Figure \ref{f:toy_calib_pois}, we have
+$n_M=20 \times 40$, combining $X$ and $U$, which is manageable. But for IBEX,
+the simulated sky maps like those in the middle and right panels of Figure
+\ref{f:fig1} are in 2d (under the hood the output is in spherical coordinates
+$x$, $y$, and $z$) and results in $>16{,}000$ locations (or pixels) for each
+$u$-value. Combine that with $n=66$ unique $u$-values used in runs available to
+us and our response vector will have greater than one million elements. Even if
+we used a smaller LHS space-filling design of size $n=15$ over the model
+parameters, the response vector would still consist of over 200,000 points. In
+that case, a GP could not be fit and provide predictions in a reasonable amount
+of time, prompting the next topic.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.3 - Approximations
@@ -546,7 +551,7 @@ m(u, X) \approx \sum_{i=1}^{n_k}  k_i \cdot w_i (u),
 \end{equation}
 Weights $w_i(u)$ are each modeled as realizations of a zero-mean GP. By not
 directly modeling the high-dimensional response $m(\cdot,\cdot)$ and it's
-associated dense grid $X$, requesite decompositions $\Sigma_{w_i}$ avoids the
+associated dense grid $X$, requisite decompositions $\Sigma_{w_i}$ avoid the
 cubic bottleneck in computation when scaling to large $n$ and can be completed
 in a reasonable amount of time.
 
@@ -618,7 +623,7 @@ approximation introduced by \citet{scaledvecchiakatzfuss2022}. We refer you to
 their manuscript for a more in-depth explanation of their work, but the primary
 draw for using it as a surrogate for the IBEX simulator is the open source
 implementation and packaging that leverages modern sparse matrix libraries and
-parallel processing. Code that that we directly rely on is readily accessible at
+parallel processing. Code that we directly rely on is readily accessible at
 \url{https://github.com/katzfuss-group/scaledVecchia}.
 
 %------------------------------------------------------------------------------
@@ -673,8 +678,8 @@ shown. These are depicted in the cross of Figure \ref{f:ibex_sim_surr}, those
 panels with thicker, dashed borders. To the naked eye, these predictive
 surfaces appear to have been generated by the computer model itself. Moving
 left to right, or top to bottom, the surfaces change gradually and as one would
-expect. Next we show empirically that our surrogate fit is extremely accurate
-and outperforms competitors.
+expect. Next we show empirically that our surrogate fit is accurate and
+outperforms competitors.
 
 \begin{figure}[ht!]
 \centering
@@ -775,10 +780,10 @@ specifically built for computer experiments with high-dimensional output. While
 it clearly performs well in these situations, it's also fairly inflexible to
 other contexts, such as a large number of simulation runs. Scaled Vecchia does
 not face this hurdle, as it treats both high-dimensional output and large-scale
-univariate datasets similarly, as a univariate response. Our experiment is set
-up similar to the previous one, but we keep the dimensionality of the response
-at 10K while sliding the number of simulator runs from 10 to 100. Again, all
-method are run over five MC iterations for each value of $n$. For the higher
+univariate datasets similarly, as a scalar response. Our experiment is set up
+similar to the previous one, but we keep the dimensionality of the response at
+10K while sliding the number of simulator runs from 10 to 100. Again, all
+methods are run over five MC iterations for each value of $n$. For the higher
 performing methods, we push the campaign size up further ($n=2500$).
 
 \begin{figure}[ht!]
@@ -811,12 +816,12 @@ competitor when $m<50$, and for all values of $m$ when $n>1500$.
 
 We now return to the IBEX inverse problem. We wish to determine the settings
 $u$ of a computer model that produce a sky map most likely to have generated
-observed. Before diving in, we dispense a few important details about IBEX
-observations and computer simulations.  We then test our modeling apparatus on
-synthetic field observations (computer model at known $u^\star$ and with
-Poisson counts) to ensure good performance within the model class, and where we
-know the true calibration parameter.  Finally, we report on our calibration of
-the actual IBEX satellite observations.
+observed counts. Before diving in, we dispense a few important details about
+IBEX observations and computer simulations.  We then test our modeling
+apparatus on synthetic field observations (computer model at known $u^\star$
+and with Poisson counts) to ensure good performance within the model class, and
+where we know the true calibration parameter.  Finally, we report on our
+calibration of the actual IBEX satellite observations.
 
 %------------------------------------------------------------------------------
 %% SECTION 4.1 - IBEX details
@@ -828,7 +833,7 @@ Each row of the satellite dataset contains the ENA origin location in Cartesian
 coordinates ($x$, $y$, $z$), time the satellite pointed at that location (in
 seconds), counts of ENAs observed at one of six different energy levels (ESA),
 and a background rate $\lambda_b$ (ENAs/sec). Note that we only use ENAs
-collected at energy level ESA 4. This provides the best context for analysis,
+collected at energy level ESA 4. This provides the best context for our work,
 whereas lower ESA values give a much weaker signal and ENAs with higher energy
 levels overwhelm the analysis. More important to consider is that ENAs are
 known to come from sources other than the heliosphere. Space scientists
@@ -843,19 +848,19 @@ expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such
 that $\lambda(X^F) = m(u, X^F) -
 \lambda_{b}(X^F)$.
 
-We have referred to the IBEX simulator throughout this paper without going
-into much detail. While we leave a more in-depth physical interpretation and
+We have referred to the IBEX simulator throughout this paper without going into
+much detail. While we leave a more in-depth physical interpretation and
 analysis of parameters to more appropriate venues
-\citep{zirnstein2021dependence,zirnsteinGDFsims2015}, some basic context is
-provided here. We focus on two particular models available (among many): one
-for the GDF and one for the ribbon. In the ribbon model, the parameter
-\textit{parallel mean free path} is the distance a hydrogen ion travels beyond
-the heliopause before interacting with another particle, receiving an
-electron, and becoming an ENA. The \textit{ratio} parameter is the fraction of
-\textit{parallel mean free path} and another measure of distance,
-perpendicular mean free path. These are our $u$ values. The response from
-the GDF model does not vary with any parameters of interest and is simply
-added to the output of the ribbon simulator.
+\citet{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density}, some
+basic context is provided here. We focus on two particular models available
+(among many): one for the GDF and one for the ribbon. In the ribbon model, the
+parameter \textit{parallel mean free path} is the distance a hydrogen ion
+travels beyond the heliopause before interacting with another particle,
+receiving an electron, and becoming an ENA. The \textit{ratio} parameter is the
+fraction of \textit{parallel mean free path} and another measure of distance,
+perpendicular mean free path. These are our $u$ values. The response from the
+GDF model does not vary with any parameters of interest and is merely added to
+the output of the ribbon simulator.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
 due to variations in the solar wind that accompany the sun's 11 or 22-year
@@ -875,9 +880,9 @@ the years 2009-2011 to simulator runs.
 
 Using the corpus of $n=66$ computer model runs, varying a design of
 \textit{parallel mean free path} and \textit{ratio} $u$-values, described in
-in Section \ref{sec:vecchia}, we select a value $u$ and set the corresponding
-output ($\lambda^\star = m(u^\star, X^M)$) as the ``true'' underlying mean ENA rate
-(upper right panel of Figure \ref{f:ibex_synth_ex}). Next, we gather
+Section \ref{sec:vecchia}, we select a value $u$ and set the corresponding
+output ($\lambda^\star = m(u^\star, X^M)$) as the ``true'' underlying mean ENA
+rate (upper right panel of Figure \ref{f:ibex_synth_ex}). Next, we gather
 measurement locations $X^F$, exposure times $e$, and background rates
 $\lambda_b$ from a single year that the IBEX satellite has been in operation,
 ignoring the observed counts of ENAs in this fabricated example. For each
@@ -933,9 +938,9 @@ simulated.
 \end{figure}
 
 To further validate our methodology, we apply this method to each unique model
-parameter available. We have access to $n=66$ simulator runs, representing all
+parameter available. We have access to simulator runs representing all
 combinations for 11 unique values of parallel mean free path and 6 unique
-values of ratio. The spread of parameter values is determined by space
+values of ratio ($n=66$). The spread of parameter values is determined by space
 scientists to include all values considered reasonable: parallel mean free path
 ranges from 500-3000 astronomical units (AU); ratio values are unitless, and
 span from 0.001 to 0.1. Due to the inability for the model to furnish posterior
@@ -945,8 +950,9 @@ $\in \{500, 3000\}$ and/or ratio $\in \{0.001, 0.1\}$). Removing these edge
 cases results in 36 remaining test runs. For each combination, we follow the
 same procedure as above: select one model parameter $u$, create simulated
 observed satellite data, fit a  Scaled Vecchia surrogate on training data
-excluding $u^\star$, and run Algorithm \ref{alg:gibbs} to sample from the posterior
-$u \mid Y^F$. Results are shown in Figure \ref{f:synth_estimates_all}.
+excluding $u^\star$, and run Algorithm \ref{alg:gibbs} to sample from the
+posterior $u \mid Y^F$. Results are shown in Figure
+\ref{f:synth_estimates_all}.
 
 Each panel shows posterior samples of $u \mid Y^F$ for a unique $u^\star$ as a
 kernel density. We have indicated each $u^\star$ that generated synthetic $Y^F$ as a
@@ -1010,20 +1016,20 @@ beyond the range of model parameters present in the training data.
 The boundary-pushing estimate for $u$ and the gap, which is plainly visual
 between surrogate predictions and collected data, are somewhat unsatistfying.
 We address in more detail the potential discrepancy between simulator and
-reality in Section \ref{sec:discuss}. But we wish to offer some validation
-that our method performs well for the real data, given our provided computer
-model implementation. To do so, we ran a final experiment using cross
-validation and calculation of CRPS at testing locations. We split the satellite data from 2009-2011 into ten
-equally-sized folds. For each fold $f$, we ran our Poisson Bayesian inverse
-problem framework as before, but only use the other nine folds as field data,
-and store the resulting model parameter estimate, $\hat{u}_f$. Note that for
-each fold, all computer model output is still used to train the surrogate. We
-then predict the underlying ENA rate $\lambda$ at the held out field data
-locations in three separate manners:
-1) over a fine grid of parallel mean free path, with ratio fixed at the
-posterior mean of $u_f$; 2) over a fine grid of ratio, with parallel mean
-free path fixed at the posterior mean; and 3) over a fine grid of both
-parallel mean free path and ratio. We calculate CRPS for all predictions.
+reality in Section \ref{sec:discuss}. But we wish to offer some validation that
+our method performs well for the real data, given our provided computer model
+implementation. To do so, we ran a final experiment using cross validation and
+calculation of CRPS at testing locations. We split the satellite data from
+2009-2011 into ten equally-sized folds. For each fold $f$, we ran our Poisson
+Bayesian inverse problem framework as before, but only use the other nine folds
+as field data, and store the resulting model parameter estimate, $\hat{u}_f$.
+Note that for each fold, all computer model output is still used to train the
+surrogate. We then predict the underlying ENA rate $\lambda$ at the held out
+field data locations in three separate manners: 1) over a fine grid of parallel
+mean free path, with ratio fixed at the posterior mean of $u_f$; 2) over a fine
+grid of ratio, with parallel mean free path fixed at the posterior mean; and 3)
+over a fine grid of both parallel mean free path and ratio. We calculate CRPS
+for all predictions.
 
 \begin{figure}[ht!]
 \centering
@@ -1053,8 +1059,8 @@ parallel mean free path ($\sim$2700-3000). That ridge or plateau-like behavior
 lines up with our results here, as that spectrum of parallel mean free path
 corresponds to ones that lead to low values of CRPS (left panel) in this
 cross-validation experiment. The right panel of Figure \ref{f:real_cv_valid}
-shows CRPS, averaged over ten folds, for surrogate predictions on a
-$30\times30$ grid of both model parameters. There appears to be some
+shows CRPS, averaged across ten folds, for surrogate predictions on a
+$30\times30$ grid over both model parameters. There appears to be some
 interaction between the two parameters. Adjusting parallel mean free path when
 ratio $= 0.1$ greatly affects CRPS, going from red-orange to yellow-white.
 However, when ratio $= 0.001$, varying parallel mean free path stays fairly
@@ -1146,7 +1152,10 @@ $\delta$.
 \includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_field_disc_10.pdf}
 \includegraphics[scale=0.51,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_11.pdf}
 \includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_mult_scale_disc.pdf}
-\caption{Discrepancy between observed satellite data and the simulator output at estimated model parameters. Panels left-to-right are 2009, 2010, and 2011.
+\caption{Discrepancy between observed satellite data and the simulator output
+at estimated model parameters in 2009 (top left), 2010 (top right), and 2011
+(bottom left). Posterior samples of a multiplicative scale discrepancy (bottom
+right)
 \label{f:ibex_disc}}
 \end{figure}
 
