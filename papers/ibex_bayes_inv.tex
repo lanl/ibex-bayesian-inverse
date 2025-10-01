@@ -1039,19 +1039,28 @@ performance.
 \end{figure}
 
 The outcome of this experiment is summarized in Figure \ref{f:real_cv_valid}.
-\textcolor{red}{Steven, can you tell your reader what to see in each panel?}
-The setting of the ration parameters largely determines how well the surrogate
+The left and middle panels display CRPS for surrogate predictions using 200
+equally-spaced values of parallel mean free path and ratio, respectively, at
+held-out satellite data locations. CRPS is averaged over the ten folds. For
+reference, we include a red dashed line to mark our estimate of the model
+parameter $u_i$ when using all the IBEX data from 2009-2011. It's clear that
+the setting of the ratio parameter largely determines how well the surrogate
 predictions fit the real data. CRPS changes significantly across the entire
 range of ratio, but only shifts slightly for parallel mean free path.
 Furthermore, looking back at Figure \ref{f:ibex_real_ex}, note that the
 posterior (bottom right panel) is spread across a broad set of values for
 parallel mean free path ($\sim$2700-3000). That ridge or plateau-like behavior
 lines up with our results here, as that spectrum of parallel mean free path
-corresponds to ones that lead to low values of CRPS in this cross-validation
-experiment. Next, there appears to be some interaction between the two
-parameters. In the right panel, adjusting parallel mean free path when ratio
-$= 0.1$ greatly affects CRPS, going from red-orange to yellow-white. However,
-when ratio $= 0.001$, varying parallel mean free path stays fairly constant.
+corresponds to ones that lead to low values of CRPS (left panel) in this
+cross-validation experiment. The right panel of Figure \ref{f:real_cv_valid}
+shows CRPS, averaged over ten folds, for surrogate predictions on a
+$30\times30$ grid of both model parameters. There appears to be some
+interaction between the two parameters. Adjusting parallel mean free path when
+ratio $= 0.1$ greatly affects CRPS, going from red-orange to yellow-white.
+However, when ratio $= 0.001$, varying parallel mean free path stays fairly
+constant. The importance of parallel mean free path therefore lessens as ratio
+decreases in value, consistent with the posterior in Figure
+\ref{f:ibex_real_ex}.
 
 The take-home message from Figure \ref{f:real_cv_valid} is that the mean of
 posterior samples $u \mid Y^F$, when using the complete satellite dataset,
