@@ -30,7 +30,7 @@ Output and Spatially Distributed Counts}
 \author{Steven D. Barnett\thanks{Corresponding author
 \href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of Statistics,
 Virginia Tech} \and Robert B. Gramacy\thanks{Department of Statistics, Virginia
-Tech} \and Lauren J. Beesley\thanks{Statistical Sciences Group, Los Alamos
+Tech} \and Lauren J. Beesley\thanks{Statistics Group, Los Alamos
 National Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{
 University of Alabama in Huntsville } \and Fan Guo\thanks{Nuclear and Particle
 Physics, AstroPhysics and Cosmology, Los Alamos National Laboratory} \and Eric
@@ -140,14 +140,13 @@ simulated sky maps in various settings.
 Our work here focuses on two, publicly accessible computer models: a GDF model
 proposed by
 \citet{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density}; and a
-ribbon-only model developed by scientists at Los Alamos National Lab (LANL).
-These simulators take inputs that can be varied to modify the shape and
-intensity of the ribbon. The ribbon-only model relies on two parameters,
-\textit{parallel mean free path} and \textit{ratio}, while the GDF model we use
-remains constant and is simply added on to the output of the ribbon model.
-Dialing in good settings for these input parameters, in light of observed ENA
-counts from IBEX, is instrumental in furthering theory development and
-validation.
+ribbon-only model developed by \citet{huang2025numerical}. These simulators
+take inputs that can be varied to modify the shape and intensity of the ribbon.
+The ribbon-only model relies on two parameters, \textit{parallel mean free
+path} and \textit{ratio}, while the GDF model we use remains constant and is
+simply added on to the output of the ribbon model. Dialing in good settings for
+these input parameters, in light of observed ENA counts from IBEX, is
+instrumental in furthering theory development and validation.
 
 Space scientists at Los Alamos National Lab (LANL) wish to solve this
 ``parameter tuning'' exercise as a Bayesian inverse problem
@@ -851,16 +850,16 @@ that $\lambda(X^F) = m(u, X^F) -
 We have referred to the IBEX simulator throughout this paper without going into
 much detail. While we leave a more in-depth physical interpretation and
 analysis of parameters to more appropriate venues
-\citet{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density}, some
-basic context is provided here. We focus on two particular models available
-(among many): one for the GDF and one for the ribbon. In the ribbon model, the
-parameter \textit{parallel mean free path} is the distance a hydrogen ion
-travels beyond the heliopause before interacting with another particle,
-receiving an electron, and becoming an ENA. The \textit{ratio} parameter is the
-fraction of \textit{parallel mean free path} and another measure of distance,
-perpendicular mean free path. These are our $u$ values. The response from the
-GDF model does not vary with any parameters of interest and is merely added to
-the output of the ribbon simulator.
+\citep{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density,huang2025numerical},
+some basic context is provided here. We focus on two particular models
+available (among many): one for the GDF and one for the ribbon. In the ribbon
+model, the parameter \textit{parallel mean free path} is the distance a
+hydrogen ion travels beyond the heliopause before interacting with another
+particle, receiving an electron, and becoming an ENA. The \textit{ratio}
+parameter is the fraction of \textit{parallel mean free path} and another
+measure of distance, perpendicular mean free path. These are our $u$ values.
+The response from the GDF model does not vary with any parameters of interest
+and is merely added to the output of the ribbon simulator.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
 due to variations in the solar wind that accompany the sun's 11 or 22-year
