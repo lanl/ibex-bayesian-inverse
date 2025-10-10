@@ -61,7 +61,7 @@ approximation.  We demonstrate the capabilities of our proposed framework,
 which compare favorably to alternatives, through multiple simulated examples in
 terms of recovering ``true'' computer model parameters and accurate
 out-of-sample prediction. We then apply this new technology to IBEX satellite
-data and associated computer models developed at Los Alamos National Lab.
+data and associated computer models developed at Los Alamos National Laboratory.
 
 \bigskip
 \noindent \textbf{Key words:} Gaussian process, surrogate modeling,
@@ -89,14 +89,14 @@ by magnetic fields and therefore travel in a straight line.
 Some ENAs eventually make their way to Earth and can be detected by an
 instrument on the IBEX satellite called the IBEX-Hi ENA imager
 \citep{funsten2009IBEXHiENA}. This apparatus records the energy level and
-approximate location of origin for each ENA that enters the detector. IBEX's
-raw collected data consist of ENA counts and exposure times for each area of
-the sky at which the satellite points, providing sufficient information to
-estimate the rate at which these particles are created throughout the
-heliopause. An example of this estimated surface or image, referred to by
-space scientists as a \textit{sky map}, can be found in the left panel of Fig.
-\ref{f:fig1}. Sky maps are integral to better understand the heliosphere's
-creation and evolution.
+approximate location of origin for each ENA that enters the detector. IBEX's raw
+collected data consist of ENA counts and exposure times for each area of the sky
+at which the satellite points, providing sufficient information to estimate the
+rate at which these particles are created throughout the heliopause. An example
+of the observed ENA rates detected by the IBEX satellite used to make
+\textit{sky maps} (spatial maps of heliospheric ENA rates) can be found in the
+left panel of Figure \ref{f:fig1}. Sky maps are integral to better understand
+the heliosphere's creation and evolution.
 
 \begin{figure}[ht!]
 \centering
@@ -148,8 +148,9 @@ simply added on to the output of the ribbon model. Dialing in good settings for
 these input parameters, in light of observed ENA counts from IBEX, is
 instrumental in furthering theory development and validation.
 
-Space scientists at Los Alamos National Lab (LANL) wish to solve this
-``parameter tuning'' exercise as a Bayesian inverse problem
+Space scientists at Los Alamos National Laboratory (LANL) want to know which
+parameter settings best agree with IBEX observations. One way to do this is to
+treat the problem as a Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}, obtaining a
 posterior distribution over likely settings.  However, the exposure and count
 data IBEX provides, along with computer simulated rates, present some unique
@@ -167,7 +168,7 @@ with a Poisson observational model to furnish posterior samples of unknown
 parameters to these models given observed data.
 
 Methods exist separately, in the literature, to address needs in each of the
-aforementioned situations 1)--3), but we are not aware of anything in the
+aforementioned situations 1)--3), but we are not aware of any approaches in the
 intersection. Table \ref{tab:prev_work} summarizes the features of the IBEX inverse
 problem and reviews the necessary capabilities, alongside recent papers offering
 partial solutions.  References provided are representative.  We acknowledge that
@@ -419,7 +420,7 @@ that is rarely the case, presenting another challenge to the typical Bayesian
 inverse problem apparatus. For instance, each run of the IBEX model $m(\cdot,
 \cdot)$ is a Herculean effort, requiring hundreds or thousands of core hours on
 a supercomputer.  That simply cannot be embedded in a Metropolis sampler
-requiring thousands of iterations to convergence.  While it's rather
+requiring thousands of iterations to converge.  While it's rather
 conventional to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates}
 in this setting, trained on a design of space-filling $u$-values, doing so
 effectively is challenged by the dimension of $X^F$.  We considered multiple
@@ -558,13 +559,13 @@ While clever, this is one of those easy-to-say hard-to-do situations. The
 implementation is complex both mathematically, and in code.  We are aware of
 only one library implemenation, originally written in {\sf MATLAB} and now
 deployed in {\sf Python} \citep{gattiker2020lanl},  We found it difficult to
-approporiate that setup for our own use in a Poisson likelihood context.
+appropriate that setup for our own use in a Poisson likelihood context.
 Addtionally, restricting the simulated and field data to work on the same
 reference grid was not possible with IBEX's orbital data locations (Figure
 \ref{f:fig1}).
 
 Fortunately, GP approximation has come a long way in the last
-twenty or years. \citeauthor{higdoncalib2008} specifically lamented not having
+twenty or so years. \citeauthor{higdoncalib2008} specifically lamented not having
 access to such technology, necessitating a more complex approach. It is no
 longer necessary to play the trick of moving a reference grid to the output
 space.  A GP (approximation) may model $Y^M$ via all inputs $X^F$ and $U$ via
@@ -760,10 +761,10 @@ location. Reducing the neighborhood size for {\sf laGP} could help reduce
 computation, but would further degrade it's performance. The comparison between
 Scaled Vecchia and SEPIA is more nuanced. In the right panel of Figure
 \ref{f:ibex_surr_timing_dim}, we see that for a fixed value of $m$, Scaled
-Vecchia's runtime increases linearly with expanded dimensionality, as
+Vecchia's runtime increases linearly with expanded dimensionality,
 consistent with claims made by \citet{katzfuss2021general}. For a fixed number
 of principal components, SEPIA's execution time increases only slightly as
-dimension expands, showcasing it's utility. However, for response dimension
+dimension expands, showcasing its utility. However, for response dimension
 less than 75K, Scaled Vecchia with $m=25$ still executes faster. And that may
 be the largest value of $m$ we need. The boxplots on the right-hand side of
 each panel in Figure \ref{f:ibex_surr_metrics} show that increasing $m$ or
@@ -862,12 +863,12 @@ The response from the GDF model does not vary with any parameters of interest
 and is merely added to the output of the ribbon simulator.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
-due to variations in the solar wind that accompany the sun's 11 or 22-year
-cycle. Physicists build these changes into their simulators either through
-additional parameters, restricting the application of their models to a
-specific timeframe, or simply averaging over the sun cycle. The GDF model we
-utilize was developed to correspond to the years 2009-2011, while the ribbon
-model averages the composition of the heliosphere over the entire sun cycle. We
+due to variations in the solar wind that accompany the approximately 11 year
+solar cycle. Physicists build these changes into their simulators either through
+additional parameters, restricting the application of their models to a specific
+timeframe, or simply averaging over the solar cycle. The GDF model we utilize
+was developed to correspond to the years 2009-2011, while the ribbon model
+averages the composition of the heliosphere over the entire solar cycle. We
 factor in these heliospheric variations by only comparing satellite data from
 the years 2009-2011 to simulator runs.
 
@@ -891,7 +892,7 @@ field) data from a Poisson, $Y_i^F \sim
 computer model $m(\cdot,\cdot)$. The top left panel of Figure
 \ref{f:ibex_synth_ex} shows the result, which we will regard as data we
 ``observed.'' Note that observations are not on a fine grid, but instead match
-the recorded coordinates for ENAs captured by the IBEX satellite in it's orbit.
+the recorded coordinates for ENAs captured by the IBEX satellite in its orbit.
 This accounts for the unique spread of points and the strings of missing data,
 which correspond to certain orbits.
 
@@ -1009,7 +1010,7 @@ same posterior distribution, but differ in their axis limits. Posterior mass is
 concentrated in the extreme corner of the model parameter space. Our priors
 attempt to push sampling away from the boundaries, but the likelihood dominates
 the posterior. We take this as an indication that the computer model is lacking
-in it's attempt to represent reality, and the Metropolis sampler seeks to go
+in its attempt to represent reality, and the Metropolis sampler seeks to go
 beyond the range of model parameters present in the training data.
 
 The boundary-pushing estimate for $u$ and the gap, which is plainly visual
