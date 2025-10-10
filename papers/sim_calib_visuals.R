@@ -1,7 +1,6 @@
 source("../helper.R")
 source('../vecchia_scaled.R')
 
-library(ggplot2)
 library(MASS)
 library(coda)
 library(ks)
@@ -69,7 +68,8 @@ model_zmat[model_zmat < predrange[1]] <- predrange[1]
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_mod.pdf", width=7, height=5)
 image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
-  xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
+  xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims,
+  xlim=xlims, useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
@@ -99,7 +99,7 @@ par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_est.pdf", width=7, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
   xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
-  cex.lab=1.1)
+  cex.lab=1.1, useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
@@ -128,7 +128,8 @@ cls <- contourLines(fhat$eval.points[[1]],
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_post_est.pdf", width=7, height=5)
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
-  col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
+  col=rev(heat.colors(128)), useRaster=TRUE,
+  xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
   ylab=expression("Ratio ("~u[2]~")"), xlim=c(500, 3000), ylim=c(0, 0.1),
   cex.lab=1.1)
 abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)

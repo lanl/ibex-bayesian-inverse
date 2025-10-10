@@ -77,7 +77,7 @@ zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=plot_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_nbr_latlon.pdf", width=7, height=5)
 image(x=lons, y=lats, z=zmat, col=cols, xlab="Longitude", xaxt="n",
-  ylab="Latitude", breaks=bks, xlim=rev(range(lons)))
+  ylab="Latitude", breaks=bks, xlim=rev(range(lons)), useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 usr <- par("usr")  # plotting region: c(xmin, xmax, ymin, ymax)
@@ -93,9 +93,14 @@ dev.off()
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_nbr_params.pdf", width=7, height=5)
 plot(x=jitter(ref_neighbors[1:25,c("parallel_mean_free_path")]),
-  y=jitter(ref_neighbors[1:25,c("ratio")]), xlim=range(all_inputs$parallel_mean_free_path),
+  y=jitter(ref_neighbors[1:25,c("ratio")]), type="n",
+  xlim=range(all_inputs$parallel_mean_free_path),
   ylim=range(all_inputs$ratio), pch=21, col=1, bg=3,
   xlab="parallel mean free path", ylab="ratio")
+abline(v=seq(500, 3000, by=500), col=1, lty=2)
+abline(h=c(0.001, 0.005, 0.01, 0.02, 0.05, 0.1), col=1, lty=2)
+points(x=jitter(ref_neighbors[1:25,c("parallel_mean_free_path")]),
+  y=jitter(ref_neighbors[1:25,c("ratio")]), pch=21, col=1, bg=3)
 points(x=jitter(ref_neighbors[26:50,c("parallel_mean_free_path")]),
   y=jitter(ref_neighbors[26:50,c("ratio")]), pch=22, col=1, bg=4)
 points(x=jitter(ref_neighbors[51:75,c("parallel_mean_free_path")]),
@@ -156,7 +161,7 @@ for (i in 1:nrow(grid)) {
     zmat[zmat > predrange[2]] <- predrange[2]
     zmat[zmat < predrange[1]] <- predrange[1]
     image(x=lons, y=lats, z=zmat, col=cols, xlab="", xaxt="n", yaxt="n",
-      ylab="", breaks=bks, ylim=ylims, xlim=xlims)
+      ylab="", breaks=bks, ylim=ylims, xlim=xlims, useRaster=TRUE)
   } else {
     pred_params <- grid[i,]
     pred_params[1] <- (pred_params[1] - 500)/2500
@@ -179,7 +184,7 @@ for (i in 1:nrow(grid)) {
     zmat[zmat > predrange[2]] <- predrange[2]
     zmat[zmat < predrange[1]] <- predrange[1]
     image(x=lons, y=lats, z=zmat, col=cols, xaxt="n", yaxt="n", xlab="",
-      ylab="", breaks=bks, ylim=ylims, xlim=xlims, bty="n")
+      ylab="", breaks=bks, ylim=ylims, xlim=xlims, bty="n", useRaster=TRUE)
     box(lwd=4, lty=2)
   }
   if ((i-1) %% length(pmfps)==0) {

@@ -50,8 +50,9 @@ ibex_sim1_zmat[ibex_sim1_zmat < ena_range[1]] <- ena_range[1]
 ibex_sim1_zmat[ibex_sim1_zmat > ena_range[2]] <- ena_range[2]
 pdf("sim1.pdf", width=5, height=3.25)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
-image(x=ibex_sim1_lons, y=ibex_sim1_lats, z=ibex_sim1_zmat, col=cols, xlab="Longitude",
-  xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
+image(x=ibex_sim1_lons, y=ibex_sim1_lats, z=ibex_sim1_zmat, col=cols,
+  xlab="Longitude", xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1,
+  ylim=ylims, xlim=xlims, useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
@@ -63,8 +64,9 @@ ibex_sim2_zmat[ibex_sim2_zmat < ena_range[1]] <- ena_range[1]
 ibex_sim2_zmat[ibex_sim2_zmat > ena_range[2]] <- ena_range[2]
 pdf("sim2.pdf", width=5, height=3.25)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
-image(x=ibex_sim2_lons, y=ibex_sim2_lats, z=ibex_sim2_zmat, col=cols, xlab="Longitude",
-  xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
+image(x=ibex_sim2_lons, y=ibex_sim2_lats, z=ibex_sim2_zmat, col=cols,
+  xlab="Longitude", xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1,
+  ylim=ylims, xlim=xlims, useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 fields::image.plot(zlim=ena_range, col=cols, legend.lab="ENAs/sec", legend.line=3,

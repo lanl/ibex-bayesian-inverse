@@ -245,7 +245,8 @@ pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_pred_real.pdf", width=6.0, height=5)
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, xlab="Longitude",
-  xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims, xlim=xlims)
+  xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims,
+  xlim=xlims, useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
@@ -300,7 +301,8 @@ cls <- contourLines(fhat$eval.points[[1]],
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_real_post_est_zoom.pdf", width=5, height=5)
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
-  col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
+  col=rev(heat.colors(128)), useRaster=TRUE,
+  xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
   ylab=expression("Ratio ("~u[2]~")"), xlim=c(2700, 3000), ylim=c(0, 0.004))
 lines(cls$x, cls$y, lty=2)
 dev.off()
@@ -316,7 +318,7 @@ post_mean <- apply(real_dat_res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 post_mean[1] <- post_mean[1]*2500+500
 post_mean[2] <- post_mean[2]*(0.1-0.001)+0.001
 
-cv_res <- readRDS("final_results/real_data_cv_metrics_20250930190109.rds")
+cv_res <- readRDS("final_results/real_data_cv_metrics_20250930111359.rds")
 
 crps_range <- range(c(apply(cv_res$crps_pmfp, 1, mean),
   apply(cv_res$crps_ratio, 1, mean)))
@@ -342,7 +344,7 @@ pdf("crps_grid.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 unique_pmfps <- sort(unique(cv_res$grid[,1]))
 unique_ratios <- sort(unique(cv_res$grid[,2]))
-image(x=unique_pmfps, y=unique_ratios,
+image(x=unique_pmfps, y=unique_ratios, useRaster=TRUE,
   z=matrix(apply(cv_res$crps_grid, 1, mean), ncol=length(unique_pmfps)),
   col=heat.colors(128), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
   ylab=expression("Ratio ("~u[2]~")"))

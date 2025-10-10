@@ -137,16 +137,16 @@ model at a specified set of model parameters can take hundreds or thousands of
 core hours. This severely limits the number of unique runs available generating
 simulated sky maps in various settings.
 
-Our work here focuses on two, publicly accessible computer models: a GDF model
-proposed by
+Our work here focuses on two computer models provided to us by heliospheric
+physicists involved in IBEX's mission: a GDF model proposed by
 \citet{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density}; and a
-ribbon-only model developed by \citet{huang2025numerical}. These simulators
-take inputs that can be varied to modify the shape and intensity of the ribbon.
-The ribbon-only model relies on two parameters, \textit{parallel mean free
-path} and \textit{ratio}, while the GDF model we use remains constant and is
-simply added on to the output of the ribbon model. Dialing in good settings for
-these input parameters, in light of observed ENA counts from IBEX, is
-instrumental in furthering theory development and validation.
+ribbon-only model developed by \citet{huang2025numerical}. These simulators take
+inputs that can be varied to modify the shape and intensity of the ribbon. The
+ribbon-only model relies on two parameters, \textit{parallel mean free path} and
+\textit{ratio}, while the GDF model we use remains constant and is simply added
+on to the output of the ribbon model. Dialing in good settings for these input
+parameters, in light of observed ENA counts from IBEX, is instrumental in
+furthering theory development and validation.
 
 Space scientists at Los Alamos National Laboratory (LANL) want to know which
 parameter settings best agree with IBEX observations. One way to do this is to
@@ -337,7 +337,7 @@ aim to provide a method that achieves the same goal, but for unknown parameters
 $u$ that underlie observed IBEX satellite data (left panel of Figure
 \ref{f:fig1}), whose observations are counts under variable exposure. Our first
 contribution, which is albeit rather straightforward, is to depart from that
-literature by perusing a Poisson likelihood.
+literature by using a Poisson likelihood.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Generalized Bayesian inverse problems
@@ -660,10 +660,11 @@ $u$-space.
 \includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_latlon.pdf}
 \includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_params.pdf}
 \caption{Conditioning sets $h(i)$ in a multivariate normal likelihood
-(Eq.~\ref{eq:vecchia}) for a single observation $Y_i^M$ using the Scaled
-Vecchia approximation. The left panel visualizes neighborhoods in grid space
-(i.e. $X$ or $X^F$). Model parameter ($u$) space is displayed in the right
-panel with jitter added.
+(Eq.~\ref{eq:vecchia}) for a single observation $Y_i^M$ using the Scaled Vecchia
+approximation. The left panel visualizes neighborhoods in grid space (i.e. $X$
+or $X^F$). Model parameter ($u$) space is displayed in the right panel with
+jitter added. Intersections of black, dashed lines indicate unique $u$
+combinations run on the simulator.
 \label{f:ibex_vecchia}}
 \end{figure}
 
