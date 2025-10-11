@@ -88,8 +88,8 @@ lls[1] <- -0.5*nrow(XX)*tau2hat - 0.5*determinant(Sigma)$modulus - drop(0.5*t(yf
 
 accept <- 1
 lmhs <- rep(NA, nmcmcs)
-mod_lhatps <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
-mod_lhatps[,1] <- predGPsep(gpi,
+mod_lhatps <- mod_lhats_accept <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
+mod_lhatps[,1] <- mod_lhats_accept[,1] <- predGPsep(gpi,
   XX=cbind(matrix(xm, ncol=1), matrix(rep(uprops[1,], length(xm)), ncol=2, byrow=TRUE)),
   lite=TRUE, nonug=TRUE)$mean
 for (t in 2:nmcmcs) {
@@ -98,7 +98,7 @@ for (t in 2:nmcmcs) {
   ## SAMPLE CALIBRATION PARAMETERS U
   ### Propose u_prime and calculate proposal ratio
   up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=rep(0, 2), pmax=rep(1, 2),
-    pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
+    pcovar=matrix(c(0.05, 0, 0, 0.05), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
   ## Evaluate surrogate at u_prime
   lhatp <- predGPsep(gpi, XX=cbind(XX, matrix(rep(uprops[t,], nrow(XX)), ncol=2, byrow=TRUE)),
@@ -125,18 +125,23 @@ for (t in 2:nmcmcs) {
     u[t,] <- up$prop
     lls[t] <- llp
     lhat_curr <- lhatp
+    mod_lhats_accept[,t] <- mod_lhatps[,t]
     accept <- accept + 1
   } else {
     u[t,] <- u[t-1,]
     lls[t] <- lls[t-1]
+    mod_lhats_accept[,t] <- mod_lhats_accept[,t-1]
   }
+
   if (t %% 100 == 0) {
     print(paste("Finished iteration", t))
   }
 }
 deleteGPsep(gpi)
 
-ylims <- range(c(mod_lhatps, yf, lam_m))
+ylims <- range(c(mod_lhats_accept[,seq(15001, 20000, by=10)], yf, lam_m))
+ylims[1] <- ylims[1]-0.5
+ylims[2] <- ylims[2]+0.5
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1,
@@ -151,8 +156,9 @@ dev.off()
 ## Visualize model evaluations:
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_est.pdf", width=5, height=5)
-matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
-  col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
+matplot(x=xm, y=mod_lhats_accept[,seq(15001, 20000, by=10)], type="l", lty=1,
+  col=adjustcolor("lightgrey", alpha.f=0.3), xlab="X", yaxt="n", ylim=ylims,
+  mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
 u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
@@ -264,10 +270,10 @@ lls[1] <- sum(yf*log(lhat_curr) - lhat_curr)
 
 accept <- 1
 lmhs <- rep(NA, nmcmcs)
-mod_lhatps <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
-mod_lhatps[,1] <- exp(predGPsep(gpi,
+mod_lhatps <- mod_lhats_accept <- matrix(NA, nrow=length(xm), ncol=nmcmcs)
+mod_lhatps[,1] <- mod_lhats_accept[,1] <- predGPsep(gpi,
   XX=cbind(matrix(xm, ncol=1), matrix(rep(uprops[1,], length(xm)), ncol=2, byrow=TRUE)),
-  lite=TRUE, nonug=TRUE)$mean)
+  lite=TRUE, nonug=TRUE)$mean
 for (t in 2:nmcmcs) {
 
   ###########################################################################
@@ -300,10 +306,12 @@ for (t in 2:nmcmcs) {
     u[t,] <- up$prop
     lls[t] <- llp
     lhat_curr <- lhatp
+    mod_lhats_accept[,t] <- mod_lhatps[,t]
     accept <- accept + 1
   } else {
     u[t,] <- u[t-1,]
     lls[t] <- lls[t-1]
+    mod_lhats_accept[,t] <- mod_lhats_accept[,t-1]
   }
   if (t %% 100 == 0) {
     print(paste("Finished iteration", t))
@@ -311,7 +319,9 @@ for (t in 2:nmcmcs) {
 }
 deleteGPsep(gpi)
 
-ylims <- range(c(mod_lhatps, yf, lam_m))
+ylims <- range(c(mod_lhats_accept[,seq(15001, 20000, by=10)], yf, lam_m))
+ylims[1] <- ylims[1]-0.5
+ylims[2] <- ylims[2]+0.5
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_pois_obs.pdf", width=5, height=5)
 matplot(x=xm, y=ym, type="l", col="lightgrey", lty=1, lwd=1.5, xlab="X",
@@ -334,7 +344,7 @@ dev.off()
 ## Visualize model evaluations:
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_pois_est.pdf", width=5, height=5)
-matplot(x=xm, y=mod_lhatps[,seq(15001, 20000, by=10)], type="l", lty=1,
+matplot(x=xm, y=mod_lhats_accept[,seq(15001, 20000, by=10)], type="l", lty=1,
   col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
 points(x=seq(0, 1, length=nf), y=est_means, col=1, bg=2, pch=21)

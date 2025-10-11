@@ -245,17 +245,17 @@ Our paper is laid out as follows. First, Section \ref{sec:review} reviews
 methods that form the foundation for our work, namely Bayesian inverse problems
 and Gaussian process surrogate models, and introduces our framework for solving
 the inverse problem in the context of non-Gaussian field observations. We also
-give a brief description of the methodology and implementation behind SEPIA,
-which could be classified as the current ``status quo'' in Bayesian inverse
-problems for high-dimensional computer model output. Section \ref{sec:vecchia}
-describes our use of the Vecchia approximation to stretch the capacity of a GP
-surrogate beyond small simulator training runs. In Section \ref{sec:ibex_data}
-we return to our motivating application, illustrating the effectiveness of our
-framework in discovering the true, underlying model parameters on synthetic
-data and apply our methods to the raw IBEX satellite data. To conclude, we
-discuss any extensions and future work in Section \ref{sec:discuss}. Our
-implementation may be found at \url{https://github.com/lanl/IBEX_Calibration}
-along with code reproducing all included examples.
+give a brief description of the methodology and implementation behind SEPIA, the
+current ``status quo'' in Bayesian inverse problems for high-dimensional
+computer model output. Section \ref{sec:vecchia} describes our use of the
+Vecchia approximation to stretch the capacity of a GP surrogate beyond small
+simulator training runs. In Section \ref{sec:ibex_data} we return to our
+motivating application, illustrating the effectiveness of our framework in
+discovering the true, underlying model parameters on synthetic data and apply
+our methods to the raw IBEX satellite data. To conclude, we discuss any
+extensions and future work in Section \ref{sec:discuss}. Our implementation may
+be found at \url{https://github.com/lanl/IBEX_Calibration} along with code
+reproducing all included examples.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -272,12 +272,12 @@ where the simulation output is evaluated.  These may be the locations $X^F$
 that correspond to field measurements $Y^F$, or a grid of predictive locations
 supporting high resolution visuals.  Given prior information about $u$, we
 want to know which $u$'s lead to realizations of $m(\cdot, \cdot)$ that could
-explain $Y^F$, i.e., the posterior for $u \mid Y^F$. 
+explain $Y^F$, i.e., the posterior for $u \mid Y^F$.
 
 This is a classic Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Eq.~\ref{eq:inv_bayes_mod} 
 provides the typical hierarchical model used in this
-setting.
+setting, generally with Gaussian field data $Y^F$.
 \begin{align}
 Y^F &\sim \mathcal{N}_{n_F}\!\left(\mu\!\left(X^F\right),
 \Sigma\!\left(X^F\right)\right) \nonumber  \\
