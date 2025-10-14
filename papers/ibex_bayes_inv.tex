@@ -348,8 +348,9 @@ literature by using a Poisson likelihood.
 Our IBEX observations $Y^F$ are counts under exposure $e(X^F)$, which is at odds
 with the canonical Gaussian likelihood in the Bayesian inverse problem setup
 introduced earlier. We wish to model a count $y \sim \mathrm{Pois}(\lambda, e)$
-where $f(y|\lambda, e) = \frac{(\lambda e)^y \mathrm{exp}\{-\lambda e\}}{y!}$.
-We thereby extend Eq.~(\ref{eq:inv_bayes_mod}) as follows:
+where $f(y|\lambda, e) = \frac{(\lambda e)^y \mathrm{exp}\{-\lambda e\}}{y!}$
+and $E(y) = \lambda e$. We thereby extend Eq.~(\ref{eq:inv_bayes_mod}) as
+follows:
 \begin{align}
 Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
 \label{eq:pois_inv_bayes_mod} \\ u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p,
@@ -420,18 +421,19 @@ that is rarely the case, presenting another challenge to the typical Bayesian
 inverse problem apparatus. For instance, each run of the IBEX model $m(\cdot,
 \cdot)$ is a Herculean effort, requiring hundreds or thousands of core hours on
 a supercomputer.  That simply cannot be embedded in a Metropolis sampler
-requiring thousands of iterations to converge.  While it's rather
-conventional to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates}
-in this setting, trained on a design of space-filling $u$-values, doing so
-effectively is challenged by the dimension of $X^F$.  We considered multiple
-surrogate models developed to accomodate such scenarios (e.g. GPs via inducing
-points \citep{banerjee2008gaussian}, local approximate GPs
-\citep{gramacy2014lagp}), but found them unable to manage the scale of the IBEX
-data. Herein lies our main methodological contribution, using a modern sparse
-approach to surrogate modeling in a (Poisson) Bayesian inverse problem setting.
-The remainder of this section outlines the standard surrogate modeling toolkit,
-as a jumping-off point toward explaining both our main comparative (Section
-\ref{sec:gp_approx}) and our main methodological contribution.
+requiring thousands of iterations to converge.  While it's rather conventional
+to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates} in this
+setting, trained on a design of space-filling $u$-values, doing so effectively
+is challenged by the number of rows (i.e. unique measurement locations) in
+$X^F$.  We considered multiple surrogate models developed to accomodate such
+scenarios (e.g. GPs via inducing points \citep{banerjee2008gaussian}, local
+approximate GPs \citep{gramacy2014lagp}), but found them unable to manage the
+scale of the IBEX data. Herein lies our main methodological contribution, using
+a modern sparse approach to surrogate modeling in a (Poisson) Bayesian inverse
+problem setting. The remainder of this section outlines the standard surrogate
+modeling toolkit, as a jumping-off point toward explaining both our main
+comparative (Section \ref{sec:gp_approx}) and our main methodological
+contribution.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.2 - Gaussian Process Surrogates for Computer Experiments:
@@ -597,15 +599,15 @@ where } h(i) \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| \l
 \end{align}
 
 \citeauthor{vecchia1988estimation}'s critical observation was that one could
-approximate this function by reducing the size of the conditioning set $g(i)$
-to a much smaller size $m$, as specified by the user. This induces sparsity in
-the precision matrix (e.g. $\Sigma(X^M)^{-1})$ from Eq.~\ref{eq:mvn_eq},
-potentially dramatically speeding up the evaluation of the likelihood for large
-values of $n_M$. \citet{katzfuss2021general} recently made this approximation
-popular by working out its representation in matrix form and furnishing
-automatic $h(i)$ via nearest neighbor and code, allowing for broad use in a
-variety of different fields where GPs are employed, particularly spatial
-statistics and computer experiments
+approximate this function by reducing the size of the conditioning set $g(i)$ to
+a much smaller size $m$, as specified by the user. This induces sparsity in the
+precision matrix (e.g. $\Sigma(X^M)^{-1})$ from Eq.~\ref{eq:mvn_eq}, potentially
+dramatically speeding up the evaluation of the likelihood for large values of
+$n_M$. \citet{katzfuss2021general} recently made this approximation popular by
+working out its representation in matrix form and furnishing automatic $h(i)$
+creation via nearest neighbors and publicly available code, allowing for broad
+use in a variety of different fields where GPs are employed, particularly
+spatial statistics and computer experiments
 \citep{guinness2018permutation,katzfuss2020vecchia,katzfuss2021general,zhang2022multi,sauer2023vecchia}.
 
 The Vecchia approximation takes an operation of order $O(n_M^3)$ down to $O(n_M
@@ -715,11 +717,14 @@ experiment, we fit a Scaled Vecchia GP surrogate on 65 of the $n=66$ model runs
 available. Then, we predict at the held out model parameter. For now, just pay
 attention to the boxplots on the left-hand side of each panel. We'll come back
 to the others in a moment. It is obvious that the Scaled Vecchia approximation
-outperforms {\sf laGP} and {\sf deepgp} in both RMSE and CRPS. SEPIA performed
-similarly to our Scaled Vecchia approximation, illustrating why it has had such
-staying power over the past two decades. As a practitioner, it appears to be a
-toss-up between these two methods for which to use. But that's not the entire
-story.
+outperforms {\sf laGP} and {\sf deepgp} in both RMSE and CRPS. The local focus
+of {\sf laGP} limits its ability to capture global trends, potentially hurting
+its performance. Large data and corresponding expensive matrix operations
+restrict the number of iterations {\sf deepgp} can run and thus prevents the
+MCMC from converging to the target posterior. SEPIA performed similarly to our
+Scaled Vecchia approximation, illustrating why it has had such staying power
+over the past two decades. As a practitioner, it appears to be a toss-up between
+these two methods for which to use. But that's not the entire story.
 
 \begin{figure}[ht!]
 \centering
@@ -747,7 +752,10 @@ average elapsed time.
 \includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_fit_times.pdf}
 \includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_pred_times.pdf}
 \includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_total_times.pdf}
-\caption{Timing metrics on the IBEX simulator experiment.
+\caption{Timing metrics on the IBEX simulator experiment. A comparison of the
+fastest methods is shown in the right panel, with different line types
+indicating neighborhood size ($m$) and number of principal components ($n_k$)
+used for Scaled Vecchia and SEPIA, respectively.
 \label{f:ibex_surr_timing_dim}}
 \end{figure}
 
@@ -914,19 +922,19 @@ parameter $u$ as a kernel density (bottom right).
 \end{figure}
 
 We run Algorithm \ref{alg:gibbs}, treating this synthetic data as $(X^F, Y^F)$
-and using the provided computer model output (omitting responses for $u^\star$) as
-$(X^M, \lambda^M)$. We execute 10,000 MCMC iterations, throwing away 1,000 as
+and using the provided computer model output (omitting responses for $u^\star$)
+as $(X^M, \lambda^M)$. We execute 10,000 MCMC iterations, throwing away 1,000 as
 burnin and thinning by 10. Figure \ref{f:ibex_synth_ex} displays the remaining
 posterior samples of $u$ (bottom right) as a kernel density and a 95\% highest
 posterior density (HPD) interval. The posterior mean of $u \mid Y^F$ lies near
-$u^\star$, demonstrating that our framework is able to concentrate mass around the
-true model parameter. As a sanity check, we take the estimated posterior mean
-and plug it in to our fitted Scaled Vecchia GP surrogate of the IBEX simulator.
-The predicted output is shown in the bottom left panel of Figure
-\ref{f:ibex_synth_ex}. There are some subtle differences between the estimated
-sky map and the true $\lambda^\star$ (i.e, the shape and intensity of the ribbon
-vary slightly between the two). However, each map could have reasonably
-generated the data we ``observe'' in the top left panel.
+$u^\star$, demonstrating that our framework is able to concentrate mass around
+the true model parameter. As a sanity check, we take the estimated posterior
+mean and plug it in to our fitted Scaled Vecchia GP surrogate of the IBEX
+simulator. The predicted output is shown in the bottom left panel of Figure
+\ref{f:ibex_synth_ex}. There are some nearly imperceptible differences between
+the estimated sky map and the true $\lambda^\star$ (i.e, the shape and intensity
+of the ribbon vary slightly between the two). However, each map could have
+reasonably generated the data we ``observe'' in the top left panel.
 
 \begin{figure}[ht!]
 \centering

@@ -76,6 +76,7 @@ lats <- sort(unique(plot_data$lat))
 zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=plot_data)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_nbr_latlon.pdf", width=7, height=5)
+## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(x=lons, y=lats, z=zmat, col=cols, xlab="Longitude", xaxt="n",
   ylab="Latitude", breaks=bks, xlim=rev(range(lons)), useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
@@ -183,6 +184,7 @@ for (i in 1:nrow(grid)) {
     zmat <- xtabs(preds ~ nlon + lat, data=XX_ll)
     zmat[zmat > predrange[2]] <- predrange[2]
     zmat[zmat < predrange[1]] <- predrange[1]
+    ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
     image(x=lons, y=lats, z=zmat, col=cols, xaxt="n", yaxt="n", xlab="",
       ylab="", breaks=bks, ylim=ylims, xlim=xlims, bty="n", useRaster=TRUE)
     box(lwd=4, lty=2)

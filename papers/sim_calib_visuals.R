@@ -1,6 +1,7 @@
 source("../helper.R")
 source('../vecchia_scaled.R')
 
+library(ggplot2)
 library(MASS)
 library(coda)
 library(ks)
@@ -67,6 +68,7 @@ model_zmat[model_zmat > predrange[2]] <- predrange[2]
 model_zmat[model_zmat < predrange[1]] <- predrange[1]
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_mod.pdf", width=7, height=5)
+## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
   xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims,
   xlim=xlims, useRaster=TRUE)
@@ -97,6 +99,7 @@ pred_zmat[pred_zmat > predrange[2]] <- predrange[2]
 pred_zmat[pred_zmat < predrange[1]] <- predrange[1]
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_est.pdf", width=7, height=5)
+## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
   xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
   cex.lab=1.1, useRaster=TRUE)
@@ -127,6 +130,7 @@ cls <- contourLines(fhat$eval.points[[1]],
 # Plot contour at HPD threshold
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_post_est.pdf", width=7, height=5)
+## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), useRaster=TRUE,
   xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
