@@ -823,14 +823,14 @@ competitor when $m<50$, and for all values of $m$ when $n>1500$.
 \label{sec:ibex_data}
 %------------------------------------------------------------------------------
 
-We now return to the IBEX inverse problem. We wish to determine the settings
-$u$ of a computer model that produce a sky map most likely to have generated
-observed counts. Before diving in, we dispense a few important details about
-IBEX observations and computer simulations.  We then test our modeling
-apparatus on synthetic field observations (computer model at known $u^\star$
-and with Poisson counts) to ensure good performance within the model class, and
-where we know the true calibration parameter.  Finally, we report on our
-calibration of the actual IBEX satellite observations.
+We now return to the IBEX inverse problem. We wish to determine the settings $u$
+of a computer model that produce a sky map most likely to have generated
+observed counts and, more specifically, quantify the uncertainty on our estimates of $u$. Before diving in, we dispense a few important details about
+IBEX observations and computer simulations.  We then test our modeling apparatus
+on synthetic field observations (computer model at known $u^\star$ and with
+Poisson counts) to ensure good performance within the model class, and where we
+know the true calibration parameter.  Finally, we report on our calibration of
+the actual IBEX satellite observations.
 
 %------------------------------------------------------------------------------
 %% SECTION 4.1 - IBEX details
@@ -838,38 +838,36 @@ calibration of the actual IBEX satellite observations.
 \label{sec:ibex_details}
 %------------------------------------------------------------------------------
 
-Each row of the satellite dataset contains the ENA origin location in Cartesian
-coordinates ($x$, $y$, $z$), time the satellite pointed at that location (in
-seconds), counts of ENAs observed at one of six different energy levels (ESA),
-and a background rate $\lambda_b$ (ENAs/sec). Note that we only use ENAs
-collected at energy level ESA 4. This provides the best context for our work,
-whereas lower ESA values give a much weaker signal and ENAs with higher energy
-levels overwhelm the analysis. More important to consider is that ENAs are
-known to come from sources other than the heliosphere. Space scientists
-quantify this noise for each location ($X^F$) viewed by the satellite and add
-it as a background rate ($\lambda_b$) that must be accounted for in the data.
-For example, the left panel of Figure \ref{f:fig1} displays ENA rates {\em
+Each row of the satellite dataset contains Cartesian coordinates ($x$, $y$, $z$)
+for the direction the satellite was pointing, time the satellite was aimed at
+that location (in seconds), counts of ENAs observed at one of six different
+energy levels (ESA), and a background rate $\lambda_b$ (ENAs/sec). Note that we
+only use ENAs collected at energy level ESA 4. More important to consider is
+that ENAs are known to come from sources other than the heliosphere. Space
+scientists quantify this noise for each location ($X^F$) viewed by the satellite
+and add it as a background rate ($\lambda_b$) that must be accounted for in the
+data. For example, the left panel of Figure \ref{f:fig1} displays ENA rates {\em
 after} $\lambda_b$ has been subtracted out. Although this rate is an estimate
 rather than an exact value, we follow the lead of other researchers
 \citep{osthustheseus2023} and treat it as constant in our work. For the purpose
 of solving the inverse problem, we address this through an update to the mean
 expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such
-that $\lambda(X^F) = m(u, X^F) -
-\lambda_{b}(X^F)$.
+that $\lambda(X^F) = m(u, X^F) - \lambda_{b}(X^F)$.
 
 We have referred to the IBEX simulator throughout this paper without going into
-much detail. While we leave a more in-depth physical interpretation and
-analysis of parameters to more appropriate venues
+much detail. While we leave a more in-depth physical interpretation and analysis
+of parameters to more appropriate venues
 \citep{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density,huang2025numerical},
-some basic context is provided here. We focus on two particular models
-available (among many): one for the GDF and one for the ribbon. In the ribbon
-model, the parameter \textit{parallel mean free path} is the distance a
-hydrogen ion travels beyond the heliopause before interacting with another
-particle, receiving an electron, and becoming an ENA. The \textit{ratio}
-parameter is the fraction of \textit{parallel mean free path} and another
-measure of distance, perpendicular mean free path. These are our $u$ values.
-The response from the GDF model does not vary with any parameters of interest
-and is merely added to the output of the ribbon simulator.
+some basic context is provided here. We focus on two particular models available
+(among many): one for the GDF and one for the ribbon. In the ribbon model, the
+parameter \textit{parallel mean free path} is the distance a hydrogen ion
+travels beyond the heliopause before interacting with another particle,
+receiving an electron, and becoming an ENA. The \textit{ratio} parameter is the
+fraction of \textit{parallel mean free path} and another measure of distance,
+perpendicular mean free path. These are our $u$ values. The response from the
+GDF model is static and is merely added to the output of the ribbon simulator.
+This is not the case for GDF simulators in general, but the GDF model we have
+access to does not vary with any parameters of interest.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
 due to variations in the solar wind that accompany the approximately 11 year
@@ -907,10 +905,10 @@ which correspond to certain orbits.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.51,trim=0 15 15 45,clip=TRUE]{ibex_sim_field.pdf}
-\includegraphics[scale=0.51,trim=0 15 15 45,clip=TRUE]{ibex_sim_mod.pdf}
-\includegraphics[scale=0.51,trim=0 15 15 45,clip=TRUE]{ibex_sim_est.pdf}
-\includegraphics[scale=0.51,trim=0 15 15 45,clip=TRUE]{ibex_post_est.pdf}
+\includegraphics[scale=0.55,trim=5 15 95 45,clip=TRUE]{ibex_sim_field.pdf}
+\includegraphics[scale=0.55,trim=5 15 15 45,clip=TRUE]{ibex_sim_mod.pdf}
+\includegraphics[scale=0.55,trim=5 15 95 45,clip=TRUE]{ibex_sim_est.pdf}
+\includegraphics[scale=0.55,trim=5 15 15 45,clip=TRUE]{ibex_post_est.pdf}
 \caption{Rough estimate of ENA rate
 (counts/seconds) based on synthetic Poisson draws from a ``true'' computer
 model setting and varying exposure times (top left). IBEX simulator output of
@@ -933,8 +931,9 @@ mean and plug it in to our fitted Scaled Vecchia GP surrogate of the IBEX
 simulator. The predicted output is shown in the bottom left panel of Figure
 \ref{f:ibex_synth_ex}. There are some nearly imperceptible differences between
 the estimated sky map and the true $\lambda^\star$ (i.e, the shape and intensity
-of the ribbon vary slightly between the two). However, each map could have
-reasonably generated the data we ``observe'' in the top left panel.
+of the ribbon vary slightly between the two). However, from a purely visual
+standpoint, it appears that each map could have reasonably generated the data we
+``observe'' in the top left panel.
 
 \begin{figure}[ht!]
 \centering
@@ -994,10 +993,10 @@ Cartesian coordinates $x$, $y$, $z$ from years 2009-2011.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.41,trim=0 15 20 45,clip=TRUE]{ibex_field_09.pdf}
+\includegraphics[scale=0.41,trim=10 15 100 45,clip=TRUE]{ibex_field_09.pdf}
 \includegraphics[scale=0.41,trim=55 15 10 45,clip=TRUE]{ibex_field_10.pdf}
 \includegraphics[scale=0.41,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est.pdf}
-\includegraphics[scale=0.41,trim=0 15 20 45,clip=TRUE]{ibex_field_11.pdf}
+\includegraphics[scale=0.41,trim=10 15 100 45,clip=TRUE]{ibex_field_11.pdf}
 \includegraphics[scale=0.41,trim=55 15 10 45,clip=TRUE]{ibex_surr_pred_real.pdf}
 \includegraphics[scale=0.41,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est_zoom.pdf}
 \caption{Observed IBEX satellite data for years 2009-2011 (top left, top middle, bottom left). Predicted output via a fitted Scaled Vecchia surrogate at

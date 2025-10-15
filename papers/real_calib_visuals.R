@@ -211,39 +211,45 @@ field_data_09 <- field_data[field_data$map=="2009A",]
 field_data_10 <- field_data[field_data$map=="2010A",]
 field_data_11 <- field_data[field_data$map=="2011A",]
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_field_09.pdf", width=6.0, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 plot(x=field_data_09$nlon, y=field_data_09$lat, col=field_data_09$col, pch=16,
   cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=3,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.8, 0.84, 0.3, 0.75))
 dev.off()
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_field_10.pdf", width=6.0, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 plot(x=field_data_10$nlon, y=field_data_10$lat, col=field_data_10$col,
   pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=3,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.8, 0.84, 0.3, 0.75))
 dev.off()
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_field_11.pdf", width=6.0, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 plot(x=field_data_11$nlon, y=field_data_11$lat, col=field_data_11$col,
   pch=16, cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims,
   ylim=ylims, cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=3,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.8, 0.84, 0.3, 0.75))
 dev.off()
 
 pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_pred_real.pdf", width=6.0, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, xlab="Longitude",
   xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims,
@@ -273,8 +279,8 @@ cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
 # Plot contour at HPD threshold
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_real_post_est.pdf", width=5, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
   ylab=expression("Ratio ("~u[2]~")"), xlim=c(500, 3000), ylim=c(0, 0.1))
@@ -299,8 +305,8 @@ cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
 # Plot contour at HPD threshold (zoomed in)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_real_post_est_zoom.pdf", width=5, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), useRaster=TRUE,
@@ -465,3 +471,65 @@ par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
   xlab="multiplicative scale", main="")
 dev.off()
+
+###############################################################################
+###############################################################################
+## Plots ribbon-centered maps
+###############################################################################
+###############################################################################
+
+library(pracma)
+
+source("../helper.R")
+source("Coordinate_Transform_Functions.R")
+source("Ribbon_Center_Functions.R")
+
+## Read in field data
+model_data <- read.csv(file="../data/sims.csv")
+field_data <- read.csv(file="../data/ibex_real.csv")
+field_data <- field_data[field_data$map=="2009A",]
+
+## Rename field name columns
+colnames(field_data)[colnames(field_data)== "ecliptic_lat"] <- "lat"
+colnames(field_data)[colnames(field_data)== "ecliptic_lon"] <- "lon"
+field_data$est_rate <- field_data$counts/field_data$time - field_data$background
+field_data <- field_data[which(!is.nan(field_data$est_rate)),]
+
+field_data$nlon <- nose_center_lons(field_data$lon)
+model_data$nlon <- nose_center_lons(model_data$lon)
+
+rib_cent_coords <- Coord_Transform_Points(MAP=field_data, RIBBON_CENTER=c(221, 39))
+field_data$lon_new <- rib_cent_coords$lon_new
+field_data$lat_new <- rib_cent_coords$lat_new
+
+predrange <- c(0.04174779, 0.18489323)
+cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(128)
+bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
+ylims <- range(model_data$lat)
+xlims <- rev(range(model_data$nlon))
+
+## Determine colors for plots based on breaks
+field_rates <- cut(field_data$est_rate, breaks=bks, labels=FALSE)
+field_rates[which(field_data$est_rate <= predrange[1])] <- 1
+field_rates[which(field_data$est_rate >= predrange[2])] <- length(cols)
+field_cols <- cols[field_rates]
+field_data$col <- field_cols
+
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_field_non_ribb_cent.pdf", width=7, height=5)
+plot(x=field_data$nlon, y=field_data$lat, col=field_data$col, pch=16,
+  cex=0.7, xlab="Longitude", xaxt="n", ylab="Latitude", cex.lab=1.1,
+  ylim=ylims, xlim=xlims)
+axis(1, at=seq(325, 25, by=-60),
+  labels=c(60, 0, 300, 240, 180, 120))
+dev.off()
+
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+pdf("ibex_field_ribb_cent.pdf", width=7, height=5)
+plot(x=field_data$lon_new, y=field_data$lat_new, col=field_data$col, pch=16,
+  cex=0.7, xlab=expression("Longitude"*"\u002A"), xaxt="n",
+  ylab=expression("Latitude"*"\u002A"), cex.lab=1.1, ylim=ylims, xlim=xlims)
+axis(1, at=seq(325, 25, by=-60),
+  labels=c(60, 0, 300, 240, 180, 120))
+dev.off()
+

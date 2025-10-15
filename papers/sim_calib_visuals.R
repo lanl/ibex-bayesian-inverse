@@ -66,14 +66,16 @@ model_lats <- sort(unique(model_data$lat))
 model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
 model_zmat[model_zmat > predrange[2]] <- predrange[2]
 model_zmat[model_zmat < predrange[1]] <- predrange[1]
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_mod.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(x=model_lons, y=model_lats, z=model_zmat, col=cols, xlab="Longitude",
   xaxt="n", ylab="Latitude", breaks=bks, cex.lab=1.1, ylim=ylims,
   xlim=xlims, useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=3,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
 field_lons <- sort(unique(field_data$nlon))
@@ -83,13 +85,15 @@ field_rates <- cut(field_data$est_rate, breaks=bks,
 field_rates[which(field_data$est_rate <= predrange[1])] <- 1
 field_rates[which(field_data$est_rate >= predrange[2])] <- length(cols)
 field_cols <- cols[field_rates]
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_field.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 plot(x=field_data$nlon, y=field_data$lat, col=field_cols, pch=16, cex=0.7,
   xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
   cex.lab=1.1)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=3,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
 pred_lons <- sort(unique(pred_data$nlon))
@@ -97,14 +101,16 @@ pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 pred_zmat[pred_zmat > predrange[2]] <- predrange[2]
 pred_zmat[pred_zmat < predrange[1]] <- predrange[1]
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_sim_est.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(x=pred_lons, y=pred_lats, z=pred_zmat, col=cols, breaks=bks,
   xlab="Longitude", xaxt="n", ylab="Latitude", xlim=xlims, ylim=ylims,
   cex.lab=1.1, useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
+fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=3,
+  legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
 iter_pmfp <- res[[single_index]]$u[seq(10001, 20000, by=10),1]
@@ -128,8 +134,8 @@ cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
 # Plot contour at HPD threshold
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_post_est.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), useRaster=TRUE,
