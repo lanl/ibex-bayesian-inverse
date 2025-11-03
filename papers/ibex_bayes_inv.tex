@@ -470,7 +470,7 @@ proposed $u$-value and paired row in $X^F$) follows $Y(x) \mid Y(X^M) \sim
 Although a generic mean function is specified in Eq.~(\ref{eq:mvn_eq}), it is
 common to set $\mu(\cdot)=0$ assuming pre-centered responses. In this zero-mean
 context, all the action takes place in the covariance function $\Sigma(x, x')$,
-which is usually specified as inversely poportional to distances between inputs
+which is usually specified as inversely proportional to distances between inputs
 $x$ and $x'$. We use a form known as the separable Mat\'ern kernel
 \citep{stein1999interpolation} in our work, a conventional choice, parameterized
 by lengthscales $\theta$ and scale $\tau^2$. For details, see \citep[][Chapter
@@ -497,7 +497,7 @@ Eq.~(\ref{eq:mvn_eq}) requires storage and computation that is quadratic and
 cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in a
 Bayesian MCMC setting, necessitating approximations for GPs that curb this
 prohibitive cost. With the 1d example in Figure \ref{f:toy_calib_pois}, we have
-$n_M=20 \times 40$, combining $X$ and $U$, which is manageable. But for IBEX,
+$n_M=20 \times 30$, combining $X$ and $U$, which is manageable. But for IBEX,
 the simulated sky maps like those in the middle and right panels of Figure
 \ref{f:fig1} are in 2d (under the hood the output is in spherical coordinates
 $x$, $y$, and $z$) and results in $>16{,}000$ locations (or pixels) for each
@@ -559,8 +559,8 @@ in a reasonable amount of time.
 
 While clever, this is one of those easy-to-say hard-to-do situations. The
 implementation is complex both mathematically, and in code.  We are aware of
-only one library implemenation, originally written in {\sf MATLAB} and now
-deployed in {\sf Python} \citep{gattiker2020lanl},  We found it difficult to
+only one library implementation, originally written in {\sf MATLAB} and now
+deployed in {\sf Python} \citep{gattiker2020lanl}.  We found it difficult to
 appropriate that setup for our own use in a Poisson likelihood context.
 Addtionally, restricting the simulated and field data to work on the same
 reference grid was not possible with IBEX's orbital data locations (Figure
@@ -744,7 +744,7 @@ dimensionality of the response from 200 to 20,000, while keeping the number of
 runs constant. For the two methods that are best equipped for large dimensions
 (Scaled Vecchia and SEPIA), we attempt to stretch their capacity by cranking up
 the length of the response vector from 20-75K by steps of 5K. At each dimension
-size, we ran five Monte Carlo iterations for each method and recorded the
+size, we run five Monte Carlo iterations for each method and record the
 average elapsed time.
 
 \begin{figure}[ht!]
@@ -1186,7 +1186,7 @@ be pursued to improve the simulator's fidelity to the truth.
 \subsection*{Acknowledgments}
 
 RBG and SDB are grateful for funding from NSF CMMI 2152679. This work has been
-approved for public release under LA-UR-XX-XXXX. SDB, DO and LJB were funded
+approved for public release under LA-UR-25-30539. SDB, DO and LJB were funded
 by Laboratory Directed Research and Development (LDRD) Project 20220107DR.
 
 \bibliography{ibex_bayes_inv}
