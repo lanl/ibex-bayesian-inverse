@@ -98,7 +98,7 @@ plot(x=jitter(ref_neighbors[1:25,c("parallel_mean_free_path")]),
   xlim=range(all_inputs$parallel_mean_free_path),
   ylim=range(all_inputs$ratio), pch=21, col=1, bg=3,
   xlab="parallel mean free path", ylab="ratio")
-abline(v=seq(500, 3000, by=500), col=1, lty=2)
+abline(v=seq(500, 3000, by=250), col=1, lty=2)
 abline(h=c(0.001, 0.005, 0.01, 0.02, 0.05, 0.1), col=1, lty=2)
 points(x=jitter(ref_neighbors[1:25,c("parallel_mean_free_path")]),
   y=jitter(ref_neighbors[1:25,c("ratio")]), pch=21, col=1, bg=3)
@@ -114,7 +114,6 @@ legend("topleft", c("point of interest", paste0("m=", c(25,50,75,100))),
   pch=c(8, 21:24), col=c(2, rep(1, 4)), pt.bg=c(NA, 3:6),
   lwd=c(2, NA, NA, NA, NA), lty=rep(NA, 5), bg="white", cex=1.05)
 dev.off()
-
 
 ###############################################################################
 ###############################################################################
