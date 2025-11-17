@@ -9,28 +9,14 @@
 ## FIGURE 13: Bivariate visual of model parameter posterior given real counts
 ## from the satellite. Bivariate posterior is generated for each year, arranged
 ## in a 2x7 grid
-## DATA NEEDED: real_calib_results_20250916.rds 
+## DATA NEEDED: real_calib_results_all_years.rds
 ###############################################################################
 
 library(MASS)
 library(coda)
 library(ks)
 
-ind_files <- FALSE
-if (ind_files) {
-  calib_files <- list.files(
-    pattern="mcmc_res_esa4_nmcmc25000_end25_scNA_quantNA_svecchia_real20*")
-  res <- list()
-  for (i in 1:length(calib_files)) {
-    iter_res <- readRDS(calib_files[[i]])
-    res[[i]] <- list(
-      u=data.frame(pmfp=iter_res$mcmc_res$u[,1]*2500+500,
-        ratio=iter_res$mcmc_res$u[,2]*(0.1-0.001)+0.001),
-      year=as.integer(substr(iter_res$params, start=1, stop=4)))
-  }
-} else {
-  res <- readRDS("final_results/real_calib_results_20250916.rds")
-}
+res <- readRDS("final_results/real_calib_results_all_years.rds")
 
 years <- 2012:2021
 pmfp_labs <- seq(500, 2500, by=500)
@@ -105,7 +91,7 @@ dev.off()
 ## - One plot of predicted surrogate output at posterior mean of model
 ##   parameters given 2009-2011 data
 ## - Bivariate posterior of model parameters
-## DATA NEEDED: sims.csv, ibex_real.csv, sun_cycle_index_24.rds
+## DATA NEEDED: sims.csv, ibex_real.csv, real_calib_results_091011.rds
 ###############################################################################
 
 library(MASS)
@@ -132,7 +118,7 @@ pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
 model_data$nlon <- nose_center_lons(model_data$lon)
 
 ## Load results of run on real data
-res <- readRDS("final_results/sun_cycle_index_24.rds")
+res <- readRDS("final_results/real_calib_results_091011.rds")
 post_mean <- apply(res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 
 ## Fit surrogate on simulator output
@@ -282,15 +268,15 @@ dev.off()
 
 ###############################################################################
 ## FIGURE 12: Plots of CRPS for 10-fold cross validation on IBEX real data
-## DATA NEEDED: sun_cycle, real_data_cv_metrics
+## DATA NEEDED: real_calib_results_091011.rds, real_data_cv_metrics.rds
 ###############################################################################
 
-real_dat_res <- readRDS("final_results/sun_cycle_index_24.rds")
+real_dat_res <- readRDS("final_results/real_calib_results_091011.rds")
 post_mean <- apply(real_dat_res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 post_mean[1] <- post_mean[1]*2500+500
 post_mean[2] <- post_mean[2]*(0.1-0.001)+0.001
 
-cv_res <- readRDS("final_results/real_data_cv_metrics_20250930111359.rds")
+cv_res <- readRDS("final_results/real_data_cv_metrics.rds")
 
 crps_range <- range(c(apply(cv_res$crps_pmfp, 1, mean),
   apply(cv_res$crps_ratio, 1, mean)))
@@ -329,7 +315,7 @@ dev.off()
 ###############################################################################
 ## FIGURE 14: Plots showing discrepancy between real data and surrogate output
 ## at estimated model parameters
-## DATA NEEDED: sims.csv, ibex_real.csv, sun_cycle
+## DATA NEEDED: sims.csv, ibex_real.csv, real_calib_results_091011.rds
 ###############################################################################
 
 source("../helper.R")
@@ -352,7 +338,7 @@ pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
 model_data$nlon <- nose_center_lons(model_data$lon)
 
 ## Load results of run on real data
-res <- readRDS("final_results/sun_cycle_index_24.rds")
+res <- readRDS("final_results/real_calib_results_091011.rds")
 post_mean <- apply(res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 
 fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),

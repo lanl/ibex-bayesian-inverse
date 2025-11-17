@@ -134,7 +134,7 @@ dev.off()
 ###############################################################################
 ## FIGURE 5: Illustration showing a grid of both simulator output and
 ## surrogate output in order to demonstrate the effectiveness of our surrogate
-## DATA NEEDED: sims.csv, sims_real.csv
+## DATA NEEDED: sims.csv, ibex_real.csv
 ###############################################################################
 
 source("../helper.R")
@@ -143,10 +143,13 @@ source('../vecchia_scaled.R')
 # read in and structure the simulator output
 model_data <- read.csv(file="../data/sims.csv")
 model_data$nlon <- nose_center_lons(model_data$lon)
-field_data <- read.csv(file="../data/sims_real.csv")
+field_data <- read.csv(file="../data/ibex_real.csv")
+field_data$sim_counts <- field_data$counts
+field_data$lat <- field_data$ecliptic_lat
+field_data$lon <- field_data$ecliptic_lon
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
-  fparams=c(1750, 0.02), scales=c(1, 1), tol=NA, quant=0.0,
-  real=FALSE, disc=FALSE)
+  fparams=c("2009A"), scales=c(1, 1), tol=NA, quant=0.0,
+  real=TRUE, disc=FALSE)
 predrange <- quantile(model_data$blurred_ena_rate, probs=c(0.00015, 0.9985))
 Xtrain <- as.matrix(cbind(pd$Xmod, pd$Umod))
 fit <- fit_scaled(y=pd$Zmod, inputs=Xtrain, nug=1e-4, ms=25)

@@ -8,12 +8,12 @@
 ###############################################################################
 ## FIGURE 7: Timing metrics for surrogate modeling of the IBEX simulator when
 ## varying the dimension of the response
-## DATA NEEDED: surrogate_time_test_dim_20250811.rds, sepia_fit_times_X_dim.csv,
+## DATA NEEDED: surrogate_time_test_dim.rds, sepia_fit_times_X_dim.csv,
 ## sepia_pred_times_X_dim.csv
 ###############################################################################
 
 ## Visuals for varying the dimension of the response
-surr_times <- readRDS("surrogate_time_test_dim_20250811.rds")
+surr_times <- readRDS("surrogate_time_test_dim.rds")
 surr_times$fit_times <- surr_times$fit_times[,c(1:38, 40:dim(surr_times$fit_times)[2]),]
 surr_times$pred_times <- surr_times$pred_times[,c(1:38, 40:dim(surr_times$pred_times)[2]),]
 surr_fit_times <- apply(surr_times$fit_times, c(2,3), mean)
@@ -69,12 +69,12 @@ dev.off()
 ###############################################################################
 ## FIGURE 8: Timing metrics for surrogate modeling of the IBEX simulator when
 ## varying the number of simulator runs
-## DATA NEEDED: surrogate_time_test_ns_20250811.rds, sepia_fit_times_X_ns.csv,
+## DATA NEEDED: surrogate_time_test_ns.rds, sepia_fit_times_X_ns.csv,
 ## sepia_pred_times_X_ns.csv
 ###############################################################################
 
 ## Visuals for varying the number of computer experiment runs
-surr_times <- readRDS("surrogate_time_test_ns_20250806.rds")
+surr_times <- readRDS("surrogate_time_test_ns.rds")
 surr_fit_times <- apply(surr_times$fit_times, c(2,3), mean)
 surr_pred_times <- apply(surr_times$pred_times, c(2,3), mean)
 sepia_fit_files <- list.files(pattern="sepia_fit_times_[3-6]{1}_ns.csv")

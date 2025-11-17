@@ -11,7 +11,7 @@
 ## - Plot of simulator output used to generate synthetic satellite data
 ## - Plot of predicted surrogate output at posterior mean of model parameters
 ## - Bivariate posterior of model parameters
-## DATA NEEDED: sims.csv, sims_real.csv, sim_calib_results_20250916.rds 
+## DATA NEEDED: sims.csv, synth_sat_data.csv, sim_calib_results.rds 
 ###############################################################################
 
 source("../helper.R")
@@ -23,8 +23,7 @@ library(ks)
 
 ## Visuals for comparing simulated counts, "true" simulator output
 ## estimated simulator output via surrogate predictions
-# res <- readRDS("final_results/sim_calib_results_20250902.rds")
-res <- readRDS("final_results/sim_calib_results_20250915.rds")
+res <- readRDS("final_results/sim_calib_results.rds")
 single_index <- NA
 single_pmfp <- 1750
 single_ratio <- 0.02
@@ -41,7 +40,7 @@ pred_params[1] <- (pred_params[1] - 500)/2500
 pred_params[2] <- (pred_params[2] - 0.001)/(0.1-0.001)
 
 model_data <- read.csv(file="../data/sims.csv")
-field_data <- read.csv(file="../data/sims_real.csv")
+field_data <- read.csv(file="../data/synth_sat_data.csv")
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   fparams=c(single_pmfp, single_ratio), scales=c(1, 1), tol=NA, quant=0.0,
   real=FALSE, disc=FALSE)
@@ -168,31 +167,17 @@ legend("topright", c(expression(u*"\u002A"), "95% HPD"), col=c(4, 1),
   pch=c(8, NA), lwd=2, lty=c(NA, 2), cex=1.1, bg="white")
 dev.off()
 
-
 ###############################################################################
 ## FIGURE 10: Visual for bivariate posteriors of all unique combinations of
 ## model parameters held out as the truth
-## DATA NEEDED: sim_calib_results_20250915.rds 
+## DATA NEEDED: sim_calib_results.rds 
 ###############################################################################
 
 library(MASS)
 library(coda)
 library(ks)
 
-ind_files <- FALSE
-if (ind_files) {
-  calib_files <- list.files(pattern="mcmc_res_esa4_nmcmc*")
-  res <- list()
-  for (i in 1:length(calib_files)) {
-    iter_res <- readRDS(calib_files[[i]])
-    res[[i]] <- list(
-      u=data.frame(pmfp=iter_res$mcmc_res$u[,1]*2500+500,
-        ratio=iter_res$mcmc_res$u[,2]*(0.1-0.001)+0.001),
-      truth=iter_res$params)
-  }
-} else {
-  res <- readRDS("sim_calib_results_20250915.rds")
-}
+res <- readRDS("sim_calib_results.rds")
 
 pmfps <- seq(750, 2750, by=250)
 ratios <- c(0.005, 0.01, 0.02, 0.05)
