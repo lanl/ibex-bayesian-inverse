@@ -1,6 +1,15 @@
 # python3 -m venv ~/py_envs
 # source ~/py_envs/bin/activate
-# ensure fullMatrices=True is set
+
+###############################################################################
+###############################################################################
+## Timing test for SEPIA. Used to generate Figures 7 and 8. Two scenarios:
+## 1) the number of simulator runs SEPIA is asked to model is varied, and
+## 2) the dimension of the simulator runs is varied. In each case, execution
+## time and prediction time is recorded
+## DATA NEEDED: sims.csv
+###############################################################################
+###############################################################################
 
 import csv
 import math

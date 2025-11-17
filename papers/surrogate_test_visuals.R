@@ -1,3 +1,8 @@
+###############################################################################
+## FIGURE 6: Performance metrics for surrogate modeling of the IBEX simulator
+## DATA NEEDED: surrogate_test_20250811.rds, sepia_metrics_.csv
+###############################################################################
+
 surr1_res <- readRDS("surrogate_test_20250811.rds")
 sepia_files <- list.files(pattern="sepia_metrics_[3-6].csv")
 
@@ -10,6 +15,7 @@ for (i in 1:length(sepia_files)) {
   colnames(crps)[ncol(crps)] <- colnames(rmses)[ncol(rmses)] <- paste0("sepia", i+2)
 }
 
+## Figure 6 (left panel)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_rmse.pdf", width=7, height=5)
 rmses_ord <- rmses[,c(1,5:7,2:4,8:10)]
@@ -23,6 +29,7 @@ text(x=1:ncol(rmses_ord), y=par("usr")[3]-0.0002, labels=labels, srt=45,
 abline(v=4.5, lty=2)
 dev.off()
 
+## Figure 6 (right panel)
 par(mfrow=c(1,1), mar=c(5.1, 4.3, 0.2, 0.2))
 pdf("ibex_surr_crps.pdf", width=7, height=5)
 crps_ord <- crps[,c(1,5:7,2:4,8:10)]

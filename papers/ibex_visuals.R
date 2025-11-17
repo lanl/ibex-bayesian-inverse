@@ -1,4 +1,9 @@
-library(ggplot2)
+###############################################################################
+###############################################################################
+## FIGURE 1: Display IBEX satellite and IBEX simulator data
+## DATA NEEDED: ibex_real.csv, sims.csv
+###############################################################################
+###############################################################################
 
 source("../helper.R")
 
@@ -13,8 +18,8 @@ ibex_sim1 <- ibex_sim[ibex_sim$parallel_mean_free_path==500 &
 ibex_sim2 <- ibex_sim[ibex_sim$parallel_mean_free_path==3000 &
   ibex_sim$ratio==0.001,]
 
-# ena_range <- c(0.04174779, 0.18489323)
-ena_range <- range(ibex_sim$blurred_ena_rate)
+# range selected to prevent outliers affecting color scale
+ena_range <- quantile(ibex_sim$blurred_ena_rate, probs=c(0.00015, 0.9985))
 
 ibex_sim$nlon <- nose_center_lons(ibex_sim$lon)
 ibex_real$nlon <- nose_center_lons(ibex_real$ecliptic_lon)
@@ -26,6 +31,7 @@ bks <- seq(ena_range[1], ena_range[2], length=length(cols)+1)
 ylims <- range(ibex_sim$lat)
 xlims <- rev(range(ibex_sim$nlon))
 
+## Figure 1 (left panel)
 ibex_real_lons <- sort(unique(ibex_real$nlon))
 ibex_real_lats <- sort(unique(ibex_real$lat))
 ibex_real_rates <- cut(ibex_real$est_rate, breaks=bks, labels=FALSE)
@@ -43,6 +49,7 @@ fields::image.plot(zlim=ena_range, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.8, 0.84, 0.4, 0.9))
 dev.off()
 
+## Figure 1 (center panel)
 ibex_sim1_lons <- sort(unique(ibex_sim1$nlon))
 ibex_sim1_lats <- sort(unique(ibex_sim1$lat))
 ibex_sim1_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=ibex_sim1)
@@ -58,6 +65,7 @@ axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
 dev.off()
 
+## Figure 1 (right panel)
 ibex_sim2_lons <- sort(unique(ibex_sim2$nlon))
 ibex_sim2_lats <- sort(unique(ibex_sim2$lat))
 ibex_sim2_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=ibex_sim2)

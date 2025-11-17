@@ -1,7 +1,22 @@
+###############################################################################
+###############################################################################
+## Figures for running our Poisson Bayesian inverse problem framework on
+## synthetic satellite data
+###############################################################################
+###############################################################################
+
+###############################################################################
+## FIGURE 9: Synthetic data visual containing four plots:
+## - Plot of synthetic satellite data
+## - Plot of simulator output used to generate synthetic satellite data
+## - Plot of predicted surrogate output at posterior mean of model parameters
+## - Bivariate posterior of model parameters
+## DATA NEEDED: sims.csv, sims_real.csv, sim_calib_results_20250916.rds 
+###############################################################################
+
 source("../helper.R")
 source('../vecchia_scaled.R')
 
-library(ggplot2)
 library(MASS)
 library(coda)
 library(ks)
@@ -30,8 +45,7 @@ field_data <- read.csv(file="../data/sims_real.csv")
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   fparams=c(single_pmfp, single_ratio), scales=c(1, 1), tol=NA, quant=0.0,
   real=FALSE, disc=FALSE)
-# predrange <- c(0.04174779, 0.18489323)
-predrange <- range(model_data$blurred_ena_rate)
+predrange <- quantile(model_data$blurred_ena_rate, probs=c(0.00015, 0.9985))
 
 field_data <- field_data[field_data$parallel_mean_free_path==single_pmfp &
   field_data$ratio==single_ratio,]
@@ -61,6 +75,7 @@ bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
 
+## Figure 9 (top right panel)
 model_lons <- sort(unique(model_data$nlon))
 model_lats <- sort(unique(model_data$lat))
 model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
@@ -78,6 +93,7 @@ fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
+## Figure 9 (top left panel)
 field_lons <- sort(unique(field_data$nlon))
 field_lats <- sort(unique(field_data$lat))
 field_rates <- cut(field_data$est_rate, breaks=bks,
@@ -96,6 +112,7 @@ fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
+## Figure 9 (bottom left panel)
 pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
@@ -133,6 +150,7 @@ thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
 cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
+## Figure 9 (bottom right panel)
 # Plot contour at HPD threshold
 pdf("ibex_post_est.pdf", width=7, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
@@ -150,11 +168,13 @@ legend("topright", c(expression(u*"\u002A"), "95% HPD"), col=c(4, 1),
   pch=c(8, NA), lwd=2, lty=c(NA, 2), cex=1.1, bg="white")
 dev.off()
 
-#########################################################################
-#########################################################################
-#########################################################################
 
-## Visuals for bivariate posteriors of model parameters
+###############################################################################
+## FIGURE 10: Visual for bivariate posteriors of all unique combinations of
+## model parameters held out as the truth
+## DATA NEEDED: sim_calib_results_20250915.rds 
+###############################################################################
+
 library(MASS)
 library(coda)
 library(ks)
@@ -185,6 +205,7 @@ for (i in 1:length(res)) {
 pmfp_labs <- seq(500, 2500, by=500)
 ratio_labs <- seq(0.02, 0.1, length=5)
 
+## Figure 10
 pdf("sim_bayes_inv_res.pdf", width=7, height=5)
 par(mfrow=c(length(ratios), length(pmfps)),
   mar=c(0.25,0.25,0.25,0.15), oma=c(7,5,0.5,0.5))

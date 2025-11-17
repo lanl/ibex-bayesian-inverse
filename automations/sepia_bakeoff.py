@@ -1,6 +1,17 @@
 # python3 -m venv ~/py_envs
 # source ~/py_envs/bin/activate
 
+###############################################################################
+###############################################################################
+## Hold one out test for SEPIA on IBEX simulator output. Used to generate
+## Figure 6. SEPIA is run once for each unique combination of simulator model
+## parameters. Predictions are made at a held out combination of model
+## parameters. RMSE and CRPS are calculated. Varying number of bases
+## (principal components) are used
+## DATA NEEDED: sims.csv
+###############################################################################
+###############################################################################
+
 import csv
 import math
 import numpy as np

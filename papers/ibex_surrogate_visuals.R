@@ -1,3 +1,16 @@
+###############################################################################
+###############################################################################
+## Figures to visually assess the performance and inner workings of the Scaled
+## Vecchia GP surrogate
+###############################################################################
+###############################################################################
+
+###############################################################################
+## FIGURE 4: Illustration of conditioning sets used by Scaled Vecchia when
+## modeling the IBEX simulation
+## DATA NEEDED: sims.csv
+###############################################################################
+
 library(deepgp)
 library(ggplot2)
 library(laGP)
@@ -5,6 +18,7 @@ library(laGP)
 source("../helper.R")
 source('../vecchia_scaled.R')
 
+# read in and structure the simulator output
 model_data <- read.csv(file="../data/sims.csv")
 model_data <- model_data[order(model_data$parallel_mean_free_path, model_data$ratio,
   model_data$lat, model_data$lon),]
@@ -14,10 +28,10 @@ model_data_ll <- model_data[,c("lat", "lon")]
 model_data_ll$nlon <- nose_center_lons(model_data_ll$lon)
 model_data <- model_data[,c("x", "y", "z", "parallel_mean_free_path", "ratio",
  "blurred_ena_rate")]
-# predrange <- c(0.04174779, 0.18489323)
-predrange <- range(model_data$blurred_ena_rate)
-
+# range selected to prevent outliers affecting color scale
+predrange <- quantile(model_data$blurred_ena_rate, probs=c(0.00015, 0.9985))
 md_ranges <- data.frame(matrix(NA, nrow=2, ncol=ncol(model_data)-1))
+# scale model parameters to 0-1
 for (i in 1:(ncol(model_data)-1)) {
   md_ranges[,i] <- range(model_data[,i])
   model_data[,i] <- (model_data[,i] - md_ranges[1,i])/diff(md_ranges[,i])
@@ -25,19 +39,20 @@ for (i in 1:(ncol(model_data)-1)) {
 colnames(md_ranges) <- colnames(model_data)[1:ncol(md_ranges)]
 model_data <- cbind(model_data, model_data_ll)
 
-## Hold one out - 66 model runs
+## collect unique model parameters
 pmfps <- unique(model_data$parallel_mean_free_path)
 ratios <- unique(model_data$ratio)
 unique_runs <- as.matrix(expand.grid(pmfps, ratios))
 colnames(unique_runs) <- NULL
 
+## get model parameter for observation of interest 
 pmfp_unit <- pmfps[ceiling(length(pmfps)/2)]
 ratio_unit <- ratios[floor(length(ratios)/2)]
 
 Xtrain <- model_data[,c("parallel_mean_free_path", "ratio", "x", "y", "z")]
 Ytrain <- model_data[,c("blurred_ena_rate")]
 
-## takes 2-3 minutes
+## fit scaled vecchia gp surrogate (takes 2-3 minutes)
 set.seed(2349837)
 svecfit <- fit_scaled(y=Ytrain, inputs=as.matrix(Xtrain), nug=1e-4, ms=100)
 all_inputs <- data.frame(svecfit$inputs.ord)
@@ -47,8 +62,9 @@ all_inputs$z <- all_inputs$z * diff(md_ranges$z) + md_ranges$z[1]
 all_inputs[,c("lat", "lon")] <-
   spher_to_geo_coords(x=all_inputs$x, y=all_inputs$y, z=all_inputs$z)
 all_inputs$nlon <- nose_center_lons(all_inputs$lon)
-all_inputs$parallel_mean_free_path <- all_inputs$parallel_mean_free_path * diff(md_ranges$parallel_mean_free_path) +
-   md_ranges$parallel_mean_free_path[1]
+all_inputs$parallel_mean_free_path <-
+  all_inputs$parallel_mean_free_path * diff(md_ranges$parallel_mean_free_path) +
+  md_ranges$parallel_mean_free_path[1]
 all_inputs$ratio <- all_inputs$ratio * diff(md_ranges$ratio) +
    md_ranges$ratio[1]
 
@@ -56,32 +72,31 @@ pmfp <- pmfp_unit * diff(md_ranges$parallel_mean_free_path) +
    md_ranges$parallel_mean_free_path[1]
 ratio <- ratio_unit * diff(md_ranges$ratio) + md_ranges$ratio[1]
 
+## get observation of interest in the ribbon
 ribbon_points <- which(all_inputs$lat > -30 & all_inputs$lat < 30 &
   all_inputs$lon < 300 & all_inputs$lon > 270 &
   all_inputs$parallel_mean_free_path==pmfp & all_inputs$ratio==ratio)
-## Should be index 4473
 ref_point <- ribbon_points[length(ribbon_points)]
 
+## Figure 4 (left panel)
+## display conditioning sets for latitude and longitude on sky map
 plot_data <- model_data[model_data$parallel_mean_free_path==pmfp_unit &
   model_data$ratio==ratio_unit,]
 ref_neighbors <- all_inputs[svecfit$NNarray[ref_point,-1],]
-
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
-
 lons <- sort(unique(plot_data$nlon))
 lats <- sort(unique(plot_data$lat))
 zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=plot_data)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_nbr_latlon.pdf", width=7, height=5)
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(x=lons, y=lats, z=zmat, col=cols, xlab="Longitude", xaxt="n",
   ylab="Latitude", breaks=bks, xlim=rev(range(lons)), useRaster=TRUE)
 axis(1, at=seq(325, 25, by=-60),
   labels=c(60, 0, 300, 240, 180, 120))
-usr <- par("usr")  # plotting region: c(xmin, xmax, ymin, ymax)
+usr <- par("usr")
 rect(usr[1], usr[3], usr[2], usr[4],
      col = rgb(0.5, 0.5, 0.5, 0.8), border = NA)
 points(lat ~ nlon, data=ref_neighbors[1:25,], pch=21, col=1, bg=3)
@@ -91,7 +106,8 @@ points(lat ~ nlon, data=ref_neighbors[76:100,], pch=24, col=1, bg=6)
 points(lat ~ nlon, data=all_inputs[ref_point,], pch=8, col=2, cex=2, lwd=3)
 dev.off()
 
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+## Figure 4 (right panel)
+## display conditioning sets for model parameters
 pdf("ibex_nbr_params.pdf", width=7, height=5)
 plot(x=jitter(ref_neighbors[1:25,c("parallel_mean_free_path")]),
   y=jitter(ref_neighbors[1:25,c("ratio")]), type="n",
@@ -116,37 +132,38 @@ legend("topleft", c("point of interest", paste0("m=", c(25,50,75,100))),
 dev.off()
 
 ###############################################################################
-###############################################################################
-## Illustration showing simulated output next to surrogate output to
-## demonstrate effectiveness of surrogate
-###############################################################################
+## FIGURE 5: Illustration showing a grid of both simulator output and
+## surrogate output in order to demonstrate the effectiveness of our surrogate
+## DATA NEEDED: sims.csv, sims_real.csv
 ###############################################################################
 
 source("../helper.R")
 source('../vecchia_scaled.R')
 
+# read in and structure the simulator output
 model_data <- read.csv(file="../data/sims.csv")
 model_data$nlon <- nose_center_lons(model_data$lon)
 field_data <- read.csv(file="../data/sims_real.csv")
 pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
   fparams=c(1750, 0.02), scales=c(1, 1), tol=NA, quant=0.0,
   real=FALSE, disc=FALSE)
-# predrange <- c(0.04174779, 0.18489323)
-predrange <- range(model_data$blurred_ena_rate)
+predrange <- quantile(model_data$blurred_ena_rate, probs=c(0.00015, 0.9985))
 Xtrain <- as.matrix(cbind(pd$Xmod, pd$Umod))
 fit <- fit_scaled(y=pd$Zmod, inputs=Xtrain, nug=1e-4, ms=25)
 
+## select model parameter combinations for simulator output
 pmfps <- c(1500, 1625, 1750)
 ratios <- c(0.005, 0.0075, 0.01)
 grid <- as.matrix(expand.grid(pmfps, ratios))
 colnames(grid) <- c("pmfp", "ratio")
+
+## Figure 5 (left panel)
 model_pmfps <- unique(model_data$parallel_mean_free_path)
 model_ratios <- unique(model_data$ratio)
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
 bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
-
 pdf("ibex_surr_vis_check.pdf", width=14, height=11)
 par(mfrow=c(length(ratios), length(pmfps)),
   mar=c(0, 0, 1.25, 1.25), oma=c(5, 5, 1, 1))

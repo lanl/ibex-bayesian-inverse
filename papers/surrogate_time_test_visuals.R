@@ -1,3 +1,17 @@
+###############################################################################
+###############################################################################
+## Figures to display timing metrics for several different surrogate fits on
+## the IBEX simulator output
+###############################################################################
+###############################################################################
+
+###############################################################################
+## FIGURE 7: Timing metrics for surrogate modeling of the IBEX simulator when
+## varying the dimension of the response
+## DATA NEEDED: surrogate_time_test_dim_20250811.rds, sepia_fit_times_X_dim.csv,
+## sepia_pred_times_X_dim.csv
+###############################################################################
+
 ## Visuals for varying the dimension of the response
 surr_times <- readRDS("surrogate_time_test_dim_20250811.rds")
 surr_times$fit_times <- surr_times$fit_times[,c(1:38, 40:dim(surr_times$fit_times)[2]),]
@@ -18,6 +32,7 @@ for (i in 1:length(sepia_fit_files)) {
 
 surr_total_times <- surr_fit_times + surr_pred_times
 
+## Figure 7 (left panel)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_fit_times.pdf", width=4, height=5)
 fit_times_ord <- surr_fit_times[,c(1,6,7)]
@@ -30,6 +45,7 @@ legend("topleft", c("SVEC (m=25)", "deepgp",
   col=1:4, lty=1:4, lwd=2, cex=1.05)
 dev.off()
 
+## Figure 7 (middle panel)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_pred_times.pdf", width=4, height=5)
 pred_times_ord <- surr_pred_times[,c(1,6,7,5)]
@@ -38,6 +54,7 @@ matplot(x=exp_pows, y=pred_times_ord[1:length(exp_pows),]/60, type="l", ylim=c(0
   lwd=3)
 dev.off()
 
+## Figure 7 (right panel)
 large_ns <- seq(20000, 75000, by=5000)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_total_times.pdf", width=4, height=5)
@@ -48,6 +65,13 @@ matplot(x=large_ns, y=long_times_ord[(length(exp_pows)+1):nrow(long_times_ord),]
 legend("topleft", c("SVEC (m=25,50,75,100)", expression(SEPIA~"("*n[k]*"=3,4,5,6)")), col=c(1,3), lty=1, lwd=2, cex=1.05,
   bg="white")
 dev.off()
+
+###############################################################################
+## FIGURE 8: Timing metrics for surrogate modeling of the IBEX simulator when
+## varying the number of simulator runs
+## DATA NEEDED: surrogate_time_test_ns_20250811.rds, sepia_fit_times_X_ns.csv,
+## sepia_pred_times_X_ns.csv
+###############################################################################
 
 ## Visuals for varying the number of computer experiment runs
 surr_times <- readRDS("surrogate_time_test_ns_20250806.rds")
@@ -67,6 +91,7 @@ for (i in 1:length(sepia_fit_files)) {
 
 surr_total_times <- surr_fit_times + surr_pred_times
 
+## Figure 8 (left panel)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_fit_times_ns.pdf", width=4, height=5)
 fit_times_ord <- surr_fit_times[,c(1,6,7)]
@@ -78,6 +103,7 @@ legend("topright", c("SVEC (m=25)", "deepgp", expression(SEPIA~"("*n[k]*"=3)"), 
   col=1:4, lty=1:4, lwd=2, cex=1.05, bg="white")
 dev.off()
 
+## Figure 8 (middle panel)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_pred_times_ns.pdf", width=4, height=5)
 pred_times_ord <- surr_pred_times[,c(1,6,7,5)]
@@ -86,6 +112,7 @@ matplot(x=ns, y=pred_times_ord[1:length(ns),]/60, type="l", ylim=c(0, 10),
   lwd=3)
 dev.off()
 
+## Figure 8 (right panel)
 match_cols <- c(1,3:4)
 large_ns <- seq(500, 2500, by=500)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
