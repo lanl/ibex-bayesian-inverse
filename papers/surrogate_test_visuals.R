@@ -1,9 +1,9 @@
 ###############################################################################
 ## FIGURE 6: Performance metrics for surrogate modeling of the IBEX simulator
-## DATA NEEDED: surrogate_test_20250811.rds, sepia_metrics_.csv
+## DATA NEEDED: surrogate_test.rds, sepia_metrics_X.csv
 ###############################################################################
 
-surr1_res <- readRDS("surrogate_test_20250811.rds")
+surr1_res <- readRDS("surrogate_test.rds")
 sepia_files <- list.files(pattern="sepia_metrics_[3-6].csv")
 
 rmses <- surr1_res$rmse
