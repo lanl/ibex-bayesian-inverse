@@ -31,13 +31,11 @@ Output and Spatially Distributed Counts}
 \href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of Statistics,
 Virginia Tech} \and Robert B. Gramacy\thanks{Department of Statistics, Virginia
 Tech} \and Lauren J. Beesley\thanks{Statistics Group, Los Alamos National
-Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{ Center for
-Space Plasma and Aeronomic Research, University of Alabama in Huntsville } \and
-Fan Guo\thanks{Nuclear and Particle Physics, AstroPhysics and Cosmology, Los
-Alamos National Laboratory} \and Eric
-J. Zirnstein\thanks{ Department of Astrophysical Sciences, Princeton
-University} \and Daniel B. Reisenfeld\thanks{Space Science and Applications
-Group, Los Alamos National Laboratory}}
+Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{ Center
+for Space Plasma and Aeronomic Research, University of Alabama in Huntsville }
+\and Fan Guo\thanks{Nuclear and Particle Physics, AstroPhysics and Cosmology,
+Los Alamos National Laboratory} \and Daniel B. Reisenfeld\thanks{Space Science
+and Applications Group, Los Alamos National Laboratory}}
 \date{}
 
 \maketitle
@@ -81,11 +79,8 @@ Interstellar Boundary Explorer (IBEX) satellite in 2008 as part of their Small
 Explorer program \citep{mccomas2009aIBEX} to deepen our understanding of the
 heliosphere. The heliosphere is the bubble formed by the solar wind that
 encompasses our solar system and acts as a barrier to interstellar space. Of
-particular interest is the behavior at the edge of the heliosphere, known as the
-heliopause. The heliopause is the imaginary boundary separating the inner and
-outer heliosphere. It is the point at which there exists a pressure balance
-between the outgoing solar wind and the particles in the outer heliosphere.
-Here, highly energized hydrogen ions that make up the solar wind interact with
+particular interest is the behavior at the edge of the heliosphere. Here,
+highly energized hydrogen ions that make up the solar wind interact with
 neutral atoms, occasionally undergo electro exchange, and become neutral
 themselves. These energetic neutral atoms (ENAs) are unaffected by magnetic
 fields and therefore travel in a ballistic trajectory.
@@ -96,7 +91,7 @@ instrument on the IBEX satellite called the IBEX-Hi ENA imager
 approximate location of origin for each ENA that enters the detector. IBEX's raw
 collected data consist of ENA counts and exposure times for each area of the sky
 at which the satellite points, providing sufficient information to estimate the
-rate at which these particles are created throughout the heliopause. An example
+rate at which these particles are created throughout the heliosphere. An example
 of the observed ENA rates detected by the IBEX satellite used to make
 \textit{sky maps} (spatial maps of heliospheric ENA rates) can be found in the
 left panel of Figure \ref{f:fig1}. Sky maps are integral to better understand
@@ -115,13 +110,14 @@ different parameter settings (middle, right).
 
 One can think of the heliosphere as a ``boat'' moving through interstellar
 space. At the outset of IBEX's mission, scientists expected to see ENAs being
-generated throughout the heliopause, with elevated rates at the front (nose) and
-back (tail), much like the turbulent interaction with water at a boat's bow and
-stern. And indeed, that belief was validated by IBEX data. At the nose and tail
-of the heliosphere IBEX observed an increased number of collisions and resulting
-electron exchanges between hydrogen ions and neutral particles in the
-interstellar medium. These sources of ENAs are identified as \textit{globally
-distributed flux}, or GDF.
+generated throughout the heliosphere, with elevated rates at the front (nose)
+and back (tail), much like the turbulent interaction with water at a boat's bow
+and stern. And indeed, that belief was validated by IBEX data. At the nose and
+tail of the heliosphere IBEX observed an increased number of collisions and
+resulting electron exchanges between hydrogen ions and neutral particles. These
+sources of ENAs, originating from the heliosheath (region between the
+termination shock and the edge of the heliosphere), are identified as
+\textit{globally distributed flux}, or GDF.
 
 However, in a completely unanticipated finding, IBEX also recorded a thin
 string of higher rates of ENAs \citep{fuselier2009IBEXribbon} wrapping around
@@ -851,19 +847,20 @@ expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such
 that $\lambda(X^F) = m(u, X^F) - \lambda_{b}(X^F)$.
 
 We have referred to the IBEX simulator throughout this paper without going into
-much detail. While we leave a more in-depth physical interpretation and analysis
-of parameters to more appropriate venues
+much detail. While we leave a more in-depth physical interpretation and
+analysis of parameters to more appropriate venues
 \citep{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density,huang2025numerical},
-some basic context is provided here. We focus on two particular models available
-(among many): one for the GDF and one for the ribbon. In the ribbon model, the
-parameter \textit{parallel mean free path} is the distance a hydrogen ion
-travels beyond the heliopause before interacting with another particle,
-receiving an electron, and becoming an ENA. The \textit{ratio} parameter is the
-fraction of \textit{parallel mean free path} and another measure of distance,
-perpendicular mean free path. These are our $u$ values. The response from the
-GDF model is static and is merely added to the output of the ribbon simulator.
-This is not the case for GDF simulators in general, but the GDF model we have
-access to does not vary with any parameters of interest.
+some basic context is provided here. We focus on two particular models
+available (among many): one for the GDF and one for the ribbon. In the ribbon
+model, the parameter \textit{parallel mean free path} is the distance a
+hydrogen ion travels beyond the heliopause, or edge of the heliosphere, before
+interacting with another particle, receiving an electron and becoming an ENA,
+and ``turning back.'' The \textit{ratio} parameter is the fraction of
+perpendicular mean free path, another measure of distance, and \textit{parallel
+mean free path}. These are our $u$ values. The response from the GDF model is
+static and is merely added to the output of the ribbon simulator. This is not
+the case for GDF simulators in general, but the GDF model we have access to
+does not vary with any parameters of interest.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
 due to variations in the solar wind that accompany the approximately 11 year
@@ -1181,13 +1178,13 @@ inherent nonstationarity in the discrepancy.
 
 We recognize that this is not a definitive calibration for IBEX data and some
 oversimplifications were made to fit our narrative and present a more
-generalizable method. However, future work needs to account for important
-details such as the Compton-Getting effect \citep{compton1935apparent}, spatial
-blurring resulting from the IBEX-Hi point spread function
-\citep{funsten2009IBEXHiENA}, and varying parameters within a GDF computer
-simulation. Further collaboration with theoretical physicists responsible for
-computer model development should also be pursued to improve the simulator's
-fidelity to the truth.
+generalizable method. Future work could account for details such as the
+Compton-Getting effect \citep{compton1935apparent}, spatial blurring resulting
+from the IBEX-Hi point spread function \citep{funsten2009IBEXHiENA}, and
+varying parameters within a GDF computer simulation. We see the results in this
+paper as a first step in iteration with the theoretical physicists on our team
+toward the development of a higher fidelity model which more faithfully
+reproduces dynamics observed in the field.
 
 \subsection*{Acknowledgments}
 
