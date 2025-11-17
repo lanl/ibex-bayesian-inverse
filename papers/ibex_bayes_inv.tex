@@ -40,8 +40,6 @@ and Applications Group, Los Alamos National Laboratory}}
 
 \maketitle
 
-%\vspace{-0.5cm}
-
 \begin{abstract}
 Data collected by the Interstellar Boundary Explorer (IBEX) satellite,
 recording heliospheric energetic neutral atoms (ENAs), exhibit a phenomenon that
@@ -135,18 +133,19 @@ sophisticated and involve many complex and expensive operations (e.g. solving
 differential equations). Consequently, executing a single run of the computer
 model at a specified set of model parameters can take hours, even when
 leveraging parallel processing. This severely limits the number of unique runs
-available generating simulated sky maps in various settings.
+available to generate simulated sky maps in various settings.
 
 Our work here focuses on two computer models provided to us by heliospheric
 physicists involved in IBEX's mission: a GDF model proposed by
 \citet{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density}; and a
-ribbon-only model developed by \citet{huang2025numerical}. These simulators take
-inputs that can be varied to modify the shape and intensity of the ribbon. The
-ribbon-only model relies on two parameters, \textit{parallel mean free path} and
-\textit{ratio}, while the GDF model we use remains constant and is simply added
-on to the output of the ribbon model. Dialing in good settings for these input
-parameters, in light of observed ENA counts from IBEX, is instrumental in
-furthering theory development and validation.
+ribbon-only model developed by \citet{huang2025numerical}. These simulators
+take inputs that can be varied to modify either the GDF or the shape and
+intensity of the ribbon. The ribbon-only model relies on two parameters of
+interest, \textit{parallel mean free path} and \textit{ratio}, while we fix the
+GDF model as constant and simply add it's response to the output of the ribbon
+model. Dialing in good settings for these input parameters, in light of
+observed ENA counts from IBEX, is instrumental in furthering theory development
+and validation.
 
 Space scientists at Los Alamos National Laboratory (LANL) want to know which
 parameter settings best agree with IBEX observations. One way to do this is to
@@ -295,7 +294,7 @@ right panels of Figure \ref{f:fig1}. Colors indicate output $\mu(X)$ values on
 a dense grid $X$ of longitudes and latitudes. We are interested in learning
 which $u$ are likely to have generated the recorded $Y^F$ values in the left
 panel, observed at locations where the IBEX satellite was pointed ($X^F$) to
-collect particles.
+collect ENAs.
 
 To help fix ideas, consider the simpler example introduced in the left panel
 of Figure \ref{f:toy_calib}. Red stars indicate noisy field measurements,
@@ -418,20 +417,21 @@ access to simulator runs (i.e, for each proposed combination of model
 parameters, we can quickly get a response from the computer simulation). But
 that is rarely the case, presenting another challenge to the typical Bayesian
 inverse problem apparatus. For instance, each run of the IBEX model $m(\cdot,
-\cdot)$ is a real challenge, requiring hours on a supercomputer.  That simply
-cannot be embedded in a Metropolis sampler requiring thousands of iterations to
-converge.  While it's rather conventional to deploy a surrogate model
-\citep[e.g.][]{gramacy2020surrogates} in this setting, trained on a design of
-space-filling $u$-values, doing so effectively is challenged by the number of
-rows (i.e. unique measurement locations) in $X^F$.  We considered multiple
-surrogate models developed to accomodate such scenarios (e.g. GPs via inducing
-points \citep{banerjee2008gaussian}, local approximate GPs
-\citep{gramacy2014lagp}), but found them unable to manage the scale of the IBEX
-data. Herein lies our main methodological contribution, using a modern sparse
-approach to surrogate modeling in a (Poisson) Bayesian inverse problem setting.
-The remainder of this section outlines the standard surrogate modeling toolkit,
-as a jumping-off point toward explaining both our main comparative (Section
-\ref{sec:gp_approx}) and our main methodological contribution.
+\cdot)$ is a real challenge, requiring hours, even when evaluated on a
+supercomputer.  That simply cannot be embedded in a Metropolis sampler
+requiring thousands of iterations to converge.  While it's rather conventional
+to deploy a surrogate model \citep[e.g.][]{gramacy2020surrogates} in this
+setting, trained on a design of space-filling $u$-values, doing so effectively
+is challenged by the number of rows (i.e. unique measurement locations) in
+$X^F$.  We considered multiple surrogate models developed to accomodate such
+scenarios (e.g. GPs via inducing points \citep{banerjee2008gaussian}, local
+approximate GPs \citep{gramacy2014lagp}), but found them unable to manage the
+scale of the IBEX data. Herein lies our main methodological contribution, using
+a modern sparse approach to surrogate modeling in a (Poisson) Bayesian inverse
+problem setting. The remainder of this section outlines the standard surrogate
+modeling toolkit, as a jumping-off point toward explaining both our main
+comparative (Section \ref{sec:gp_approx}) and our main methodological
+contribution.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.2 - Gaussian Process Surrogates for Computer Experiments:
@@ -503,8 +503,8 @@ $u$-value. Combine that with $n=66$ unique $u$-values used in runs available to
 us and our response vector will have greater than one million elements. Even if
 we used a smaller LHS space-filling design of size $n=15$ over the model
 parameters, the response vector would still consist of over 200,000 points. In
-that case, a GP could not be fit and provide predictions in a reasonable amount
-of time, prompting the next topic.
+either case, an ordinary GP could not be fit and provide predictions in a
+reasonable amount of time, prompting the next topic.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.3 - Approximations
@@ -555,7 +555,7 @@ implementation is complex both mathematically, and in code.  We are aware of
 only one library implementation, originally written in {\sf MATLAB} and now
 deployed in {\sf Python} \citep{gattiker2020lanl}.  We found it difficult to
 appropriate that setup for our own use in a Poisson likelihood context.
-Addtionally, restricting the simulated and field data to work on the same
+Additionally, restricting the simulated and field data to work on the same
 reference grid was not possible with IBEX's orbital data locations (Figure
 \ref{f:fig1}).
 
