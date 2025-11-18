@@ -65,5 +65,5 @@ mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
   Zf=pd$Zfield, Of=pd$Ofield, m=25, nmcmcs=10000, step=0.05,
   gpmeth="svecchia", vb=TRUE, true_u=NA, true_logscl=NA, betashape=2)
 res <- list(mcmc_res=mcmc_res, field_data=field_data, settings=settings)
-saveRDS(res, file=paste0("../results/scale_disc_test_scale_", scale,
+saveRDS(res, file=paste0("results/scale_disc_test_scale_", scale,
   format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
