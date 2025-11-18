@@ -829,21 +829,22 @@ the actual IBEX satellite observations.
 \label{sec:ibex_details}
 %------------------------------------------------------------------------------
 
-Each row of the satellite dataset contains Cartesian coordinates ($x$, $y$, $z$)
-for the direction the satellite was pointing, time the satellite was aimed at
-that location (in seconds), counts of ENAs observed at one of six different
-energy levels (ESA), and a background rate $\lambda_b$ (ENAs/sec). Note that we
-only use ENAs collected at energy level ESA 4. More important to consider is
-that ENAs are known to come from sources other than the heliosphere. Space
-scientists quantify this noise for each location ($X^F$) viewed by the satellite
-and add it as a background rate ($\lambda_b$) that must be accounted for in the
-data. For example, the left panel of Figure \ref{f:fig1} displays ENA rates {\em
-after} $\lambda_b$ has been subtracted out. Although this rate is an estimate
-rather than an exact value, we follow the lead of other researchers
-\citep{osthustheseus2023} and treat it as constant in our work. For the purpose
-of solving the inverse problem, we address this through an update to the mean
-expression in the Poisson likelihood in Eq.~\ref{eq:pois_inv_bayes_mod} such
-that $\lambda(X^F) = m(u, X^F) - \lambda_{b}(X^F)$.
+Each row of the satellite dataset contains Cartesian coordinates ($x$, $y$,
+$z$) for the direction the satellite was pointing, time the satellite was aimed
+at that location (in seconds), counts of ENAs observed at one of six different
+energy levels (ESA), and a background rate $\lambda_b$ (ENAs/sec). Note that
+for the sake of brevity, we focus only on ENAs collected at energy level ESA 4.
+More important to consider is that ENAs are known to come from sources other
+than the heliosphere. Space scientists quantify this noise for each location
+($X^F$) viewed by the satellite and add it as a background rate ($\lambda_b$)
+that must be accounted for in the data. For example, the left panel of Figure
+\ref{f:fig1} displays ENA rates {\em after} $\lambda_b$ has been subtracted
+out. Although this rate is an estimate rather than an exact value, we follow
+the lead of other researchers \citep{osthustheseus2023} and treat it as
+constant in our work. For the purpose of solving the inverse problem, we
+address this through an update to the mean expression in the Poisson likelihood
+in Eq.~\ref{eq:pois_inv_bayes_mod} such that $\lambda(X^F) = m(u, X^F) -
+\lambda_{b}(X^F)$.
 
 We have referred to the IBEX simulator throughout this paper without going into
 much detail. While we leave a more in-depth physical interpretation and
@@ -919,16 +920,16 @@ that we employ an empirical Bayes approach
 hyperparameter $\theta$ and only fitting the surrogate on simulator output
 \citep{Liu2009ModularizationIB}. We execute 10,000 MCMC iterations, throwing
 away 1,000 as burnin and thinning by 10. Figure \ref{f:ibex_synth_ex} displays
-the remaining posterior samples of $u$ (bottom right) as a kernel density and a
-95\% highest posterior density (HPD) interval. The posterior mean of $u \mid
-Y^F$ lies near $u^\star$, demonstrating that our framework is able to
-concentrate mass around the ``true'' model parameter. As a sanity check, we take
-the estimated posterior mean and plug it in to our fitted Scaled Vecchia GP
-surrogate of the IBEX simulator. The predicted output is shown in the bottom
+the remaining posterior samples of $u$ (bottom right) as a kernel density along
+with a 95\% highest posterior density (HPD) interval. The posterior mean of $u
+\mid Y^F$ lies near $u^\star$, demonstrating that our framework is able to
+concentrate mass around the ``true'' model parameter. As a sanity check, we
+take the estimated posterior mean and plug it in to our fitted Scaled Vecchia
+GP surrogate of the IBEX simulator. The predicted output is shown in the bottom
 left panel of Figure \ref{f:ibex_synth_ex}. There are some nearly imperceptible
-differences between the estimated sky map and the true $\lambda^\star$ (i.e, the
-shape and intensity of the ribbon vary slightly between the two). However, from
-a purely visual standpoint, it appears that each map could have reasonably
+differences between the estimated sky map and the true $\lambda^\star$ (i.e,
+the shape and intensity of the ribbon vary slightly between the two). However,
+from a purely visual standpoint, it appears that each map could have reasonably
 generated the data we ``observe'' in the top left panel.
 
 \begin{figure}[ht!]
@@ -981,9 +982,9 @@ varies across the three years from $\sim$7-9K observations, giving us over 23K
 rows of field data ($X^F, Y^F$) for use in our analysis. We execute Algorithm
 \ref{alg:gibbs} by fitting a Scaled Vecchia GP surrogate to \textit{all} 66
 computer model runs and sample from the posterior $u \mid Y^F$ via MCMC. One
-difference from Section \ref{sec:synth_data} is that field data ($Y^F, X^F$) are
-not exclusively from one map (Figure \ref{f:ibex_real_ex}). Instead, ($Y^F,
-X^F$) is formed by stacking the counts, exposure times, background rates, and
+difference from Section \ref{sec:synth_data} is that field data ($X^F, Y^F$) are
+not exclusively from one map (Figure \ref{f:ibex_real_ex}). Instead, ($X^F,
+Y^F$) is formed by stacking the counts, exposure times, background rates, and
 Cartesian coordinates $x$, $y$, $z$ from years 2009-2011.
 
 \begin{figure}[ht!]
@@ -1120,21 +1121,23 @@ not represented in this paper and/or match years outside of 2009-2011.
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=1.0,trim=0 0 0 0,clip=TRUE]{real_bayes_inv_res.pdf}
-\caption{Posterior distributions of estimated calibration parameters for each
-unique combination of values that has been treated as a holdout set.
+\caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals for 10
+separate runs of our Poisson Bayesian inverse problem framework. Field data
+$(X^F, Y^F)$ for each run comes from a single year between 2012-2021.
 \label{f:real_estimates_all}}
 \end{figure}
 
-Figure \ref{f:ibex_disc} shows the discrepancy between what the Scaled Vecchia
-surrogate for the computer model outputs at the posterior mean estimated by our
-framework for the model parameter $u$ and data collected from the IBEX satellite
-in the years 2009-2011. It's clear that the computer model does not sufficiently
-account for the behavior observed in the satellite data. But this is not
-terribly surprising. Simulators are inherently biased, simply from not being
-able to completely reconstruct the real process. \citet{kennedyohagan2001}
-address this limitation by introducing a discrepancy term in their canonical
-computer model calibration framework, a practice followed by many other
-practitioners \citep{higdoncalib2004,higdoncalib2008,Liu2009ModularizationIB}.
+Figure \ref{f:ibex_disc} displays the discrepancy between what the Scaled
+Vecchia surrogate of our computer model outputs at the posterior mean estimated
+by our framework for the model parameter $u$ and data collected from the IBEX
+satellite in the years 2009-2011. It's clear that the computer model does not
+sufficiently account for the behavior observed in the satellite data. But this
+is not terribly surprising. Simulators are inherently biased, simply from not
+being able to completely reconstruct the real process.
+\citet{kennedyohagan2001} address this limitation by introducing a discrepancy
+term in their canonical computer model calibration framework, a practice
+followed by many other practitioners
+\citep{higdoncalib2004,higdoncalib2008,Liu2009ModularizationIB}.
 
 The KOH approach uses a GP for modeling of complex disparities between
 simulator and reality. Due to our field response being counts, further
@@ -1155,10 +1158,10 @@ Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
 \includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_field_disc_10.pdf}
 \includegraphics[scale=0.51,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_11.pdf}
 \includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_mult_scale_disc.pdf}
-\caption{Discrepancy between observed satellite data and the simulator output
-at estimated model parameters in 2009 (top left), 2010 (top right), and 2011
-(bottom left). Posterior samples of a multiplicative scale discrepancy (bottom
-right)
+\caption{Discrepancy (observed - estimated) between observed satellite data and
+the simulator output at estimated model parameters in 2009 (top left), 2010
+(top right), and 2011 (bottom left). Posterior samples of a multiplicative
+scale discrepancy (bottom right).
 \label{f:ibex_disc}}
 \end{figure}
 
