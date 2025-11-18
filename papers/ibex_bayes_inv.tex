@@ -655,7 +655,7 @@ $u$-space.
 \includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_params.pdf}
 \caption{Conditioning sets $h(i)$ in a multivariate normal likelihood
 (Eq.~\ref{eq:vecchia}) for a single observation $Y_i^M$ using the Scaled Vecchia
-approximation. The left panel visualizes neighborhoods in grid space (i.e. $X$
+approximation. The left panel visualizes neighborhoods in grid space (i.e.\!~$X$
 or $X^F$). Model parameter ($u$) space is displayed in the right panel with
 jitter added. Intersections of black, dashed lines indicate unique $u$
 combinations run on the simulator.
@@ -731,13 +731,12 @@ Figures \ref{f:ibex_surr_timing_dim}-\ref{f:ibex_surr_timing_size} summarize
 compute times in a similar experiment but varying data size. Two factors exist
 that contribute to a computational bottleneck: the dimension of the simulator
 response (the main focus of our work), and the number of runs of the computer
-model available for training. To test scaling dimension, we vary the
-dimensionality of the response from 200 to 20,000, while keeping the number of
-runs constant. For the two methods that are best equipped for large dimensions
-(Scaled Vecchia and SEPIA), we attempt to stretch their capacity by cranking up
-the length of the response vector from 20-75K by steps of 5K. At each dimension
-size, we run five Monte Carlo iterations for each method and record the
-average elapsed time.
+model available for training. To test the former, we vary the dimensionality of
+the response from 200 to 20,000, while keeping the number of runs constant. For
+the two methods that are best equipped for large dimensions (Scaled Vecchia and
+SEPIA), we attempt to stretch their capacity by cranking up the length of the
+response vector from 20-75K by steps of 5K. At each dimension size, we run five
+Monte Carlo iterations for each method and record the average elapsed time.
 
 \begin{figure}[ht!]
 \centering
