@@ -11,7 +11,7 @@ source("../vecchia_scaled.R")
 index <- NA
 scale <- NA
 seed <- 7198701
-map <- "2020A"
+map <- 2020
 
 scales <- c(seq(0.2, 1.0, by=0.2), 1.5, 2, 4, 8, 10)
 
@@ -30,7 +30,9 @@ if (is.na(index) && is.na(scale)) {
 } else if (!is.na(index) && is.na(scale)) {
   scale <- scales[index]
 }
-settings <- data.frame(index=index, scale=scale, seed=seed)
+map <- paste0(map, "A")
+
+settings <- data.frame(index=index, scale=scale, seed=seed, map=map)
 print(settings)
 
 ## Load model and field data
