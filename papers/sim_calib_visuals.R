@@ -253,3 +253,97 @@ for (i in 1:length(ratios)) {
 mtext("Parallel Mean Free Path", side=1, outer=TRUE, line=4.25, cex=1.2)
 mtext("Ratio", side=2, outer=TRUE, line=3.0, cex=1.2)
 dev.off()
+
+###############################################################################
+## FIGURE ???:
+## DATA NEEDED: sims.csv, synth_sat_data.csv, sim_calib_results.rds
+###############################################################################
+
+source("../helper.R")
+source('../vecchia_scaled.R')
+
+library(MASS)
+library(coda)
+library(ks)
+
+### Read in calibration results
+res <- readRDS("final_results/sim_calib_results.rds")
+
+### Fit Scaled Vecchia GP surrogate
+model_data <- read.csv(file="../data/sims.csv")
+field_data <- read.csv(file="../data/synth_sat_data.csv")
+Xmod <- model_data[,c("lat", "lon")]
+Xmod[,c("x", "y", "z")] <- geo_to_spher_coords(Xmod$lat, Xmod$lon)
+Xmod <- Xmod[,c("x", "y", "z")]
+Xfield <- unique(field_data[c("lon", "lat")])
+Xfield[,c("x", "y", "z")] <- geo_to_spher_coords(Xfield$lat, Xfield$lon)
+Xfield <- Xfield[,c("x", "y", "z")]
+Xall <- rbind(Xmod, Xfield)
+for (i in 1:ncol(Xall)) {
+  Xmod[,i] <- (Xmod[,i] - min(Xall[,i]))/diff(range(Xall[,i]))
+  Xfield[,i] <- (Xfield[,i] - min(Xall[,i]))/diff(range(Xall[,i]))
+}
+
+pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
+  fparams=c(1750, 0.001), scales=c(1, 1), tol=NA, quant=0.0,
+  real=FALSE, disc=FALSE)
+fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),
+ nug=1e-4, ms=25)
+
+pmfps <- seq(750, 2750, by=500)
+ratios <- c(0.005, 0.01, 0.05)
+ugrid <- expand.grid(pmfps, ratios)
+u_inds <- rep(NA, nrow(ugrid))
+pits <- matrix(NA, ncol=nrow(ugrid), nrow=nrow(Xfield))
+for (i in 1:length(res)) {
+  iter_res <- res[[i]]
+  for (j in 1:nrow(ugrid)) {
+    if (iter_res$truth[1]==ugrid[j,1] && iter_res$truth[2]==ugrid[j,2]) {
+      u_inds[j] <- i
+    }
+  }
+}
+
+for (i in 1:length(u_inds)) {
+  ##### Predict using the GP surrogate at the estimated calibration parameters and XF
+  iter_res <- res[[u_inds[i]]]
+  truth <- iter_res$truth
+  iter_field <- field_data[field_data$parallel_mean_free_path==truth[1] &
+  field_data$ratio==truth[2],]
+  truth_unit <- c((truth[1] - 500)/2500, (truth[2] - 0.001)/(0.1-0.001))
+  XX <- as.matrix(cbind(Xfield, matrix(truth_unit, nrow=1)))
+  colnames(XX) <- NULL
+  preds <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
+    predvar=FALSE)
+  ##### Calculate PIT values
+  Fy  <- ppois(iter_field$sim_counts, (preds+iter_field$background)*iter_field$time)
+  Fy1 <- ppois(iter_field$sim_counts - 1, (preds+iter_field$background)*iter_field$time)
+  # Randomized PIT for discrete distributions
+  pits[,i] <- Fy1 + runif(length(y)) * (Fy - Fy1)
+}
+
+pdf("pit_hists.pdf", width=14, height=11)
+par(mfrow=c(3, 5), mar=c(1.5, 0, 2.25, 1.25), oma=c(5, 5, 1, 1),
+  mgp=c(3, 1, 0))
+### For each calibration result
+for (i in 1:length(u_inds)) {
+  iter_res <- res[[u_inds[i]]]
+  truth <- iter_res$truth
+
+  ##### Display in histogram
+  hist(pits[,i], breaks=20, main=bquote(u*"\u002A" * " = (" * .(truth[1]) * ", " * .(truth[2]) * ")"),
+    xlab="", col="lightgray", border="white", freq=FALSE,
+    axes=FALSE, cex.main=1.5, ylim=c(0, 1.05))
+  abline(h=1, col="red", lwd=2, lty=2)
+  if ((i-1) %% 5==0) {
+    axis(2, at=seq(0, 1, length=6), cex.axis=1.25)
+  } else {
+    axis(2, at=seq(0, 1, length=6), labels=FALSE, cex.axis=1.25)
+  }
+  if (i > 5*(3-1)) {
+    axis(1, at=seq(0, 1, length=6), cex.axis=1.25)
+  } else {
+    axis(1, at=seq(0, 1, length=6), labels=FALSE, cex.axis=1.25)
+  }
+}
+dev.off()
