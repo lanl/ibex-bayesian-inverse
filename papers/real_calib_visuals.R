@@ -427,3 +427,144 @@ par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
   xlab="multiplicative scale", main="")
 dev.off()
+
+###############################################################################
+## FIGURE 16: PIT histograms for estimated sky maps generated from estimates
+## of u for actual IBEX satellite data
+## DATA NEEDED: real_calib_results_091011.rds, sims.csv, ibex_real.csv,
+## real_calib_results_all_years.rds
+###############################################################################
+
+source("../helper.R")
+source('../vecchia_scaled.R')
+
+library(MASS)
+library(coda)
+library(ks)
+
+# Create plot for years 2009-2011
+### Read in calibration results
+res <- readRDS("final_results/real_calib_results_091011.rds")
+
+### Fit Scaled Vecchia GP surrogate
+model_data <- read.csv(file="../data/sims.csv")
+field_data <- read.csv(file="../data/ibex_real.csv")
+field_data <- field_data[field_data$map %in% paste0(2009:2011, "A"),]
+field_data$lat <- field_data$ecliptic_lat
+field_data$lon <- field_data$ecliptic_lon
+field_data$sim_counts <- field_data$counts
+Xmod <- model_data[,c("lat", "lon")]
+Xmod[,c("x", "y", "z")] <- geo_to_spher_coords(Xmod$lat, Xmod$lon)
+Xmod <- Xmod[,c("x", "y", "z")]
+Xfield <- unique(field_data[c("lon", "lat")])
+Xfield[,c("x", "y", "z")] <- geo_to_spher_coords(Xfield$lat, Xfield$lon)
+Xfield <- Xfield[,c("x", "y", "z")]
+Xall <- rbind(Xmod, Xfield)
+for (i in 1:ncol(Xall)) {
+  Xmod[,i] <- (Xmod[,i] - min(Xall[,i]))/diff(range(Xall[,i]))
+  Xfield[,i] <- (Xfield[,i] - min(Xall[,i]))/diff(range(Xall[,i]))
+}
+
+pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
+  fparams=paste0(2009:2011, "A"), scales=c(1, 1), tol=NA, quant=0.0,
+  real=TRUE, disc=FALSE)
+fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),
+ nug=1e-4, ms=25)
+
+##### Predict using the GP surrogate at the estimated calibration parameters and XF
+u_est <- apply(res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
+XX <- as.matrix(cbind(Xfield, matrix(u_est, nrow=1)))
+colnames(XX) <- NULL
+preds <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
+  predvar=FALSE)
+##### Calculate PIT values
+Fy  <- ppois(field_data$sim_counts, (preds+field_data$background)*field_data$time)
+Fy1 <- ppois(field_data$sim_counts - 1, (preds+field_data$background)*field_data$time)
+# Randomized PIT for discrete distributions
+pit <- Fy1 + runif(length(field_data$sim_counts)) * (Fy - Fy1)
+
+pdf("real_pit_hists.pdf", width=5.0, height=5.0)
+par(mfrow=c(1, 1), mar=c(5.1, 4.1, 2.1, 2.1), oma=c(0, 0, 0, 0),
+  mgp=c(3.0, 0.7, 0))
+##### Display in histogram
+hist(pit, breaks=20, main="2009-2011", xlab="Probability Integral Transform", ylab="Density",
+  col="lightgray", border="white", freq=FALSE, cex.main=1.5)
+abline(h=1, col="red", lwd=2, lty=2)
+dev.off()
+
+# Create plot for all years
+### Read in calibration results
+res <- readRDS("final_results/real_calib_results_all_years.rds")
+### Read in data
+model_data <- read.csv(file="../data/sims.csv")
+Xmod <- model_data[,c("lat", "lon")]
+Xmod[,c("x", "y", "z")] <- geo_to_spher_coords(Xmod$lat, Xmod$lon)
+Xmod <- Xmod[,c("x", "y", "z")]
+field_data <- read.csv(file="../data/ibex_real.csv")
+field_data$lat <- field_data$ecliptic_lat
+field_data$lon <- field_data$ecliptic_lon
+field_data$sim_counts <- field_data$counts
+
+pits <- list()
+
+ymax <- 1.05
+for (i in 4:(length(res)-1)) {
+  iter_res <- res[[i]]
+  ### Fit Scaled Vecchia GP surrogate
+  Xmod_iter <- Xmod
+  iter_field <- field_data[field_data$map==paste0(iter_res$year, "A"),]
+  Xfield <- iter_field[c("lon", "lat")]
+  Xfield[,c("x", "y", "z")] <- geo_to_spher_coords(Xfield$lat, Xfield$lon)
+  Xfield <- Xfield[,c("x", "y", "z")]
+  Xall <- rbind(Xmod_iter, Xfield)
+  for (j in 1:ncol(Xall)) {
+    Xmod_iter[,j] <- (Xmod_iter[,j] - min(Xall[,j]))/diff(range(Xall[,j]))
+    Xfield[,j] <- (Xfield[,j] - min(Xall[,j]))/diff(range(Xall[,j]))
+  }
+  pd <- preprocess_data(md=model_data, fd=iter_field, esa_lev=4,
+    fparams=c(paste0(iter_res$year, "A")), scales=c(1, 1), tol=NA, quant=0.0,
+    real=TRUE, disc=FALSE)
+  fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),
+   nug=1e-4, ms=25)
+
+  u_est <- apply(iter_res$u[seq(15001, 25000, by=10),], 2, mean)
+  u_unit <- c((u_est[1] - 500)/2500, (u_est[2] - 0.001)/(0.1-0.001))
+  XX <- as.matrix(cbind(Xfield, matrix(u_unit, nrow=1)))
+  colnames(XX) <- NULL
+  preds <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
+    predvar=FALSE)
+
+  ##### Calculate PIT values
+  Fy  <- ppois(iter_field$sim_counts, (preds+iter_field$background)*iter_field$time)
+  Fy1 <- ppois(iter_field$sim_counts - 1, (preds+iter_field$background)*iter_field$time)
+  # Randomized PIT for discrete distributions
+  pits[[i-3]] <- Fy1 + runif(length(iter_field$sim_counts)) * (Fy - Fy1)
+  if (max(hist(pits[[i-3]], plot=FALSE)$density) > ymax) {
+    ymax <- max(hist(pits[[i-3]], plot=FALSE)$density)
+  }
+}
+
+pdf("real_pit_hists_all_years.pdf", width=5, height=2.75)
+par(mfrow=c(2, 5), mar=c(0.9, 1.2, 1.0, 0.3), oma=c(2.0, 2.0, 0, 0),
+  mgp=c(1.0, 0.7, 0))
+### For each calibration result
+for (i in 1:length(pits)) {
+  ##### Display in histogram
+  hist(pits[[i]], breaks=20, main=res[[i+3]]$year, ylab="",
+    xlab="", col="lightgray", border="white", freq=FALSE,
+    axes=FALSE, cex.main=1.1, ylim=c(0, ymax))
+  abline(h=1, col="red", lwd=1, lty=2)
+  if ((i-1) %% 5==0) {
+    axis(2, at=seq(0, ymax, by=0.5), cex.axis=0.65)
+  } else {
+    axis(2, at=seq(0, ymax, by=0.5), labels=FALSE, cex.axis=0.65)
+  }
+  if (i > 5*(2-1)) {
+    axis(1, at=seq(0, 1, by=0.25), cex.axis=0.65)
+  } else {
+    axis(1, at=seq(0, 1, by=0.25), labels=FALSE, cex.axis=0.65)
+  }
+}
+mtext("Probability Integral Transform", side=1, outer=TRUE, line=1.0, cex=0.6)
+mtext("Density", side=2, outer=TRUE, line=0.3, cex=0.6)
+dev.off()

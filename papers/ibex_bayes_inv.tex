@@ -1290,23 +1290,47 @@ underdisperson. Right-skewed PIT histograms indicate consistent overprediction.
 \subsection{Multiplicative Scale Discrepancy}
 \label{app:scale_disc}
 
-Equation \ref{eq:mod_with_disc} includes a simple, multiplicative discrepeancy
-term $\delta$. We tested using this model on the IBEX satellite data and
-discovered that it was insufficient to account for the spatially-varying,
-nonstationary discrepancy present in the IBEX data. To verify that our scale
-discrepancy actually works, we tested it on simulated data. For ten different
-scales between 0 and 10, we generated data.
+Equation \ref{eq:mod_with_disc} introduces a simple, multiplicative term
+$\delta$ to try and account for the gap between the predicted ENA rates and ENA
+counts observed by IBEX. Unsurprisingly, we discovered that it was insufficient
+to account for the spatially-varying, nonstationary discrepancy present in the
+satellite data. However, we gave no evidence to suggest that, if there indeed
+only was a multicplicative discrepancy, our updated model would be able to
+correctly identify it. Therefore, in order to verify that our scale discrepancy
+actually works, we conducted an experiment on simulated data that fall within
+that model class.
 
-Figure \ref{f:sim_pit_hist} shows posterior samples for 10 runs of Algorithm \ref{alg:gibbs}, where $Y^F$ is drawn from varying scaled ENA rates.
+First, we select one sky map from the simulator output corresponding to one of
+the $n =66$ $u$-values and set as $\lambda^\star$. Next, we scale
+$\lambda^\star$ by $\delta$ and add the background rate $\lambda_b$. Then, we
+generate synthetic satellite data via counts drawn from a Poisson, $Y_i^F \sim
+\mathrm{Pois}(\lambda_i^\star * \delta + \lambda_{b_i}, e_i)$ for given exposure
+times $e_i$. Finally, we run our Algorithm \ref{alg:gibbs}, modified slightly to
+sample for a multiplicative scale discrepancy, and calculate a posterior mean
+and 95\% credible intervals for $\delta$. We repeat this process for 10
+different values of $\delta$.
 
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.65,trim=0 0 0 0,clip=TRUE]{scale_disc_vis.pdf}
 \caption{Posterior samples of a multiplicative scale discrepancy, $\delta$. Each
 panel corresponds to a Metropolis sampler run on synthetic data artificially
-scaled by separate known values ($\delta_{true}$). True values marked in blue.
-Posterior mean and 95\% credible intervals shown in red.
-\label{f:sim_pit_hist}}
+scaled by separate known constants ($\delta_{true}$). True values marked in
+blue. Posterior mean and 95\% credible intervals shown in red.
+\label{f:scale_disc_samples}}
 \end{figure}
+
+Figure \ref{f:scale_disc_samples} shows histograms of posterior samples of
+$\delta$ as estimated densities. We restrict the $y$-axis limits to be the same,
+which causes different bar heights among the 10 plots due to the variation in
+spread of the posterior samples on the $x$-axes. In each of the 10 test cases,
+our framework is able to recover the true value of $\delta$. Although not shown
+here, it's important to mention that in addition to successfully estimating
+$\delta$, our framework also recovered the true $u$-values used to generate the
+synthetic data at the nominal 95\% rate. Therefore, we can be confident that had
+the disparity between the IBEX simulator and the IBEX satellite data been in the
+form of a multiplicative scale, our method would be able to identity it. Alas,
+we look forward to future work exploring more sophisticated discrepancy models
+and better capturing the mismatch between simulator and reality.
 
 \end{document}

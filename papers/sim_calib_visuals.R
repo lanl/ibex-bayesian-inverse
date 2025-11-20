@@ -255,7 +255,8 @@ mtext("Ratio", side=2, outer=TRUE, line=3.0, cex=1.2)
 dev.off()
 
 ###############################################################################
-## FIGURE ???:
+## FIGURE 15: PIT histograms for estimated sky maps generated from estimates
+## of u for synthetic satellite data
 ## DATA NEEDED: sims.csv, synth_sat_data.csv, sim_calib_results.rds
 ###############################################################################
 
@@ -304,6 +305,7 @@ for (i in 1:length(res)) {
   }
 }
 
+ymax <- 1.05
 for (i in 1:length(u_inds)) {
   ##### Predict using the GP surrogate at the estimated calibration parameters and XF
   iter_res <- res[[u_inds[i]]]
@@ -319,10 +321,13 @@ for (i in 1:length(u_inds)) {
   Fy  <- ppois(iter_field$sim_counts, (preds+iter_field$background)*iter_field$time)
   Fy1 <- ppois(iter_field$sim_counts - 1, (preds+iter_field$background)*iter_field$time)
   # Randomized PIT for discrete distributions
-  pits[,i] <- Fy1 + runif(length(y)) * (Fy - Fy1)
+  pits[,i] <- Fy1 + runif(length(iter_field$sim_counts)) * (Fy - Fy1)
+  if (max(hist(pits[,i], plot=FALSE)$density) > ymax) {
+    ymax <- max(hist(pits[,i], plot=FALSE)$density)
+  }
 }
 
-pdf("pit_hists.pdf", width=14, height=11)
+pdf("sim_pit_hists.pdf", width=14, height=11)
 par(mfrow=c(3, 5), mar=c(1.5, 0, 2.25, 1.25), oma=c(5, 5, 1, 1),
   mgp=c(3, 1, 0))
 ### For each calibration result
@@ -333,7 +338,7 @@ for (i in 1:length(u_inds)) {
   ##### Display in histogram
   hist(pits[,i], breaks=20, main=bquote(u*"\u002A" * " = (" * .(truth[1]) * ", " * .(truth[2]) * ")"),
     xlab="", col="lightgray", border="white", freq=FALSE,
-    axes=FALSE, cex.main=1.5, ylim=c(0, 1.05))
+    axes=FALSE, cex.main=1.5, ylim=c(0, ymax))
   abline(h=1, col="red", lwd=2, lty=2)
   if ((i-1) %% 5==0) {
     axis(2, at=seq(0, 1, length=6), cex.axis=1.25)
@@ -346,4 +351,58 @@ for (i in 1:length(u_inds)) {
     axis(1, at=seq(0, 1, length=6), labels=FALSE, cex.axis=1.25)
   }
 }
+mtext("Probability Integral Transform", side=1, outer=TRUE, line=2.75, cex=1.2)
+mtext("Density", side=2, outer=TRUE, line=3.0, cex=1.2)
+dev.off()
+
+###############################################################################
+## FIGURE 17: Plot of histograms showing posterior samples of a multiplicative
+## scale discrepancy between simulation and reality. In this case, satellite
+## data is synthetic and artificially scaled by a known constant.
+## DATA NEEDED: scale_disc_test_results.rds
+###############################################################################
+
+res <- readRDS("final_results/scale_disc_test_results.rds")
+
+scales <- rep(NA, length(res))
+samps <- matrix(NA, nrow=nrow(res[[1]]$logscls), ncol=length(res))
+
+ymax <- 0
+for (i in 1:length(res)) {
+  scales[i] <- res[[i]]$truth
+  samps[,i] <- exp(res[[i]]$logscls)
+  if (max(hist(samps[seq(1001, 10000, by=10),i], plot=FALSE)$density) > ymax) {
+    ymax <- max(hist(samps[seq(1001, 10000, by=10),i], plot=FALSE)$density)
+  }
+}
+
+samps <- samps[,order(scales)]
+scales <- scales[order(scales)]
+
+pdf("scale_disc_vis.pdf", width=10.5, height=5.625)
+par(mfrow=c(2, 5), mar=c(2.5, 0.5, 2.35, 0.5), oma=c(2, 3, 1, 1),
+  mgp=c(2.25, 1, 0))
+### For each calibration result
+for (i in 1:length(scales)) {
+  ##### Display in histogram
+  hist(samps[seq(1001, 10000, by=10),i], main=bquote(delta[true] ~ " = " ~ .(scales[i])),
+    ylab="", xlab="", col="lightgray", border="white", freq=FALSE, cex.main=1.5,
+    ylim=c(0, ymax), axes=FALSE)
+  abline(v=scales[i], col=4, lwd=2)
+  abline(v=quantile(samps[seq(1001, 10000, by=10),i], probs=c(0.025, 0.975)), col=2, lty=2)
+  abline(v=mean(samps[seq(1001, 10000, by=10),i]), col=2, lwd=2)
+  if (i==5) {
+    legend("topright", c("truth", "post mean", "95% ci"), col=c(4,2,2),
+      lty=c(1,1,2), lwd=c(2,2,1), bg="white", cex=1.0)
+  }
+  if ((i-1) %% 5==0) {
+    axis(2)
+  } else {
+    axis(2, labels=FALSE)
+  }
+  axis(1)
+}
+mtext("density", side=2, outer=TRUE, line=1.75, at=0.75, cex=0.75)
+mtext("density", side=2, outer=TRUE, line=1.75, at=0.25, cex=0.75)
+mtext(expression(delta), side=1, outer=TRUE, line=0, at=seq(0.1, 0.9, length=5), cex=0.8)
 dev.off()
