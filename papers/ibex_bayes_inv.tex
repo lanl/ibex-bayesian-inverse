@@ -1210,80 +1210,81 @@ for future research endeavors.
 
 Section \ref{sec:synth_data} showcased the ability of our Poisson Bayesian
 inverse problem framework to recover the ``true'' model parameters $u$ from
-synthetic satellite data. In particular, we made the claim that both sky maps in
-Figure \ref{f:ibex_synth_ex} (bottom left, top right) could have generated the
-ENA counts ``observed'' in the top left plot of that figure. This assertion was
-based on a purely visual assessment of the data and the estimated underlying ENA
-rate. A more empirical method to validate our claim is therough the probability
-integral transform
+synthetic satellite data. In particular, we made the claim that both sky maps
+in Figure \ref{f:ibex_synth_ex} (bottom left, top right) could have reasonably
+generated the ENA counts ``observed'' in the top left plot of that figure. This
+assertion was based on a purely visual assessment of the data and the estimated
+underlying ENA rate. A more empirical method to validate our claim could be via
+the probability integral transform
 \citep[PIT;][]{gneiting2007probabilistic,diebold1997evaluating,dawid1984present}.
 
 PIT values, frequently visualized in PIT histograms, are used to evaluate
 predictions and forecasts from a statistical model. In short, the PIT compares
-observed data to the CDFs of predictive distributions. If observations came from
-the predicted distributions, PIT values should be distributed uniformally
-between 0 and 1. For discrete data such as Poisson counts, PIT values will not
-be uniformally distributed, due to the step nature of the CDF. A randomized PIT
-is used in these scenarios
+observed data to the CDFs of predictive distributions. If observations came
+from the predicted distributions, PIT values should be distributed uniformally
+between 0 and 1. However, for discrete data such as our Poisson counts, PIT
+values will not be uniformally distributed, due to the step function nature of
+the CDF. A randomized PIT is used in these scenarios
 \citep{gneiting2014probabilistic,czado2009predictive}, as we will do for the
 IBEX data.
 
 Figure \ref{f:sim_pit_hist} displays PIT histograms for comparing synthetic
-counts and predicted ENA rates computed via a surrogate for our computer model
-$m(\cdot,\cdot)$ using estimated $u$-values. To keep it short, here we show only
-15 of the 36 cases from Figure \ref{f:synth_estimates_all}. Titles of each plot
-indicate the true model parameter $u^\star$ that was used to sample the
-synthetic data. If the data ``observed'' comes from a Poisson distribution with
-a mean surface $\lambda(X) = \hat{m}(u^\star, X)$, then we'd expect the PIT
-histogram to be distributed evenly between 0 and 1. This is certainly the case
-for all 15 histograms shown.  No siginifcant departure from a Uniform(0,1) is
-observed. Therefore, we can add further empirical backing to our visual
-assessment that estimates from our framework reasonably explain the data
-``observed.''
+counts to predicted ENA rates computed via a surrogate for our computer model
+$m(\cdot,\cdot)$ at estimated model parameter $\hat{u}$. To keep it short, here
+we show only 15 of the 36 cases from Figure \ref{f:synth_estimates_all}. Titles
+of each plot indicate the true model parameter $u^\star$ that was used to
+sample the synthetic data. If the data ``observed'' comes from a Poisson
+distribution with a mean surface $\lambda(X) = \hat{m}(\hat{u}, X)$, then we'd
+expect the PIT histogram to be distributed evenly between 0 and 1. This is
+certainly the case for all 15 histograms shown.  No siginifcant departure from
+a Uniform(0,1) is observed. Therefore, we can add further empirical backing to
+our visual assessment that estimates from our framework reasonably explain the
+data ``observed.''
 
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.5,trim=0 0 0 0,clip=TRUE]{sim_pit_hists.pdf}
 \caption{Probability integral transform (PIT) histograms for 15 sets of
-estimated parameters and their corresponding synthetic ``observed'' datasets.
-Red dashed lines are drawn at 1 to show where we'd expect the histograms to
+estimated sky maps and their corresponding synthetic ``observed'' datasets. Red
+dashed lines are drawn at 1 to show where we'd expect the histograms to
 approach as the number of draws goes to infinity.
 \label{f:sim_pit_hist}}
 \end{figure}
 
 In contrast to the results in Figure \ref{f:ibex_synth_ex} (and more broadly in
 Figure \ref{f:synth_estimates_all}), our Poisson Bayesian inverse problem
-framework struggles to estimate a value for $u$ that produces a map of ENA rates
-that is likely to have generated the actual data observed from the IBEX
+framework struggles to estimate a value for $u$ that produces a map of ENA
+rates that is likely to have generated the actual data observed from the IBEX
 satellite. This is due in large part to the insufficiencies of the IBEX
-simulator. To illustrate, consider Figure \ref{f:real_pit_hist}. Here we display
-PIT histograms produced by comparing IBEX satellite data to surrogate predicted
-sky maps using $u$-estimates from our framework. On the left we show results
-when satellite data from years 2009-2011 is used as the field data ($X^F, Y^F$).
-On the right we show results when treating years individually from 2012-2021 as
-($X^F, Y^F$). These panels correspond to Figures \ref{f:ibex_real_ex} and
-\ref{f:real_estimates_all}, respectively.
+simulator. To illustrate, consider Figure \ref{f:real_pit_hist}. Here we
+display PIT histograms produced by comparing IBEX satellite data to surrogate
+predicted sky maps using estimates of $u$ from our framework. On the left we
+show results when satellite data from years 2009-2011 is used as the field data
+($X^F, Y^F$). On the right we show results when treating years individually
+from 2012-2021 as ($X^F, Y^F$). These panels correspond to Figures
+\ref{f:ibex_real_ex} and \ref{f:real_estimates_all}, respectively.
 
 The departure from uniformity is clear. For years 2009-2011, we see
 crater-shaped histograms, indicating that the predicted ENA rate surface does
 not sufficiently account for the extreme observations in the satellite data.
-That is, the observed data fell too frequently in both tails of our predicted
+That is, the observed data fell too frequently in the tails of our predicted
 distribution. This is consistent with the spatially-varying discrepancy we
 observed in Figure \ref{f:ibex_disc}. For years 2012-2021, we see a different,
 though consistent, behavior. Although individual years vary, each PIT histogram
-is right-skewed. This means with the estimated $u$, the output from the IBEX
-computer model, or the surrogate fit on the simulator output, is systematically
-overpredicting the ENA rates for the years 2012-2021.
+is right-skewed. This means that with the estimated $u$, the output from the
+IBEX computer model, or the surrogate fit on the simulator output, is
+systematically overpredicting the ENA rates for the years 2012-2021.
 
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.5,trim=0 0 0 0,clip=TRUE]{real_pit_hists.pdf}
 \includegraphics[scale=0.9,trim=17 0 0 0,clip=TRUE]{real_pit_hists_all_years.pdf}
-\caption{Probability integral transform (PIT) histograms for estimated
-parameters on real IBEX satellite data. The left panel displays PIT histograms
-for estimates from combined years 2009-2011. PIT histograms for individual years
-2012-2021 are shown on the right. U-shaped PIT histograms indicate
-underdisperson. Right-skewed PIT histograms indicate consistent overprediction.
+\caption{Probability integral transform (PIT) histograms comparing ENA counts
+collected by IBEX and predicted sky map from estimated model parameters. The
+left panel displays PIT histograms for estimates from combined years 2009-2011.
+PIT histograms for individual years 2012-2021 are shown on the right. U-shaped
+PIT histograms indicate underdisperson. Right-skewed PIT histograms indicate
+consistent overprediction.
 \label{f:real_pit_hist}}
 \end{figure}
 
@@ -1291,24 +1292,24 @@ underdisperson. Right-skewed PIT histograms indicate consistent overprediction.
 \label{app:scale_disc}
 
 Equation \ref{eq:mod_with_disc} introduces a simple, multiplicative term
-$\delta$ to try and account for the gap between the predicted ENA rates and ENA
-counts observed by IBEX. Unsurprisingly, we discovered that it was insufficient
-to account for the spatially-varying, nonstationary discrepancy present in the
-satellite data. However, we gave no evidence to suggest that, if there indeed
-only was a multicplicative discrepancy, our updated model would be able to
-correctly identify it. Therefore, in order to verify that our scale discrepancy
-actually works, we conducted an experiment on simulated data that fall within
-that model class.
+$\delta$ in an attempt to account for the gap between the predicted ENA rates
+and ENA counts observed by IBEX. Unsurprisingly, we discovered that this
+multiplicative scale was insufficient to account for the spatially-varying,
+nonstationary discrepancy present in the satellite data. However, we gave no
+evidence to suggest that, if indeed there only existed a multiplicative
+discrepancy, our updated model would be able to correctly identify it.
+Therefore, in order to verify that our scale discrepancy actually works, we
+conducted an experiment on simulated data that fall within that model class.
 
 First, we select one sky map from the simulator output corresponding to one of
-the $n =66$ $u$-values and set as $\lambda^\star$. Next, we scale
-$\lambda^\star$ by $\delta$ and add the background rate $\lambda_b$. Then, we
-generate synthetic satellite data via counts drawn from a Poisson, $Y_i^F \sim
-\mathrm{Pois}(\lambda_i^\star * \delta + \lambda_{b_i}, e_i)$ for given exposure
-times $e_i$. Finally, we run our Algorithm \ref{alg:gibbs}, modified slightly to
-sample for a multiplicative scale discrepancy, and calculate a posterior mean
-and 95\% credible intervals for $\delta$. We repeat this process for 10
-different values of $\delta$.
+the $n =66$ $u$-values and set this as $\lambda^\star$. Next, we both scale
+$\lambda^\star$ by $\delta$ and add in the background rate, $\lambda_b$. Then,
+we generate synthetic satellite data via counts drawn from a Poisson, $Y_i^F
+\sim \mathrm{Pois}(\lambda_i^\star * \delta + \lambda_{b_i}, e_i)$ for given
+exposure times $e_i$. Finally, we run Algorithm \ref{alg:gibbs}, modified
+slightly to sample for a multiplicative scale discrepancy, and calculate a
+posterior mean and 95\% credible intervals for $\delta$. We repeat this process
+for 10 different values of $\delta$.
 
 \begin{figure}[ht!]
 \centering
@@ -1316,21 +1317,22 @@ different values of $\delta$.
 \caption{Posterior samples of a multiplicative scale discrepancy, $\delta$. Each
 panel corresponds to a Metropolis sampler run on synthetic data artificially
 scaled by separate known constants ($\delta_{true}$). True values marked in
-blue. Posterior mean and 95\% credible intervals shown in red.
+blue. Posterior means and 95\% credible intervals shown in red.
 \label{f:scale_disc_samples}}
 \end{figure}
 
 Figure \ref{f:scale_disc_samples} shows histograms of posterior samples of
-$\delta$ as estimated densities. We restrict the $y$-axis limits to be the same,
-which causes different bar heights among the 10 plots due to the variation in
-spread of the posterior samples on the $x$-axes. In each of the 10 test cases,
-our framework is able to recover the true value of $\delta$. Although not shown
-here, it's important to mention that in addition to successfully estimating
-$\delta$, our framework also recovered the true $u$-values used to generate the
-synthetic data at the nominal 95\% rate. Therefore, we can be confident that had
-the disparity between the IBEX simulator and the IBEX satellite data been in the
-form of a multiplicative scale, our method would be able to identity it. Alas,
-we look forward to future work exploring more sophisticated discrepancy models
-and better capturing the mismatch between simulator and reality.
+$\delta$ as estimated densities. We restrict the $y$-axis limits to be the
+same, which causes different bar heights among the plots due to the variation
+in spread of the posterior samples on the $x$-axes. In each of the 10 test
+cases, our framework is able to recover the true value of $\delta$. Although
+not shown here, it's important to mention that in addition to successfully
+estimating $\delta$, our framework also recovered the true $u$-values used to
+generate the synthetic data at the nominal 95\% rate. Therefore, we can be
+confident that had the disparity between the IBEX simulator and the IBEX
+satellite data been in the form of a multiplicative scale, our method would be
+able to identity it. Alas, we look forward to future work exploring more
+sophisticated discrepancy models and better capturing the mismatch between
+simulator and reality.
 
 \end{document}
