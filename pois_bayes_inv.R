@@ -20,8 +20,8 @@ source("check.R")
 # @param T number of McMC iterations
 # @param init list containing initial values (u)
 # @param settings list containing settings (step size for random walk, beta
-## parameter for prior on u, conditioning set size for Scaled Vecchia, and a
-## flag indicating if a multiplicative scale discrepancy should be sampled)
+# parameter for prior on u, conditioning set size for Scaled Vecchia, and a
+# flag indicating if a multiplicative scale discrepancy should be sampled)
 # @param vb flag indicating verbose output
 #
 # @return list with posterior samples of model parameters and corresponding
