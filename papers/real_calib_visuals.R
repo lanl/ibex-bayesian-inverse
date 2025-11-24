@@ -483,16 +483,7 @@ Fy1 <- ppois(field_data$sim_counts - 1, (preds+field_data$background)*field_data
 # Randomized PIT for discrete distributions
 pit <- Fy1 + runif(length(field_data$sim_counts)) * (Fy - Fy1)
 
-pdf("real_pit_hists.pdf", width=5.0, height=5.0)
-par(mfrow=c(1, 1), mar=c(5.1, 4.1, 2.1, 2.1), oma=c(0, 0, 0, 0),
-  mgp=c(3.0, 0.7, 0))
-##### Display in histogram
-hist(pit, breaks=20, main="2009-2011", xlab="Probability Integral Transform", ylab="Density",
-  col="lightgray", border="white", freq=FALSE, cex.main=1.5)
-abline(h=1, col="red", lwd=2, lty=2)
-dev.off()
-
-# Create plot for all years
+# Create data for plots for all years
 ### Read in calibration results
 res <- readRDS("final_results/real_calib_results_all_years.rds")
 ### Read in data
@@ -544,27 +535,36 @@ for (i in 4:(length(res)-1)) {
   }
 }
 
-pdf("real_pit_hists_all_years.pdf", width=5, height=2.75)
-par(mfrow=c(2, 5), mar=c(0.9, 1.2, 1.0, 0.3), oma=c(2.0, 2.0, 0, 0),
-  mgp=c(1.0, 0.7, 0))
+pdf("real_pit_hists.pdf", width=10.5, height=5.625)
+layout(matrix(c(1,1,2:6,1,1,7:11), nrow=2, byrow=TRUE))
+par(mar=c(0.9, 1.2, 1.0, 0.3), mgp=c(1.0, 0.7, 0), oma=c(3.5, 2.25, 0.5, 0.5),
+  cex.main=1.5, cex.axis=0.9)
+# par(mar=c(5.1, 4.1, 2.1, 2.1), oma=c(0, 0, 0, 0),
+  # mgp=c(3.0, 0.7, 0))
+##### Display in histogram
+hist(pit, breaks=20, main="", xlab="", ylab="",
+  col="lightgray", border="white", freq=FALSE)
+title(main="2009-2011", line=-1)
+abline(h=1, col="red", lwd=2, lty=2)
 ### For each calibration result
 for (i in 1:length(pits)) {
   ##### Display in histogram
-  hist(pits[[i]], breaks=20, main=res[[i+3]]$year, ylab="",
+  hist(pits[[i]], breaks=20, main="", ylab="",
     xlab="", col="lightgray", border="white", freq=FALSE,
-    axes=FALSE, cex.main=1.1, ylim=c(0, ymax))
+    axes=FALSE, ylim=c(0, ymax))
+  title(main=res[[i+3]]$year, line=-1)
   abline(h=1, col="red", lwd=1, lty=2)
   if ((i-1) %% 5==0) {
-    axis(2, at=seq(0, ymax, by=0.5), cex.axis=0.65)
+    axis(2, at=seq(0, ymax, by=0.5))
   } else {
-    axis(2, at=seq(0, ymax, by=0.5), labels=FALSE, cex.axis=0.65)
+    axis(2, at=seq(0, ymax, by=0.5), labels=FALSE)
   }
   if (i > 5*(2-1)) {
-    axis(1, at=seq(0, 1, by=0.25), cex.axis=0.65)
+    axis(1, at=seq(0, 1, by=0.25))
   } else {
-    axis(1, at=seq(0, 1, by=0.25), labels=FALSE, cex.axis=0.65)
+    axis(1, at=seq(0, 1, by=0.25), labels=FALSE)
   }
 }
-mtext("Probability Integral Transform", side=1, outer=TRUE, line=1.0, cex=0.6)
-mtext("Density", side=2, outer=TRUE, line=0.3, cex=0.6)
+mtext("Probability Integral Transform", side=1, outer=TRUE, line=2.0, cex=0.9)
+mtext("Density", side=2, outer=TRUE, line=1.0, cex=0.9)
 dev.off()
