@@ -6,7 +6,7 @@
 ###############################################################################
 
 ## global settings
-ibex_palette <- read.csv("../ibex_rgb.csv")
+ibex_palette <- read.csv("ibex_rgb.csv")
 ibex_palette <- ibex_palette[2:255,]
 noselongitude <- 256
 center <- 180 - (360 - noselongitude)

@@ -7,7 +7,7 @@
 
 ## global settings
 ena_range <- c(0.04174779, 0.18753771)
-ibex_palette <- read.csv("../ibex_rgb.csv")
+ibex_palette <- read.csv("ibex_rgb.csv")
 noselongitude <- 256
 center <- 180 - (360 - noselongitude)
 orig_360 <- seq(0,300,60)
