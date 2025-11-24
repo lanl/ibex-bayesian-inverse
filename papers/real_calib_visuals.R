@@ -535,24 +535,25 @@ for (i in 4:(length(res)-1)) {
   }
 }
 
-pdf("real_pit_hists.pdf", width=10.5, height=5.625)
+pdf("real_pit_hists.pdf", width=13.5, height=5.625)
 layout(matrix(c(1,1,2:6,1,1,7:11), nrow=2, byrow=TRUE))
-par(mar=c(0.9, 1.2, 1.0, 0.3), mgp=c(1.0, 0.7, 0), oma=c(3.5, 2.25, 0.5, 0.5),
-  cex.main=1.5, cex.axis=0.9)
+par(mar=c(0.9, 1.2, 1.0, 1.8), mgp=c(1.0, 0.7, 0), oma=c(4.0, 2.75, 0.5, 0.5),
+  cex.main=2.0, cex.axis=1.1)
 # par(mar=c(5.1, 4.1, 2.1, 2.1), oma=c(0, 0, 0, 0),
   # mgp=c(3.0, 0.7, 0))
 ##### Display in histogram
 hist(pit, breaks=20, main="", xlab="", ylab="",
   col="lightgray", border="white", freq=FALSE)
-title(main="2009-2011", line=-1)
+title(main="2009-2011", line=-1.5)
 abline(h=1, col="red", lwd=2, lty=2)
 ### For each calibration result
+par(mar=c(0.9, 1.2, 1.0, 0.3))
 for (i in 1:length(pits)) {
   ##### Display in histogram
   hist(pits[[i]], breaks=20, main="", ylab="",
     xlab="", col="lightgray", border="white", freq=FALSE,
     axes=FALSE, ylim=c(0, ymax))
-  title(main=res[[i+3]]$year, line=-1)
+  title(main=res[[i+3]]$year, line=-1.5)
   abline(h=1, col="red", lwd=1, lty=2)
   if ((i-1) %% 5==0) {
     axis(2, at=seq(0, ymax, by=0.5))
@@ -565,6 +566,6 @@ for (i in 1:length(pits)) {
     axis(1, at=seq(0, 1, by=0.25), labels=FALSE)
   }
 }
-mtext("Probability Integral Transform", side=1, outer=TRUE, line=2.0, cex=0.9)
-mtext("Density", side=2, outer=TRUE, line=1.0, cex=0.9)
+mtext("Probability Integral Transform", side=1, outer=TRUE, line=2.75, cex=1.1)
+mtext("Density", side=2, outer=TRUE, line=1.5, cex=1.1)
 dev.off()
