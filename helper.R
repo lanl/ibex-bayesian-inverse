@@ -8,67 +8,44 @@ library(tmvtnorm)
 #
 # @param md data frame containing data from a computer model
 # @param fd data frame containing data from field (e.g. satellite) experiment
-# @param esa_lev energy level of ENAs to use in this calibration
-# @param fparams parameters (pmfp, ratio) of simulated field data to use
-# @param scales scaling values for calibration parameters
-# @param tol tolerance of how much data should change to remain in dataset
-# @param quant quantile of data to keep in data set
-# @param real flag indicating if real data should be used in this calibration
+# @param map year(s) (aka map(s)) to use as field data
+# @param esa_lev energy level of ENAs to use from the field data
 #
-# @return list with cleaned data prepared for calibration: Xmod, Umod, Zmod,
-# Xfield, Zfield, Ofield, and settings used in preprocessing
+# @return list with cleaned data with inputs scaled to 0-1: xm, um, ym, xf, yf,
+# exposure times, backgrounds, and settings used in preprocessing
 ###############################################################################
-preprocess_data <- function(md, fd, esa_lev, fparams, scales, tol=NA,
-  quant=NA, real=FALSE, disc=FALSE) {
+preprocess_data <- function(md, fd, map, esa_lev) {
 
   md$pmfp <- md$parallel_mean_free_path
-  if (!real) {
-    fd$pmfp <- fd$parallel_mean_free_path
-    if (disc) {
-      fd <- fd %>% dplyr::filter(near(scl, fparams[1]), time > 0)
-    } else {
-      fd <- fd %>% dplyr::filter(esa==esa_lev, pmfp==fparams[1],
-        ratio==fparams[2], time > 0)
-    }
-  } else{
-    fd <- fd %>% dplyr::filter(esa==esa_lev, map %in% fparams, time > 0)
+  md <- md[md$ESA == esa_lev,]
+  fd <- fd[fd$esa==esa_lev & fd$map %in% map & fd$time > 0,]
+
+  um <- as.matrix(md[,c("pmfp", "ratio")])
+  xm <- as.matrix(geo_to_spher_coords(md$lat, md$lon))
+  ym <- md$blurred_ena_rate
+  xf <- as.matrix(geo_to_spher_coords(fd$lat, fd$lon))
+  colnames(xm) <- colnames(um) <- colnames(xf) <- NULL
+  ## pull counts, exposure times, and background rates from field data
+  yf <- fd$counts
+  e <- fd$time
+  bg <- fd$background
+
+  xall <- rbind(xm, xf)
+
+  for (i in 1:ncol(xall)) {
+    xm[,i] <- (xm[,i] - min(xall[,i]))/diff(range(xall[,i]))
+    xf[,i] <- (xf[,i] - min(xall[,i]))/diff(range(xall[,i]))
   }
 
-  Xmod <- md %>% dplyr::filter(ESA==esa_lev)
-  Umod <- Xmod %>% dplyr::select(pmfp, ratio)
-
-  Xfield <- fd
-
-  Xmod[,c("x", "y", "z")] <- geo_to_spher_coords(Xmod$lat, Xmod$lon)
-  Xmod <- Xmod %>% dplyr::select(x, y, z)
-  Zmod <- md %>%
-    dplyr::filter(ESA==esa_lev) %>%
-    dplyr::pull(blurred_ena_rate)
-
-  Xfield[,c("x", "y", "z")] <- geo_to_spher_coords(Xfield$lat, Xfield$lon)
-  Zfield <- Xfield %>% dplyr::pull(sim_counts)
-  Ofield <- Xfield %>%
-    dplyr::select(time, background) %>%
-    dplyr::rename(bg=background)
-  Xfield <- Xfield %>% dplyr::select(x, y, z)
-
-  Xall <- rbind(Xmod, Xfield)
-
-  for (i in 1:ncol(Xall)) {
-    Xmod[,i] <- (Xmod[,i] - min(Xall[,i]))/diff(range(Xall[,i]))
-    Xfield[,i] <- (Xfield[,i] - min(Xall[,i]))/diff(range(Xall[,i]))
+  for (i in 1:ncol(um)) {
+    umin <- min(umod[,i])
+    umax <- max(umod[,i])
+    urange <- diff(range(umod[,i]))
+    umod[,i] <- (umod[,i] - umin)/(urange)
   }
 
-  for (i in 1:ncol(Umod)) {
-    Umin <- min(Umod[,i])
-    Umax <- max(Umod[,i])
-    Urange <- diff(range(Umod[,i]))
-    Umod[,i] <- (Umod[,i] - Umin)/(Urange/scales[i])
-  }
-
-  return(list(Xmod=Xmod, Umod=Umod, Zmod=Zmod, Xfield=Xfield, Zfield=Zfield,
-    Ofield=Ofield, settings=list(esa=esa_lev, fparams=fparams, pmfp_sc=scales[1],
-    ratio_sc=scales[2])))
+  return(list(xm=xm, um=um, ym=ym, xf=xf, yf=yf, e=e, bg=bg,
+    settings=list(map=map, esa=esa_lev))
 }
 
 ###############################################################################
