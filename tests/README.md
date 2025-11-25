@@ -56,6 +56,8 @@ Each set can include bash scripts and/or R and Python code files.
   effectively model the IBEX simulator response. As above, predictive
   performance is measured through RMSE, proper uncertainty quantification is
   assessed via CRPS, and computational thriftiness is evaluated by varying
-  simulator response dimension and training set size..
+  simulator response dimension and training set size. Documentation on SEPIA's
+  implementation and user guidance can be found here:
+  https://sepia-lanl.readthedocs.io/en/latest/
 - Required data: `sims.csv`
 - Figures: 6, 7, 8

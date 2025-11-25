@@ -7,6 +7,34 @@ generated throughout the heliosphere. The goal is to estimate the posterior
 distributions of the input parameter to the computer simulation, given observed
 data from the IBEX satellite.
 
+Descriptions of directories and files contained in the top-level directory are
+below.
+
+### Directories
+
+- **data**: contains IBEX satellite data, computer model simulation output, and
+  synthetic satellite data for testing purposes provided in this dataset
+- **papers**: includes any content necessary to compile the manuscript along
+  with `R` scripts for toy examples and figure generation
+- **presentations**: code used to produce figures and documents for conference
+  presentations
+- **tests**: various bash, `Python`, and `R` scripts conducting tests to
+  evaluate the performance and functionality of our proposed Poisson Bayesian
+  inverse problem framework
+
+## Files
+
+- `pois_bayes_inv.R`: contains the function that implements the proposed
+  Poisson Bayesian inverse problem framework. Requires computer model
+  input/output and field observations
+- `mcmc.R`: support functions for our Markov chain Monte Carlo (MCMC),
+  including proposals and likelihood evaluations
+- `helper.R`: contains functions that aid in the processing of IBEX satellite
+  and simulator data, particulary in preparation for running our Bayesian
+  inverse problem method
+- `check.R`: input validation functions
+- `vecchia_scaled.R`: original implementation of the Scaled Vecchia GP approximation for use as a surrogate model of the IBEX simulator. Original code found here: https://github.com/katzfuss-group/scaledVecchia
+
 ---
 
 Copyright 2023 for **O4646**
