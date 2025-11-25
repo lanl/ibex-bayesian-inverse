@@ -2,7 +2,7 @@ library(doParallel)
 library(parallel)
 
 ###############################################################################
-#### Conducts Bayesian Computer Model Calibration for the data collected by
+#### Solves a Bayesian inverse problem for particle counts collected by
 #### the Interstellar Boundary Explorer satellite. Uses the Scaled Vecchia GP
 #### approximation to fit surrogate model from the computer model output.
 #### DATA NEEDED: sims.csv, ibex_real.csv, synth_sat_data.csv
