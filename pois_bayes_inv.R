@@ -87,7 +87,7 @@ pois_bayes_inv <- function(xm, um, ym, xf, yf, e, lam0, T,
     # sample multiplicative discrepancy
     if (settings$sample_scl) {
 
-      logscl_star <- propose_logscl(curr=logscls[t-1], sd=0.1)
+      logscl_star <- propose_logscl(lscl_curr=logscls[t-1], sd=0.1)
 
       ### calculate proposed likelihood
       ll_star <- ll_pois(lambda=lam_star*exp(logscl_star$prop)+lam0,
@@ -102,7 +102,7 @@ pois_bayes_inv <- function(xm, um, ym, xf, yf, e, lam0, T,
 
       ## accept or reject
       if (lmh > log(runif(n=1))) {
-        logscl[t,] <- logscl_star$prop
+        logscls[t] <- logscl_star$prop
         lls[t] <- ll_star
       } else {
         logscls[t] <- logscls[t-1]
