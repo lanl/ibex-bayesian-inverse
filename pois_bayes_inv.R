@@ -2,8 +2,9 @@ library(GPvecchia)
 library(GpGp)
 library(laGP)
 
-source("vecchia_scaled.R")
 source("check.R")
+source("mcmc.R")
+source("vecchia_scaled.R")
 
 ###############################################################################
 # Runs Markov chain Monte Carlo (McMC) for a Poisson Bayesian inverse problem.
@@ -56,8 +57,7 @@ pois_bayes_inv <- function(xm, um, ym, xf, yf, e, lam0, T,
   for (t in 2:T) {
     # sample model parameter u
     ## propose u*
-    ustar <- propose_u(curr=us[t-1,], method="tmvnorm", pcovar=ucov,
-      pmin=c(0,0), pmax=c(1,1))
+    ustar <- propose_u(ucurr=us[t-1,], method="tmvnorm", ucov=ucov)
     ## predict lambda*
     xuf[,(px+1):p] <- matrix(rep(ustar$prop, nf), nrow=nf, byrow=TRUE)
     lam_star <- predictions_scaled(fit, xuf, m=settings$m, joint=FALSE)

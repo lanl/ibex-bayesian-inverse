@@ -15,7 +15,7 @@
 propose_u <- function(ucurr, method, umin=0, umax=1,
   ucov=diag(1, length(ucurr))) {
 
-  } if (method=="unif") {
+  if (method=="unif") {
     ## Propose u_prime from a unit hypercube (centered around current value)
     mins <- apply(matrix(c(ucurr, 1-ucurr), ncol=2, byrow=FALSE), 1, min)
     maxs <- apply(matrix(c(ucurr, 1-ucurr), ncol=2, byrow=FALSE), 1, max)

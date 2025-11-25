@@ -23,7 +23,7 @@ preprocess_data <- function(md, fd, map, esa_lev) {
   um <- as.matrix(md[,c("pmfp", "ratio")])
   xm <- as.matrix(geo_to_spher_coords(md$lat, md$lon))
   ym <- md$blurred_ena_rate
-  xf <- as.matrix(geo_to_spher_coords(fd$lat, fd$lon))
+  xf <- as.matrix(geo_to_spher_coords(fd$ecliptic_lat, fd$ecliptic_lon))
   colnames(xm) <- colnames(um) <- colnames(xf) <- NULL
   ## pull counts, exposure times, and background rates from field data
   yf <- fd$counts
@@ -38,14 +38,14 @@ preprocess_data <- function(md, fd, map, esa_lev) {
   }
 
   for (i in 1:ncol(um)) {
-    umin <- min(umod[,i])
-    umax <- max(umod[,i])
-    urange <- diff(range(umod[,i]))
-    umod[,i] <- (umod[,i] - umin)/(urange)
+    umin <- min(um[,i])
+    umax <- max(um[,i])
+    urange <- diff(range(um[,i]))
+    um[,i] <- (um[,i] - umin)/(urange)
   }
 
   return(list(xm=xm, um=um, ym=ym, xf=xf, yf=yf, e=e, bg=bg,
-    settings=list(map=map, esa=esa_lev))
+    settings=list(map=map, esa=esa_lev)))
 }
 
 ###############################################################################
