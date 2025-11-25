@@ -1,9 +1,19 @@
+###############################################################################
+#### Testing speed of surrogate fits and predictions on IBEX simulator data.
+#### Methods tested are Scaled Vecchia, laGP, and deepgp with one layer. Each
+#### method is tested with varying dimension size and varying number of
+#### simulator runs, depending on user input.
+####
+#### DATA NEEDED: sims.csv
+###############################################################################
+
 library(deepgp)
-library(dplyr)
 library(laGP)
 
-source("../helper.R")
-source('../vecchia_scaled.R')
+setwd("..")
+source("helper.R")
+source("vecchia_scaled.R")
+setwd("automations")
 
 seed <- 781691
 inc_out <- 1

@@ -2,6 +2,8 @@
 #### Cross-validation code for solving a Bayesian inverse problem for counts
 #### collected by the Interstellar Boundary Explorer satellite. Uses field data
 #### from 2009-2011. Results will be used to calculate CRPS on held out data.
+####
+#### DATA NEEDED: sims.csv, ibex_real.csv
 ###############################################################################
 
 library(scoringRules)

@@ -6,6 +6,8 @@
 #### times come from a year specified by the user that the Interstellar
 #### Boundary Explorer has been in operation. Rate of ENAs at these
 #### locations is determined by the IBEX simulator.
+####
+#### DATA NEEDED: sims.csv, ibex_real.csv
 ###############################################################################
 
 setwd("..")

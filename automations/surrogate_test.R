@@ -1,8 +1,18 @@
+###############################################################################
+#### Hold one out testing of different surrogate methods: Scaled Vecchia,
+#### laGP, and deepgp with one layer. Testing data is from the IBEX
+#### simulator. Each of 66 unique simulator runs is used as a holdout set once.
+####
+#### DATA NEEDED: sims.csv
+###############################################################################
+
 library(deepgp)
 library(laGP)
 
-source("../helper.R")
-source('../vecchia_scaled.R')
+setwd("..")
+source("helper.R")
+source("vecchia_scaled.R")
+setwd("automations")
 
 start <- 1
 method <- "all"
@@ -16,7 +26,6 @@ if (length(args) > 0) {
     eval(parse(text=args[[i]]))
   }
 }
-print(args)
 settings <- list(seed=seed, method=method, start=start)
 print(settings)
 
