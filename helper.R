@@ -8,17 +8,22 @@ library(tmvtnorm)
 #
 # @param md data frame containing data from a computer model
 # @param fd data frame containing data from field (e.g. satellite) experiment
-# @param map year(s) (aka map(s)) to use as field data
+# @param map year(s) (aka map(s)) to use as field data. If map==NULL, parameter
+# is ignored and synthetic satellite field data that does not need filtering
+# is assumed
 # @param esa_lev energy level of ENAs to use from the field data
 #
 # @return list with cleaned data with inputs scaled to 0-1: xm, um, ym, xf, yf,
 # exposure times, backgrounds, and settings used in preprocessing
 ###############################################################################
-preprocess_data <- function(md, fd, map, esa_lev) {
+preprocess_data <- function(md, fd, map=NULL, esa_lev=4) {
 
   md$pmfp <- md$parallel_mean_free_path
   md <- md[md$ESA == esa_lev,]
-  fd <- fd[fd$esa==esa_lev & fd$map %in% map & fd$time > 0,]
+  fd <- fd[fd$esa==esa_lev & fd$time > 0,]
+  if (!is.null(map)) {
+    fd <- fd[fd$map %in% map,]
+  }
 
   um <- as.matrix(md[,c("pmfp", "ratio")])
   xm <- as.matrix(geo_to_spher_coords(md$lat, md$lon))

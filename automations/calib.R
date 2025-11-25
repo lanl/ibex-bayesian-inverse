@@ -1,145 +1,78 @@
 library(doParallel)
 library(parallel)
 
-source("../helper.R")
-source("../mcmc.R")
-
 ###############################################################################
 #### Conducts Bayesian Computer Model Calibration for the data collected by
-#### the Interstellar Boundary Explorer satellite. Uses scaled Vecchia
-#### approximation or locally approximated Gaussian processes to fit surrogate
-#### model from the computer model output.
+#### the Interstellar Boundary Explorer satellite. Uses the Scaled Vecchia GP
+#### approximation to fit surrogate model from the computer model output.
+#### DATA NEEDED: sims.csv, ibex_real.csv, synth_sat_data.csv
+###############################################################################
+
+setwd("..")
+source("pois_bayes_inv.R")
+source("helper.R")
+setwd("automations")
+
 ###############################################################################
 
 args <- R.utils::commandArgs(asValues=TRUE)
 
-## energy level of data to work with
-esa_lev <- ifelse(!is.null(args[["esa"]]), as.integer(args[["esa"]]), 4)
-## number of MCMC iterations to run
-nmcmcs <- ifelse(!is.null(args[["nmcmcs"]]), as.integer(args[["nmcmcs"]]), 10000)
-## specifies type of GP to fit (e.g. svecchia, laGP w/ nearest neighbors)
-gp <- ifelse(!is.null(args[["gp"]]), as.character(args[["gp"]]), "svecchia")
-## if using svecchia, m is the conditioning set size
-m <- ifelse(!is.null(args[["m"]]), as.character(args[["m"]]), 25)
-## if using laGP, end is the neighborhood size for each local GP
-end <- ifelse(!is.null(args[["end"]]), as.integer(args[["end"]]), 25)
-## if using laGP, number of threads to run during each fit
-thrds <- ifelse(!is.null(args[["threads"]]), as.integer(args[["threads"]]), 10)
-## maximum number of calibrations to perform at once (for the dopar loop)
-maxprocs <- ifelse(!is.null(args[["procs"]]), as.integer(args[["procs"]]), 6)
-## flag indicating if simulated field data should have discrepancy
-disc <- ifelse(!is.null(args[["d"]]), as.logical(args[["d"]]), FALSE)
-## number of discrepancy file to use
-disc_num <- ifelse(!is.null(args[["dnum"]]), as.numeric(args[["dnum"]]), NA)
-## flag indicating if the true u should be sent
-true_u <- ifelse(!is.null(args[["tu"]]), as.logical(args[["tu"]]), FALSE)
-## setting for true log scale
-true_logscl <- ifelse(!is.null(args[["tls"]]), as.numeric(args[["tls"]]), NA)
-## flag indicating if field data in calibration should be real or simulated
+## flag indicating if field data in inverse problem should be real or synthetic
 real <- ifelse(!is.null(args[["r"]]), as.logical(args[["r"]]), FALSE)
-## if using simulated field data, what the true PMFP and ratio should be
-fpmfp <- ifelse(!is.null(args[["fpmfp"]]), as.numeric(args[["fpmfp"]]), 2500)
-fratio <- ifelse(!is.null(args[["fratio"]]), as.numeric(args[["fratio"]]), 0.05)
 ## if using real field data, what year it should come from
-fyear <- ifelse(!is.null(args[["fyear"]]), args[["fyear"]], "2009A")
-## file that contains multiple parameter combinations for field data
-infile <- ifelse(!is.null(args[["infile"]]), as.character(args[["infile"]]), NA)
-## amount the PMFP and ratio should be scaled before fitting (used for laGP)
-psc <- ifelse(!is.null(args[["psc"]]), as.numeric(args[["psc"]]), 1)
-rsc <- ifelse(!is.null(args[["rsc"]]), as.numeric(args[["rsc"]]), 1)
-## step size for random walk in McMC
-step_size <- ifelse(!is.null(args[["step"]]), as.numeric(args[["step"]]), 0.06517432)
-## quantile of changes in y below which to remove points
-quant <- ifelse(!is.null(args[["quant"]]), as.numeric(args[["quant"]]), 0.0)
-## tolerance of changes in y below which to remove points
-tol <- ifelse(!is.null(args[["tol"]]), as.numeric(args[["tol"]]), NA)
-## flag to turn on "debug" mode, which will save more output
-debug <- ifelse(!is.null(args[["debug"]]), as.logical(args[["debug"]]), FALSE)
+year <- ifelse(!is.null(args[["y"]]), args[["y"]], NULL)
+## file that contains multiple parameter combinations for synthetic field data
+infile <- ifelse(!is.null(args[["if"]]), as.character(args[["if"]]), NULL)
 ## flag to print more output to screen
 vb <- ifelse(!is.null(args[["v"]]), as.logical(args[["v"]]), FALSE)
-settings <- list(esa_lev=esa_lev, nmcmcs=nmcmcs, gp=gp, m=m, end=end, thrds=thrds,
-  maxprocs=maxprocs, disc=disc, disc_num=disc_num, real=real, fpmfp=fpmfp,
-  fratio=fratio, fyear=fyear, infile=infile, psc=psc, rsc=rsc,
-  step_size=step_size, quant=quant, tol=tol, debug=debug, vb=vb,
-  true_u=true_u, true_logscl=true_logscl)
+settings <- list(real=real, year=year, infile=infile, vb=vb)
 if (vb) print(settings)
 
 model_data <- read.csv(file="../data/sims.csv")
-if (!real) {
-  if (disc) {
-    disc_files <- list.files(path="../data", pattern="sims_bias_2020A_p*")
-    if (is.na(disc_num) || disc_num > length(disc_files)) {
-      stop("Incorrect number of discrepancy file specified")
-    }
-    field_data <- read.csv(file=paste0("../data/", disc_files[disc_num]))
-  } else {
-    field_data <- read.csv(file="../data/sims_real.csv")
-  }
-} else {
+if (real) {
   field_data <- read.csv(file="../data/ibex_real.csv")
-  field_data <- field_data %>% dplyr::rename(sim_counts=counts,
-    lat=ecliptic_lat, lon=ecliptic_lon)
-}
-
-if (!is.na(infile)) {
+  if (is.null(year)) {
+    stop("must specify a year")
+  }
+  if (year=="all") {
+    cpars <- matrix(2009:2022, ncol=1)
+  } else if (year=="mod_align") {
+    cpars <- matrix(2009)
+  } else {
+    cpars <- matrix(year)
+  }
+} else {
+  field_data <- read.csv(file="../data/synth_sat_data.csv")
+  if (is.null(infile)) {
+    stop("must specify a file with unique model parameter combinations")
+  }
   cpars <- read.csv(file=infile, head=TRUE)
-} else if (disc) {
-  cpars <- data.frame(matrix(data=unique(field_data$scl)))
-  names(cpars) <- c("scl")
-} else {
-  if (!real) {
-    cpars <- data.frame(matrix(data=c(fpmfp, fratio), nrow=1))
-    names(cpars) <- c("pmfp", "ratio")
-  } else {
-    if (fyear=="all") {
-      cpars <- data.frame(matrix(data=paste0(2009:2022, "A")))
-    } else {
-      cpars <- data.frame(matrix(data=c(fyear)))
-    }
-    names(cpars) <- c("year")
-  }
 }
 
-if (!real) {
-  true_pmfp <- unique(field_data$parallel_mean_free_path)
-  true_ratio <- unique(field_data$ratio)
-}
-
-if (true_u) {
-  true_u <- c(true_pmfp, true_ratio)
-  settings$true_u <- true_u
-} else {
-  true_u <- NA
-}
-
-cl <- parallel::makeCluster(ifelse(nrow(cpars) < maxprocs, nrow(cpars),
-                                   maxprocs), outfile="../temp/log.txt")
+ncores <- detectCores()-1
+cl <- parallel::makeCluster(ifelse(nrow(cpars) < ncores, nrow(cpars), ncores),
+  outfile="log.txt")
 doParallel::registerDoParallel(cl)
-foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tidyverse",
-                                       "tmvtnorm")) %dopar% {
-  if (!real && !disc) {
-    fparams <- c(cpars[i,]$pmfp, cpars[i,]$ratio)
+foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tmvtnorm")) %dopar% {
+  if (real) {
+    if (year=="mod_align") {
+      map <- paste0(2009:2011, "A")
+    } else {
+      map <- paste0(cpars[i], "A")
+    }
   } else {
-    fparams <- c(cpars[i,])
+    field_data <- field_data[field_data$parallel_mean_free_path==cpars[i,c("pmfp")] &
+      field_data$ratio==cpars[i,c("ratio"),],]
+    field_data$counts <- field_data$sim_counts
+    field_data$ecliptic_lon <- field_data$lon
+    field_data$ecliptic_lat <- field_data$lat
+    map <- NULL
   }
-  pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=esa_lev,
-    fparams=fparams, scales=c(psc, rsc), tol=tol, quant=quant, real=real,
-    disc=disc)
-  mcmc_res <- mcmc(Xm=pd$Xmod, Um=pd$Umod, Zm=pd$Zmod, Xf=pd$Xfield,
-    Zf=pd$Zfield, Of=pd$Ofield, m=m, nmcmcs=nmcmcs, step=step_size,
-    gpmeth=gp, end=end, thrds=thrds, vb=vb, debug=debug,
-    true_u=true_u, true_logscl=true_logscl)
-  settings$truth <- list(pmfp=true_pmfp, ratio=true_ratio, scl=fparams)
-  res <- list(mcmc_res=mcmc_res, settings=settings, esa=esa_lev, nmcmcs=nmcmcs,
-   threads=thrds, params=fparams, real=real, step=step_size, pmfp_scale=psc,
-   ratio_scale=rsc)
-  saveRDS(res, file=paste0("../results/mcmc_res_esa", esa_lev, "_nmcmc", nmcmcs,
-    "_end", end, "_sc", strsplit(as.character(psc), split='\\.')[[1]][2],
-    "_quant", strsplit(as.character(quant), split='\\.')[[1]][2],
-    ifelse(gp=="svecchia", "_svecchia", ""),
-    ifelse(real, paste0("_real", fparams[1]),
-           paste0("_pmfp", fparams[1], "_rat",
-                  strsplit(as.character(fparams[2]), split='\\.')[[1]][2])),
+  pd <- preprocess_data(md=model_data, fd=field_data, map=map)
+  res <- pois_bayes_inv(xm=pd$xm, um=pd$um, ym=pd$ym, xf=pd$xf, yf=pd$yf, e=pd$e,
+    lam0=pd$bg, T=10000)
+  saveRDS(res, file=paste0("pois_bayes_inv_res_",
+    ifelse(real, map, paste0("pmfp_", cpars[i,c("pmfp")], "_rat", cpars[i,c("ratio")])),
     format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
 }
 parallel::stopCluster(cl)

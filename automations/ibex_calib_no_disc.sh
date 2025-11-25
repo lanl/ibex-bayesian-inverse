@@ -12,5 +12,5 @@ module load R/4.1.0-foss-2021a
 export OMP_NUM_THREADS=2
 
 echo "Started script"
-R CMD BATCH "--args -debug -v --procs=33 --infile=../temp/inputs.txt" calib.R
+R CMD BATCH "--args -v --infile=inputs.txt" calib.R
 echo "Finished calibration script"
