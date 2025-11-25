@@ -12,13 +12,12 @@ source("helper.R")
 setwd("automations")
 
 seed <- 711930
-fold_seed <- 12937120
+fold_seed <- fid <- 1
 ncvs <- 10
-fid <- 1
 nmcmcs <- 10000
 
 ## read in the command line arguments
-## run with: R CMD BATCH '--args seed=711930 fold_seed=12937120 ncvs=10 fid=1 nmcmcs=10000' real_data_cv.R
+## run with: R CMD BATCH '--args seed=711930 fold_seed=1 ncvs=10 fid=1 nmcmcs=10000' real_data_cv.R
 args <- commandArgs(TRUE)
 if (length(args) > 0) {
   for(i in 1:length(args)) {
@@ -131,6 +130,7 @@ res <- list(res=res, crps_pmfp=crps_pmfp, crps_ratio=crps_ratio,
   crps_grid=crps_grid, pmfp_grid=pmfps, ratio_grid=ratios, grid=grid,
   post_mean=post_mean, settings=list(seed=seed, ncvs=ncvs, fid=fid))
 
-saveRDS(res, file=paste0("results/real_data_cv_fold", fid, "_seed", seed,
+saveRDS(res, file=paste0("real_data_cv_fold", fid, "_seed", seed,
   format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
+## remove saved RData files
 unlink(paste0("real_data_cv_", fold_seed, "_", seed, ".RData"))

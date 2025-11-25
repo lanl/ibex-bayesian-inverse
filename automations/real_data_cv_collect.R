@@ -1,8 +1,3 @@
-library(scoringRules)
-
-source("../helper.R")
-source("../vecchia_scaled.R")
-
 seed <- NA
 
 args <- commandArgs(TRUE)
@@ -15,9 +10,10 @@ if (is.na(seed)) {
   stop("Must provide a seed to collect results!")
 }
 
-files <- list.files(path="results",
-  pattern=paste0("real_data_cv_fold[1-9][0-9]{0,1}_seed", seed, "_[0-9]*.rds"))
-res <- readRDS(paste0("results/", files[1]))
+## list files for each fold
+files <- list.files(pattern=paste0("real_data_cv_fold[1-9][0-9]{0,1}_seed",
+  seed, "_[0-9]*.rds"))
+res <- readRDS(files[1])
 
 us <- array(NA, dim=c(nrow(res$res$u), ncol(res$res$u), length(files)))
 logscls <- matrix(NA, nrow=length(res$res$logscl), ncol=length(files))
@@ -35,8 +31,9 @@ colnames(post_means) <- c("pmfp", "ratio")
 
 settings <- list(seed=res$settings$seed, fids=rep(NA, length(files)))
 
+## read in results from each file
 for (i in 1:length(files)) {
-  res <- readRDS(paste0("results/", files[i]))
+  res <- readRDS(files[i])
   crps_pmfp[,i] <- res$crps_pmfp
   crps_ratio[,i] <- res$crps_ratio
   crps_grid[,i] <- res$crps_grid
@@ -50,5 +47,5 @@ for (i in 1:length(files)) {
 metrics <- list(crps_pmfp=crps_pmfp, crps_ratio=crps_ratio,
   crps_grid=crps_grid, pmfp_grid=pmfp_grid, ratio_grid=ratio_grid, grid=grid,
   post_means=post_means, us=us, logscls=logscls)
-saveRDS(metrics, file=paste0("../results/real_data_cv_metrics",
+saveRDS(metrics, file=paste0("real_data_cv_metrics",
   format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+###############################################################################
+#### Bash script for launch cross-validation codee for solving a Bayesian
+#### inverse problem. Details in real_data_cv.R
+###############################################################################
+
 #SBATCH -N 5
 #SBATCH --ntasks-per-node=20
 #SBATCH -t 24:00:00
@@ -11,6 +16,20 @@ module load parallel
 module load R/4.4.2-gfbf-2024a
 
 export OMP_NUM_THREADS=2
+
+if ! [[ $1 =~ ^[0-9]+$ ]];
+then
+  echo "Argument 1 must be an integer. Indicates number of MCMC iterations."
+  echo "Usage: real_data_cv.sh [number of mcmcs] [number of folds]"
+  exit 1
+fi
+
+if ! [[ $2 =~ ^[0-9]+$ ]];
+then
+  echo "Argument 2 must be an integer. Indicates number of cross-validation folds."
+  echo "Usage: real_data_cv.sh [number of mcmcs] [number of folds]"
+  exit 1
+fi
 
 nmcmc=$1 # number of mcmcs to run
 ncv=$2 # number of folds in cross validation
