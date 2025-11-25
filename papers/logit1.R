@@ -15,7 +15,7 @@ library(laGP)
 library(lhs)
 library(plgp)
 
-source("../helper.R")
+source("../mcmc.R")
 
 f <- function(x, mu, nu) {
   if (is.null(nrow(x))) {
@@ -56,7 +56,7 @@ for (i in 1:nrow(calib_params)) {
   ym[,i] <- f(x=xm, mu=mu, nu=nu)
 }
 
-nmcmcs <- 20000
+nmcmcs <- 10000
 u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(calib_params))
 
 colnames(u) <- colnames(uprops) <- colnames(calib_params)
@@ -107,8 +107,8 @@ for (t in 2:nmcmcs) {
   ###########################################################################
   ## SAMPLE CALIBRATION PARAMETERS U
   ### Propose u_prime and calculate proposal ratio
-  up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=rep(0, 2), pmax=rep(1, 2),
-    pcovar=matrix(c(0.05, 0, 0, 0.05), byrow=TRUE, ncol=2))
+  up <- propose_u(ucurr=u[t-1,], method="tmvnorm",
+    ucov=matrix(c(0.05, 0, 0, 0.05), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
   ## Evaluate surrogate at u_prime
   lhatp <- predGPsep(gpi, XX=cbind(XX, matrix(rep(uprops[t,], nrow(XX)),
@@ -151,7 +151,7 @@ for (t in 2:nmcmcs) {
 deleteGPsep(gpi)
 
 ## Figure 2 (left panel)
-ylims <- range(c(mod_lhats_accept[,seq(15001, 20000, by=10)], yf, lam_m))
+ylims <- range(c(mod_lhats_accept[,seq(5001, 10000, by=10)], yf, lam_m))
 ylims[1] <- ylims[1]-0.5
 ylims[2] <- ylims[2]+0.5
 pdf("logit1_obs.pdf", width=5, height=5)
@@ -167,11 +167,11 @@ dev.off()
 ## Figure 2 (middle panel)
 ## Visualize model evaluations
 pdf("logit1_est.pdf", width=5, height=5)
-matplot(x=xm, y=mod_lhats_accept[,seq(15001, 20000, by=10)], type="l", lty=1,
+matplot(x=xm, y=mod_lhats_accept[,seq(5001, 10000, by=10)], type="l", lty=1,
   col=adjustcolor("lightgrey", alpha.f=0.3), xlab="X", yaxt="n", ylim=ylims,
   mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
-u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
+u_postmean <- apply(u[seq(5001, 10000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
   u_postmean[2]*uranges[2]+umins[2]), col=4, lwd=2, lty=4)
 lines(x=xm, y=lam_m, lty=2, lwd=2)
@@ -203,7 +203,7 @@ dev.off()
 library(laGP)
 library(lhs)
 
-source("../helper.R")
+source("../mcmc.R")
 
 f <- function(x, mu, nu) {
   if (is.null(nrow(x))) {
@@ -248,7 +248,7 @@ for (i in 1:nrow(calib_params)) {
   ym[,i] <- f(x=xm, mu=mu, nu=nu)
 }
 
-nmcmcs <- 20000
+nmcmcs <- 10000
 u <- uprops <- matrix(data=NA, nrow=nmcmcs, ncol=ncol(calib_params))
 
 colnames(u) <- colnames(uprops) <- colnames(calib_params)
@@ -292,8 +292,8 @@ for (t in 2:nmcmcs) {
   ###########################################################################
   ## SAMPLE CALIBRATION PARAMETERS U
   ### Propose u_prime and calculate proposal ratio
-  up <- propose_u(curr=u[t-1,], method="tmvnorm", pmin=rep(0, 2), pmax=rep(1, 2),
-    pcovar=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
+  up <- propose_u(ucurr=u[t-1,], method="tmvnorm",
+    ucov=matrix(c(0.15, 0, 0, 0.15), byrow=TRUE, ncol=2))
   uprops[t,] <- up$prop
   ## Evaluate simulator at u_prime
   lhatp <- exp(predGPsep(gpi, XX=cbind(XX, matrix(rep(uprops[t,], nrow(XX)),
@@ -333,7 +333,7 @@ for (t in 2:nmcmcs) {
 deleteGPsep(gpi)
 
 ## Figure 3 (left panel)
-ylims <- range(c(mod_lhats_accept[,seq(15001, 20000, by=10)], yf, lam_m))
+ylims <- range(c(mod_lhats_accept[,seq(5001, 10000, by=10)], yf, lam_m))
 ylims[1] <- ylims[1]-0.5
 ylims[2] <- ylims[2]+0.5
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
@@ -359,11 +359,11 @@ dev.off()
 ## Visualize model evaluations
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_pois_est.pdf", width=5, height=5)
-matplot(x=xm, y=mod_lhats_accept[,seq(15001, 20000, by=10)], type="l", lty=1,
+matplot(x=xm, y=mod_lhats_accept[,seq(5001, 10000, by=10)], type="l", lty=1,
   col="lightgrey", xlab="X", yaxt="n", ylim=ylims, mgp=c(2,0.75,0))
 points(x=xf, y=yf, col=2, pch=8)
 points(x=seq(0, 1, length=nf), y=est_means, col=1, bg=2, pch=21)
-u_postmean <- apply(u[seq(15001, 20000, by=10),], 2, mean)
+u_postmean <- apply(u[seq(5001, 10000, by=10),], 2, mean)
 lines(x=xm, y=f(xm, u_postmean[1]*uranges[1]+umins[1],
   u_postmean[2]*uranges[2]+umins[2]), col=4, lwd=2, lty=4)
 lines(x=xm, y=lam_m, lty=2, lwd=2)
