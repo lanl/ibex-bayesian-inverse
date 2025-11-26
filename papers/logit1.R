@@ -184,8 +184,8 @@ dev.off()
 ## Figure 2 (right panel)
 ## Visualize posterior draws of u
 pdf("logit1_post_draws.pdf", width=5, height=5)
-plot(x=u[seq(10001, 20000, by=10),1]*uranges[1]+umins[1],
- y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(u[1]),
+plot(x=u[seq(1001, 10000, by=10),1]*uranges[1]+umins[1],
+ y=u[seq(1001, 10000, by=10),2]*uranges[2]+umins[2], xlab=expression(u[1]),
  ylab=expression(u[2]), col="lightgrey", mgp=c(2,0.75,0))
 points(x=true_mu, y=true_nu, col=3, pch=8, lwd=2, cex=1.5)
 points(x=u_postmean[1]*uranges[1]+umins[1],
@@ -377,8 +377,8 @@ dev.off()
 ## Visualize posterior draws of u
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.05, 0.05))
 pdf("logit1_pois_post_draws.pdf", width=5, height=5)
-plot(x=u[seq(10001, 20000, by=10),1]*uranges[1]+umins[1],
- y=u[seq(10001, 20000, by=10),2]*uranges[2]+umins[2], xlab=expression(u[1]),
+plot(x=u[seq(1001, 10000, by=10),1]*uranges[1]+umins[1],
+ y=u[seq(1001, 10000, by=10),2]*uranges[2]+umins[2], xlab=expression(u[1]),
  ylab=expression(u[2]), col="lightgrey", mgp=c(2,0.75,0))
 points(x=true_mu, y=true_nu, col=3, pch=8, lwd=2, cex=1.5)
 points(x=u_postmean[1]*uranges[1]+umins[1],
