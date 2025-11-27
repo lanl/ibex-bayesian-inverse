@@ -52,7 +52,7 @@ n_samp = 10000
 for j in range(len(pcs)):
     metrics = np.zeros((nruns, 2))
     iter_pc = pcs[j]
-    ofname = 'sepia_metrics_' + str(iter_pc) + '.csv'
+    ofname = '../papers/sepia_metrics_' + str(iter_pc) + '.csv'
     for i in range(nruns):
         yy_true = y[[i],:][0]
         inds = np.delete(range(nruns), i)

@@ -11,7 +11,7 @@ library(scoringRules)
 setwd("..")
 source("pois_bayes_inv.R")
 source("helper.R")
-setwd("automations")
+setwd("tests")
 
 seed <- 711930
 fold_seed <- fid <- 1

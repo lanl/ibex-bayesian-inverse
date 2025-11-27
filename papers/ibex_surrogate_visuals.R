@@ -144,15 +144,10 @@ source('../vecchia_scaled.R')
 model_data <- read.csv(file="../data/sims.csv")
 model_data$nlon <- nose_center_lons(model_data$lon)
 field_data <- read.csv(file="../data/ibex_real.csv")
-field_data$sim_counts <- field_data$counts
-field_data$lat <- field_data$ecliptic_lat
-field_data$lon <- field_data$ecliptic_lon
-pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
-  fparams=c("2009A"), scales=c(1, 1), tol=NA, quant=0.0,
-  real=TRUE, disc=FALSE)
+pd <- preprocess_data(md=model_data, fd=field_data, map=2009, esa_lev=4)
 predrange <- quantile(model_data$blurred_ena_rate, probs=c(0.00015, 0.9985))
-Xtrain <- as.matrix(cbind(pd$Xmod, pd$Umod))
-fit <- fit_scaled(y=pd$Zmod, inputs=Xtrain, nug=1e-4, ms=25)
+Xtrain <- as.matrix(cbind(pd$xm, pd$um))
+fit <- fit_scaled(y=pd$ym, inputs=Xtrain, nug=1e-4, ms=25)
 
 ## select model parameter combinations for simulator output
 pmfps <- c(1500, 1625, 1750)

@@ -3,7 +3,8 @@
 ## DATA NEEDED: surrogate_test.rds, sepia_metrics_X.csv
 ###############################################################################
 
-surr1_res <- readRDS("surrogate_test.rds")
+surr_file <- list.files(pattern="surrogate_test_[0-9]{8}.rds")
+surr1_res <- readRDS(surr_file)
 sepia_files <- list.files(pattern="sepia_metrics_[3-6].csv")
 
 rmses <- surr1_res$rmse

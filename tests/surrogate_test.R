@@ -12,7 +12,7 @@ library(laGP)
 setwd("..")
 source("helper.R")
 source("vecchia_scaled.R")
-setwd("automations")
+setwd("tests")
 
 start <- 1
 method <- "all"
@@ -59,7 +59,7 @@ colnames(rmses) <- colnames(crps) <- colnames(fit_times) <-
 
 if (method=="svecchia" || method=="all") {
   ms <- seq(25, 100, by=25)
-  for (i in 1:length(ms))) {
+  for (i in 1:length(ms)) {
     for (j in start:nrow(unique_runs)) {
       pmfp <- unique_runs[j,1]
       ratio <- unique_runs[j,2]
@@ -79,8 +79,8 @@ if (method=="svecchia" || method=="all") {
       print(paste0("Finished SVecchia fit where m=", ms[i]))
 
       tic <- proc.time()[3]
-      svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=ms[i], joint=FALSE,
-        predvar=TRUE)
+      svecpreds <- predictions_scaled(svecfit, as.matrix(Xtest), m=ms[i],
+        joint=FALSE, predvar=TRUE)
       toc <- proc.time()[3]
       pred_times[j,i] <- toc-tic
       rmses[j,i] <- sqrt(mean((svecpreds$means - Ytest)^2))
@@ -162,4 +162,4 @@ if (method=="deepgp" || method=="all") {
 }
 
 res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
-saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+saveRDS(res, paste0("../papers/surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))

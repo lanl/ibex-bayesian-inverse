@@ -11,7 +11,7 @@ library(parallel)
 setwd("..")
 source("pois_bayes_inv.R")
 source("helper.R")
-setwd("automations")
+setwd("tests")
 
 ###############################################################################
 

@@ -13,7 +13,7 @@ library(laGP)
 setwd("..")
 source("helper.R")
 source("vecchia_scaled.R")
-setwd("automations")
+setwd("tests")
 
 seed <- 781691
 inc_out <- 1
@@ -191,7 +191,7 @@ for (i in 1:num_ns) {
     }
   }
   res <- list(fit_times=fit_times, pred_times=pred_times)
-  saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
+  saveRDS(res, paste0("../papers/", outf, format(Sys.time(), "%Y%m%d"), ".rds"))
 
   too_long_fits <- apply(fit_times[,i,], 2, mean, na.rm=TRUE) >= 3600
   too_long_fits[is.na(too_long_fits)] <- TRUE
@@ -203,4 +203,4 @@ for (i in 1:num_ns) {
 }
 
 res <- list(fit_times=fit_times, pred_times=pred_times)
-saveRDS(res, paste0(outf, format(Sys.time(), "%Y%m%d"), ".rds"))
+saveRDS(res, paste0("../papers/", outf, format(Sys.time(), "%Y%m%d"), ".rds"))
