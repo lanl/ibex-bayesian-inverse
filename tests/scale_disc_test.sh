@@ -15,7 +15,7 @@ fi
 map=$1 # map year on which to base simulated field data
 ncopies=$2 # number of processes to run in parallel
 
-seq 1 $ncopies | parallel -j $ncopies --wd $PWD "R CMD BATCH \"--args index={} seed={} map=$map\" scale_disc_test.R scale_disc_test_{}.Rout"
+seq 1 10 | parallel -j $ncopies --wd $PWD "R CMD BATCH \"--args index={} seed={} map=$map\" scale_disc_test.R scale_disc_test_{}.Rout"
 
 # Collect all the results
 R CMD BATCH scale_disc_test_collect.R
