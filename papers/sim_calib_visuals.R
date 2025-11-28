@@ -23,7 +23,8 @@ library(ks)
 
 ## Visuals for comparing simulated counts, "true" simulator output
 ## estimated simulator output via surrogate predictions
-res <- readRDS("final_results/sim_calib_results.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{14}.rds")
+res <- readRDS(sim_res_file)
 single_index <- NA
 single_pmfp <- 1750
 single_ratio <- 0.02
@@ -41,13 +42,13 @@ pred_params[2] <- (pred_params[2] - 0.001)/(0.1-0.001)
 
 model_data <- read.csv(file="../data/sims.csv")
 field_data <- read.csv(file="../data/synth_sat_data.csv")
-pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
-  fparams=c(single_pmfp, single_ratio), scales=c(1, 1), tol=NA, quant=0.0,
-  real=FALSE, disc=FALSE)
-predrange <- quantile(model_data$blurred_ena_rate, probs=c(0.00015, 0.9985))
-
 field_data <- field_data[field_data$parallel_mean_free_path==single_pmfp &
   field_data$ratio==single_ratio,]
+field_data$counts <- field_data$sim_counts
+field_data$ecliptic_lon <- field_data$lon
+field_data$ecliptic_lat <- field_data$lat
+pd <- preprocess_data(md=model_data, fd=field_data)
+predrange <- quantile(model_data$blurred_ena_rate, probs=c(0.00015, 0.9985))
 field_data$est_rate <- field_data$sim_counts/field_data$time - field_data$background
 field_data$nlon <- nose_center_lons(field_data$lon)
 field_data <- field_data[which(!is.nan(field_data$est_rate)),]
@@ -55,17 +56,15 @@ model_data <- model_data[model_data$parallel_mean_free_path==single_pmfp &
   model_data$ratio==single_ratio,]
 model_data$nlon <- nose_center_lons(model_data$lon)
 
-fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),
- nug=1e-4, ms=25)
+fit <- fit_scaled(y=pd$ym, inputs=cbind(pd$xm, pd$um), nug=1e-4, ms=25)
 XX_ll <- cbind(unique(model_data[,c("lon", "lat")]), matrix(pred_params, nrow=1))
 XX_ll[,c("x", "y", "z")] <- geo_to_spher_coords(lat=XX_ll$lat, lon=XX_ll$lon)
 XX_ll$x <- (XX_ll$x - min(XX_ll$x)) / diff(range(XX_ll$x))
 XX_ll$y <- (XX_ll$y - min(XX_ll$y)) / diff(range(XX_ll$y))
 XX_ll$z <- (XX_ll$z - min(XX_ll$z)) / diff(range(XX_ll$z))
 XX <- XX_ll[,c("x", "y", "z", "1", "2")]
-colnames(XX) <- c("x", "y", "z", "pmfp", "ratio")
-lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
-  predvar=FALSE)
+colnames(XX) <- NULL
+lhat_curr <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE)
 pred_data <- data.frame(XX_ll, lhat_curr)
 pred_data$nlon <- nose_center_lons(pred_data$lon)
 
@@ -177,7 +176,8 @@ library(MASS)
 library(coda)
 library(ks)
 
-res <- readRDS("sim_calib_results.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{14}.rds")
+res <- readRDS(sim_res_file)
 
 pmfps <- seq(750, 2750, by=250)
 ratios <- c(0.005, 0.01, 0.02, 0.05)
@@ -268,11 +268,17 @@ library(coda)
 library(ks)
 
 ### Read in calibration results
-res <- readRDS("final_results/sim_calib_results.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{14}.rds")
+res <- readRDS(sim_res_file)
 
 ### Fit Scaled Vecchia GP surrogate
 model_data <- read.csv(file="../data/sims.csv")
 field_data <- read.csv(file="../data/synth_sat_data.csv")
+field_data <- field_data[field_data$parallel_mean_free_path==1750 &
+  field_data$ratio==0.001,]
+field_data$counts <- field_data$sim_counts
+field_data$ecliptic_lon <- field_data$lon
+field_data$ecliptic_lat <- field_data$lat
 Xmod <- model_data[,c("lat", "lon")]
 Xmod[,c("x", "y", "z")] <- geo_to_spher_coords(Xmod$lat, Xmod$lon)
 Xmod <- Xmod[,c("x", "y", "z")]
@@ -285,11 +291,8 @@ for (i in 1:ncol(Xall)) {
   Xfield[,i] <- (Xfield[,i] - min(Xall[,i]))/diff(range(Xall[,i]))
 }
 
-pd <- preprocess_data(md=model_data, fd=field_data, esa_lev=4,
-  fparams=c(1750, 0.001), scales=c(1, 1), tol=NA, quant=0.0,
-  real=FALSE, disc=FALSE)
-fit <- fit_scaled(y=pd$Zmod, inputs=as.matrix(cbind(pd$Xmod, pd$Umod)),
- nug=1e-4, ms=25)
+pd <- preprocess_data(md=model_data, fd=field_data)
+fit <- fit_scaled(y=pd$ym, inputs=cbind(pd$xm, pd$um), nug=1e-4, ms=25)
 
 pmfps <- seq(750, 2750, by=500)
 ratios <- c(0.005, 0.01, 0.05)
@@ -315,8 +318,7 @@ for (i in 1:length(u_inds)) {
   truth_unit <- c((truth[1] - 500)/2500, (truth[2] - 0.001)/(0.1-0.001))
   XX <- as.matrix(cbind(Xfield, matrix(truth_unit, nrow=1)))
   colnames(XX) <- NULL
-  preds <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE,
-    predvar=FALSE)
+  preds <- predictions_scaled(fit, as.matrix(XX), m=25, joint=FALSE)
   ##### Calculate PIT values
   Fy  <- ppois(iter_field$sim_counts, (preds+iter_field$background)*iter_field$time)
   Fy1 <- ppois(iter_field$sim_counts - 1, (preds+iter_field$background)*iter_field$time)
@@ -359,10 +361,11 @@ dev.off()
 ## FIGURE 17: Plot of histograms showing posterior samples of a multiplicative
 ## scale discrepancy between simulation and reality. In this case, satellite
 ## data is synthetic and artificially scaled by a known constant.
-## DATA NEEDED: scale_disc_test_results.rds
+## DATA NEEDED: scale_disc_test_results_YYYYMMDDHHMMSS.rds
 ###############################################################################
 
-res <- readRDS("final_results/scale_disc_test_results.rds")
+scale_res_file <- list.files(pattern="scale_disc_test_results_[0-9]{14}.rds")
+res <- readRDS(scale_res_file)
 
 scales <- rep(NA, length(res))
 samps <- matrix(NA, nrow=nrow(res[[1]]$logscls), ncol=length(res))

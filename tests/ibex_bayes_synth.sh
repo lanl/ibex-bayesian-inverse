@@ -1,16 +1,10 @@
 #!/bin/bash
 
-#SBATCH -N 1 
-#SBATCH --ntasks-per-node=66
-#SBATCH -t 96:00:00
-#SBATCH -p normal_q
-#SBATCH -A ibex
-
-module reset
-module load R/4.1.0-foss-2021a
-
-export OMP_NUM_THREADS=2
+infile=$1 # input file with simulator paramters
 
 echo "Started script"
-R CMD BATCH "--args -v --infile=inputs.txt" ibex_bayes_test.R
+R CMD BATCH "--args -v --if=$infile" ibex_bayes_test.R
 echo "Finished calibration script"
+
+# Collect all the results
+R CMD BATCH ibex_bayes_test_collect.R

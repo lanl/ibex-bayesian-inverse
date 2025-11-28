@@ -74,10 +74,10 @@ for i in range(len(pcs)):
     pred_times = np.zeros((mcs, num_ns))
     iter_pc = pcs[i]
     of_fit_name = '../papers/sepia_fit_times_' + str(iter_pc)
-    of_fit_name = of_fit_name + '_dim' if inc_out else of_fit_name + '_ns'
+    of_fit_name = of_fit_name + '_dim' if inc_out else of_fit_name + '_n'
     of_fit_name = of_fit_name + '.csv'
     of_pred_name = '../papers/sepia_pred_times_' + str(iter_pc)
-    of_pred_name = of_pred_name + '_dim' if inc_out else of_pred_name + '_ns'
+    of_pred_name = of_pred_name + '_dim' if inc_out else of_pred_name + '_n'
     of_pred_name = of_pred_name + '.csv'
     for j in range(num_ns):
         n = ns[j]

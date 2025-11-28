@@ -13,7 +13,8 @@
 ###############################################################################
 
 ## Visuals for varying the dimension of the response
-surr_times <- readRDS("surrogate_time_test_dim.rds")
+surr_file <- list.files(pattern="surrogate_time_test_dim_[0-9]{8}.rds")
+surr_times <- readRDS(surr_file)
 surr_times$fit_times <- surr_times$fit_times[,c(1:38, 40:dim(surr_times$fit_times)[2]),]
 surr_times$pred_times <- surr_times$pred_times[,c(1:38, 40:dim(surr_times$pred_times)[2]),]
 surr_fit_times <- apply(surr_times$fit_times, c(2,3), mean)
@@ -74,11 +75,12 @@ dev.off()
 ###############################################################################
 
 ## Visuals for varying the number of computer experiment runs
-surr_times <- readRDS("surrogate_time_test_ns.rds")
+surr_file <- list.files(pattern="surrogate_time_test_n_[0-9]{8}.rds")
+surr_times <- readRDS(surr_file)
 surr_fit_times <- apply(surr_times$fit_times, c(2,3), mean)
 surr_pred_times <- apply(surr_times$pred_times, c(2,3), mean)
-sepia_fit_files <- list.files(pattern="sepia_fit_times_[3-6]{1}_ns.csv")
-sepia_pred_files <- list.files(pattern="sepia_pred_times_[3-6]{1}_ns.csv")
+sepia_fit_files <- list.files(pattern="sepia_fit_times_[3-6]{1}_n.csv")
+sepia_pred_files <- list.files(pattern="sepia_pred_times_[3-6]{1}_n.csv")
 
 for (i in 1:length(sepia_fit_files)) {
   sep_fit <- read.csv(sepia_fit_files[i], header=FALSE)
