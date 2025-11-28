@@ -49,16 +49,19 @@ if (real) {
   cpars <- read.csv(file=infile, head=TRUE)
 }
 
-ncores <- detectCores()-1
+ncores <- 4#detectCores()-1
 cl <- parallel::makeCluster(ifelse(nrow(cpars) < ncores, nrow(cpars), ncores),
   outfile="log.txt")
 doParallel::registerDoParallel(cl)
 foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tmvtnorm")) %dopar% {
   if (real) {
+    thread_fd <- field_data
     if (year=="mod_align") {
       map <- paste0(2009:2011, "A")
+      map_fn <- paste0(2009:2011, collapse="")
     } else {
       map <- paste0(cpars[i], "A")
+      map_fn <- cpars[i]
     }
   } else {
     thread_fd <- field_data[field_data$parallel_mean_free_path==cpars[i,c("pmfp")] &
@@ -70,14 +73,14 @@ foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tmvtnorm"))
   }
   pd <- preprocess_data(md=model_data, fd=thread_fd, map=map)
   res <- pois_bayes_inv(xm=pd$xm, um=pd$um, ym=pd$ym, xf=pd$xf, yf=pd$yf, e=pd$e,
-    lam0=pd$bg, T=10000)
+    lam0=pd$bg, T=41)
   if (real) {
     res$year <- map
   } else {
     res$truth <- cpars[i,]
   }
   saveRDS(res, file=paste0("pois_bayes_inv_res_",
-    ifelse(real, map, paste0("pmfp", cpars[i,c("pmfp")], "_rat", cpars[i,c("ratio")])),
+    ifelse(real, map_fn, paste0("pmfp", cpars[i,c("pmfp")], "_rat", cpars[i,c("ratio")])),
     format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
 }
 parallel::stopCluster(cl)

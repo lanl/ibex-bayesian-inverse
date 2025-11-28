@@ -47,5 +47,5 @@ for (i in 1:length(files)) {
 metrics <- list(crps_pmfp=crps_pmfp, crps_ratio=crps_ratio,
   crps_grid=crps_grid, pmfp_grid=pmfp_grid, ratio_grid=ratio_grid, grid=grid,
   post_means=post_means, us=us, logscls=logscls)
-saveRDS(metrics, file=paste0("real_data_cv_metrics",
+saveRDS(metrics, file=paste0("../papers/real_data_cv_metrics",
   format(Sys.time(), "_%Y%m%d%H%M%S"), ".rds"))
