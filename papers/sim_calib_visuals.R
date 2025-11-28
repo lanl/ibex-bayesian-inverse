@@ -23,7 +23,7 @@ library(ks)
 
 ## Visuals for comparing simulated counts, "true" simulator output
 ## estimated simulator output via surrogate predictions
-sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{14}.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{0,14}.rds")
 res <- readRDS(sim_res_file)
 single_index <- NA
 single_pmfp <- 1750
@@ -176,7 +176,7 @@ library(MASS)
 library(coda)
 library(ks)
 
-sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{14}.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{0,14}.rds")
 res <- readRDS(sim_res_file)
 
 pmfps <- seq(750, 2750, by=250)
@@ -268,14 +268,12 @@ library(coda)
 library(ks)
 
 ### Read in calibration results
-sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{14}.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{0,14}.rds")
 res <- readRDS(sim_res_file)
 
 ### Fit Scaled Vecchia GP surrogate
 model_data <- read.csv(file="../data/sims.csv")
 field_data <- read.csv(file="../data/synth_sat_data.csv")
-field_data <- field_data[field_data$parallel_mean_free_path==1750 &
-  field_data$ratio==0.001,]
 field_data$counts <- field_data$sim_counts
 field_data$ecliptic_lon <- field_data$lon
 field_data$ecliptic_lat <- field_data$lat
@@ -364,7 +362,7 @@ dev.off()
 ## DATA NEEDED: scale_disc_test_results_YYYYMMDDHHMMSS.rds
 ###############################################################################
 
-scale_res_file <- list.files(pattern="scale_disc_test_results_[0-9]{14}.rds")
+scale_res_file <- list.files(pattern="scale_disc_test_results_[0-9]{0,14}.rds")
 res <- readRDS(scale_res_file)
 
 scales <- rep(NA, length(res))
