@@ -79,7 +79,7 @@ heliosphere. The heliosphere is the bubble formed by the solar wind that
 encompasses our solar system and acts as a barrier to interstellar space. Of
 particular interest is the behavior at the edge of the heliosphere. Here,
 highly energized hydrogen ions that make up the solar wind interact with
-neutral atoms, occasionally undergo electro exchange, and become neutral
+neutral atoms, occasionally undergo electron exchange, and become neutral
 themselves. These energetic neutral atoms (ENAs) are unaffected by magnetic
 fields and therefore travel in a ballistic trajectory.
 
@@ -1123,7 +1123,7 @@ not represented in this paper and/or match years outside of 2009-2011.
 \includegraphics[scale=1.0,trim=0 0 0 0,clip=TRUE]{real_bayes_inv_res.pdf}
 \caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals for 10
 separate runs of our Poisson Bayesian inverse problem framework. Field data
-$(X^F, Y^F)$ for each run comes from a single year between 2012-2021.
+$(X^F, Y^F)$ for each run come from a single year between 2012-2021.
 \label{f:real_estimates_all}}
 \end{figure}
 
@@ -1196,9 +1196,10 @@ found at \url{https://github.com/lanl/ibex-bayesian-inverse}.
 
 \subsection*{Acknowledgments}
 
-RBG and SDB are grateful for funding from NSF CMMI 2152679. This work has been
-approved for public release under LA-UR-25-30539. SDB, DO and LJB were funded
-by Laboratory Directed Research and Development (LDRD) Project 20220107DR.
+RBG and SDB are grateful for funding from NSF CMMI 2152679. SDB, DO and LJB
+were funded by Laboratory Directed Research and Development (LDRD) Project
+20220107DR. This work has been approved for public release under
+LA-UR-25-30539.
 
 \bibliography{ibex_bayes_inv}
 \bibliographystyle{jasa}
@@ -1228,9 +1229,9 @@ PIT values, frequently visualized in PIT histograms, are used to evaluate
 predictions and forecasts from a statistical model. In short, the PIT compares
 observed data to the CDFs of predictive distributions. If observations came
 from the predicted distributions, PIT values should be distributed uniformally
-between 0 and 1. However, for discrete data such as our Poisson counts, PIT
-values will not be uniformally distributed, due to the step function nature of
-the CDF. A randomized PIT is used in these scenarios
+between 0 and 1. For discrete data such as our Poisson counts, PIT values will
+not be uniformally distributed, due to the step function nature of the CDF. A
+randomized PIT is used in these scenarios
 \citep{gneiting2014probabilistic,czado2009predictive}, as we will do for the
 IBEX data.
 
@@ -1270,8 +1271,8 @@ show results when satellite data from years 2009-2011 is used as the field data
 from 2012-2021 as ($X^F, Y^F$). These panels correspond to Figures
 \ref{f:ibex_real_ex} and \ref{f:real_estimates_all}, respectively.
 
-The departure from uniformity is clear. For years 2009-2011, we see
-crater-shaped histograms, indicating that the predicted ENA rate surface does
+The departure from uniformity is clear. For years 2009-2011, we get a
+crater-shaped histogram, indicating that the predicted ENA rate surface does
 not sufficiently account for the extreme observations in the satellite data.
 That is, the observed data fell too frequently in the tails of our predicted
 distribution. This is consistent with the spatially-varying discrepancy we
@@ -1288,7 +1289,7 @@ systematically overpredicting the ENA rates for the years 2012-2021.
 collected by IBEX and predicted sky map from estimated model parameters. The
 very left panel displays the PIT histogram for estimates from combined years
 2009-2011. PIT histograms for individual years 2012-2021 are shown in the two
-rows on the right. U-shaped PIT histograms indicate underdisperson.
+rows on the right. U-shaped PIT histograms indicate overdispersion.
 Right-skewed PIT histograms indicate consistent overprediction.
 \label{f:real_pit_hist}}
 \end{figure}
