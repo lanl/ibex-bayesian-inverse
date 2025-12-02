@@ -1,10 +1,11 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[ruled, vlined]{algorithm2e}
 \usepackage{amsmath, amsfonts, amssymb, mathrsfs}
 \usepackage{caption}
 \usepackage{dcolumn}
 \usepackage{filemod}
 \usepackage{floatrow}
+\usepackage[margin=1in]{geometry}
 \usepackage{gensymb}
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -13,15 +14,6 @@
 \usepackage{subcaption}
 \usepackage{verbatim}
 \usepackage{makecell}
-
-\oddsidemargin=0.25in
-\evensidemargin=0.25in
-\textwidth=7in
-\textheight=8.75in
-\topmargin=-.5in
-\addtolength{\oddsidemargin}{-.5in}
-\addtolength{\evensidemargin}{-.5in}
-\footskip=0.5in
 
 \begin{document}
 
@@ -65,7 +57,7 @@ data and associated computer models developed at Los Alamos National Laboratory.
 Poisson, calibration, heliospheric science, IBEX, Vecchia approximation
 \end{abstract}
 
-\doublespacing % no double spacing for arXiv
+\setstretch{1.45} % no double spacing for arXiv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -97,9 +89,9 @@ the heliosphere's properties and evolution.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.6,trim=0 0 85 0,clip=TRUE]{ibex_real1.pdf}
-\includegraphics[scale=0.6,trim=55 0 85 0,clip=TRUE]{sim1.pdf}
-\includegraphics[scale=0.6,trim=55 0 00 0,clip=TRUE]{sim2.pdf}
+\includegraphics[scale=0.55,trim=0 0 85 0,clip=TRUE]{ibex_real1.pdf}
+\includegraphics[scale=0.55,trim=55 0 85 0,clip=TRUE]{sim1.pdf}
+\includegraphics[scale=0.55,trim=55 0 00 0,clip=TRUE]{sim2.pdf}
 \caption{Observed ENA rates detected by the
 IBEX satellite (left) and output from two IBEX  simulations under
 different parameter settings (middle, right).
@@ -309,9 +301,9 @@ line is $m(u^\star, X)$ provided as a reference.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.55,trim=20 0 30 0,clip=TRUE]{logit1_obs.pdf}
-\includegraphics[scale=0.55,trim=59 0 30 0,clip=TRUE]{logit1_est.pdf}
-\includegraphics[scale=0.55,trim=16 0 30 0,clip=TRUE]{logit1_post_draws.pdf}
+\includegraphics[scale=0.51,trim=20 0 30 0,clip=TRUE]{logit1_obs.pdf}
+\includegraphics[scale=0.51,trim=59 0 30 0,clip=TRUE]{logit1_est.pdf}
+\includegraphics[scale=0.51,trim=16 0 30 0,clip=TRUE]{logit1_post_draws.pdf}
 \caption{A simple inverse problem. Field observations and a small sample of
 computer model runs (left), model evaluations at posterior draws and mean
 (middle), and posterior distribution of model parameters (right).
@@ -402,9 +394,9 @@ model input space but hones in on the region where the true parameter value
 lies.
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.55,trim=20 0 30 0,clip=TRUE]{logit1_pois_obs.pdf}
-\includegraphics[scale=0.55,trim=59 0 30 0,clip=TRUE]{logit1_pois_est.pdf}
-\includegraphics[scale=0.55,trim=16 0 30 0,clip=TRUE]{logit1_pois_post_draws.pdf}
+\includegraphics[scale=0.51,trim=20 0 30 0,clip=TRUE]{logit1_pois_obs.pdf}
+\includegraphics[scale=0.51,trim=59 0 30 0,clip=TRUE]{logit1_pois_est.pdf}
+\includegraphics[scale=0.51,trim=16 0 30 0,clip=TRUE]{logit1_pois_post_draws.pdf}
 \caption{An inverse problem for a Poisson process. Counts observed in the field
 and a sample of computer model runs (left), model evaluations at posterior
 draws and mean (middle), and posterior distribution of model parameters
@@ -651,8 +643,8 @@ $u$-space.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_latlon.pdf}
-\includegraphics[scale=0.5, trim=5 0 30 0,clip=TRUE]{ibex_nbr_params.pdf}
+\includegraphics[scale=0.44, trim=5 0 30 0,clip=TRUE]{ibex_nbr_latlon.pdf}
+\includegraphics[scale=0.44, trim=5 0 30 0,clip=TRUE]{ibex_nbr_params.pdf}
 \caption{Conditioning sets $h(i)$ in a multivariate normal likelihood
 (Eq.~\ref{eq:vecchia}) for a single observation $Y_i^M$ using the Scaled Vecchia
 approximation. The left panel visualizes neighborhoods in grid space (i.e.\!~$X$
@@ -678,7 +670,7 @@ outperforms competitors.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.5,trim=0 0 0 0,clip=TRUE]{ibex_surr_vis_check.pdf}
+\includegraphics[scale=0.4,trim=0 0 0 0,clip=TRUE]{ibex_surr_vis_check.pdf}
 \caption{Actual and predicted outputs from the IBEX \textit{sky map} computer
 model. Corner panels represent the response for four unique combinations of
 model inputs. Panels on the cross with bold, dashed borders are predictions at
@@ -740,9 +732,9 @@ Monte Carlo iterations for each method and record the average elapsed time.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_fit_times.pdf}
-\includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_pred_times.pdf}
-\includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_total_times.pdf}
+\includegraphics[scale=0.53, trim=0 0 0 0, clip=TRUE]{ibex_surr_fit_times.pdf}
+\includegraphics[scale=0.53, trim=0 0 0 0, clip=TRUE]{ibex_surr_pred_times.pdf}
+\includegraphics[scale=0.53, trim=0 0 0 0, clip=TRUE]{ibex_surr_total_times.pdf}
 \caption{Timing metrics on the IBEX simulator experiment. A comparison of the
 fastest methods is shown in the right panel, with different line types
 indicating neighborhood size ($m$) and number of principal components ($n_k$)
@@ -788,9 +780,9 @@ performing methods, we push the campaign size up further ($n=2500$).
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_fit_times_ns.pdf}
-\includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_pred_times_ns.pdf}
-\includegraphics[scale=0.57, trim=0 0 0 0, clip=TRUE]{ibex_surr_total_times_ns.pdf}
+\includegraphics[scale=0.53, trim=0 0 0 0, clip=TRUE]{ibex_surr_fit_times_ns.pdf}
+\includegraphics[scale=0.53, trim=0 0 0 0, clip=TRUE]{ibex_surr_pred_times_ns.pdf}
+\includegraphics[scale=0.53, trim=0 0 0 0, clip=TRUE]{ibex_surr_total_times_ns.pdf}
 \caption{Timing metrics on the IBEX simulator experiment.
 \label{f:ibex_surr_timing_size}}
 \end{figure}
@@ -898,10 +890,10 @@ which correspond to certain orbits.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.55,trim=5 15 95 45,clip=TRUE]{ibex_sim_field.pdf}
-\includegraphics[scale=0.55,trim=5 15 15 45,clip=TRUE]{ibex_sim_mod.pdf}
-\includegraphics[scale=0.55,trim=5 15 95 45,clip=TRUE]{ibex_sim_est.pdf}
-\includegraphics[scale=0.55,trim=5 15 15 45,clip=TRUE]{ibex_post_est.pdf}
+\includegraphics[scale=0.48,trim=5 15 95 45,clip=TRUE]{ibex_sim_field.pdf}
+\includegraphics[scale=0.48,trim=5 15 15 45,clip=TRUE]{ibex_sim_mod.pdf}
+\includegraphics[scale=0.48,trim=5 15 95 45,clip=TRUE]{ibex_sim_est.pdf}
+\includegraphics[scale=0.48,trim=5 15 15 45,clip=TRUE]{ibex_post_est.pdf}
 \caption{Estimate of ENA rate
 (counts/seconds) based on synthetic Poisson draws from a ``true'' computer
 model setting and varying exposure times (top left). IBEX simulator output of
@@ -934,7 +926,7 @@ generated the data we ``observe'' in the top left panel.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=1.0,trim=0 0 0 0,clip=TRUE]{sim_bayes_inv_res.pdf}
+\includegraphics[scale=0.8,trim=0 0 0 0,clip=TRUE]{sim_bayes_inv_res.pdf}
 \caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals from runs
 of our Poisson Bayesian inverse problem framework on 36 different synthetic
 datasets. Blue stars indicate the value $u^\star$ from which the data was
@@ -989,12 +981,12 @@ Cartesian coordinates $x$, $y$, $z$ from years 2009-2011.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.41,trim=10 15 100 45,clip=TRUE]{ibex_field_09.pdf}
-\includegraphics[scale=0.41,trim=55 15 10 45,clip=TRUE]{ibex_field_10.pdf}
-\includegraphics[scale=0.41,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est.pdf}
-\includegraphics[scale=0.41,trim=10 15 100 45,clip=TRUE]{ibex_field_11.pdf}
-\includegraphics[scale=0.41,trim=55 15 10 45,clip=TRUE]{ibex_surr_pred_real.pdf}
-\includegraphics[scale=0.41,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est_zoom.pdf}
+\includegraphics[scale=0.39,trim=10 15 100 45,clip=TRUE]{ibex_field_09.pdf}
+\includegraphics[scale=0.39,trim=55 15 10 45,clip=TRUE]{ibex_field_10.pdf}
+\includegraphics[scale=0.39,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est.pdf}
+\includegraphics[scale=0.39,trim=10 15 100 45,clip=TRUE]{ibex_field_11.pdf}
+\includegraphics[scale=0.39,trim=55 15 10 45,clip=TRUE]{ibex_surr_pred_real.pdf}
+\includegraphics[scale=0.39,trim=0 15 15 45,clip=TRUE]{ibex_real_post_est_zoom.pdf}
 \caption{Observed IBEX satellite data for years 2009-2011 (top left, top middle, bottom left). Predicted output via a fitted Scaled Vecchia surrogate at
 estimated model parameters (bottom middle). Two views for the posterior
 distribution of sampled model parameters $u$ (top right, bottom right).
@@ -1037,9 +1029,9 @@ and ratio. We calculate CRPS for all predictions.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.53,trim=16 0 26 0,clip=TRUE]{crps_pmfp.pdf}
-\includegraphics[scale=0.53,trim=54 0 28 0,clip=TRUE]{crps_ratio.pdf}
-\includegraphics[scale=0.53,trim=12 0 22 0,clip=TRUE]{crps_grid.pdf}
+\includegraphics[scale=0.47,trim=16 0 26 0,clip=TRUE]{crps_pmfp.pdf}
+\includegraphics[scale=0.47,trim=54 0 28 0,clip=TRUE]{crps_ratio.pdf}
+\includegraphics[scale=0.47,trim=12 0 22 0,clip=TRUE]{crps_grid.pdf}
 \caption{Metrics from a cross-validation experiment for IBEX satellite data.
 Averaged CRPS across folds on fine grids of parallel mean free path and ratio
 (left and middle) and a lattice over both (right). In the right panel, low
@@ -1120,7 +1112,7 @@ not represented in this paper and/or match years outside of 2009-2011.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=1.0,trim=0 0 0 0,clip=TRUE]{real_bayes_inv_res.pdf}
+\includegraphics[scale=0.8,trim=0 0 0 0,clip=TRUE]{real_bayes_inv_res.pdf}
 \caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals for 10
 separate runs of our Poisson Bayesian inverse problem framework. Field data
 $(X^F, Y^F)$ for each run come from a single year between 2012-2021.
@@ -1154,10 +1146,10 @@ Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.51,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_09.pdf}
-\includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_field_disc_10.pdf}
-\includegraphics[scale=0.51,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_11.pdf}
-\includegraphics[scale=0.51,trim=0 5 0 0,clip=TRUE]{ibex_mult_scale_disc.pdf}
+\includegraphics[scale=0.47,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_09.pdf}
+\includegraphics[scale=0.47,trim=0 5 0 0,clip=TRUE]{ibex_field_disc_10.pdf}
+\includegraphics[scale=0.47,trim=0 5 75 0,clip=TRUE]{ibex_field_disc_11.pdf}
+\includegraphics[scale=0.47,trim=0 5 0 0,clip=TRUE]{ibex_mult_scale_disc.pdf}
 \caption{Discrepancy (observed - estimated) between observed satellite data and
 the simulator output at estimated model parameters in 2009 (top left), 2010
 (top right), and 2011 (bottom left). Posterior samples of a multiplicative
@@ -1250,7 +1242,7 @@ data ``observed.''
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.5,trim=0 0 0 0,clip=TRUE]{sim_pit_hists.pdf}
+\includegraphics[scale=0.45,trim=0 0 0 0,clip=TRUE]{sim_pit_hists.pdf}
 \caption{Probability integral transform (PIT) histograms for 15 sets of
 estimated sky maps and their corresponding synthetic ``observed'' datasets. Red
 dashed lines are drawn at 1 to show where we'd expect the histograms to
@@ -1284,7 +1276,7 @@ systematically overpredicting the ENA rates for the years 2012-2021.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.5,trim=0 0 0 0,clip=TRUE]{real_pit_hists.pdf}
+\includegraphics[scale=0.45,trim=0 0 0 0,clip=TRUE]{real_pit_hists.pdf}
 \caption{Probability integral transform (PIT) histograms comparing ENA counts
 collected by IBEX and predicted sky map from estimated model parameters. The
 very left panel displays the PIT histogram for estimates from combined years
@@ -1319,7 +1311,7 @@ for 10 different values of $\delta$.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.65,trim=0 0 0 0,clip=TRUE]{scale_disc_vis.pdf}
+\includegraphics[scale=0.6,trim=0 0 0 0,clip=TRUE]{scale_disc_vis.pdf}
 \caption{Posterior samples of a multiplicative scale discrepancy, $\delta$. Each
 panel corresponds to a Metropolis sampler run on synthetic data artificially
 scaled by separate known constants ($\delta_{true}$). True values marked in
