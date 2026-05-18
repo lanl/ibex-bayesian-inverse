@@ -318,10 +318,10 @@ line is $m(u^\star, X)$ provided as a reference.
 field and a sample of computer model runs are displayed in the left column. On
 the top, red stars are measurements with Gaussian noise. On the bottom, red
 stars are draws from a Poisson that, when summed together, represent $Y^F$ in
-Alg.~\ref{alg:gibbs}. Red red circles correspond to the quantity
-$\frac{Y^F}{e(X^F)}$. The middle panels show computer model evaluations at
-posterior draws and means. Right panels show posterior distributions of model
-parameter $u$.}
+Alg.~\ref{alg:gibbs}. Red circles correspond to the quantity
+$\frac{Y^F}{e(X^F)}$. Middle panels show computer model evaluations at
+posterior draws and means. The right column shows posterior distributions of
+model parameter $u$.}
 \label{f:toy_calib}}
 \end{figure}
 
@@ -1139,10 +1139,21 @@ not represented in this paper and/or match years outside of 2009-2011.
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[scale=0.8,trim=0 0 0 0,clip=TRUE]{real_bayes_inv_res.pdf}
-\caption{Posterior distributions $u \mid Y^F$ and 95\% HPD intervals for 10
-separate runs of our Poisson Bayesian inverse problem framework. Field data
-$(X^F, Y^F)$ for each run come from a single year between 2012-2021.
+\includegraphics[scale=0.3,trim=0 65 30 20,clip=TRUE]{real_bayes_inv_res_2012.pdf}
+\includegraphics[scale=0.3,trim=50 65 30 20,clip=TRUE]{real_bayes_inv_res_2013.pdf}
+\includegraphics[scale=0.3,trim=50 65 30 20,clip=TRUE]{real_bayes_inv_res_2014.pdf}
+\includegraphics[scale=0.3,trim=50 65 30 20,clip=TRUE]{real_bayes_inv_res_2015.pdf}
+\includegraphics[scale=0.3,trim=50 65 30 20,clip=TRUE]{real_bayes_inv_res_2016.pdf}
+\includegraphics[scale=0.3,trim=0 0 30 20,clip=TRUE]{real_bayes_inv_res_2017.pdf}
+\includegraphics[scale=0.3,trim=50 0 30 20,clip=TRUE]{real_bayes_inv_res_2018.pdf}
+\includegraphics[scale=0.3,trim=50 0 30 20,clip=TRUE]{real_bayes_inv_res_2019.pdf}
+\includegraphics[scale=0.3,trim=50 0 30 20,clip=TRUE]{real_bayes_inv_res_2020.pdf}
+\includegraphics[scale=0.3,trim=50 0 30 20,clip=TRUE]{real_bayes_inv_res_2021.pdf}
+\caption{Posterior distributions $u \mid Y^F$ for 10 separate runs of our
+Poisson Bayesian inverse problem framework. Model parameters $u_1$ and $u_2$
+represent parallel mean free path and ratio, respectively. Bold, black borders
+on plot insets indicate boundary values for each parameter. Field data $(X^F,
+Y^F)$ for each run come from a single year between 2012-2021.
 \label{f:real_estimates_all}}
 \end{figure}
 

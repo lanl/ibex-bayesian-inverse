@@ -246,13 +246,22 @@ years <- 2012:2021
 pmfp_labs <- seq(500, 2500, by=500)
 ratio_labs <- seq(0.02, 0.1, length=5)
 
-## Figure 13
-pdf("real_bayes_inv_res.pdf", width=7, height=4)
-par(mfrow=c(2, 5), mar=c(0.25,0.25,1.25,0.15),
-  oma=c(7,5,0.5,0.5))
+x_mins <- c(2450, 2900, 2675, 2875, 2825, 2850, 2850, 2850, 2850, 2850)
+x_maxs <- c(2850, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000)
+y_mins <- c(0, 0, 0.01, 0.074, 0.082, 0.09, 0.09, 0.09, 0.09, 0.09)
+y_maxs <- c(0.005, 0.004, 0.023, 0.094, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
+
+arrow_x1s <- c(1800, 2000, 1900, 1100, 1986.842, 1800, 1800, 1800, 1800, 1800)
+arrow_x2s <- c(2600, 2900, 2675, 2825, 2900, 2850, 2925, 2950, 2900, 2850)
+arrow_y1s <- c(0.06625, 0.049, 0.041, 0.04, 0.05, 0.045, 0.045, 0.045, 0.045, 0.045)
+arrow_y2s <- c(0.0065, 0.004, 0.023, 0.082, 0.082, 0.09, 0.095, 0.0975, 0.0925, 0.09)
+
+inset_lefts <- c(600, 600, 600, 600, 600, 600, 600, 600, 600, 600) # where it starts on x-axis
+inset_rights <- c(2900, 2000, 1900, 1100, 1986.842, 1800, 1800, 1800, 1800, 1800) # where it ends on x-axis  
+inset_bottoms <- c(0.06625, 0.049, 0.041, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005) # where it starts on y-axis
+inset_tops <- c(0.095, 0.095, 0.095, 0.085, 0.085, 0.085, 0.085, 0.085, 0.085, 0.085) # where it ends on y-axis
+
 for (i in 1:length(years)) {
-  yticks <- i %% (length(years)/2)-1 == 0
-  xticks <- i > (length(years)/2)
 
   year <- years[i]
   index <- which(years==year)
@@ -271,43 +280,57 @@ for (i in 1:length(years)) {
   dens_vals <- sort(as.vector(fhat$estimate), decreasing=TRUE)
   cum_prob <- cumsum(dens_vals)*dx*dy
 
-  # Threshold for 95% HPD
-  thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
-  if (is.na(thresh)) {
-    thresh <- dens_vals[length(cum_prob)]
-    if (thresh==0) {
-      thresh <- dens_vals[max(which(dens_vals > 0))]
-    }
-  }
-
-  cls <- contourLines(fhat$eval.points[[1]],
-    fhat$eval.points[[2]], fhat$estimate, levels=thresh)
-
-  # If multiple, keep the largest (by number of vertices)
-  largest <- cls[[which.max(sapply(cls, function(cl) length(cl$x)))]]
+  pdf(paste0("real_bayes_inv_res_", year, ".pdf"), width=5, height=5)
 
     # Plot contour at HPD threshold
   image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
-    col=rev(heat.colors(128)), xaxt="n", yaxt="n", xlab="", ylab="", main=year,
-    xlim=c(500, 3000), ylim=c(0, 0.1))
+    col=rev(heat.colors(128)), xaxt="n", yaxt="n", xlab="",
+    ylab=expression(u[2]), cex.lab=1.5, xlim=c(500, 3000), ylim=c(0, 0.1))
+  mtext(expression(u[1]), side=1, line=3.5, cex=1.5)
+  title(year, line=0.5, cex.main=1.75)
   abline(v=seq(500, 3000, by=500), col="lightgrey", lty=3)
   abline(h=seq(0, 0.1, length=6), col="lightgrey", lty=3)
-  if (xticks) {
-    axis(1, labels=FALSE, tck=-0.05)
-    text(pmfp_labs, par("usr")[3]-0.0075, labels=pmfp_labs, srt=90, adj=1, xpd=NA,
-      cex=1.05)
+  axis(1, labels=FALSE)
+  text(pmfp_labs, par("usr")[3]-0.0045, labels=pmfp_labs, srt=90, adj=1, xpd=NA,
+    cex=1.05)
+  axis(2, labels=FALSE)
+  text(x=par("usr")[1]-100, y=ratio_labs, labels=ratio_labs, adj=1,
+    cex=1.05, xpd=NA)
+
+  arrows(x0=arrow_x1s[i], y0=arrow_y1s[i], x1=arrow_x2s[i], y1=arrow_y2s[i],
+    col=1, lty=2, lwd=2, length=0.4)
+
+  usr <- par("usr") # user coordinates
+  plt <- par("plt") # plot region as fraction of figure
+
+  # Convert to figure coordinates
+  fig_x1 <- plt[1] + (inset_lefts[i] - usr[1])/(usr[2] - usr[1]) * (plt[2] - plt[1])
+  fig_x2 <- plt[1] + (inset_rights[i] - usr[1])/(usr[2] - usr[1]) * (plt[2] - plt[1])
+  fig_y1 <- plt[3] + (inset_bottoms[i] - usr[3])/(usr[4] - usr[3]) * (plt[4] - plt[3])
+  fig_y2 <- plt[3] + (inset_tops[i] - usr[3])/(usr[4] - usr[3]) * (plt[4] - plt[3])
+
+  rect(inset_lefts[i], inset_bottoms[i], inset_rights[i], inset_tops[i], col="white", border=NA)
+  par(fig = c(fig_x1, fig_x2, fig_y1, fig_y2), new=TRUE, mar=c(0, 0, 0, 0))
+
+  image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
+    col=rev(heat.colors(128)), xaxt="n", yaxt="n", xlab="", ylab="", main="",
+    xlim=c(x_mins[i], x_maxs[i]), ylim=c(y_mins[i], y_maxs[i]))
+  axis(1, labels=FALSE, tck=0.04, col="lightgrey")
+  axis(2, labels=FALSE, tck=0.04, col="lightgrey")
+
+  # Add red border around inset
+  box(col=1, col="lightgrey", lwd=1)
+  if (i %in% 1:2) {
+    segments(usr[1], usr[3], usr[2], usr[3], col=1, lwd=10) # bottom
   }
-  if (yticks) {
-    axis(2, labels=FALSE, tck=-0.05)
-    text(x=par("usr")[1]-225, y=ratio_labs, labels=ratio_labs, adj=1,
-      cex=1.05, xpd=NA)
+  if (i %in% c(4:10)) {
+    segments(usr[1], usr[4], usr[2], usr[4], col=1, lwd=10) # top
   }
-  lines(largest$x, largest$y, lty=2)
+  if (i %in% c(2:10)) {
+    segments(usr[2], usr[3], usr[2], usr[4], col=1, lwd=10) # right
+  }
+  dev.off()
 }
-mtext(expression("Parallel Mean Free Path ("~u[1]~")"), side=1, outer=TRUE,
-  line=4.25, cex=1.2)
-mtext(expression("Ratio ("~u[2]~")"), side=2, outer=TRUE, line=3.0, cex=1.2)
-dev.off()
 
 ###############################################################################
 ## FIGURE 14: Plots showing discrepancy between real data and surrogate output
