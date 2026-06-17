@@ -57,6 +57,9 @@ colnames(rmses) <- colnames(crps) <- colnames(fit_times) <-
   colnames(pred_times) <- c("svecchia25", "svecchia50", "svecchia75",
    "svecchia100", "lagp", "deepgp")
 
+## Calculating residuals
+resids <- array(NA, dim=c(nrow(model_data)/nrow(unique_runs), nrow(unique_runs), 6))
+
 if (method=="svecchia" || method=="all") {
   ms <- seq(25, 100, by=25)
   for (i in 1:length(ms)) {
@@ -85,9 +88,10 @@ if (method=="svecchia" || method=="all") {
       pred_times[j,i] <- toc-tic
       rmses[j,i] <- sqrt(mean((svecpreds$means - Ytest)^2))
       crps[j,i] <- crps(y=Ytest, mu=svecpreds$means, s2=svecpreds$vars)
+      resids[,j,i] <- svecpreds$means - Ytest
       print(paste0("Finished SVecchia predictions where m=", ms[i]))
       print(paste0("Finished holdout iteration ", j))
-      res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
+      res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
       saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
     }
   }
@@ -122,9 +126,10 @@ if (method=="laGP" || method=="all") {
     pred_times[i,5] <- toc-tic
     rmses[i,5] <- sqrt(mean((lagppreds$mean - Ytest)^2))
     crps[i,5] <- crps(y=Ytest, mu=lagppreds$mean, s2=lagppreds$var)
+    resids[,i,5] <- lagppreds$mean - Ytest
     print("Finished laGP fit and predictions")
     print(paste0("Finished holdout iteration ", i))
-    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
+    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
     saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
 }
@@ -154,12 +159,13 @@ if (method=="deepgp" || method=="all") {
     pred_times[i,6] <- toc-tic
     rmses[i,6] <- sqrt(mean((dgp1preds$mean - Ytest)^2))
     crps[i,6] <- crps(y=Ytest, mu=dgp1preds$mean, s2=dgp1preds$s2)
+    resids[,i,6] <- dgp1preds$means - Ytest
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
-    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
+    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
     saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
 }
 
-res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps)
+res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
 saveRDS(res, paste0("../papers/surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
