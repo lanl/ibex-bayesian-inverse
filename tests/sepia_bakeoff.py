@@ -51,8 +51,10 @@ n_samp = 10000
 
 for j in range(len(pcs)):
     metrics = np.zeros((nruns, 2))
+    resids = np.zeros((16200, nruns))
     iter_pc = pcs[j]
-    ofname = '../papers/sepia_metrics_' + str(iter_pc) + '.csv'
+    met_ofname = '../papers/sepia_metrics_' + str(iter_pc) + '.csv'
+    resids_ofname = '../papers/sepia_resids_' + str(iter_pc) + '.csv'
     for i in range(nruns):
         yy_true = y[[i],:][0]
         inds = np.delete(range(nruns), i)
@@ -86,10 +88,16 @@ for j in range(len(pcs)):
             z = (yy_true[j] - meany[j])/sigma
             scores[j] = sigma*(-1/(math.pow(math.pi, 0.5)) + 2*norm.pdf(z) + z*(2*norm.cdf(z)-1))
         metrics[i,1] = np.nanmean(scores)
+        resids[:,i] = meany - yy_true
         print("\n")
         print("Finished iteration " + str(i) + "with nps=" + str(iter_pc) + "\n")
-    with open(ofname, 'w', newline='') as file:
+    with open(met_ofname, 'w', newline='') as file:
         # Create a CSV writer object
         writer = csv.writer(file)
         # Write each row of data to the CSV file
         writer.writerows(metrics)
+    with open(resids_ofname, 'w', newline='') as file:
+        # Create a CSV writer object
+        writer = csv.writer(file)
+        # Write each row of data to the CSV file
+        writer.writerows(resids)
