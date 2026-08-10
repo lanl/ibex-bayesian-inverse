@@ -1,0 +1,493 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage,epsfig}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{bm,dsfont,hyperref}
+
+\newcommand{\mb}[1]{\mathbf{#1}}
+\newcommand{\ds}[1]{\mathds{#1}}
+
+\begin{document}
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\renewcommand{\baselinestretch}{1.5} \small\normalsize
+
+\noindent {\bf``Bayesian Statistical Inversion for High-Dimensional Computer Model
+Output and Spatially Distributed Counts''}
+
+\bigskip
+\noindent
+Dear Dr. Tuo,
+
+\medskip Thank you for allowing us to revise our manuscript. We 
+are thrilled that you think it is a good fit for \textit{IISE Transactions}. We
+are grateful for the thoughtful suggestions made by each of the reviewers and have
+addressed their comments in our revision.  We believe that addressing these concerns
+has led to an improved manuscript and hope that you will agree.  I have included
+responses to each comment made by a reviewer in the following pages. Additional text
+is highlighted in blue in the revised manuscript.
+
+Please let me know if you need anything else from us, and thank you again for your
+consideration of our manuscript.
+
+\vspace{0.25in}
+\begin{center}
+\begin{tabular}{l}
+Sincerely,\\
+\\
+Steven Barnett
+\end{tabular}
+\end{center}
+
+\bigskip
+\renewcommand{\baselinestretch}{1.1} \small\normalsize
+
+\pagebreak
+
+\bigskip
+\noindent
+1. \textbf{Associate Editor} \textit{I agree with both referees’ comments that
+the notation needs to be improved. When introducing u, \(X\), and \(Y^F\) on
+page 5, these vectors/matrices could be introduced together with their
+dimensions (e.g., u in \(R^p\) (or u in \(\Theta \subset R^p\)), \(X\) in
+\(R^{(?)}\), \(X^F\) in \(R^{(?)}\), and \(Y^F\) in \(R^{(n_F?)}\)). If the
+authors adopt a consistent convention, such as using lower-case letters for
+vectors and upper-case letters for matrices and specifying their dimensions,
+readers can more easily follow the notation.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+2. \textbf{Associate Editor} \textit{In addition, when introducing the dimensions
+of vectors and matrices on page 5, I suggest explicitly relating these numbers
+to your application. I understand you mentioned this later; however, this
+would help emphasize to readers that the problem you are addressing is
+large-scale. e.g., what is the size of \(Y^F, X^F\), and u in your example?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+3. \textbf{Associate Editor} \textit{The authors refer to the rows of \(X^F\);
+however, it should be clarified earlier what each row and column of this
+matrix represents when it is introduced early in Section 2. Perhaps this will
+be resolved once the dimensions are introduced and clarified.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+4. \textbf{Associate Editor} \textit{Later, when describing the toy example in
+Figure 3, the stars, circles, and the dimensions of \(X, u, Y^F, X^F\) could
+be explicitly linked to the notation introduced earlier. For example, it would
+help to clarify whether the circles or the stars correspond to the \(y_i\) in
+Algorithm 1.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+5. \textbf{Associate Editor} \textit{Page 7, line 7: I understand that
+\(u^{(t)}\) corresponds to a draw from Metropolis sampling. However, it has
+not introduced at this point.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+6. \textbf{Associate Editor} \textit{On page 10, it is unclear what ``n'' refers
+to. Does it correspond to the size of any of the previously introduced
+notation (e.g., \(X, Y^F, u\)), or is it intended as a generic sample size for
+computer runs? It is used three times on this page.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+7. \textbf{Associate Editor} \textit{Figure 5: Is it possible to provide a heat
+map for the residuals between actual and predicted outputs?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+8. \textbf{Associate Editor} \textit{On page 15, please introduce an abbreviation
+for your method in the text, e.g., Scaled Vecchia (SVEC).}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+9. \textbf{Associate Editor} \textit{I agree with one referee’s comment regarding
+potential computational bottlenecks in SEPIA due to the number of simulation
+runs. It would strengthen the manuscript if the authors could discuss whether
+approaches such as those proposed by Higdon et al., combined with Vecchia-type
+approximations, could help alleviate these computational challenges.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+10. \textbf{Associate Editor} \textit{Relatedly, since log-transformed count data
+are sometimes modeled using Gaussian likelihoods, it would be helpful if the
+authors could comment on how the results might change under such a
+transformation.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+\textbf{Associate Editor} \textit{I agree with one referee's comment about the typos need to be fixed. Some of them I found:}
+
+\begin{itemize}
+	\item \textit{Page 2, line 45: Use Figure 1 instead of Fig. 1}
+	\item \textit{Page 2/8, line 52/19: Use i.e. not i.e}
+\end{itemize}
+
+\bigskip
+\noindent
+We greatly appreciate your careful attention to detail during your review.
+These typos have been corrected.
+
+\bigskip
+\noindent
+12. \textbf{Reviewer 1:} \textit{Section 2. The major writing consistency issues
+in notations seem to arise in this section. While Eq. 1 provides a good
+baseline for the standard Gaussian likelihood inverse problem, the undefined
+variables and notations are odd. For examples, }
+
+\begin{itemize}
+	\item $N_{n_F} (\cdot, \cdot)$ \textit{is not defined here, but defined
+much later in Section 2.2 introducing Gaussian process surrogates.}
+	\item \textit{If \(\rho, V\) are unimportant to the discussion (which I believe
+they are), perhaps do not state them, or rather provide a brief statement.}
+	\item \textit{The dimension p seems to have never been defined.}
+\end{itemize}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+13. \textbf{Reviewer 1:} \textit{Section 2. In describing Metropolis sampling
+``using a multivariate normal likelihood whose mean} $\mu(X^F) = m(u^{(t)},
+X^F) \ldots,$'' $u^{(t)}$ \textit{seems to suggest the tth step sample collected,
+but t was never defined before the MCMC algorithm.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+14. \textbf{Reviewer 1:} \textit{Section 2 (and more generally). The observational
+data suggest that there are gaps in the data, i.e., data are not available at
+every pixel. Do the computer models generate any incomplete output for certain
+parameters? Moreover, are the missing data accounted for in the likelihood?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+15. \textbf{Reviewer 1:} \textit{Section 2.1 provide an educational illustration
+of the difference between a Gaussian and a Poisson likelihood. Should readers
+expect the posterior draws to cover the counts/exposure data? Or is it a
+deficiency of the computer model in such case?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+16. \textbf{Reviewer 1:} \textit{Section 2.3. ``However, there is a method
+tailor-made for our Bayesian inverse problem setting when the likelihood (for
+\(Y^F\)) is Gaussian.''}
+
+\bigskip
+\noindent
+\textit{This seems to be an important justification of the
+proposed method, but missing words made the point rather unclear. Do the
+authors mean ``there is not a method ... for Poisson likelihood''?}
+
+\bigskip
+\noindent
+\textit{Also, should \(F\) in \(Y^F\) be in the superscript?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+17. \textbf{Reviewer 1:} \textit{Section 2.3. In the software survey, the authors
+have mentioned SEPIA by Gattiker et al., 2020. I believe at two other possible
+implementations are available from 2021 onward:}
+
+\begin{itemize}
+	\item \textit{GPflow (Van der Wilk et al., 2020), in addition to GP approximations, seems to also
+offer a Poisson likelihood implementation.}
+	\item \textit{surmise (Plumlee et al., 2025) contains an implementation of the Higdon et al. (2008)
+strategy. Examples using the package with the relevant high-dimensional output
+meth- ods are found, for examples, in Chan et al. (2024); S¨urer et al.
+(2022).}
+\end{itemize}
+
+\bigskip
+\noindent
+\textit{And, what about any variational methods, e.g., Hensman et al. (2015)?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+18. \textbf{Reviewer 1:} \textit{Section 3.2. Since the surrogate outputs are
+high-dimensional, would a multivariate measurement of performance be more
+appropriate? RMSE and CRPS are univariate measures.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+19. \textbf{Reviewer 1:} \textit{e.g. Section 4.2. In several sections when the
+surrogate prediction of a full sky map is compared with the computer model,
+the authors state for multiple times that there are no ``visual'' difference. In
+such cases, a residual plot seems to be beneficial to better quantify the
+claim.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+20. \textbf{Reviewer 1:} \textit{Section 5. The demonstration of a need for a
+discrepancy model is good, yet the value of Figure 13 is not clear to me, as
+most posterior region becomes invisible.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+21. \textbf{Reviewer 1:} \textit{Computation. While the code repository is
+relatively complete, it is helpful to include the software requirements and
+dependencies somewhere, e.g., GPvecchia, tmvtnorm, laGP, R.utils, etc.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+23. \textbf{Reviewer 1:} \textit{Some language choices seem to leave
+interpretative room with regards to the authors’ intentions when a reader
+will benefit from a clear opinion from the authors. For example, the adverb
+''extremely'' is used in several places where some quantification will be
+helpful to answer the question ``in what way is it extreme?''}
+
+\begin{itemize}
+	\item \textit{``These simulations are extremely sophisticated and ...''
+	(This usage seems fine.)}
+	\item \textit{``We find the Vecchia approximation to be extremely effective
+	in this regard.''}
+	\item \textit{``GP surrogates are extremely effective.''}
+	\item \textit{``the computer model output is extremely high-dimensional
+	...'' A reminder of the number of outputs may be helpful here.}
+\end{itemize}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+24. \textbf{Reviewer 1:} \textit{The intention of quote usages is unclear at times.}
+
+\begin{itemize}
+	\item \textit{``status quo'' in correspondence to SEPIA.}
+	\item \textit{``true'' parameter, as in synthetically generated true values?}
+\end{itemize}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+25. \textbf{Reviewer 1:} \textit{Section 1. The use of nouns with different
+meanings, i.e., ``challenges'', ``bottlenecks'', and ``situations'', to refer to the
+same set of issues has made it difficult to follow.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+26. \textbf{Reviewer 1:} \textit{Would combining Figures 2 and 3 as a top and
+bottom panel help with the illustration? The figures are similar and would
+benefit from side-by-side comparison.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+27. \textbf{Reviewer 1:} \textit{The legend in Figure 7 (right panel) is unclear.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+28. \textbf{Reviewer 1:} \textit{The caption of Figure 8 can be improved,
+especially regarding the laGP line in the rightmost panel.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+\textbf{Reviewer 1:} \textit{Supplemental comments}
+
+\bigskip
+\noindent
+Thank you for your diligent reading of our manuscript. We have fixed the typos
+and phrasing issues mentioned. We also now introduce the KOH acronym earlier
+in the paper.
+
+\bigskip
+\noindent
+30. \textbf{Reviewer 2:} \textit{The manuscript uses \(X^M\) to denote the
+combined input \((u, X)\) to the surrogate, while \(X^F\) denotes the
+field-data locations (latitude/longitude) and does not involve \(u\). Since
+\(M\) indicates ``model,'' I found this overloading of \(X\) (and the use of
+superscripts) easy to misread: I repeatedly had to remind myself that \(X^F\)
+is purely spatial, whereas \(X^M\) includes both parameters and locations. I
+recommend reserving \(X^M\) (or simply \(X\)) for model output locations only,
+and introducing a different symbol for the joint design in parameter–location
+space (e.g., \(Z=(u,X)\)). This small change would reduce cognitive load and
+make the distinction between ``where data are observed'' and ``what the emulator
+is conditioned on'' more transparent.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+31. \textbf{Reviewer 2:} \textit{Figure 3 is helpful overall, but I suggest
+removing the star markers in the middle panel, since they do not correspond to
+the final quantity of interest. It would make the visual assesment of the
+inference performance easier.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+32. \textbf{Reviewer 2:} \textit{In Figure 5, it would be helpful to annotate each
+simulated output and its surrogate approximation with the corresponding
+parameter value(s) used to generate them (either in the panel titles, caption,
+or a small table/legend). This would make the comparison more interpretable.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+33. \textbf{Reviewer 2:} \textit{The calibration parameters are described
+essentially in terms of \((u_1, u_2/u_1)\). Could the authors clarify the
+motivation for using this parameterization, as opposed to solving the inverse
+problem directly in terms of \((u_1, u_2)\) with \(u_1\) and \(u_2\) treated
+as independent coordinates? I understand there is physical meaning of the
+ratio parameter. But isn’t it a general desire to use untangled variables in
+regression problem?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+34. \textbf{Reviewer 2:} \textit{Figure 6 suggests that SEPIA (even with only
+three PC bases) can achieve performance comparable to SVEC (this acronymm is
+never defined in the text). If the primary bottleneck for SEPIA in this
+setting is scalability with a large number of simulation runs (Figure 8,
+right panel), a potentially manageable alternative would be to retain the
+Higdon et al.basis-decomposition setup but model the PC/basis weights using
+Vecchia-approximated GPs (rather than full GPs). It would be helpful if the
+authors could comment on whether such a ``Higdon et al. + Vecchia'' hybrid has
+been considered, and how it might compare to SVEC in terms of computational
+cost and accuracy. This could potentially be implemented without relying on
+the SEPIA library (thereby avoiding the MCMC cost of full Bayesian inference),
+and instead used as a drop-in surrogate within the proposed framework.}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+35. \textbf{Reviewer 2:} \textit{Since it is common to model log-count data using
+a Gaussian likelihood, and the IBEX application uses only 66 simulator runs,
+it would be helpful if the authors could comment on, and possibly experiment
+whether SEPIA would be computationally feasible at this problem size when
+applied to (transformed) log-count outputs. Is the main limitation of SEPIA
+here the non-Gaussian (Poisson) observation model?}
+
+\bigskip
+\noindent
+TBD
+
+\bigskip
+\noindent
+36. \textbf{Reviewer 2:} \textit{It remains unclear to me how the ``stacked'' field
+data are used in the real-data analysis (e.g., stacking three years into
+roughly 23K rows of \((X^F, Y^F)\)). Figure 11 suggests that \(X^F\) varies
+across years. Does the simulator also produce year-specific outputs (at
+year-specific \(X^F\)), which are then stacked and passed into a single
+likelihood evaluation, or are the years treated as separate likelihood terms
+(with a product over years)? A short mathematical description (with explicit
+notation for year index, locations, and simulator output) would be very
+helpful for readers.}
+
+\bigskip
+\noindent
+TBD
+
+\end{document}
