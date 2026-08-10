@@ -196,7 +196,7 @@ library(MASS)
 library(coda)
 library(ks)
 
-sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{0,14}.rds")
+sim_res_file <- list.files(pattern="sim_calib_results[_]*[0-9]{0,14}.rds")
 res <- readRDS(sim_res_file)
 
 pmfps <- seq(750, 2750, by=250)

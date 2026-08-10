@@ -265,9 +265,12 @@ measurement) and a computer implementation of a physical model $m(u, X)$,
 where parameters $u$ are unknown and $X$ represents the spatial locations
 where the simulation output is evaluated.  These may be the locations $X^F$
 that correspond to field measurements $Y^F$, or a grid of predictive locations
-supporting high-resolution visuals.  Given prior information about $u$, we
-want to know which $u$'s lead to realizations of $m(\cdot, \cdot)$ that could
-explain $Y^F$, i.e., the posterior for $u \mid Y^F$.
+supporting high-resolution visuals. {\color{red}Therefore, computer model and
+field data are potentially collected at different inputs, but we only evaluate
+the likelihood (Eq.~\ref{eq:inv_bayes_mod}) at observed field data locations.}
+Given prior information about $u$, we want to know which $u$'s lead to
+realizations of $m(\cdot, \cdot)$ that could explain $Y^F$, i.e., the
+posterior for $u \mid Y^F$.
 
 This is a classic Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Eq.~\ref{eq:inv_bayes_mod} 
@@ -339,12 +342,12 @@ evident that the Metropolis sampler successfully concentrates posterior mass
 around the true value of $u$.
 
 The literature on Bayesian inverse problems involves methods that work
-predominantly in this way, particularly regarding a Gaussian likelihood. We
-aim to provide a method that achieves the same goal, but for unknown parameters
-$u$ that underlie observed IBEX satellite data (left panel of Figure
-\ref{f:fig1}), whose observations are counts under variable exposure. Our first
-contribution, which is albeit rather straightforward, is to depart from that
-literature by using a Poisson likelihood.
+predominantly in this way, particularly {\color{red}regarding} a Gaussian
+likelihood. We aim to provide a method that achieves the same goal, but for
+unknown parameters $u$ that underlie observed IBEX satellite data (left panel
+of Figure \ref{f:fig1}), whose observations are counts under variable
+exposure. Our first contribution, which is albeit rather straightforward, is
+to depart from that literature by using a Poisson likelihood.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Generalized Bayesian inverse problems
@@ -707,18 +710,21 @@ Python}.
 
 Figure \ref{f:ibex_surr_metrics} displays the accuracy results of a simple
 hold-one-out bake-off, with time coming next. For each iteration of the
-experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the $n=66$ model runs
-available. Then, we predict at the held out model parameter. For now, just
-pay attention to the boxplots on the left-hand side of each panel. We'll come
-back to the others in a moment. It is obvious that {\color{red}SVEC} outperforms{\sf laGP}
-and {\sf deepgp} in both RMSE and CRPS. The local focus of {\sf laGP} limits
-its ability to capture global trends, potentially hurting its performance.
-Large data and corresponding expensive matrix operations restrict the number
-of iterations {\sf deepgp} can run and thus prevents the MCMC from converging
-to the target posterior. SEPIA performed similarly to {\color{red}SVEC}, illustrating why
-it has had such staying power over the past two decades. As a practitioner,
-it appears to be a toss-up between these two methods for which to use. But
-that's not the entire story.
+experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the $n=66$ model
+runs available. Then, we predict at the held out model parameter. For now,
+just pay attention to the boxplots on the left-hand side of each panel. We'll
+come back to the others in a moment. It is obvious that {\color{red}SVEC}
+outperforms{\sf laGP} and {\sf deepgp} in both RMSE and CRPS.
+{\color{red}Further visual aids showing the gap in predictive accuracy for
+these methods are provided in the Appendix (Figure
+\ref{f:surrogate_residuals})}. The local focus of {\sf laGP} limits its
+ability to capture global trends, potentially hurting its performance. Large
+data and corresponding expensive matrix operations restrict the number of
+iterations {\sf deepgp} can run and thus prevents the MCMC from converging to
+the target posterior. SEPIA performed similarly to {\color{red}SVEC},
+illustrating why it has had such staying power over the past two decades. As a
+practitioner, it appears to be a toss-up between these two methods for which
+to use. But that's not the entire story.
 
 \begin{figure}[ht!]
 \centering
@@ -856,8 +862,8 @@ address this through an update to the mean expression in the Poisson likelihood
 in Eq.~\ref{eq:pois_inv_bayes_mod} such that $\lambda(X^F) = m(u, X^F) -
 \lambda_{b}(X^F)$.
 
-We have referred to the IBEX simulator throughout this paper without going into
-much detail. While we leave a more in-depth physical interpretation and
+We have referred to the IBEX simulator throughout this paper without going
+into much detail. While we leave a more in-depth physical interpretation and
 analysis of parameters to more appropriate venues
 \citep{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density,huang2025numerical},
 some basic context is provided here. We focus on two particular models
@@ -866,11 +872,14 @@ model, the parameter \textit{parallel mean free path} is the distance a
 hydrogen ion travels beyond the heliopause, or edge of the heliosphere, before
 interacting with another particle, receiving an electron and becoming an ENA,
 and ``turning back.'' The \textit{ratio} parameter is the fraction of
-perpendicular mean free path, another measure of distance, and \textit{parallel
-mean free path}. These are our $u$ values. The response from the GDF model is
-static and is merely added to the output of the ribbon simulator. This is not
-the case for GDF simulators in general, but the GDF model we have access to
-does not vary with any parameters of interest.
+perpendicular mean free path, another measure of distance, and
+\textit{parallel mean free path}. These are our $u$ values.
+{\color{red}Although seemingly entangled, this parameterization is common
+practice among space scientists, easing interpretation and allowing for the
+clean separation of certain particle scattering and diffusion effects.} The
+response from the GDF model is static and is merely added to the output of the
+ribbon simulator. This is not the case for GDF simulators in general, but the
+GDF model we have access to does not vary with any parameters of interest.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
 due to variations in the solar wind that accompany the approximately 11 year
@@ -903,8 +912,6 @@ computer model $m(\cdot,\cdot)$. The top left panel of Figure
 \ref{f:ibex_synth_ex} shows the result, which we will regard as data we
 ``observed.'' Note that observations are not on a fine grid, but instead match
 the recorded coordinates for ENAs captured by the IBEX satellite in its orbit.
-This accounts for the unique spread of points and the strings of missing data,
-which correspond to certain orbits.
 
 \begin{figure}[ht!]
 \centering
@@ -1370,5 +1377,24 @@ satellite data been in the form of a multiplicative scale, our method would be
 able to identity it. Alas, we look forward to future work exploring more
 sophisticated discrepancy models and better capturing the mismatch between
 simulator and reality.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.29,trim=0 65 100 20,clip=TRUE]{residual_plot_SVEC_25.pdf}
+\includegraphics[scale=0.29,trim=50 65 100 20,clip=TRUE]{residual_plot_SVEC_50.pdf}
+\includegraphics[scale=0.29,trim=50 65 100 20,clip=TRUE]{residual_plot_SVEC_75.pdf}
+\includegraphics[scale=0.29,trim=50 65 5 20,clip=TRUE]{residual_plot_laGP.pdf}
+\includegraphics[scale=0.29,trim=0 0 100 10,clip=TRUE]{residual_plot_SEPIA_3.pdf}
+\includegraphics[scale=0.29,trim=50 0 100 10,clip=TRUE]{residual_plot_SEPIA_4.pdf}
+\includegraphics[scale=0.29,trim=50 0 100 10,clip=TRUE]{residual_plot_SEPIA_5.pdf}
+\includegraphics[scale=0.29,trim=50 0 5 10,clip=TRUE]{residual_plot_deepgp.pdf}
+\caption{{\color{red}Absolute residuals averaged over 66 hold-one-out predictions from the IBEX simulator experiment (Figure
+\ref{f:ibex_surr_metrics}) for several different surrogate model techniques.
+For better visual comparison between methods, the square root of the absolute
+residuals is shown and the range of values is clipped. Note that all SVEC and
+SEPIA residuals are similar, regardless of the neighborhood size or number of
+principal components used}
+\label{f:surrogate_residuals}}
+\end{figure}
 
 \end{document}
