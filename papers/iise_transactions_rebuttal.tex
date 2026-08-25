@@ -45,7 +45,7 @@ Steven Barnett
 
 \bigskip
 \noindent
-1. \textbf{Associate Editor} \textit{I agree with both referees’ comments that
+\textbf{Associate Editor} \textit{I agree with both referees’ comments that
 the notation needs to be improved. When introducing u, \(X\), and \(Y^F\) on
 page 5, these vectors/matrices could be introduced together with their
 dimensions (e.g., u in \(R^p\) (or u in \(\Theta \subset R^p\)), \(X\) in
@@ -56,11 +56,16 @@ readers can more easily follow the notation.}
 
 \bigskip
 \noindent
-TBD
+Thank you for this recommendation. We agree that this improvement make it much
+clearer to the reader what the data from each source (computer model and
+physical experiment) looks like. We have updated the text on Page 5 to
+explicity note the dimensions of the vectors and matrices introduced.
+Additionally, in the first paragraph of Section 2.2 we have specified the
+dimensions of the vector $Y^M$ and the matrix $X^M$.
 
 \bigskip
 \noindent
-2. \textbf{Associate Editor} \textit{In addition, when introducing the dimensions
+\textbf{Associate Editor} \textit{In addition, when introducing the dimensions
 of vectors and matrices on page 5, I suggest explicitly relating these numbers
 to your application. I understand you mentioned this later; however, this
 would help emphasize to readers that the problem you are addressing is
@@ -68,22 +73,29 @@ large-scale. e.g., what is the size of \(Y^F, X^F\), and u in your example?}
 
 \bigskip
 \noindent
-TBD
+Thank you for this suggestion. We have inserted a short parenthetical
+statement indicating those dimensions. As our manuscript is very application
+focused, we agree that this change will help the reader understand the need
+for our proposed methodology.
 
 \bigskip
 \noindent
-3. \textbf{Associate Editor} \textit{The authors refer to the rows of \(X^F\);
+\textbf{Associate Editor} \textit{The authors refer to the rows of \(X^F\);
 however, it should be clarified earlier what each row and column of this
 matrix represents when it is introduced early in Section 2. Perhaps this will
 be resolved once the dimensions are introduced and clarified.}
 
 \bigskip
 \noindent
-TBD
+Thank you for proposing this clarification. In order to make the structure
+more clear, we have updated the first paragraph of Section 2. First, we have
+explicitly stated the set of data that comes from a run of the computer model.
+Additionally, we added in parentheses an example of what the columns could
+look like in the design matrix $X$ or $X^F$.
 
 \bigskip
 \noindent
-4. \textbf{Associate Editor} \textit{Later, when describing the toy example in
+\textbf{Associate Editor} \textit{Later, when describing the toy example in
 Figure 3, the stars, circles, and the dimensions of \(X, u, Y^F, X^F\) could
 be explicitly linked to the notation introduced earlier. For example, it would
 help to clarify whether the circles or the stars correspond to the \(y_i\) in
@@ -91,46 +103,58 @@ Algorithm 1.}
 
 \bigskip
 \noindent
-TBD
+We are grateful for this insightful observation. We have updated the caption
+of Figure 2 (previously separated into Figures 2 and 3) and now explicity make
+the connection between the stars and circles in the figure with the quantities
+in Algorithm 1.
 
 \bigskip
 \noindent
-5. \textbf{Associate Editor} \textit{Page 7, line 7: I understand that
+\textbf{Associate Editor} \textit{Page 7, line 7: I understand that
 \(u^{(t)}\) corresponds to a draw from Metropolis sampling. However, it has
 not introduced at this point.}
 
 \bigskip
 \noindent
-TBD
+Thank you for pointing this out. Earlier in that same paragraph, we now
+clarify that $t$ indexes into the draws from a Metropolis sampler.
 
 \bigskip
 \noindent
-6. \textbf{Associate Editor} \textit{On page 10, it is unclear what ``n'' refers
+\textbf{Associate Editor} \textit{On page 10, it is unclear what ``n'' refers
 to. Does it correspond to the size of any of the previously introduced
 notation (e.g., \(X, Y^F, u\)), or is it intended as a generic sample size for
 computer runs? It is used three times on this page.}
 
 \bigskip
 \noindent
-TBD
+We appreciate this suggested change. We have updated the text to include the
+subscript $M$ to clarify that the $n$ mentioned here corresponds to the number
+of simulator runs.
 
 \bigskip
 \noindent
-7. \textbf{Associate Editor} \textit{Figure 5: Is it possible to provide a heat
+\textbf{Associate Editor} \textit{Figure 5: Is it possible to provide a heat
 map for the residuals between actual and predicted outputs?}
 
 \bigskip
 \noindent
-TBD
+We are grateful for this constructive recommendation. This visual aid adds
+strength to the argument for our method to be used over others. We have added
+the suggested heat map to the appendix and refer to it in Section 3.2 of the
+manuscript.
 
 \bigskip
 \noindent
-8. \textbf{Associate Editor} \textit{On page 15, please introduce an abbreviation
+\textbf{Associate Editor} \textit{On page 15, please introduce an abbreviation
 for your method in the text, e.g., Scaled Vecchia (SVEC).}
 
 \bigskip
 \noindent
-TBD
+This is a valuable suggestion. We have introduced the abbreviation SVEC and
+refer to this throughout the paper in place of SVEC. In addition to
+conciseness, this is also helpful to connect the text with the visuals in
+Figures 5-7.
 
 \bigskip
 \noindent
@@ -157,7 +181,8 @@ TBD
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{I agree with one referee's comment about the typos need to be fixed. Some of them I found:}
+\textbf{Associate Editor} \textit{I agree with one referee's comment about the
+typos need to be fixed. Some of them I found:}
 
 \begin{itemize}
 	\item \textit{Page 2, line 45: Use Figure 1 instead of Fig. 1}
