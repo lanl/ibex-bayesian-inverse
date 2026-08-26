@@ -17,9 +17,18 @@ import math
 import numpy as np
 import time
 from scipy.stats import norm
+from scipy.spatial.distance import pdist
 from sepia.SepiaModel import SepiaModel
 from sepia.SepiaData import SepiaData
 from sepia.SepiaPredict import SepiaEmulatorPrediction
+
+def energy_score(draws, observed):
+    draws = np.asarray(draws)
+    observed = np.asarray(observed)
+    n = draws.shape[0]
+    dist_to_obs = np.linalg.norm(draws - observed,  axis=1)
+    pairwise_distance_sum = pdist(draws).sum()
+    return(dist_to_obs.mean()-pairwise_distance_sum / n**2)
 
 model_data = np.genfromtxt('../data/sims.csv', delimiter=',', names=True)
 x = model_data[['parallel_mean_free_path', 'ratio']]
@@ -88,6 +97,7 @@ for j in range(len(pcs)):
             z = (yy_true[j] - meany[j])/sigma
             scores[j] = sigma*(-1/(math.pow(math.pi, 0.5)) + 2*norm.pdf(z) + z*(2*norm.cdf(z)-1))
         metrics[i,1] = np.nanmean(scores)
+        metrics[i,2] = energy_score(draws=predy[8000:9000,0,:], observed=yy_true)
         resids[:,i] = meany - yy_true
         print("\n")
         print("Finished iteration " + str(i) + "with nps=" + str(iter_pc) + "\n")
