@@ -19,12 +19,12 @@ Output and Spatially Distributed Counts''}
 Dear Dr. Tuo,
 
 \medskip Thank you for allowing us to revise our manuscript. We 
-are thrilled that you think it is a good fit for \textit{IISE Transactions}. We
-are grateful for the thoughtful suggestions made by each of the reviewers and have
-addressed their comments in our revision.  We believe that addressing these concerns
-has led to an improved manuscript and hope that you will agree.  I have included
-responses to each comment made by a reviewer in the following pages. Additional text
-is highlighted in blue in the revised manuscript.
+believe it is a good fit for \textit{IISE Transactions}. We are grateful for
+the thoughtful suggestions made by each of the reviewers and have addressed
+their comments in our revision.  We believe that addressing these concerns has
+led to an improved manuscript and hope that you will agree.  I have included
+responses to each comment made by a reviewer in the following pages.
+Additional text is highlighted in red in the revised manuscript.
 
 Please let me know if you need anything else from us, and thank you again for your
 consideration of our manuscript.
@@ -139,10 +139,10 @@ map for the residuals between actual and predicted outputs?}
 
 \bigskip
 \noindent
-We are grateful for this constructive recommendation. This visual aid adds
-strength to the argument for our method to be used over others. We have added
-the suggested heat map to the appendix and refer to it in Section 3.2 of the
-manuscript.
+We are grateful for this constructive recommendation. We have added the
+suggested heat map to the appendix and refer to it in Section 3.2 of the
+manuscript. This visual aid adds strength to the argument for our method to be
+used over others.
 
 \bigskip
 \noindent
@@ -196,7 +196,7 @@ These typos have been corrected.
 
 \bigskip
 \noindent
-12. \textbf{Reviewer 1:} \textit{Section 2. The major writing consistency issues
+\textbf{Reviewer 1:} \textit{Section 2. The major writing consistency issues
 in notations seem to arise in this section. While Eq. 1 provides a good
 baseline for the standard Gaussian likelihood inverse problem, the undefined
 variables and notations are odd. For examples, }
@@ -211,44 +211,67 @@ they are), perhaps do not state them, or rather provide a brief statement.}
 
 \bigskip
 \noindent
-TBD
+Thank you for pointing this out and helping us be more clear. We added text
+above Equation 1 to specify that $Y_F$ follows a multivariate normal, removed
+references to $\rho$ and $V$ to eliminate confusion for the reader, and
+defined the dimension of $p_U$ (updated from $p$) in the first paragraph of
+Section 2.
 
 \bigskip
 \noindent
-13. \textbf{Reviewer 1:} \textit{Section 2. In describing Metropolis sampling
+\textbf{Reviewer 1:} \textit{Section 2. In describing Metropolis sampling
 ``using a multivariate normal likelihood whose mean} $\mu(X^F) = m(u^{(t)},
 X^F) \ldots,$'' $u^{(t)}$ \textit{seems to suggest the tth step sample collected,
 but t was never defined before the MCMC algorithm.}
 
 \bigskip
 \noindent
-TBD
+Thank you for raising this point. We have now defined $t$ earlier in that same
+sentence.
 
 \bigskip
 \noindent
-14. \textbf{Reviewer 1:} \textit{Section 2 (and more generally). The observational
+\textbf{Reviewer 1:} \textit{Section 2 (and more generally). The observational
 data suggest that there are gaps in the data, i.e., data are not available at
 every pixel. Do the computer models generate any incomplete output for certain
 parameters? Moreover, are the missing data accounted for in the likelihood?}
 
 \bigskip
 \noindent
-TBD
+We appreciate this feedback. Similar to a physical experiment, the IBEX
+satellite cannot take measurements at every possible location. So, although
+there appears to be empty space between observations, there is no relationship
+between the response of interest and the missingness. To avoid any confusion
+for the reader, we have removed the words ``missing'' or ``gap'' from the
+manuscript when referring to the observed data.
 
 \bigskip
 \noindent
-15. \textbf{Reviewer 1:} \textit{Section 2.1 provide an educational illustration
+The reviewer's comment does highlight one advantage of pairing a computer
+model with the observational data. In that set up, you can run the simulation
+at any location, and thereby ``fill in'' the space that your physical
+experiment is unable to cover.
+
+\bigskip
+\noindent
+\textbf{Reviewer 1:} \textit{Section 2.1 provide an educational illustration
 of the difference between a Gaussian and a Poisson likelihood. Should readers
 expect the posterior draws to cover the counts/exposure data? Or is it a
 deficiency of the computer model in such case?}
 
 \bigskip
 \noindent
-TBD
+Thank you for this clarifying suggestion. We expect the posterior draws to
+cover the mean function $\lambda(X)$, not the counts/exposure data. We have
+added a sentence in the paper around the figure alluding to this fact. We have
+also combined Figures 2 and 3 to make the distinction between Gaussian and
+Poisson data more explicit. Additionally, we have added the axis label
+``$\lambda$ or Y'' to the plot to make it clear to the reader that both
+quantities are being plotted.
 
 \bigskip
 \noindent
-16. \textbf{Reviewer 1:} \textit{Section 2.3. ``However, there is a method
+\textbf{Reviewer 1:} \textit{Section 2.3. ``However, there is a method
 tailor-made for our Bayesian inverse problem setting when the likelihood (for
 \(Y^F\)) is Gaussian.''}
 
@@ -264,7 +287,10 @@ authors mean ``there is not a method ... for Poisson likelihood''?}
 
 \bigskip
 \noindent
-TBD
+This is a valuable suggestion, and we have revised the manuscript accordingly.
+We have added explicit phrasing in Section 2.3 to indicate that no method
+exists for a Poisson likelihood. We have also the text to show $F$ in the
+superscript instead of the subscript.
 
 \bigskip
 \noindent
@@ -297,11 +323,23 @@ appropriate? RMSE and CRPS are univariate measures.}
 
 \bigskip
 \noindent
-TBD
+We appreciate the reviewer’s thoughtful suggestion. We agree that a
+multivariate scoring rule, such as the energy score, could provide additional
+information about the joint predictive performance of the surrogate for these
+high-dimensional outputs. However, calculating such a score requires a
+representation of the joint predictive distribution. In our setting, this
+would require either estimating and storing the full high-dimensional
+predictive covariance matrix or generating joint predictive draws that
+preserve this covariance structure. Both approaches would be computationally
+prohibitive for the problem considered here. Moreover, some of the competing
+methods provide only marginal predictive distributions and do not produce the
+joint covariance information or joint predictive draws needed to calculate a
+multivariate score. Therefore, we are unfortunately unable to provide such a
+metric.
 
 \bigskip
 \noindent
-19. \textbf{Reviewer 1:} \textit{e.g. Section 4.2. In several sections when the
+\textbf{Reviewer 1:} \textit{e.g. Section 4.2. In several sections when the
 surrogate prediction of a full sky map is compared with the computer model,
 the authors state for multiple times that there are no ``visual'' difference. In
 such cases, a residual plot seems to be beneficial to better quantify the
@@ -309,17 +347,28 @@ claim.}
 
 \bigskip
 \noindent
-TBD
+Thank you for suggesting this insightful contribution. We have made two
+updates to strengthen the claim of no ``visual'' difference. First we added a
+heat map of averaged residuals to the appendix and link to it in the
+manuscript near Figures 4 (grid of model runs and predicted surfaces) and 5
+(boxplots of RMSE and CRPS). Next, we have added a residual plot to Figure 8.
+This figure displays results from an experiement where we simulate data from
+something known and then try to predict the true underlying surface. We
+comment on the nature of these residuals in the text below.
 
 \bigskip
 \noindent
-20. \textbf{Reviewer 1:} \textit{Section 5. The demonstration of a need for a
+\textbf{Reviewer 1:} \textit{Section 5. The demonstration of a need for a
 discrepancy model is good, yet the value of Figure 13 is not clear to me, as
 most posterior region becomes invisible.}
 
 \bigskip
 \noindent
-TBD
+We agree that this figure (now Figure 12) could be more helpful to the reader.
+To achieve this, we have added insets to each plot that zoom in on the
+posterior region. This addition allows the reader to more clearly see the
+shape of each posterior. We also believe it further strengthens the argument
+that the sampler wants to explore beyond the constrained parameter space.
 
 \bigskip
 \noindent
@@ -430,6 +479,11 @@ is conditioned on'' more transparent.}
 \bigskip
 \noindent
 TBD
+Thank you for your comment. We made a couple changes to make this clear to
+make this more explicit. This notation is standard. We want to refer to two
+kinds of $X^F$. We want to distinguish between the designs, one where
+observations are recorded, and one where it is gridded out and predicted on.
+We could have introduced Z, but…
 
 \bigskip
 \noindent

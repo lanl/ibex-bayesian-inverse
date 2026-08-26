@@ -88,10 +88,12 @@ if (method=="svecchia" || method=="all") {
       pred_times[j,i] <- toc-tic
       rmses[j,i] <- sqrt(mean((svecpreds$means - Ytest)^2))
       crps[j,i] <- crps(y=Ytest, mu=svecpreds$means, s2=svecpreds$vars)
+      svecdraws <- predictions_scaled(svecfit, as.matrix(Xtest), m=ms[i], joint=TRUE, nsims=1000)
+      escores[j,i] <- energy_score(draws=t(svecdraws[[2]]), observed=Ytest)
       resids[,j,i] <- svecpreds$means - Ytest
       print(paste0("Finished SVecchia predictions where m=", ms[i]))
       print(paste0("Finished holdout iteration ", j))
-      res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
+      res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, escores=escores, resids=resids)
       saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
     }
   }
@@ -167,5 +169,5 @@ if (method=="deepgp" || method=="all") {
   }
 }
 
-res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
+res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, escores=escores, resids=resids)
 saveRDS(res, paste0("../papers/surrogate_test_", format(Sys.time(), "%Y%m%d"), "_", start, ".rds"))

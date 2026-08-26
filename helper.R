@@ -92,3 +92,18 @@ spher_to_geo_coords <- function(x, y, z) {
 nose_center_lons <- function(lons) {
   return((lons - 85) %% 360)
 }
+
+###############################################################################
+# Calculates energy score, a multivariate version of CRPS
+#
+# @return a scalar value indicating the score
+###############################################################################
+energy_score <- function(draws, observed) {
+  draws <- as.matrix(draws)
+  n <- nrow(draws)
+
+  dist_to_obs <- sqrt(rowSums(sweep(draws, 2, observed, "-")^2))
+  pairwise_dists <- as.matrix(dist(draws))
+
+  mean(dist_to_obs)-sum(pairwise_dists) / (2 * n^2)
+}

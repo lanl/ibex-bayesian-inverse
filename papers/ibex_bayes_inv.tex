@@ -279,16 +279,17 @@ $m(\cdot, \cdot)$ that could explain $Y^F$, i.e., the posterior for $u \mid
 Y^F$.
 
 This is a classic Bayesian inverse problem
-\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Eq.~\ref{eq:inv_bayes_mod} 
-provides the typical hierarchical model used in this
-setting, generally with Gaussian field data $Y^F$.
+\citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}.
+Eq.~\ref{eq:inv_bayes_mod} provides the typical hierarchical model used in
+this setting, generally with Gaussian field data $Y^F$ {\color{red}following
+an $n_F$-variate normal with defined mean and covariance functions.}
 \begin{align}
 Y^F &\sim \mathcal{N}_{n_F}\!\left(\mu\!\left(X^F\right),
 \Sigma\!\left(X^F\right)\right) \nonumber  \\
 \mu(X) &= m(u, X) \label{eq:inv_bayes_mod} \\
-\Sigma(X) &\sim \pi\left(\Sigma\right) & \mbox{e.g.,} \quad \Sigma^{-1} & \sim \mathrm{Wishart}((\rho V)^{-1}, \rho)
+\Sigma(X) &\sim \pi\left(\Sigma\right) & \mbox{e.g.,} \quad \Sigma^{-1} & \sim \mathrm{Wishart}(\cdot, \cdot)
 \nonumber \\
-u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p \nonumber
+u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^{p_U} \nonumber
 \end{align}
 One big difference with Bayesian inverse problems, as opposed to ordinary
 Bayesian inference, is that the parameters $\mu(X^F)$ and $\Sigma(X^F)$
@@ -416,10 +417,12 @@ circles indicate the sum of all counts at one input location (i.e. a single
 row of $X^F$) divided by the sum of their corresponding exposure times
 $e(\cdot)$. These points are the actual data we receive. Results from running
 Algorithm \ref{alg:gibbs} are shown in the {\color{red}bottom} middle and
-right panels of Figure \ref{f:toy_calib}. Similar to results in
-{\color{red} the top row}, it is clear that the sampler searches a broad swath
-of the model input space but hones in {\color{red}(perhaps more effectively
-than before)} on the region where the true parameter value lies.
+right panels of Figure \ref{f:toy_calib}. Similar to results in {\color{red}
+the top row}, it is clear that the sampler searches a broad swath of the model
+input space but hones in {\color{red}(perhaps more effectively than before)}
+on the region where the true parameter value lies. {\color{red}In the bottom
+middle panel, we do not expect the posterior draws to cover all observed
+counts, but to be centered around the true mean, as is the case here.}
 
 In each of these toy examples we have made the assumption that we have unlimited
 access to simulator runs (i.e., for each proposed combination of model
@@ -1245,7 +1248,7 @@ found at \url{https://github.com/lanl/ibex-bayesian-inverse}.
 
 RBG and SDB are grateful for funding from NSF CMMI 2152679. SDB, DO and LJB
 were funded by Laboratory Directed Research and Development (LDRD) Project
-20220107DR. {\color{red}The authors would also like to thank C.A.~Eiffer for her
+20220107DR. {\color{red}The authors would like to thank C.A.~Eiffer for her
 encouragement and support of this paper. They also wish to thank the editor,
 associate editor, and referees for their valuable suggestions, which improved
 the manuscript.} This work has been approved for public release under
