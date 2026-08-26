@@ -260,14 +260,23 @@ reproducing all included examples.
 \section{Bayesian inverse problems}
 \label{sec:review}
 
-We study IBEX through the lens of observational data $Y^F$ ($F$ for field
-measurement) and a computer implementation of a physical model $m(u, X)$,
-where parameters $u$ are unknown and $X$ represents the spatial locations
-where the simulation output is evaluated.  These may be the locations $X^F$
-that correspond to field measurements $Y^F$, or a grid of predictive locations
-supporting high-resolution visuals.  Given prior information about $u$, we
-want to know which $u$'s lead to realizations of $m(\cdot, \cdot)$ that could
-explain $Y^F$, i.e., the posterior for $u \mid Y^F$.
+We study IBEX through the lens of observational data {\color{red}$Y^F \in
+\mathbb{R}^{n_F}$} ($F$ for field measurement) and a computer
+implementation of a physical model $m(u, X) = \{m(u, x_i^\top)\}_{i=1}^n$.
+Parameters {\color{red}$u
+\in \mathbb{R}^{p_U}$} are unknown and {\color{red} $X \in \mathbb{R}^{n
+\times p_F}$ } represents the {\color{red} locations (i.e. spatial coordinates
+in columns $x$, $y$, $z$)} where the simulation output is evaluated
+{\color{red}(for our motivating application, $n_F > 23,000$, $p_F=3$, and $p_U
+= 2$)}. These {\color{red}$X$ locations} may be the locations {\color{red}
+$X^F \in \mathbb{R}^{n_F \times p_F}$ } that correspond to field measurements
+$Y^F$, or a grid of predictive locations supporting high-resolution visuals.
+{\color{red}Therefore, computer model and field data are potentially collected
+at different inputs, but we only evaluate the likelihood
+(Eq.~\ref{eq:inv_bayes_mod}) at observed field data locations.} Given prior
+information about $u$, we want to know which $u$'s lead to realizations of
+$m(\cdot, \cdot)$ that could explain $Y^F$, i.e., the posterior for $u \mid
+Y^F$.
 
 This is a classic Bayesian inverse problem
 \citep{kaipio2011bayesian,stuart2010inverse,knapik2011bayesian}. Eq.~\ref{eq:inv_bayes_mod} 
@@ -314,10 +323,11 @@ line is $m(u^\star, X)$ provided as a reference.
 \includegraphics[scale=0.51,trim=0 0 30 45,clip=TRUE]{logit1_pois_obs.pdf}
 \includegraphics[scale=0.51,trim=71 0 30 45,clip=TRUE]{logit1_pois_est.pdf}
 \includegraphics[scale=0.51,trim=31 0 25 45,clip=TRUE]{logit1_pois_post_draws.pdf}
-\caption{{\color{red}A simple inverse problem. Observations from the
-field and a sample of computer model runs are displayed in the left column. On
-the top, red stars are measurements with Gaussian noise. On the bottom, red
-stars are draws from a Poisson that, when summed together, represent $Y^F$ in
+\caption{{\color{red}A simple inverse problem. Observations ($Y^F$, measured
+at $X^F$) from the field and a sample of computer model runs (each evaluated
+over a fine grid $X$) are displayed in the left column. On the top, red stars
+are measurements with Gaussian noise. On the bottom, red stars are individual
+draws from a Poisson that, when summed together, represent $Y^F$ in
 Alg.~\ref{alg:gibbs}. Red circles correspond to the quantity
 $\frac{Y^F}{e(X^F)}$. Middle panels show computer model evaluations at
 posterior draws and means. The right column shows posterior distributions of
@@ -339,12 +349,12 @@ evident that the Metropolis sampler successfully concentrates posterior mass
 around the true value of $u$.
 
 The literature on Bayesian inverse problems involves methods that work
-predominantly in this way, particularly regarding a Gaussian likelihood. We
-aim to provide a method that achieves the same goal, but for unknown parameters
-$u$ that underlie observed IBEX satellite data (left panel of Figure
-\ref{f:fig1}), whose observations are counts under variable exposure. Our first
-contribution, which is albeit rather straightforward, is to depart from that
-literature by using a Poisson likelihood.
+predominantly in this way, particularly {\color{red}regarding} a Gaussian
+likelihood. We aim to provide a method that achieves the same goal, but for
+unknown parameters $u$ that underlie observed IBEX satellite data (left panel
+of Figure \ref{f:fig1}), whose observations are counts under variable
+exposure. Our first contribution, which is albeit rather straightforward, is
+to depart from that literature by using a Poisson likelihood.
 
 %------------------------------------------------------------------------------
 %% SECTION 2.1 - Generalized Bayesian inverse problems
@@ -440,13 +450,15 @@ contribution.
 
 Evaluating the likelihood $Y^F$ in Algorithm \ref{alg:gibbs} may proceed via
 surrogate when {\em in situ} evaluation directly on $m(\cdot, \cdot)$ is too
-slow. Suppose we have a vector of observations $Y^M$ ($M$ for computer model) at
-input locations $X^M$ from a campaign of runs of $m(\cdot, \cdot)$ that may or
-may not coincide with settings in $X^F$. We prefer a small design of
-space-filling $u$-values ($U$), paired via Cartesian product with $X^F$ from the
-field experiment or a predictive grid $X$, e.g., $X^M = X \otimes U$, depending
-on the situation. Two such runs, i.e., for two rows $u^\top \in U$ and a dense
-grid $X$, are shown in Figure \ref{f:fig1}.
+slow. Suppose we have a vector of observations {\color{red} $Y^M \in
+\mathbb{R}^{n_M}$ } ($M$ for computer model) at input locations
+{\color{red}$X^M \in \mathbb{R}^{n_M \times (p_U+p_F)}$} from a campaign of runs of
+$m(\cdot, \cdot)$, {\color{red}where $X$} may or may not coincide with
+settings in $X^F$. We prefer a small design of space-filling $u$-values ($U$),
+paired via Cartesian product with $X^F$ from the field experiment or a
+predictive grid $X$, e.g., $X^M = X \otimes U$, depending on the situation.
+Two such runs, i.e., for two rows $u^\top \in U$ and a dense grid $X$, are
+shown in Figure \ref{f:fig1}.
 
 Given a corpus of runs $(Y^M, X^M)$, a surrogate synthesizes this information
 in order to extend it to new inputs.  Many surrogates for computer
@@ -707,18 +719,20 @@ Python}.
 
 Figure \ref{f:ibex_surr_metrics} displays the accuracy results of a simple
 hold-one-out bake-off, with time coming next. For each iteration of the
-experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the $n=66$ model runs
-available. Then, we predict at the held out model parameter. For now, just
-pay attention to the boxplots on the left-hand side of each panel. We'll come
-back to the others in a moment. It is obvious that {\color{red}SVEC} outperforms{\sf laGP}
-and {\sf deepgp} in both RMSE and CRPS. The local focus of {\sf laGP} limits
-its ability to capture global trends, potentially hurting its performance.
-Large data and corresponding expensive matrix operations restrict the number
-of iterations {\sf deepgp} can run and thus prevents the MCMC from converging
-to the target posterior. SEPIA performed similarly to {\color{red}SVEC}, illustrating why
-it has had such staying power over the past two decades. As a practitioner,
-it appears to be a toss-up between these two methods for which to use. But
-that's not the entire story.
+experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the $n=66$ model
+runs available. Then, we predict at the held out model parameter. For now,
+just pay attention to the boxplots on the left-hand side of each panel. We'll
+come back to the others in a moment. It is obvious that {\color{red}SVEC}
+outperforms {\sf laGP} and {\sf deepgp} in both RMSE and CRPS
+{\color{red}(additional visual aids provided in Appendix
+\ref{app:resid_anal}).} The local focus of {\sf laGP} limits its ability to
+capture global trends, potentially hurting its performance. Large data and
+corresponding expensive matrix operations restrict the number of iterations
+{\sf deepgp} can run and thus prevents the MCMC from converging to the target
+posterior. SEPIA performed similarly to {\color{red}SVEC}, illustrating why it
+has had such staying power over the past two decades. As a practitioner, it
+appears to be a toss-up between these two methods for which to use. But that's
+not the entire story.
 
 \begin{figure}[ht!]
 \centering
@@ -824,14 +838,15 @@ competitor when $m<50$, and for all values of $m$ when $n>1500$.
 \label{sec:ibex_data}
 %------------------------------------------------------------------------------
 
-We now return to the IBEX inverse problem. We wish to determine the settings $u$
-of a computer model that produce a sky map most likely to have generated
-observed counts and, more specifically, quantify the uncertainty on our estimates of $u$. Before diving in, we dispense a few important details about
-IBEX observations and computer simulations.  We then test our modeling apparatus
-on synthetic field observations (computer model at known $u^\star$ and with
-Poisson counts) to ensure good performance within the model class, and where we
-know the true calibration parameter.  Finally, we report on our calibration of
-the actual IBEX satellite observations.
+We now return to the IBEX inverse problem. We wish to determine the settings
+$u$ of a computer model that produce a sky map most likely to have generated
+observed counts and, more specifically, quantify the uncertainty on our
+estimates of $u$. Before diving in, we dispense a few important details about
+IBEX observations and computer simulations.  We then test our modeling
+apparatus on synthetic field observations (computer model at known $u^\star$
+and with Poisson counts) to ensure good performance within the model class,
+and where we know the true calibration parameter.  Finally, we report on our
+calibration of the actual IBEX satellite observations.
 
 %------------------------------------------------------------------------------
 %% SECTION 4.1 - IBEX details
@@ -856,8 +871,8 @@ address this through an update to the mean expression in the Poisson likelihood
 in Eq.~\ref{eq:pois_inv_bayes_mod} such that $\lambda(X^F) = m(u, X^F) -
 \lambda_{b}(X^F)$.
 
-We have referred to the IBEX simulator throughout this paper without going into
-much detail. While we leave a more in-depth physical interpretation and
+We have referred to the IBEX simulator throughout this paper without going
+into much detail. While we leave a more in-depth physical interpretation and
 analysis of parameters to more appropriate venues
 \citep{zirnstein2021heliosheath,zirnstein2025global,swaczyna2020density,huang2025numerical},
 some basic context is provided here. We focus on two particular models
@@ -866,11 +881,14 @@ model, the parameter \textit{parallel mean free path} is the distance a
 hydrogen ion travels beyond the heliopause, or edge of the heliosphere, before
 interacting with another particle, receiving an electron and becoming an ENA,
 and ``turning back.'' The \textit{ratio} parameter is the fraction of
-perpendicular mean free path, another measure of distance, and \textit{parallel
-mean free path}. These are our $u$ values. The response from the GDF model is
-static and is merely added to the output of the ribbon simulator. This is not
-the case for GDF simulators in general, but the GDF model we have access to
-does not vary with any parameters of interest.
+perpendicular mean free path, another measure of distance, and
+\textit{parallel mean free path}. These are our $u$ values.
+{\color{red}Although seemingly entangled, this parameterization is common
+practice among space scientists, easing interpretation and allowing for the
+clean separation of certain particle scattering and diffusion effects.} The
+response from the GDF model is static and is merely added to the output of the
+ribbon simulator. This is not the case for GDF simulators in general, but the
+GDF model we have access to does not vary with any parameters of interest.
 
 Scientists know that the makeup of the heliosphere evolves over time, largely
 due to variations in the solar wind that accompany the approximately 11 year
@@ -890,21 +908,19 @@ the years 2009-2011 to simulator runs.
 
 Using the corpus of $n=66$ computer model runs, varying a design of
 \textit{parallel mean free path} and \textit{ratio} $u$-values, described in
-Section \ref{sec:vecchia}, we select a value $u^\star$ and set the corresponding
-output ($\lambda^\star = m(u^\star, X^M)$) as the {\color{red}``unknown''} underlying mean ENA
-rate (upper right panel of Figure \ref{f:ibex_synth_ex}). Next, we gather
-measurement locations $X^F$, exposure times $e$, and background rates
-$\lambda_b$ from a single year that the IBEX satellite has been in operation,
-ignoring the observed counts of ENAs in this fabricated example. For each
-latitude/longitude pair (i.e.~a row in $X^F$), we draw synthetic satellite (or
-field) data from a Poisson, $Y_i^F \sim
+Section \ref{sec:vecchia}, we select a value $u^\star$ and set the
+corresponding output ($\lambda^\star = m(u^\star, X^M)$) as the
+{\color{red}``unknown''} underlying mean ENA rate (upper right panel of Figure
+\ref{f:ibex_synth_ex}). Next, we gather measurement locations $X^F$, exposure
+times $e$, and background rates $\lambda_b$ from a single year that the IBEX
+satellite has been in operation, ignoring the observed counts of ENAs in this
+fabricated example. For each latitude/longitude pair (i.e.~a row in $X^F$), we
+draw synthetic satellite (or field) data from a Poisson, $Y_i^F \sim
 \mathrm{Pois}(\lambda^\star_i + \lambda_{b_{i}}, e_i)$, where $\lambda_i^\star$ is determined by the
 computer model $m(\cdot,\cdot)$. The top left panel of Figure
 \ref{f:ibex_synth_ex} shows the result, which we will regard as data we
 ``observed.'' Note that observations are not on a fine grid, but instead match
 the recorded coordinates for ENAs captured by the IBEX satellite in its orbit.
-This accounts for the unique spread of points and the strings of missing data,
-which correspond to certain orbits.
 
 \begin{figure}[ht!]
 \centering
@@ -1196,16 +1212,17 @@ scale discrepancy (bottom right).
 \end{figure}
 
 The bottom right panel of Figure \ref{f:ibex_disc} shows posterior samples of
-$\delta$. Mass is concentrated just below 1, indicating nearly zero effect from
-the multiplicative discrepancy. Examining the disparities closer, it appears
-that spatial dependence exists in whether the simulator overestimates or
-underestimates the mean surface. For instance, the area of the sky map
+$\delta$. Mass is concentrated just below 1, indicating nearly zero effect
+from the multiplicative discrepancy. Examining the disparities closer, it
+appears that spatial dependence exists in whether the simulator overestimates
+or underestimates the mean surface. For instance, the area of the sky map
 corresponding to the ribbon shows some underestimation. By contrast, areas
 outside of the ribbon are overestimated. A constant multiplicative scale
 discrepancy is clearly insufficient. We believe that $\delta$ is estimated
 around 1.0 because of these competing interests between different regimes in
 the sky map. More advancements are needed to properly model this disparity. A
-fully Bayesian framework could be developed to provide full uncertainty quantification, perhaps with the use of a deep Gaussian process to handle the
+fully Bayesian framework could be developed to provide full uncertainty
+quantification, perhaps with the use of a deep Gaussian process to handle the
 inherent nonstationarity in the discrepancy.
 
 We recognize that this is not a definitive calibration for IBEX data and some
@@ -1228,7 +1245,10 @@ found at \url{https://github.com/lanl/ibex-bayesian-inverse}.
 
 RBG and SDB are grateful for funding from NSF CMMI 2152679. SDB, DO and LJB
 were funded by Laboratory Directed Research and Development (LDRD) Project
-20220107DR. This work has been approved for public release under
+20220107DR. {\color{red}The authors would also like to thank C.A.~Eiffer for her
+encouragement and support of this paper. They also wish to thank the editor,
+associate editor, and referees for their valuable suggestions, which improved
+the manuscript.} This work has been approved for public release under
 LA-UR-25-30539.
 
 \bibliography{ibex_bayes_inv}
@@ -1370,5 +1390,53 @@ satellite data been in the form of a multiplicative scale, our method would be
 able to identity it. Alas, we look forward to future work exploring more
 sophisticated discrepancy models and better capturing the mismatch between
 simulator and reality.
+
+\subsection{Residual Visual Analysis}
+\label{app:resid_anal}
+
+{\color{red} Figure \ref{f:ibex_sim_surr} helps visualize the accuracy of our
+proposed method (SVEC) by displaying a few computer model evaluations
+side-by-side with predicted surfaces at unobserved parameter settings. Figure
+\ref{f:ibex_surr_metrics} then presents performance metrics from a
+hold-one-out bakeoff between SVEC and multiple competitors. At each iteration,
+all methods are trained on 65 model runs of the IBEX simulator and then asked
+to predict the response at the held out model parameter. Predictions are then
+used to calculate the displayed RMSE and CRPS values. To further visually
+demonstrate the differences between competing methods, we plot the residuals
+(averaged over the 66 held out model runs) from each method's predicted
+surfaces. These are shown as heat maps in Figure \ref{f:surrogate_residuals}.
+}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.29,trim=0 65 100 20,clip=TRUE]{residual_plot_SVEC_25.pdf}
+\includegraphics[scale=0.29,trim=50 65 100 20,clip=TRUE]{residual_plot_SVEC_50.pdf}
+\includegraphics[scale=0.29,trim=50 65 100 20,clip=TRUE]{residual_plot_SVEC_75.pdf}
+\includegraphics[scale=0.29,trim=50 65 5 20,clip=TRUE]{residual_plot_laGP.pdf}
+\includegraphics[scale=0.29,trim=0 0 100 10,clip=TRUE]{residual_plot_SEPIA_3.pdf}
+\includegraphics[scale=0.29,trim=50 0 100 10,clip=TRUE]{residual_plot_SEPIA_4.pdf}
+\includegraphics[scale=0.29,trim=50 0 100 10,clip=TRUE]{residual_plot_SEPIA_5.pdf}
+\includegraphics[scale=0.29,trim=50 0 5 10,clip=TRUE]{residual_plot_deepgp.pdf}
+\caption{{\color{red}Absolute, square-rooted residuals averaged over 66
+hold-one-out predictions from the IBEX simulator experiment (Figure
+\ref{f:ibex_surr_metrics}) for several different surrogate model techniques.
+\label{f:surrogate_residuals}}}
+\end{figure}
+
+{\color{red} Note that before plotting, we first take the absolute values of
+the residuals and then take their square root. Additionally, the range of
+values for which the colors represent is clipped. These steps are
+\textit{only} taken to allow better visual comparison between methods.
+Otherwise, heat maps for SVEC and SEPIA would be solid red and heat maps for
+{\sf laGP} and {\sf deepgp} would be solid white. }
+
+{\color{red} It is clear that SVEC and SEPIA provide considerably better
+predictions than the other methods. Additionally, the residuals from SVEC and
+SEPIA predictions are similar, regardless of the neighborhood size or number
+of principal components used. This hearkens back to the nearly identical
+metrics observed between the two methods in Figure \ref{f:ibex_surr_metrics}.
+Although it appears that these methods are missing significant structure in
+the data, it is only due to these small residuals (originally on the order of
+$10^{-4}$) being magnified by the modifications for visual aid listed above.}
 
 \end{document}

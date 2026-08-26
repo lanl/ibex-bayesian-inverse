@@ -226,3 +226,63 @@ for (i in 1:length(unique(grid[,1]))) {
 }
 
 dev.off()
+
+###############################################################################
+## FIGURE ???: Illustration showing average residuals for surrogate
+## predictions of IBEX simulator. Methods include SVEC, laGP, deepgp, and
+## SEPIA
+## DATA NEEDED: sepia_resids_*.csv, sims.csv, surrogate_test_20260716.rds
+###############################################################################
+
+library(abind)
+
+source("../../helper.R")
+
+sepia_files <- list.files(pattern="sepia_resids_[3-6]{1}.csv")
+resids <- abs(readRDS("surrogate_test_20260716.rds")$resids)
+sepia_resids <- array(NA, dim=c(dim(resids)[1], dim(resids)[2], length(sepia_files)))
+for (i in 1:length(sepia_files)) {
+  sepia_resids[,,i] <- abs(as.matrix(read.csv(sepia_files[i], header=FALSE)))
+}
+resids_all <- abind(resids, sepia_resids, along=3)
+resids_all_ave <- apply(sqrt(resids_all), c(1,3), mean)
+resid_range <- c(0, quantile(resids_all_ave, 0.95)) # ~0.65
+resids_all_ave <- resids_all_ave[,-c(4,10)]
+resid_names <- c(paste0("SVEC (m=", c(25,50,75), ")"), "laGP", "deepgp",
+  paste0("SEPIA n", 3:5))
+cols <- heat.colors(128)
+bks <- seq(resid_range[1], resid_range[2], length=length(cols)+1)
+
+model_data <- read.csv(file="../../data/sims.csv")
+model_data <- model_data[order(model_data$parallel_mean_free_path, model_data$ratio,
+  model_data$lat, model_data$lon),]
+model_data <- model_data[which(model_data$parallel_mean_free_path==500 & model_data$ratio==0.001),]
+model_data$nlon <- nose_center_lons(model_data$lon)
+plot_data <- model_data[,c("lat", "nlon")]
+
+lons <- sort(unique(model_data$nlon))
+lats <- sort(unique(model_data$lat))
+ylims <- range(model_data$lat)
+xlims <- rev(range(model_data$nlon))
+
+for (i in 1:ncol(resids_all_ave)) {
+  if (substr(resid_names[i], 1, 5)=="SEPIA") {
+    nk_val <- as.integer(substr(resid_names[i], nchar(resid_names[i]), nchar(resid_names[i])))
+    plot_name <- bquote(SEPIA~"("*n[k]*"="*.(nk_val)*")")
+  } else {
+    plot_name <- resid_names[i]
+  }
+
+  pdf(paste0("residual_plot_", substr(resid_names[i], 1, 4), "_", i, ".pdf"), width=7, height=5)
+  par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
+  plot_data$diffs <- resids_all_ave[,i]
+  zmat_resids <- xtabs(diffs ~ nlon + lat, data=plot_data)
+  image(x=lons, y=lats, z=zmat_resids, col=cols, xlab="Longitude", xaxt="n", yaxt="n",
+    font.main=1, ylab="Latitude", breaks=bks, ylim=ylims, xlim=xlims, useRaster=FALSE)
+  title(main=plot_name, line=1, font.main=1)
+  axis(1, at=seq(325, 25, by=-60), labels=c(60, 0, 300, 240, 180, 120))
+  axis(2, at=seq(-90, 90, by=30))
+  fields::image.plot(zlim=resid_range, col=cols, legend.lab=expression(sqrt(phantom(.) ~ "|" ~ residual ~ "|" ~ phantom(.))), legend.line=3.5,
+    legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
+  dev.off()
+}
