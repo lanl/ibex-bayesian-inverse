@@ -159,13 +159,13 @@ if (method=="deepgp" || method=="all") {
     pred_times[i,6] <- toc-tic
     rmses[i,6] <- sqrt(mean((dgp1preds$mean - Ytest)^2))
     crps[i,6] <- crps(y=Ytest, mu=dgp1preds$mean, s2=dgp1preds$s2)
-    resids[,i,6] <- dgp1preds$means - Ytest
+    resids[,i,6] <- dgp1preds$mean - Ytest
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
-    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+    saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), "_", start, ".rds"))
   }
 }
 
 res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
-saveRDS(res, paste0("../papers/surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
+saveRDS(res, paste0("../papers/surrogate_test_", format(Sys.time(), "%Y%m%d"), "_", start, ".rds"))
