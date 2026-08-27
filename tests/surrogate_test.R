@@ -51,7 +51,7 @@ unique_runs <- as.matrix(expand.grid(pmfps, ratios))
 colnames(unique_runs) <- NULL
 
 ## Calculating metrics
-rmses <- crps <- fit_times <- pred_times <-
+rmses <- crps <- escores <- linf_norms <- fit_times <- pred_times <-
   matrix(NA, ncol=6, nrow=nrow(unique_runs))
 colnames(rmses) <- colnames(crps) <- colnames(fit_times) <-
   colnames(pred_times) <- c("svecchia25", "svecchia50", "svecchia75",
@@ -90,6 +90,7 @@ if (method=="svecchia" || method=="all") {
       crps[j,i] <- crps(y=Ytest, mu=svecpreds$means, s2=svecpreds$vars)
       svecdraws <- predictions_scaled(svecfit, as.matrix(Xtest), m=ms[i], joint=TRUE, nsims=1000)
       escores[j,i] <- energy_score(draws=t(svecdraws[[2]]), observed=Ytest)
+      linf_norms[j,i] <- max(abs(svecpreds$means - Ytest))
       resids[,j,i] <- svecpreds$means - Ytest
       print(paste0("Finished SVecchia predictions where m=", ms[i]))
       print(paste0("Finished holdout iteration ", j))
@@ -128,6 +129,7 @@ if (method=="laGP" || method=="all") {
     pred_times[i,5] <- toc-tic
     rmses[i,5] <- sqrt(mean((lagppreds$mean - Ytest)^2))
     crps[i,5] <- crps(y=Ytest, mu=lagppreds$mean, s2=lagppreds$var)
+    linf_norms[i,5] <- max(abs(lagppreds$means - Ytest))
     resids[,i,5] <- lagppreds$mean - Ytest
     print("Finished laGP fit and predictions")
     print(paste0("Finished holdout iteration ", i))
@@ -161,6 +163,7 @@ if (method=="deepgp" || method=="all") {
     pred_times[i,6] <- toc-tic
     rmses[i,6] <- sqrt(mean((dgp1preds$mean - Ytest)^2))
     crps[i,6] <- crps(y=Ytest, mu=dgp1preds$mean, s2=dgp1preds$s2)
+    linf_norms[i,6] <- max(abs(dgp1preds$means - Ytest))
     resids[,i,6] <- dgp1preds$mean - Ytest
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
@@ -169,5 +172,6 @@ if (method=="deepgp" || method=="all") {
   }
 }
 
-res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, escores=escores, resids=resids)
+res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps,
+  escores=escores, linf_norms=linf_norms, resids=resids)
 saveRDS(res, paste0("../papers/surrogate_test_", format(Sys.time(), "%Y%m%d"), "_", start, ".rds"))

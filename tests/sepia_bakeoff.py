@@ -59,7 +59,7 @@ pcs = [3,4,5,6]
 n_samp = 10000
 
 for j in range(len(pcs)):
-    metrics = np.zeros((nruns, 2))
+    metrics = np.zeros((nruns, 4))
     resids = np.zeros((16200, nruns))
     iter_pc = pcs[j]
     met_ofname = '../papers/sepia_metrics_' + str(iter_pc) + '.csv'
@@ -98,6 +98,7 @@ for j in range(len(pcs)):
             scores[j] = sigma*(-1/(math.pow(math.pi, 0.5)) + 2*norm.pdf(z) + z*(2*norm.cdf(z)-1))
         metrics[i,1] = np.nanmean(scores)
         metrics[i,2] = energy_score(draws=predy[8000:9000,0,:], observed=yy_true)
+        metrics[i,3] = np.max(np.abs(meany - yy_true))
         resids[:,i] = meany - yy_true
         print("\n")
         print("Finished iteration " + str(i) + "with nps=" + str(iter_pc) + "\n")
