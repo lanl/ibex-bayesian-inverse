@@ -158,7 +158,7 @@ Figures 5-7.
 
 \bigskip
 \noindent
-9. \textbf{Associate Editor} \textit{I agree with one referee’s comment regarding
+\textbf{Associate Editor} \textit{I agree with one referee’s comment regarding
 potential computational bottlenecks in SEPIA due to the number of simulation
 runs. It would strengthen the manuscript if the authors could discuss whether
 approaches such as those proposed by Higdon et al., combined with Vecchia-type
@@ -166,7 +166,10 @@ approximations, could help alleviate these computational challenges.}
 
 \bigskip
 \noindent
-TBD
+We also agree with the referee's comment that this hybrid approach is of
+interest. In fact, we think it is an intriguing and promising area of research
+to pursue. As such we have added a ``Possible Extensions'' section to the end
+of our paper in which we comment on its appeal.
 
 \bigskip
 \noindent
@@ -372,17 +375,19 @@ that the sampler wants to explore beyond the constrained parameter space.
 
 \bigskip
 \noindent
-21. \textbf{Reviewer 1:} \textit{Computation. While the code repository is
+\textbf{Reviewer 1:} \textit{Computation. While the code repository is
 relatively complete, it is helpful to include the software requirements and
 dependencies somewhere, e.g., GPvecchia, tmvtnorm, laGP, R.utils, etc.}
 
 \bigskip
 \noindent
-TBD
+Thank you for this suggestion. We have added a list of dependencies to the
+GitHub repository. We have also added a script ({\sf dependencies.R}) which
+will install all the necessary packages to run our code.
 
 \bigskip
 \noindent
-23. \textbf{Reviewer 1:} \textit{Some language choices seem to leave
+\textbf{Reviewer 1:} \textit{Some language choices seem to leave
 interpretative room with regards to the authors’ intentions when a reader
 will benefit from a clear opinion from the authors. For example, the adverb
 ''extremely'' is used in several places where some quantification will be
@@ -400,11 +405,15 @@ helpful to answer the question ``in what way is it extreme?''}
 
 \bigskip
 \noindent
-TBD
+We greatly appreciate the referee's assistance in making our manuscript more
+clear to the reader. We have updated the language to be more direct and where
+needed, now provide additional information and context to back up or give
+clarity to the text. This has been done at the places noted by the referee and
+throughout the manuscript.
 
 \bigskip
 \noindent
-24. \textbf{Reviewer 1:} \textit{The intention of quote usages is unclear at times.}
+\textbf{Reviewer 1:} \textit{The intention of quote usages is unclear at times.}
 
 \begin{itemize}
 	\item \textit{``status quo'' in correspondence to SEPIA.}
@@ -413,44 +422,57 @@ TBD
 
 \bigskip
 \noindent
-TBD
+Thank you for pointing this out. We have removed quotes around the phrases
+``status quo'' and ``true'' in order reduce confusion. We have reserved the
+usage of quotes in this manner for simulated quantities that we know, but
+treat as unknown for the purpose of method benchmarking and validation.
 
 \bigskip
 \noindent
-25. \textbf{Reviewer 1:} \textit{Section 1. The use of nouns with different
+\textbf{Reviewer 1:} \textit{Section 1. The use of nouns with different
 meanings, i.e., ``challenges'', ``bottlenecks'', and ``situations'', to refer to the
 same set of issues has made it difficult to follow.}
 
 \bigskip
 \noindent
-TBD
+We acknowledge that the usage of these different nouns causes some confusion.
+We have therefore updated the manuscript, particularly in Section 1, to be
+consistent in the use of nouns when referring to similar issues.
 
 \bigskip
 \noindent
-26. \textbf{Reviewer 1:} \textit{Would combining Figures 2 and 3 as a top and
+\textbf{Reviewer 1:} \textit{Would combining Figures 2 and 3 as a top and
 bottom panel help with the illustration? The figures are similar and would
 benefit from side-by-side comparison.}
 
 \bigskip
 \noindent
-TBD
+We agree with this constructive observation. We have combined Figures 2 and 3
+into one. We believe this will help the reader understand the difference from
+the current literature and one of the issues with the IBEX data that we are
+addressing.
 
 \bigskip
 \noindent
-27. \textbf{Reviewer 1:} \textit{The legend in Figure 7 (right panel) is unclear.}
+\textbf{Reviewer 1:} \textit{The legend in Figure 7 (right panel) is unclear.}
 
 \bigskip
 \noindent
-TBD
+We agree that the legend this figure (now Figure 6) could be improved. We have
+expanded the legend to include both color and line type for each line in the
+plot, along with their corresponding labels (e.g. SVEC, m=25).
 
 \bigskip
 \noindent
-28. \textbf{Reviewer 1:} \textit{The caption of Figure 8 can be improved,
+\textbf{Reviewer 1:} \textit{The caption of Figure 8 can be improved,
 especially regarding the laGP line in the rightmost panel.}
 
 \bigskip
 \noindent
-TBD
+We are grateful to the reviewer for highlighting this point of confusion. We
+have updated the legend for the rightmost panel, similar to our comment above.
+Additionlly, we have improved the caption and now explicity describe the lines
+in the right panel and clarify the laGP settings in all panels.
 
 \bigskip
 \noindent
@@ -487,25 +509,28 @@ We could have introduced Z, but…
 
 \bigskip
 \noindent
-31. \textbf{Reviewer 2:} \textit{Figure 3 is helpful overall, but I suggest
+\textbf{Reviewer 2:} \textit{Figure 3 is helpful overall, but I suggest
 removing the star markers in the middle panel, since they do not correspond to
 the final quantity of interest. It would make the visual assesment of the
 inference performance easier.}
 
 \bigskip
 \noindent
-TBD
+This is an excellent point. We have removed the stars in the middle panel of
+what was Figure 3 (now the bottom row of Figure 2).
 
 \bigskip
 \noindent
-32. \textbf{Reviewer 2:} \textit{In Figure 5, it would be helpful to annotate each
+\textbf{Reviewer 2:} \textit{In Figure 5, it would be helpful to annotate each
 simulated output and its surrogate approximation with the corresponding
 parameter value(s) used to generate them (either in the panel titles, caption,
 or a small table/legend). This would make the comparison more interpretable.}
 
 \bigskip
 \noindent
-TBD
+We appreciate this valuable suggestion. We have added the values of the
+parameter values as panel titles for each row/column of panels in the figure
+(now Figure 4).
 
 \bigskip
 \noindent
@@ -523,7 +548,7 @@ TBD
 
 \bigskip
 \noindent
-34. \textbf{Reviewer 2:} \textit{Figure 6 suggests that SEPIA (even with only
+\textbf{Reviewer 2:} \textit{Figure 6 suggests that SEPIA (even with only
 three PC bases) can achieve performance comparable to SVEC (this acronymm is
 never defined in the text). If the primary bottleneck for SEPIA in this
 setting is scalability with a large number of simulation runs (Figure 8,
@@ -538,7 +563,19 @@ and instead used as a drop-in surrogate within the proposed framework.}
 
 \bigskip
 \noindent
-TBD
+This is a wonderful idea, and one that we do not believe has been attempted.
+Unfortunately SEPIA is not a simple plug and play framework, and therefore
+combining it with the Vecchia approximation was not considered for this work.
+Perhaps that is the reason that research into this area generally has not been
+pursued, or there may be other unanswered questions about the feasibility of
+hybridizing these two approaches.
+
+\bigskip
+\noindent
+We think this could be an exciting and promising area of research for GP
+approximations. Therefore, we have added a ``Possible Extensions'' section to
+the end of our paper and have included commentary on this ``Higdon et al. +
+Vecchia'' hybrid approach.
 
 \bigskip
 \noindent

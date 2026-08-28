@@ -94,7 +94,8 @@ if (method=="svecchia" || method=="all") {
       resids[,j,i] <- svecpreds$means - Ytest
       print(paste0("Finished SVecchia predictions where m=", ms[i]))
       print(paste0("Finished holdout iteration ", j))
-      res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, escores=escores, resids=resids)
+      res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps,
+        escores=escores, linf_norms=linf_norms, resids=resids)
       saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
     }
   }
@@ -133,7 +134,8 @@ if (method=="laGP" || method=="all") {
     resids[,i,5] <- lagppreds$mean - Ytest
     print("Finished laGP fit and predictions")
     print(paste0("Finished holdout iteration ", i))
-    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
+    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps,
+      linf_norms=linf_norms, resids=resids)
     saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
 }
@@ -167,7 +169,8 @@ if (method=="deepgp" || method=="all") {
     resids[,i,6] <- dgp1preds$mean - Ytest
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
-    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps, resids=resids)
+    res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps,
+      linf_norms=linf_norms, resids=resids)
     saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), "_", start, ".rds"))
   }
 }

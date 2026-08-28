@@ -227,7 +227,7 @@ exacerbates the computational burden of making surrogate predictions,
 necessitating not only a sparse GP surrogate, but one that can swiftly
 generate repeated sky map proposals at each MCMC iteration. We find the
 Vecchia approximation to be extremely effective in this regard {\color{red}
-providing predictions at thousands of unobserved locations in under a
+(providing predictions at thousands of unobserved locations in under a
 second)}. Lastly, we propose a more intuitive technique to modeling
 high-dimensional vectors, treating each pixel representing an ENA rate as a
 scalar response of interest. This differs from previous approaches to
@@ -1220,13 +1220,10 @@ from the multiplicative discrepancy. Examining the disparities closer, it
 appears that spatial dependence exists in whether the simulator overestimates
 or underestimates the mean surface. For instance, the area of the sky map
 corresponding to the ribbon shows some underestimation. By contrast, areas
-outside of the ribbon are overestimated. A constant multiplicative scale
-discrepancy is clearly insufficient. We believe that $\delta$ is estimated
+outside of the ribbon are overestimated. We believe that $\delta$ is estimated
 around 1.0 because of these competing interests between different regimes in
-the sky map. More advancements are needed to properly model this disparity. A
-fully Bayesian framework could be developed to provide full uncertainty
-quantification, perhaps with the use of a deep Gaussian process to handle the
-inherent nonstationarity in the discrepancy.
+the sky map. A constant multiplicative scale discrepancy is clearly
+insufficient. Other ideas to resolve this shortcoming are listed below.
 
 We recognize that this is not a definitive calibration for IBEX data and some
 oversimplifications were made to fit our narrative and present a more
@@ -1244,14 +1241,34 @@ The authors confirm that data and code supporting the conclusions of this
 research, along with reproductions of included figures and examples, can be
 found at \url{https://github.com/lanl/ibex-bayesian-inverse}.
 
+\subsection*{Possible Extensions}
+
+{\color{red}Section \ref{sec:gp_approx} details several GP approximations for modeling
+large-scale datasets. In particular, we review SEPIA \citep{gattiker2020lanl},
+a {\sf Python} library based on work by \citet{higdoncalib2008}, and
+subsequently use it as a competitor throughout the manuscript. SEPIA performs
+comparably to SVEC in terms of predictive accuracy and uncertainty
+quantification. However, it suffers computationally as the number of computer
+model runs increases. One intriguing extension could be the combination of
+\citeauthor{higdoncalib2008}'s PCA approach and the Vecchia approximation. PCA
+weights could be modeled using the Vecchia approximation and alleviate a
+growing number of computer model runs. To our knowledge this has not been
+attempted, but represents a promising area of research.}
+
+{\color{red}Figure \ref{f:ibex_disc} illustrates the need for more advancements to
+properly model disparity between the observed IBEX satellite data and the
+corresponding simulator. A fully Bayesian framework could be developed to
+provide full uncertainty quantification, perhaps with the use of a deep
+Gaussian process to handle the inherent nonstationarity in the discrepancy.}
+
 \subsection*{Acknowledgments}
 
 RBG and SDB are grateful for funding from NSF CMMI 2152679. SDB, DO and LJB
 were funded by Laboratory Directed Research and Development (LDRD) Project
 20220107DR. {\color{red}The authors would like to thank C.A.~Eiffer for her
 encouragement and support of this paper. They also wish to thank the editor,
-associate editor, and referees for their valuable suggestions, which improved
-the manuscript.} This work has been approved for public release under
+associate editor, and referees for their valuable suggestions, which greatly
+improved the manuscript.} This work has been approved for public release under
 LA-UR-25-30539.
 
 \bibliography{ibex_bayes_inv}
