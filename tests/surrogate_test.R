@@ -130,7 +130,11 @@ if (method=="laGP" || method=="all") {
     pred_times[i,5] <- toc-tic
     rmses[i,5] <- sqrt(mean((lagppreds$mean - Ytest)^2))
     crps[i,5] <- crps(y=Ytest, mu=lagppreds$mean, s2=lagppreds$var)
-    linf_norms[i,5] <- max(abs(lagppreds$means - Ytest))
+    lagpdraws <- matrix(rnorm(n=1000*length(lagppreds$mean),
+      mean=rep(lagppreds$mean, 1000), sd=rep(sqrt(lagppreds$var), 1000)),
+      ncol=1000, byrow=FALSE)
+    escores[i,5] <- energy_score(draws=t(lagpdraws), observed=Ytest)
+    linf_norms[i,5] <- max(abs(lagppreds$mean - Ytest))
     resids[,i,5] <- lagppreds$mean - Ytest
     print("Finished laGP fit and predictions")
     print(paste0("Finished holdout iteration ", i))
@@ -165,6 +169,8 @@ if (method=="deepgp" || method=="all") {
     pred_times[i,6] <- toc-tic
     rmses[i,6] <- sqrt(mean((dgp1preds$mean - Ytest)^2))
     crps[i,6] <- crps(y=Ytest, mu=dgp1preds$mean, s2=dgp1preds$s2)
+    dgp1draws <- post_sample(trim(dgp1fit, burn=100), x_new=Xtest, nper=1)
+    escores[i,6] <- energy_score(draws=dgp1draws, observed=Ytest)
     linf_norms[i,6] <- max(abs(dgp1preds$means - Ytest))
     resids[,i,6] <- dgp1preds$mean - Ytest
     print("Finished deep gp predictions")
