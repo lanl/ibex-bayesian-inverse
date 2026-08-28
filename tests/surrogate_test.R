@@ -171,7 +171,7 @@ if (method=="deepgp" || method=="all") {
     crps[i,6] <- crps(y=Ytest, mu=dgp1preds$mean, s2=dgp1preds$s2)
     dgp1draws <- post_sample(trim(dgp1fit, burn=100), x_new=Xtest, nper=1)
     escores[i,6] <- energy_score(draws=dgp1draws, observed=Ytest)
-    linf_norms[i,6] <- max(abs(dgp1preds$means - Ytest))
+    linf_norms[i,6] <- max(abs(dgp1preds$mean - Ytest))
     resids[,i,6] <- dgp1preds$mean - Ytest
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
