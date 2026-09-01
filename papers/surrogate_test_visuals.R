@@ -40,3 +40,50 @@ text(x=1:ncol(crps_ord), y=par("usr")[3]-0.0002, labels=labels, srt=45,
   xpd=TRUE, adj=1, cex=1.05)
 abline(v=4.5, lty=2)
 dev.off()
+
+###############################################################################
+## FIGURE 18: Multivariate performance metrics for surrogate modeling of the
+## IBEX simulator
+## DATA NEEDED: surrogate_test_all.rds, sepia_metrics_X.csv
+###############################################################################
+
+surr_file <- list.files(pattern="surrogate_test_all_20260901.rds")
+surr1_res <- readRDS(surr_file)
+sepia_files <- list.files(pattern="sepia_metrics_new_[3-6].csv")
+
+escores <- surr1_res$escores
+linfs <- surr1_res$linf_norms
+for (i in 1:(length(sepia_files))) {
+  sep_res <- read.csv(sepia_files[i], header=FALSE)
+  escores <- cbind(escores, sep_res[,3])
+  linfs <- cbind(linfs, sep_res[,4])
+  colnames(linfs)[ncol(linfs)] <- colnames(escores)[ncol(escores)] <- paste0("sepia", i+2)
+}
+
+## Figure 18 (left panel)
+pdf("ibex_surr_escores.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.3, 4.1, 4.1, 2.1))
+escores_ord <- escores[,c(1,5:7,2:4,8:10)]
+labels <- c("SVEC (m=25)", "laGP", "deepgp", expression(SEPIA~"("*n[k]*"="*3*")"),
+  paste0("SVEC (m=", c(50, 75, 100), ")"), expression(SEPIA~"("*n[k]*"="*4*")"),
+  expression(SEPIA~"("*n[k]*"="*5*")"), expression(SEPIA~"("*n[k]*"="*6*")"))
+boxplot(escores_ord, ylab="energy score", xaxt="n", cex.lab=1.05)
+axis(1, at=1:ncol(escores_ord), labels=FALSE, tck=-0.02)
+text(x=1:ncol(escores_ord), y=par("usr")[3]-0.0784, labels=labels, srt=45,
+  xpd=TRUE, adj=1, cex=1.05)
+abline(v=4.5, lty=2)
+dev.off()
+
+## Figure 18 (right panel)
+pdf("ibex_surr_linfnorm.pdf", width=7, height=5)
+par(mfrow=c(1,1), mar=c(5.3, 4.1, 4.1, 2.1))
+linfs_ord <- linfs[,c(1,5:7,2:4,8:10)]
+labels <- c("SVEC (m=25)", "laGP", "deepgp", expression(SEPIA~"("*n[k]*"="*3*")"),
+  paste0("SVEC (m=", c(50, 75, 100), ")"), expression(SEPIA~"("*n[k]*"="*4*")"),
+  expression(SEPIA~"("*n[k]*"="*5*")"), expression(SEPIA~"("*n[k]*"="*6*")"))
+boxplot(linfs_ord, ylab="L-infinity distance", xaxt="n", cex.lab=1.05)
+axis(1, at=1:ncol(linfs_ord), labels = FALSE, tck=-0.02)
+text(x=1:ncol(linfs_ord), y=par("usr")[3]-0.01, labels=labels, srt=45,
+  xpd=TRUE, adj=1, cex=1.05)
+abline(v=4.5, lty=2)
+dev.off()

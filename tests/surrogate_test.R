@@ -139,7 +139,7 @@ if (method=="laGP" || method=="all") {
     print("Finished laGP fit and predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps,
-      linf_norms=linf_norms, resids=resids)
+      escores=escores, linf_norms=linf_norms, resids=resids)
     saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), ".rds"))
   }
 }
@@ -176,7 +176,7 @@ if (method=="deepgp" || method=="all") {
     print("Finished deep gp predictions")
     print(paste0("Finished holdout iteration ", i))
     res <- list(fit_times=fit_times, pred_times=pred_times, rmse=rmses, crps=crps,
-      linf_norms=linf_norms, resids=resids)
+      escores=escores, linf_norms=linf_norms, resids=resids)
     saveRDS(res, paste0("surrogate_test_", format(Sys.time(), "%Y%m%d"), "_", start, ".rds"))
   }
 }

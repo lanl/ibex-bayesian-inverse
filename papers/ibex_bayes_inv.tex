@@ -727,15 +727,15 @@ runs available. Then, we predict at the held out model parameter. For now,
 just pay attention to the boxplots on the left-hand side of each panel. We'll
 come back to the others in a moment. It is obvious that {\color{red}SVEC}
 outperforms {\sf laGP} and {\sf deepgp} in both RMSE and CRPS
-{\color{red}(additional visual aids provided in Appendix
-\ref{app:resid_anal}).} The local focus of {\sf laGP} limits its ability to
-capture global trends, potentially hurting its performance. Large data and
-corresponding expensive matrix operations restrict the number of iterations
-{\sf deepgp} can run and thus prevents the MCMC from converging to the target
-posterior. SEPIA performed similarly to {\color{red}SVEC}, illustrating why it
-has had such staying power over the past two decades. As a practitioner, it
-appears to be a toss-up between these two methods for which to use. But that's
-not the entire story.
+{\color{red}(additional visual aids provided in Appendices
+\ref{app:resid_anal} and \ref{app:multivar_mets}).} The local focus of {\sf
+laGP} limits its ability to capture global trends, potentially hurting its
+performance. Large data and corresponding expensive matrix operations restrict
+the number of iterations {\sf deepgp} can run and thus prevents the MCMC from
+converging to the target posterior. SEPIA performed similarly to
+{\color{red}SVEC}, illustrating why it has had such staying power over the
+past two decades. As a practitioner, it appears to be a toss-up between these
+two methods for which to use. But that's not the entire story.
 
 \begin{figure}[ht!]
 \centering
@@ -1009,18 +1009,29 @@ by the IBEX satellite.
 \label{sec:ibex_exp}
 %------------------------------------------------------------------------------
 
-Our experimental setup will be similar to that in Section \ref{sec:synth_data},
-only substituting in real data for simulated data. Space scientists at LANL have
-provided us with satellite data from IBEX for the years 2009-2011, aligning with
-the implementation of the computer model. The number of records in each sky map
-varies across the three years from $\sim$7-9K observations, giving us over 23K
-rows of field data ($X^F, Y^F$) for use in our analysis. We execute Algorithm
-\ref{alg:gibbs} by fitting {\color{red}an SVEC} GP surrogate to \textit{all} 66
-computer model runs and sample from the posterior $u \mid Y^F$ via MCMC. One
-difference from Section \ref{sec:synth_data} is that field data ($X^F, Y^F$) are
-not exclusively from one map (Figure \ref{f:ibex_real_ex}). Instead, ($X^F,
-Y^F$) is formed by stacking the counts, exposure times, background rates, and
-Cartesian coordinates $x$, $y$, $z$ from years 2009-2011.
+Our experimental setup will be similar to that in Section
+\ref{sec:synth_data}, only substituting in real data for simulated data. Space
+scientists at LANL have provided us with satellite data from IBEX for the
+years 2009-2011, aligning with the implementation of the computer model. The
+number of records in each sky map varies across the three years from
+$\sim$7-9K observations, giving us over 23K rows of field data ($X^F, Y^F$)
+for use in our analysis. We execute Algorithm \ref{alg:gibbs} by fitting
+{\color{red}an SVEC} GP surrogate to \textit{all} 66 computer model runs and
+sample from the posterior $u \mid Y^F$ via MCMC. One difference from Section
+\ref{sec:synth_data} is that field data are not exclusively from one map
+(Figure \ref{f:ibex_real_ex}). Instead, ($X^F, Y^F$) is formed by stacking the
+counts, exposure times, background rates, and Cartesian coordinates $x$, $y$,
+$z$ from years 2009-2011 {\color{red}$\left(X^F = [X_{2009}^{F^\top}
+\quad X_{2010}^{F^\top} \quad X_{2011}^{F^\top}]^\top; Y^F = [Y_{2009}^{F^T} \quad
+Y_{2010}^{F^T} \quad Y_{2011}^{F^T}]^\top\right)$. Although the data come from
+different years, we treat them as one field dataset. The simulator (or GP
+surrogate) is evaluated in Algorithm \ref{alg:gibbs} at all $X^F$ locations,
+regardless of year, to provide $\lambda(X^F)$ values for the single likelihood
+calculation, $\mathcal{L}(Y^F|\lambda(X^F)^{(t)}, e(X^F)) = \prod_{i=1}^{n_F}
+f(y_i|\lambda_i(X^F)^{(t)}, e_i)$. The IBEX simulator itself does not embody
+any notion of time or year as a covariate or predictor, but was specifically
+developed to model the heliosphere in the years 2009-2011 when the satellite
+data was collected.}
 
 \begin{figure}[ht!]
 \centering
@@ -1457,6 +1468,49 @@ of principal components used. This hearkens back to the nearly identical
 metrics observed between the two methods in Figure \ref{f:ibex_surr_metrics}.
 Although it appears that these methods are missing significant structure in
 the data, it is only due to these small residuals (originally on the order of
-$10^{-4}$) being magnified by the modifications for visual aid listed above.}
+$10^{-4}$) being magnified by the modifications for visua{}l aid listed above.}
+
+\subsection{Multivariate Performance Metrics}
+\label{app:multivar_mets}
+
+{\color{red}
+Section \ref{sec:emp_comp} assesses the performance of out-of-sample
+predictions for the IBEX simulator using our proposed SVEC GP surrogate and
+other competitors. In particular, Figure \ref{f:ibex_surr_metrics} displays a
+pair of boxplots measuring each surrogate model on RMSE and CRPS. However,
+RMSE and CRPS are both univariate metrics and are not able to capture
+relationships between output variables (e.g. different pixels). The response
+for the IBEX is high-dimensional (16,200), and therefore it is appropriate to
+compare using multivariate metrics.}
+
+{\color{red}
+First, we consider \textit{energy score} \citep{gneiting2007strictly}, a
+natural multivariate extension of CRPS. Energy score incorporates two elements
+into the metric: 1) how far away predictions are from the truth, and 2) how
+spread out the predictions are from each other. We calculate energy score for
+each competitor in Figure \ref{f:ibex_surr_metrics} using draws from the
+estimated predictive distribution. Next, we measure the distance between the
+predicted response vector $\hat{\lambda}$ and simulator output $\lambda$ using
+the infinity norm, $||\hat{\lambda} -\lambda||_\infty$. Figure
+\ref{f:ibex_surr_multivar_metrics} displays the results.}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.45, trim=0 0 0 0,clip=TRUE]{ibex_surr_escores.pdf}
+\includegraphics[scale=0.45, trim=0 0 0 0,clip=TRUE]{ibex_surr_linfnorm.pdf}
+\caption{Multivariate performance metrics on the IBEX simulator experiment.
+Smaller is better for both energy score and L-infinity distance.
+\label{f:ibex_surr_multivar_metrics}}
+\end{figure}
+
+{\color{red} For the most part, the results obtained in Figure
+\ref{f:ibex_surr_metrics} hold. SVEC and SEPIA are the clear winners, but are
+comparable to each other in terms of performance. This similarity extends to
+varying values of neighborhood size $m$ for SVEC and number of principal
+components $n_k$ for SEPIA. It is noteworthy that {\sf laGP} performs worse
+(and is highly variable) than {\sf deepgp} in terms of L-infinity distance. We
+believe this could be due to the unique framework of {\sf laGP}, where each
+prediction is based on a unique neighborhood of surrounding points, and
+therefore largely independent of each other.}
 
 \end{document}

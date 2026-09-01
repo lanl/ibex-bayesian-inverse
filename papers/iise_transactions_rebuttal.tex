@@ -306,7 +306,7 @@ implementations are available from 2021 onward:}
 offer a Poisson likelihood implementation.}
 	\item \textit{surmise (Plumlee et al., 2025) contains an implementation of the Higdon et al. (2008)
 strategy. Examples using the package with the relevant high-dimensional output
-meth- ods are found, for examples, in Chan et al. (2024); S¨urer et al.
+methods are found, for examples, in Chan et al. (2024); S¨urer et al.
 (2022).}
 \end{itemize}
 
@@ -320,7 +320,7 @@ TBD
 
 \bigskip
 \noindent
-18. \textbf{Reviewer 1:} \textit{Section 3.2. Since the surrogate outputs are
+\textbf{Reviewer 1:} \textit{Section 3.2. Since the surrogate outputs are
 high-dimensional, would a multivariate measurement of performance be more
 appropriate? RMSE and CRPS are univariate measures.}
 
@@ -329,16 +329,9 @@ appropriate? RMSE and CRPS are univariate measures.}
 We appreciate the reviewer’s thoughtful suggestion. We agree that a
 multivariate scoring rule, such as the energy score, could provide additional
 information about the joint predictive performance of the surrogate for these
-high-dimensional outputs. However, calculating such a score requires a
-representation of the joint predictive distribution. In our setting, this
-would require either estimating and storing the full high-dimensional
-predictive covariance matrix or generating joint predictive draws that
-preserve this covariance structure. Both approaches would be computationally
-prohibitive for the problem considered here. Moreover, some of the competing
-methods provide only marginal predictive distributions and do not produce the
-joint covariance information or joint predictive draws needed to calculate a
-multivariate score. Therefore, we are unfortunately unable to provide such a
-metric.
+high-dimensional outputs. We have calculated energy score and the L-infinity
+distance for each method. Results and commentary are included in the appendix
+and linked to in the main body of the paper.
 
 \bigskip
 \noindent
@@ -486,7 +479,7 @@ in the paper.
 
 \bigskip
 \noindent
-30. \textbf{Reviewer 2:} \textit{The manuscript uses \(X^M\) to denote the
+\textbf{Reviewer 2:} \textit{The manuscript uses \(X^M\) to denote the
 combined input \((u, X)\) to the surrogate, while \(X^F\) denotes the
 field-data locations (latitude/longitude) and does not involve \(u\). Since
 \(M\) indicates ``model,'' I found this overloading of \(X\) (and the use of
@@ -500,12 +493,16 @@ is conditioned on'' more transparent.}
 
 \bigskip
 \noindent
-TBD
-Thank you for your comment. We made a couple changes to make this clear to
-make this more explicit. This notation is standard. We want to refer to two
-kinds of $X^F$. We want to distinguish between the designs, one where
-observations are recorded, and one where it is gridded out and predicted on.
-We could have introduced Z, but…
+Thank you for your comment. We have made a couple changes (Section 2, first
+paragraph and Section 2.2, first paragraph) in the text to make the
+distinction between $X^M$ and $X^F$ more explicit. This notation ($X^M, X^F$)
+is standard in the computer model calibration literature. We want to refer to
+two kinds of $X^F$. We want to distinguish between the designs, one where
+field (in this case, satellite) observations are recorded, and one where it is
+gridded out and predicted on. We could have introduced Z, but we want to
+remind the reader of the link (both contain unique $(x, y, z)$ measurement
+locations) between field and computer model data, as well as follow the
+convention in the literature.
 
 \bigskip
 \noindent
@@ -534,7 +531,7 @@ parameter values as panel titles for each row/column of panels in the figure
 
 \bigskip
 \noindent
-33. \textbf{Reviewer 2:} \textit{The calibration parameters are described
+\textbf{Reviewer 2:} \textit{The calibration parameters are described
 essentially in terms of \((u_1, u_2/u_1)\). Could the authors clarify the
 motivation for using this parameterization, as opposed to solving the inverse
 problem directly in terms of \((u_1, u_2)\) with \(u_1\) and \(u_2\) treated
@@ -544,7 +541,36 @@ regression problem?}
 
 \bigskip
 \noindent
-TBD
+Thank you for this insightful comment. We went back and conducted our analysis
+using the separated parameters (parallel mean free path and perpendicular mean
+free path). The results were similar, if not slightly worse, than using the
+collaborator-provided parameterization.
+
+\bigskip
+\noindent
+The primary motivation for using parallel mean free path and ratio is that our
+collaborators discussed results exclusively in terms of parallel mean free
+path ($u_1)$ and ratio ($\frac{u_2}{u_1}$). I reached out to our co-authors
+for a more expert explanation of the reasoning behind this parameterization
+and received the follow response:
+
+\bigskip
+\noindent
+``In parameter studies, it is common to vary the parallel mean free path,
+$\lambda_{parallel}$, together with the perpendicular-to-parallel mean free
+path ratio, $\frac{\lambda_{perpendicular}}{\lambda_{parallel}}$, rather than
+treating $\lambda_{parallel}$ and $\lambda_{perpendicular}$ as independent
+parameters. This is because $\lambda_{parallel}$ primarily determines the
+overall scattering strength and transport timescale, whereas the ratio
+$\frac{\lambda_{perpendicular}}{\lambda_{parallel}}$ characterizes the
+anisotropy of particle diffusion and the efficiency of cross-field transport.
+This parameterization cleanly separates the effects of the total scattering
+level from those of diffusion anisotropy, making the influence of each
+parameter easier to interpret. In contrast, varying $\lambda_{parallel}$ and
+$\lambda_{perpendicular}$ independently changes both the overall scattering
+strength and the diffusion anisotropy simultaneously. As a result, it becomes
+difficult to determine which effect is responsible for the observed
+differences in the simulation results.''
 
 \bigskip
 \noindent
@@ -592,7 +618,7 @@ TBD
 
 \bigskip
 \noindent
-36. \textbf{Reviewer 2:} \textit{It remains unclear to me how the ``stacked'' field
+\textbf{Reviewer 2:} \textit{It remains unclear to me how the ``stacked'' field
 data are used in the real-data analysis (e.g., stacking three years into
 roughly 23K rows of \((X^F, Y^F)\)). Figure 11 suggests that \(X^F\) varies
 across years. Does the simulator also produce year-specific outputs (at
@@ -604,6 +630,12 @@ helpful for readers.}
 
 \bigskip
 \noindent
-TBD
+Thank you for suggesting this clarification. We have added an inline
+mathematical representation of the stacked field data. Additionally, we now
+explicity state that the data from different years are all included in a
+single likelihood calculation, and explain that the simulator is not
+year-specific, but covers the entire range of the collected data. We also
+provide the likelihood equation inline to demonstrate that the product is
+taken over observations, and not years.
 
 \end{document}
