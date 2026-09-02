@@ -1252,7 +1252,14 @@ The authors confirm that data and code supporting the conclusions of this
 research, along with reproductions of included figures and examples, can be
 found at \url{https://github.com/lanl/ibex-bayesian-inverse}.
 
-\subsection*{Possible Extensions}
+\subsection*{Possible Extensions \& Alternative Formulations}
+
+{\color{red}Figure \ref{f:ibex_disc} illustrates the need for more
+advancements to properly model disparity between the observed IBEX satellite
+data and the corresponding simulator. A fully Bayesian framework could be
+developed to provide full uncertainty quantification, perhaps with the use of
+a deep Gaussian process to handle the inherent nonstationarity in the
+discrepancy.}
 
 {\color{red}Section \ref{sec:gp_approx} details several GP approximations for modeling
 large-scale datasets. In particular, we review SEPIA \citep{gattiker2020lanl},
@@ -1266,18 +1273,25 @@ weights could be modeled using the Vecchia approximation and alleviate a
 growing number of computer model runs. To our knowledge this has not been
 attempted, but represents a promising area of research.}
 
-{\color{red}Figure \ref{f:ibex_disc} illustrates the need for more advancements to
-properly model disparity between the observed IBEX satellite data and the
-corresponding simulator. A fully Bayesian framework could be developed to
-provide full uncertainty quantification, perhaps with the use of a deep
-Gaussian process to handle the inherent nonstationarity in the discrepancy.}
+{\color{red}Several alternative formulations and software implementations may
+also be useful for addressing problems of this type. For example, {\sf GPflow}
+proposes a modular system for scalable Gaussian process modeling, as described
+in \citet{van2020framework}. The {\sf Python} package {\sf surmise}
+\citep{surmise2025} provides related surrogate modeling functionality, in
+particular as it relates to computer model calibration. It has been used in
+multiple academic works \citep{chan2024constructing,surer2022uncertainty}.
+Variational approaches \citep{opper2009variational,hensman2015scalable} could
+also be explored. These methods offer additional modeling and computational
+options that may be appropriate depending on the objectives and requirements
+of a particular application. We refer interested readers to the corresponding
+articles and software documentation for detailed descriptions.}
 
 \subsection*{Acknowledgments}
 
 RBG and SDB are grateful for funding from NSF CMMI 2152679. SDB, DO and LJB
 were funded by Laboratory Directed Research and Development (LDRD) Project
-20220107DR. {\color{red}The authors would like to thank C.A.~Eiffer for her
-encouragement and support of this paper. They also wish to thank the editor,
+20220107DR. The authors would like to thank C.A.~Eiffer for her encouragement
+and support of this paper. {\color{red}They also wish to thank the editor,
 associate editor, and referees for their valuable suggestions, which greatly
 improved the manuscript.} This work has been approved for public release under
 LA-UR-25-30539.
@@ -1456,8 +1470,8 @@ hold-one-out predictions from the IBEX simulator experiment (Figure
 
 {\color{red} Note that before plotting, we first take the absolute values of
 the residuals and then take their square root. Additionally, the range of
-values for which the colors represent is clipped. These steps are
-\textit{only} taken to allow better visual comparison between methods.
+values for which the colors represent is clipped on the upper end. These steps
+are \textit{only} taken to allow better visual comparison between methods.
 Otherwise, heat maps for SVEC and SEPIA would be solid red and heat maps for
 {\sf laGP} and {\sf deepgp} would be solid white. }
 
@@ -1473,26 +1487,15 @@ $10^{-4}$) being magnified by the modifications for visua{}l aid listed above.}
 \subsection{Multivariate Performance Metrics}
 \label{app:multivar_mets}
 
-{\color{red}
-Section \ref{sec:emp_comp} assesses the performance of out-of-sample
-predictions for the IBEX simulator using our proposed SVEC GP surrogate and
-other competitors. In particular, Figure \ref{f:ibex_surr_metrics} displays a
-pair of boxplots measuring each surrogate model on RMSE and CRPS. However,
-RMSE and CRPS are both univariate metrics and are not able to capture
-relationships between output variables (e.g. different pixels). The response
-for the IBEX is high-dimensional (16,200), and therefore it is appropriate to
-compare using multivariate metrics.}
-
-{\color{red}
-First, we consider \textit{energy score} \citep{gneiting2007strictly}, a
-natural multivariate extension of CRPS. Energy score incorporates two elements
-into the metric: 1) how far away predictions are from the truth, and 2) how
-spread out the predictions are from each other. We calculate energy score for
-each competitor in Figure \ref{f:ibex_surr_metrics} using draws from the
-estimated predictive distribution. Next, we measure the distance between the
-predicted response vector $\hat{\lambda}$ and simulator output $\lambda$ using
-the infinity norm, $||\hat{\lambda} -\lambda||_\infty$. Figure
-\ref{f:ibex_surr_multivar_metrics} displays the results.}
+{\color{red} Section \ref{sec:emp_comp} assesses the performance of
+out-of-sample predictions for the IBEX simulator using our proposed SVEC GP
+surrogate and other competitors. In particular, Figure
+\ref{f:ibex_surr_metrics} displays a pair of boxplots measuring each surrogate
+model on RMSE and CRPS. However, RMSE and CRPS are both univariate metrics and
+are not able to capture relationships between output variables (e.g. different
+pixels within the same image). The response for the IBEX is high-dimensional
+(16,200), and therefore it is appropriate to compare using multivariate
+metrics.}
 
 \begin{figure}[ht!]
 \centering
@@ -1503,11 +1506,22 @@ Smaller is better for both energy score and L-infinity distance.
 \label{f:ibex_surr_multivar_metrics}}
 \end{figure}
 
+{\color{red} First, we consider \textit{energy score}
+\citep{gneiting2007strictly}, a natural multivariate extension of CRPS. Energy
+score incorporates two elements into the metric: 1) how far away predictions
+are from the truth, and 2) how spread out the predictions are from each other.
+We calculate energy score for each competitor in Figure
+\ref{f:ibex_surr_metrics} using draws from the estimated predictive
+distributions. Next, we measure the distance between each method's predicted
+response vector $\hat{\lambda}$ and the simulator output $\lambda$ using the
+infinity norm, $||\hat{\lambda} -\lambda||_\infty$. Figure
+\ref{f:ibex_surr_multivar_metrics} displays the results.}
+
 {\color{red} For the most part, the results obtained in Figure
 \ref{f:ibex_surr_metrics} hold. SVEC and SEPIA are the clear winners, but are
 comparable to each other in terms of performance. This similarity extends to
-varying values of neighborhood size $m$ for SVEC and number of principal
-components $n_k$ for SEPIA. It is noteworthy that {\sf laGP} performs worse
+varying values of neighborhood size $m$ (for SVEC) and number of principal
+components $n_k$ (for SEPIA). It is noteworthy that {\sf laGP} performs worse
 (and is highly variable) than {\sf deepgp} in terms of L-infinity distance. We
 believe this could be due to the unique framework of {\sf laGP}, where each
 prediction is based on a unique neighborhood of surrounding points, and
