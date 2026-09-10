@@ -73,7 +73,7 @@ foreach(i = 1:nrow(cpars), .packages=c("GpGp", "GPvecchia", "laGP", "tmvtnorm"))
   }
   pd <- preprocess_data(md=model_data, fd=thread_fd, map=map)
   res <- pois_bayes_inv(xm=pd$xm, um=pd$um, ym=pd$ym, xf=pd$xf, yf=pd$yf, e=pd$e,
-    lam0=pd$bg, T=41)
+    lam0=pd$bg, T=10000)
   if (real) {
     res$year <- map
   } else {
