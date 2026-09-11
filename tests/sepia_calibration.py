@@ -59,10 +59,11 @@ unique_combos = np.unique(real_data[['ratio', 'parallel_mean_free_path']])
 
 results = {}
 ## for each unique setting, run calibration.
-for i in range(unique_combos):
+for i in range(len(unique_combos)):
     ## OBSERVED DATA
     iter_ratio = unique_combos[i]['ratio']
     iter_pmfp = unique_combos[i]['parallel_mean_free_path']
+    print("Started iteration " + str(i) + " with ratio=" + str(iter_ratio) + " and pmfp=" + str(iter_pmfp))
     iter_data = real_data[(real_data['ratio']==iter_ratio) & (real_data['parallel_mean_free_path']==iter_pmfp)]
     x_obs = iter_data[['lon', 'lat']]
     x_obs = np.array(x_obs.tolist(), dtype=object)
@@ -131,7 +132,7 @@ for i in range(unique_combos):
 
     model = SepiaModel(data)
     model.tune_step_sizes(50, 20, update_vals=True)
-    model.do_mcmc(10)
+    model.do_mcmc(10000)
     samples_dict = model.get_samples()
     samples_dict['theta'][:,0] = samples_dict['theta'][:,0]*(0.1-0.001)+0.001
     samples_dict['theta'][:,1] = samples_dict['theta'][:,1]*(3000-500)+500
@@ -148,3 +149,5 @@ for i in range(unique_combos):
             for col_idx in range(arr.shape[1]):          # loop over the 2 columns
                 row = [ratio, pmfp, param_names[col_idx]] + list(arr[:, col_idx])
                 writer.writerow(row)
+    print("Finished iteration " + str(i) + " with ratio=" + str(iter_ratio) + " and pmfp=" + str(iter_pmfp))
+
