@@ -68,7 +68,6 @@ for i in range(unique_combos):
     x_obs = np.array(x_obs.tolist(), dtype=object)
     y_obs = iter_data['sim_counts'] / iter_data['time']
     y_obs[np.isnan(y_obs)] = 0
-    y_obs = y_obs - iter_data['background']
     logy_obs = np.log(y_obs + 0.65)
     logy_obs = [logy_obs]
     logy_ind_obs = [x_obs]
@@ -101,7 +100,8 @@ for i in range(unique_combos):
     data.obs_data.orig_y_sd = []
     for k in range(1):
         points = np.column_stack([data.obs_data.y_ind[k][:,0], data.obs_data.y_ind[k][:,1]])
-        ymk = interp(points)
+        ymk = np.array(interp(points), dtype=np.float64)
+        ymk = np.log(np.exp(ymk)+iter_data['background'])
         data.obs_data.orig_y_mean.append(ymk.flatten())
         data.obs_data.orig_y_sd.append(data.sim_data.orig_y_sd)
 
@@ -131,7 +131,7 @@ for i in range(unique_combos):
 
     model = SepiaModel(data)
     model.tune_step_sizes(50, 20, update_vals=True)
-    model.do_mcmc(10)
+    model.do_mcmc(10000)
     samples_dict = model.get_samples()
     samples_dict['theta'][:,0] = samples_dict['theta'][:,0]*(0.1-0.001)+0.001
     samples_dict['theta'][:,1] = samples_dict['theta'][:,1]*(3000-500)+500
