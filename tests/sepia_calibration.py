@@ -69,7 +69,6 @@ for i in range(len(unique_combos)):
     x_obs = np.array(x_obs.tolist(), dtype=object)
     y_obs = iter_data['sim_counts'] / iter_data['time']
     y_obs[np.isnan(y_obs)] = 0
-    y_obs = y_obs - iter_data['background']
     logy_obs = np.log(y_obs + 0.65)
     logy_obs = [logy_obs]
     logy_ind_obs = [x_obs]
@@ -102,7 +101,8 @@ for i in range(len(unique_combos)):
     data.obs_data.orig_y_sd = []
     for k in range(1):
         points = np.column_stack([data.obs_data.y_ind[k][:,0], data.obs_data.y_ind[k][:,1]])
-        ymk = interp(points)
+        ymk = np.array(interp(points), dtype=np.float64)
+        ymk = np.log(np.exp(ymk)+iter_data['background'])
         data.obs_data.orig_y_mean.append(ymk.flatten())
         data.obs_data.orig_y_sd.append(data.sim_data.orig_y_sd)
 

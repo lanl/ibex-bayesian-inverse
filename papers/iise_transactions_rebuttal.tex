@@ -45,7 +45,7 @@ Steven Barnett
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{I agree with both referees’ comments that
+\textbf{Associate Editor:} \textit{I agree with both referees’ comments that
 the notation needs to be improved. When introducing u, \(X\), and \(Y^F\) on
 page 5, these vectors/matrices could be introduced together with their
 dimensions (e.g., u in \(R^p\) (or u in \(\Theta \subset R^p\)), \(X\) in
@@ -65,7 +65,7 @@ dimensions of the vector $Y^M$ and the matrix $X^M$.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{In addition, when introducing the dimensions
+\textbf{Associate Editor:} \textit{In addition, when introducing the dimensions
 of vectors and matrices on page 5, I suggest explicitly relating these numbers
 to your application. I understand you mentioned this later; however, this
 would help emphasize to readers that the problem you are addressing is
@@ -80,7 +80,7 @@ for our proposed methodology.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{The authors refer to the rows of \(X^F\);
+\textbf{Associate Editor:} \textit{The authors refer to the rows of \(X^F\);
 however, it should be clarified earlier what each row and column of this
 matrix represents when it is introduced early in Section 2. Perhaps this will
 be resolved once the dimensions are introduced and clarified.}
@@ -95,7 +95,7 @@ look like in the design matrix $X$ or $X^F$.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{Later, when describing the toy example in
+\textbf{Associate Editor:} \textit{Later, when describing the toy example in
 Figure 3, the stars, circles, and the dimensions of \(X, u, Y^F, X^F\) could
 be explicitly linked to the notation introduced earlier. For example, it would
 help to clarify whether the circles or the stars correspond to the \(y_i\) in
@@ -110,7 +110,7 @@ in Algorithm 1.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{Page 7, line 7: I understand that
+\textbf{Associate Editor:} \textit{Page 7, line 7: I understand that
 \(u^{(t)}\) corresponds to a draw from Metropolis sampling. However, it has
 not introduced at this point.}
 
@@ -121,7 +121,7 @@ clarify that $t$ indexes into the draws from a Metropolis sampler.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{On page 10, it is unclear what ``n'' refers
+\textbf{Associate Editor:} \textit{On page 10, it is unclear what ``n'' refers
 to. Does it correspond to the size of any of the previously introduced
 notation (e.g., \(X, Y^F, u\)), or is it intended as a generic sample size for
 computer runs? It is used three times on this page.}
@@ -134,7 +134,7 @@ of simulator runs.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{Figure 5: Is it possible to provide a heat
+\textbf{Associate Editor:} \textit{Figure 5: Is it possible to provide a heat
 map for the residuals between actual and predicted outputs?}
 
 \bigskip
@@ -146,7 +146,7 @@ used over others.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{On page 15, please introduce an abbreviation
+\textbf{Associate Editor:} \textit{On page 15, please introduce an abbreviation
 for your method in the text, e.g., Scaled Vecchia (SVEC).}
 
 \bigskip
@@ -158,7 +158,7 @@ Figures 5-7.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{I agree with one referee’s comment regarding
+\textbf{Associate Editor:} \textit{I agree with one referee’s comment regarding
 potential computational bottlenecks in SEPIA due to the number of simulation
 runs. It would strengthen the manuscript if the authors could discuss whether
 approaches such as those proposed by Higdon et al., combined with Vecchia-type
@@ -173,18 +173,26 @@ of our paper in which we comment on its appeal.
 
 \bigskip
 \noindent
-10. \textbf{Associate Editor} \textit{Relatedly, since log-transformed count data
+\textbf{Associate Editor:} \textit{Relatedly, since log-transformed count data
 are sometimes modeled using Gaussian likelihoods, it would be helpful if the
 authors could comment on how the results might change under such a
 transformation.}
 
 \bigskip
 \noindent
-TBD
+Thank you for raising this point. Modeling log-transformed count data using a
+Gaussian likelihood is a very common technique. In fact, after reviewing a
+comment from one referee, we attempted to use SEPIA, our primary competitor,
+in this exact manner. Unfortunately the results we obtained were far from
+accurate. This could be due to a variety of factors. For instance, using
+log-transformed count data gives a practitioner no ability to place higher
+weight on observations with high exposure time. Tackling this and the other
+issues from modeling count data using a Gaussian likelihood could be an
+interesting area of future work.
 
 \bigskip
 \noindent
-\textbf{Associate Editor} \textit{I agree with one referee's comment about the
+\textbf{Associate Editor:} \textit{I agree with one referee's comment about the
 typos need to be fixed. Some of them I found:}
 
 \begin{itemize}
@@ -604,7 +612,7 @@ Vecchia'' hybrid approach.
 
 \bigskip
 \noindent
-35. \textbf{Reviewer 2:} \textit{Since it is common to model log-count data using
+\textbf{Reviewer 2:} \textit{Since it is common to model log-count data using
 a Gaussian likelihood, and the IBEX application uses only 66 simulator runs,
 it would be helpful if the authors could comment on, and possibly experiment
 whether SEPIA would be computationally feasible at this problem size when
@@ -613,7 +621,19 @@ here the non-Gaussian (Poisson) observation model?}
 
 \bigskip
 \noindent
-TBD
+We agree with the reviewer that this possibility should be explored. While
+SEPIA does experience computational hurdles for a large number of simulator
+runs, this isn't necessarily a problem for the IBEX application. The main
+limitation is the lack of a Poisson observational model. In light of your
+suggestion, we did use SEPIA on the log-transformed count data. Specifically,
+we attempted to replicate the results on simulated observational data found in
+Figure 9 (previously Figure 10). SEPIA's posterior estimate did not cover the
+truth for any of the 36 synthetic datasets. We believe this could stem for a
+number of issues. Perhaps the most significant is that a user of SEPIA cannot
+place different weights on observations based on its exposure time (e.g. low
+weight for small exposure time, high weight for long exposure time). This is
+certainly an intriguing problem and we believe future research could be done
+to allow for modeling of count data in this manner.
 
 \bigskip
 \noindent
