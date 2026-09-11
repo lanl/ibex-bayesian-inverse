@@ -15,6 +15,7 @@ source("vecchia_scaled.R")
 setwd("tests")
 
 start <- 1
+end <- NA
 method <- "all"
 seed <- 6756781
 
@@ -26,7 +27,7 @@ if (length(args) > 0) {
     eval(parse(text=args[[i]]))
   }
 }
-settings <- list(seed=seed, method=method, start=start)
+settings <- list(seed=seed, method=method, start=start, end=end)
 print(settings)
 
 model_data <- read.csv(file="../data/sims.csv")
@@ -59,11 +60,12 @@ colnames(rmses) <- colnames(crps) <- colnames(fit_times) <-
 
 ## Calculating residuals
 resids <- array(NA, dim=c(nrow(model_data)/nrow(unique_runs), nrow(unique_runs), 6))
+end <- ifelse(is.na(end), nrow(unique_runs), end)
 
 if (method=="svecchia" || method=="all") {
   ms <- seq(25, 100, by=25)
   for (i in 1:length(ms)) {
-    for (j in start:nrow(unique_runs)) {
+    for (j in start:end) {
       pmfp <- unique_runs[j,1]
       ratio <- unique_runs[j,2]
       Xtrain <- model_data[model_data$parallel_mean_free_path != pmfp |
@@ -102,7 +104,7 @@ if (method=="svecchia" || method=="all") {
 }
 
 if (method=="laGP" || method=="all") {
-  for (i in start:nrow(unique_runs)) {
+  for (i in start:end) {
     pmfp <- unique_runs[i,1]
     ratio <- unique_runs[i,2]
     Xtrain <- model_data[model_data$parallel_mean_free_path != pmfp |
@@ -145,7 +147,8 @@ if (method=="laGP" || method=="all") {
 }
 
 if (method=="deepgp" || method=="all") {
-  for (i in start:nrow(unique_runs)) {
+  for (i in start:end) {
+    print(paste0("Starting holdout iteration ", i))
     pmfp <- unique_runs[i,1]
     ratio <- unique_runs[i,2]
     Xtrain <- model_data[model_data$parallel_mean_free_path != pmfp |
