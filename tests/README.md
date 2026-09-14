@@ -14,7 +14,7 @@ Each set can include bash scripts and/or R and Python code files.
   shell scripts, `ibex_bayes_real.sh` and `ibex_bayes_synth.sh`, execute the
   framework on real and synthetic satellite data, respectively.
 - Required data: `sims.csv`, `ibex_real.csv`, `synth_sat_data.csv`
-- Figures: 9, 10, 11, 13, 14, 15, 16
+- Figures: 8, 9, 10, 12, 13, 14, 15
 
 ### real_data_cv*
 
@@ -25,7 +25,7 @@ Each set can include bash scripts and/or R and Python code files.
   ENA rates are made at locations in the held out fold. CRPS is calculated to
   measure performance at different model parameter values.
 - Required data: `sims.csv`, `ibex_real.csv`
-- Figures: 12
+- Figures: 11
 
 ### scale_disc_test*
 
@@ -35,7 +35,7 @@ Each set can include bash scripts and/or R and Python code files.
   terms are considered. In each instance, synthetic satellite data (with a
   scale discrepancy) is generated within the script.
 - Required data: `sims.csv`, `ibex_real.csv`
-- Figures: 17
+- Figures: 16
 
 ### surrogate_*
 
@@ -48,7 +48,7 @@ Each set can include bash scripts and/or R and Python code files.
   different number of training runs available are both tested for their effect
   on execution time.
 - Required data: `sims.csv`
-- Figures: 6, 7, 8
+- Figures: 5, 6, 7, 17, 18
 
 ### sepia*
 
@@ -60,4 +60,4 @@ Each set can include bash scripts and/or R and Python code files.
   implementation and user guidance can be found here:
   https://sepia-lanl.readthedocs.io/en/latest/
 - Required data: `sims.csv`
-- Figures: 6, 7, 8
+- Figures: 5, 6, 7, 17, 18
