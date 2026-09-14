@@ -6,8 +6,9 @@
 ###############################################################################
 
 ###############################################################################
-## FIGURE 2: Toy 1D example for standard Bayesian inverse problem. A logistic
-## curve with two input parameters to vary the shape
+## FIGURE 2: Toy 1D example for standard Bayesian inverse problem and Poisson
+## Bayesian inverse problem. A logistic curve with two input parameters to
+## vary the shape
 ## DATA NEEDED:
 ###############################################################################
 

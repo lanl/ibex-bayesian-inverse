@@ -6,7 +6,7 @@
 ###############################################################################
 
 ###############################################################################
-## FIGURE 9: Synthetic data visual containing four plots:
+## FIGURE 8: Synthetic data visual containing four plots:
 ## - Plot of synthetic satellite data
 ## - Plot of simulator output used to generate synthetic satellite data
 ## - Plot of predicted surrogate output at posterior mean of model parameters
@@ -23,7 +23,7 @@ library(ks)
 
 ## Visuals for comparing simulated counts, "true" simulator output
 ## estimated simulator output via surrogate predictions
-sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{0,14}.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_*[0-9]{0,14}.rds")
 res <- readRDS(sim_res_file)
 single_index <- NA
 single_pmfp <- 1750
@@ -73,7 +73,7 @@ bks <- seq(predrange[1], predrange[2], length=length(cols)+1)
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
 
-## Figure 9 (top right panel)
+## Figure 8 (top middle panel)
 model_lons <- sort(unique(model_data$nlon))
 model_lats <- sort(unique(model_data$lat))
 model_zmat <- xtabs(blurred_ena_rate ~ nlon + lat, data=model_data)
@@ -91,7 +91,7 @@ fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
-## Figure 9 (top left panel)
+## Figure 8 (top left panel)
 field_lons <- sort(unique(field_data$nlon))
 field_lats <- sort(unique(field_data$lat))
 field_rates <- cut(field_data$est_rate, breaks=bks,
@@ -110,7 +110,7 @@ fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
-## Figure 9 (bottom left panel)
+## Figure 8 (top right panel)
 pred_lons <- sort(unique(pred_data$nlon))
 pred_lats <- sort(unique(pred_data$lat))
 pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
@@ -128,11 +128,11 @@ fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.82, 0.86, 0.3, 0.75))
 dev.off()
 
+## Figure 8 (bottom right panel)
 pred_data$residuals <- pred_data$lhat_curr-model_data$blurred_ena_rate
 residrange <- c(-max(abs(pred_data$residuals)), max(abs(pred_data$residuals)))
 resid_cols <- colorRampPalette(c("red", "white", "blue"))(500)
 resid_bks <- seq(residrange[1], residrange[2], length=length(resid_cols)+1)
-
 resid_zmat <- xtabs(residuals ~ nlon + lat, data=pred_data)
 resid_zmat[resid_zmat > residrange[2]] <- residrange[2]
 resid_zmat[resid_zmat < residrange[1]] <- residrange[1]
@@ -168,7 +168,7 @@ thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
 cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
-## Figure 9 (bottom right panel)
+## Figure 8 (bottom left panel)
 # Plot contour at HPD threshold
 pdf("ibex_post_est.pdf", width=7, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
@@ -187,7 +187,7 @@ legend("topright", c(expression(u*"\u002A"), "95% HPD"), col=c(4, 1),
 dev.off()
 
 ###############################################################################
-## FIGURE 10: Visual for bivariate posteriors of all unique combinations of
+## FIGURE 9: Visual for bivariate posteriors of all unique combinations of
 ## model parameters held out as the truth
 ## DATA NEEDED: sim_calib_results.rds 
 ###############################################################################
@@ -210,7 +210,7 @@ for (i in 1:length(res)) {
 pmfp_labs <- seq(500, 2500, by=500)
 ratio_labs <- seq(0.02, 0.1, length=5)
 
-## Figure 10
+## Figure 9
 pdf("sim_bayes_inv_res.pdf", width=7, height=5)
 par(mfrow=c(length(ratios), length(pmfps)),
   mar=c(0.25,0.25,0.25,0.15), oma=c(7,5,0.5,0.5))
@@ -275,7 +275,7 @@ mtext("Ratio", side=2, outer=TRUE, line=3.0, cex=1.2)
 dev.off()
 
 ###############################################################################
-## FIGURE 15: PIT histograms for estimated sky maps generated from estimates
+## FIGURE 14: PIT histograms for estimated sky maps generated from estimates
 ## of u for synthetic satellite data
 ## DATA NEEDED: sims.csv, synth_sat_data.csv, sim_calib_results.rds
 ###############################################################################
@@ -288,7 +288,7 @@ library(coda)
 library(ks)
 
 ### Read in calibration results
-sim_res_file <- list.files(pattern="sim_calib_results_[0-9]{0,14}.rds")
+sim_res_file <- list.files(pattern="sim_calib_results_*[0-9]{0,14}.rds")
 res <- readRDS(sim_res_file)
 
 ### Fit Scaled Vecchia GP surrogate
@@ -376,13 +376,13 @@ mtext("Density", side=2, outer=TRUE, line=3.0, cex=1.2)
 dev.off()
 
 ###############################################################################
-## FIGURE 17: Plot of histograms showing posterior samples of a multiplicative
+## FIGURE 16: Plot of histograms showing posterior samples of a multiplicative
 ## scale discrepancy between simulation and reality. In this case, satellite
 ## data is synthetic and artificially scaled by a known constant.
 ## DATA NEEDED: scale_disc_test_results_YYYYMMDDHHMMSS.rds
 ###############################################################################
 
-scale_res_file <- list.files(pattern="scale_disc_test_results_[0-9]{0,14}.rds")
+scale_res_file <- list.files(pattern="scale_disc_test_results_*[0-9]{0,14}.rds")
 res <- readRDS(scale_res_file)
 
 scales <- rep(NA, length(res))

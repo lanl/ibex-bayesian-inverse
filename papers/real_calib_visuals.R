@@ -6,7 +6,7 @@
 ###############################################################################
 
 ###############################################################################
-## FIGURE 11: Real data visual containing six plots:
+## FIGURE 10: Real data visual containing six plots:
 ## - One plot of each year's satellite data from 2009-2011
 ## - One plot of predicted surrogate output at posterior mean of model
 ##   parameters given 2009-2011 data
@@ -32,7 +32,7 @@ pd <- preprocess_data(md=model_data, fd=field_data)
 model_data$nlon <- nose_center_lons(model_data$lon)
 
 ## Load results of run on real data
-real_res_file <- list.files(pattern="real_calib_results_091011_[0-9]{0,14}.rds")
+real_res_file <- list.files(pattern="real_calib_results_091011_*[0-9]{0,14}.rds")
 res <- readRDS(real_res_file)
 post_mean <- apply(res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 
@@ -68,7 +68,7 @@ field_data_09 <- field_data[field_data$map=="2009A",]
 field_data_10 <- field_data[field_data$map=="2010A",]
 field_data_11 <- field_data[field_data$map=="2011A",]
 
-## Figure 11 (top left panel)
+## Figure 10 (top left panel)
 pdf("ibex_field_09.pdf", width=6.0, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 plot(x=field_data_09$nlon, y=field_data_09$ecliptic_lat, col=field_data_09$col, pch=16,
@@ -80,7 +80,7 @@ fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.8, 0.84, 0.3, 0.75))
 dev.off()
 
-## Figure 11 (top middle panel)
+## Figure 10 (top middle panel)
 pdf("ibex_field_10.pdf", width=6.0, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 plot(x=field_data_10$nlon, y=field_data_10$ecliptic_lat, col=field_data_10$col,
@@ -92,7 +92,7 @@ fields::image.plot(zlim=predrange, col=cols, legend.lab="ENAs/sec", legend.line=
   legend.only=TRUE, side=4, line=2, smallplot=c(0.8, 0.84, 0.3, 0.75))
 dev.off()
 
-## Figure 11 (bottom left panel)
+## Figure 10 (bottom left panel)
 pdf("ibex_field_11.pdf", width=6.0, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 plot(x=field_data_11$nlon, y=field_data_11$ecliptic_lat, col=field_data_11$col,
@@ -110,7 +110,7 @@ pred_zmat <- xtabs(lhat_curr ~ nlon + lat, data=pred_data)
 pred_zmat[pred_zmat > predrange[2]] <- predrange[2]
 pred_zmat[pred_zmat < predrange[1]] <- predrange[1]
 
-## Figure 11 (bottom middle panel)
+## Figure 10 (bottom middle panel)
 pdf("ibex_surr_pred_real.pdf", width=6.0, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 7.1), mgp=c(2.4, 0.6, 0))
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
@@ -141,7 +141,7 @@ thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
 cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
-## Figure 11 (top right panel)
+## Figure 10 (top right panel)
 # Plot contour at HPD threshold
 pdf("ibex_real_post_est.pdf", width=5, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
@@ -169,7 +169,7 @@ thresh <- dens_vals[which(cum_prob >= 0.95)[1]]
 cls <- contourLines(fhat$eval.points[[1]],
   fhat$eval.points[[2]], fhat$estimate, levels=thresh)[[1]]
 
-## Figure 11 (bottom right panel)
+## Figure 10 (bottom right panel)
 # Plot contour at HPD threshold (zoomed in)
 pdf("ibex_real_post_est_zoom.pdf", width=5, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
@@ -182,22 +182,22 @@ lines(cls$x, cls$y, lty=2)
 dev.off()
 
 ###############################################################################
-## FIGURE 12: Plots of CRPS for 10-fold cross validation on IBEX real data
+## FIGURE 11: Plots of CRPS for 10-fold cross validation on IBEX real data
 ## DATA NEEDED: real_calib_results_091011.rds, real_data_cv_metrics.rds
 ###############################################################################
 
-real_res_file <- list.files(pattern="real_calib_results_091011_[0-9]{0,14}.rds")
+real_res_file <- list.files(pattern="real_calib_results_091011_*[0-9]{0,14}.rds")
 real_dat_res <- readRDS(real_res_file)
 post_mean <- apply(real_dat_res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 post_mean[1] <- post_mean[1]*2500+500
 post_mean[2] <- post_mean[2]*(0.1-0.001)+0.001
 
-cv_res <- readRDS("final_results/real_data_cv_metrics.rds")
+cv_res <- readRDS("real_data_cv_metrics.rds")
 
 crps_range <- range(c(apply(cv_res$crps_pmfp, 1, mean),
   apply(cv_res$crps_ratio, 1, mean)))
 
-## Figure 12 (left panel)
+## Figure 11 (left panel)
 pdf("crps_pmfp.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 plot(x=cv_res$pmfp_grid, y=apply(cv_res$crps_pmfp, 1, mean), type="l",
@@ -208,7 +208,7 @@ legend("topleft", c("mean across folds", expression(hat(u[i])~"(2009-2011)")),
   col=1:2, lty=1:2, lwd=c(1, 2.5), bg="white", cex=1.15)
 dev.off()
 
-## Figure 12 (middle panel)
+## Figure 11 (middle panel)
 pdf("crps_ratio.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 plot(x=cv_res$ratio_grid, y=apply(cv_res$crps_ratio, 1, mean), type="l",
@@ -216,7 +216,7 @@ plot(x=cv_res$ratio_grid, y=apply(cv_res$crps_ratio, 1, mean), type="l",
 abline(v=post_mean[2], col=2, lty=2, lwd=2.5)
 dev.off()
 
-## Figure 12 (right panel)
+## Figure 11 (right panel)
 pdf("crps_grid.pdf", width=5, height=5)
 par(mgp=c(2.25, 0.8, 0))
 unique_pmfps <- sort(unique(cv_res$grid[,1]))
@@ -229,7 +229,7 @@ image(x=unique_pmfps, y=unique_ratios, useRaster=TRUE,
 dev.off()
 
 ###############################################################################
-## FIGURE 13: Bivariate visual of model parameter posterior given real counts
+## FIGURE 12: Bivariate visual of model parameter posterior given real counts
 ## from the satellite. Bivariate posterior is generated for each year, arranged
 ## in a 2x5 grid
 ## DATA NEEDED: real_calib_results_all_years.rds
@@ -239,7 +239,7 @@ library(MASS)
 library(coda)
 library(ks)
 
-real_res_file <- list.files(pattern="real_calib_results_all_years_[0-9]{0,14}.rds")
+real_res_file <- list.files(pattern="real_calib_results_all_years_*[0-9]{0,14}.rds")
 res <- readRDS(real_res_file)
 
 years <- 2012:2021
@@ -333,7 +333,7 @@ for (i in 1:length(years)) {
 }
 
 ###############################################################################
-## FIGURE 14: Plots showing discrepancy between real data and surrogate output
+## FIGURE 13: Plots showing discrepancy between real data and surrogate output
 ## at estimated model parameters
 ## DATA NEEDED: sims.csv, ibex_real.csv, real_calib_results_091011.rds
 ###############################################################################
@@ -353,7 +353,7 @@ pd <- preprocess_data(md=model_data, fd=field_data)
 model_data$nlon <- nose_center_lons(model_data$lon)
 
 ## Load results of run on real data
-real_res_file <- list.files(pattern="real_calib_results_091011_[0-9]{0,14}.rds")
+real_res_file <- list.files(pattern="real_calib_results_091011_*[0-9]{0,14}.rds")
 res <- readRDS(real_res_file)
 post_mean <- apply(res$mcmc_res$u[seq(1001, 10000, by=10),], 2, mean)
 
@@ -399,7 +399,7 @@ field_data_11 <- field_data[field_data$map=="2011A",]
 ylims <- range(model_data$lat)
 xlims <- rev(range(model_data$nlon))
 
-## Figure 14 (top left panel)
+## Figure 13 (top left panel)
 pdf("ibex_field_disc_09.pdf", width=7, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 plot(x=field_data_09$nlon, y=field_data_09$ecliptic_lat,
@@ -411,7 +411,7 @@ fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
   legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
 dev.off()
 
-## Figure 14 (top right panel)
+## Figure 13 (top right panel)
 pdf("ibex_field_disc_10.pdf", width=7, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 plot(x=field_data_10$nlon, y=field_data_10$ecliptic_lat,
@@ -423,7 +423,7 @@ fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
   legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
 dev.off()
 
-## Figure 14 (bottom left panel)
+## Figure 13 (bottom left panel)
 pdf("ibex_field_disc_11.pdf", width=7, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 plot(x=field_data_11$nlon, y=field_data_11$ecliptic_lat,
@@ -435,7 +435,7 @@ fields::image.plot(zlim=c(-max_disc, max_disc), col=disc_cols,
   legend.only=TRUE, side=4, line=2, smallplot=c(0.86, 0.9, 0.3, 0.9))
 dev.off()
 
-## Figure 14 (bottom right panel)
+## Figure 13 (bottom right panel)
 pdf("ibex_mult_scale_disc.pdf", width=7, height=5)
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 6))
 hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
@@ -443,7 +443,7 @@ hist(exp(res$mcmc_res$logscl[seq(1001, 10000, 10)]),
 dev.off()
 
 ###############################################################################
-## FIGURE 16: PIT histograms for estimated sky maps generated from estimates
+## FIGURE 15: PIT histograms for estimated sky maps generated from estimates
 ## of u for actual IBEX satellite data
 ## DATA NEEDED: real_calib_results_091011.rds, sims.csv, ibex_real.csv,
 ## real_calib_results_all_years.rds
@@ -458,7 +458,7 @@ library(ks)
 
 # Create plot for years 2009-2011
 ### Read in calibration results
-real_res_file <- list.files(pattern="real_calib_results_091011_[0-9]{0,14}.rds")
+real_res_file <- list.files(pattern="real_calib_results_091011_*[0-9]{0,14}.rds")
 res <- readRDS(real_res_file)
 
 ### Fit Scaled Vecchia GP surrogate
@@ -494,7 +494,7 @@ pit <- Fy1 + runif(length(field_data$counts)) * (Fy - Fy1)
 
 # Create data for plots for all years
 ### Read in calibration results
-real_res_file <- list.files(pattern="real_calib_results_all_years_[0-9]{0,14}.rds")
+real_res_file <- list.files(pattern="real_calib_results_all_years_*[0-9]{0,14}.rds")
 res <- readRDS(real_res_file)
 ### Read in data
 model_data <- read.csv(file="../data/sims.csv")

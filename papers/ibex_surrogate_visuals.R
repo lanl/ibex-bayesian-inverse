@@ -6,7 +6,7 @@
 ###############################################################################
 
 ###############################################################################
-## FIGURE 4: Illustration of conditioning sets used by Scaled Vecchia when
+## FIGURE 3: Illustration of conditioning sets used by Scaled Vecchia when
 ## modeling the IBEX simulation
 ## DATA NEEDED: sims.csv
 ###############################################################################
@@ -78,7 +78,7 @@ ribbon_points <- which(all_inputs$lat > -30 & all_inputs$lat < 30 &
   all_inputs$parallel_mean_free_path==pmfp & all_inputs$ratio==ratio)
 ref_point <- ribbon_points[length(ribbon_points)]
 
-## Figure 4 (left panel)
+## Figure 3 (left panel)
 ## display conditioning sets for latitude and longitude on sky map
 plot_data <- model_data[model_data$parallel_mean_free_path==pmfp_unit &
   model_data$ratio==ratio_unit,]
@@ -106,7 +106,7 @@ points(lat ~ nlon, data=ref_neighbors[76:100,], pch=24, col=1, bg=6)
 points(lat ~ nlon, data=all_inputs[ref_point,], pch=8, col=2, cex=2, lwd=3)
 dev.off()
 
-## Figure 4 (right panel)
+## Figure 3 (right panel)
 ## display conditioning sets for model parameters
 pdf("ibex_nbr_params.pdf", width=7, height=5)
 plot(x=jitter(ref_neighbors[1:25,c("parallel_mean_free_path")]),
@@ -132,7 +132,7 @@ legend("topleft", c("point of interest", paste0("m=", c(25,50,75,100))),
 dev.off()
 
 ###############################################################################
-## FIGURE 5: Illustration showing a grid of both simulator output and
+## FIGURE 4: Illustration showing a grid of both simulator output and
 ## surrogate output in order to demonstrate the effectiveness of our surrogate
 ## DATA NEEDED: sims.csv, ibex_real.csv
 ###############################################################################
@@ -155,7 +155,7 @@ ratios <- c(0.005, 0.0075, 0.01)
 grid <- as.matrix(expand.grid(pmfps, ratios))
 colnames(grid) <- c("pmfp", "ratio")
 
-## Figure 5 (left panel)
+## Figure 4 (left panel)
 model_pmfps <- unique(model_data$parallel_mean_free_path)
 model_ratios <- unique(model_data$ratio)
 cols <- colorRampPalette(c("blue", "cyan", "green", "yellow", "red", "magenta"))(500)
@@ -228,15 +228,14 @@ for (i in 1:length(unique(grid[,1]))) {
 dev.off()
 
 ###############################################################################
-## FIGURE ???: Illustration showing average residuals for surrogate
-## predictions of IBEX simulator. Methods include SVEC, laGP, deepgp, and
-## SEPIA
+## FIGURE 15: Illustration showing average residuals for surrogate predictions
+## of IBEX simulator. Methods include SVEC, laGP, deepgp, and SEPIA
 ## DATA NEEDED: sepia_resids_*.csv, sims.csv, surrogate_test_20260716.rds
 ###############################################################################
 
 library(abind)
 
-source("../../helper.R")
+source("../helper.R")
 
 sepia_files <- list.files(pattern="sepia_resids_[3-6]{1}.csv")
 resids <- abs(readRDS("surrogate_test_20260716.rds")$resids)
@@ -253,7 +252,7 @@ resid_names <- c(paste0("SVEC (m=", c(25,50,75), ")"), "laGP", "deepgp",
 cols <- heat.colors(128)
 bks <- seq(resid_range[1], resid_range[2], length=length(cols)+1)
 
-model_data <- read.csv(file="../../data/sims.csv")
+model_data <- read.csv(file="../data/sims.csv")
 model_data <- model_data[order(model_data$parallel_mean_free_path, model_data$ratio,
   model_data$lat, model_data$lon),]
 model_data <- model_data[which(model_data$parallel_mean_free_path==500 & model_data$ratio==0.001),]

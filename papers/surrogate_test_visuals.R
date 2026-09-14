@@ -47,9 +47,9 @@ dev.off()
 ## DATA NEEDED: surrogate_test_all.rds, sepia_metrics_X.csv
 ###############################################################################
 
-surr_file <- list.files(pattern="surrogate_test_all_20260908.rds")
+surr_file <- list.files(pattern="surrogate_test_20260908.rds")
 surr1_res <- readRDS(surr_file)
-sepia_files <- list.files(pattern="sepia_metrics_new_[3-6].csv")
+sepia_files <- list.files(pattern="sepia_metrics_[3-6].csv")
 
 escores <- surr1_res$escores
 linfs <- surr1_res$linf_norms

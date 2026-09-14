@@ -6,7 +6,7 @@
 ###############################################################################
 
 ###############################################################################
-## FIGURE 7: Timing metrics for surrogate modeling of the IBEX simulator when
+## FIGURE 6: Timing metrics for surrogate modeling of the IBEX simulator when
 ## varying the dimension of the response
 ## DATA NEEDED: surrogate_time_test_dim.rds, sepia_fit_times_X_dim.csv,
 ## sepia_pred_times_X_dim.csv
@@ -33,8 +33,7 @@ for (i in 1:length(sepia_fit_files)) {
 
 surr_total_times <- surr_fit_times + surr_pred_times
 
-## Figure 7 (left panel)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+## Figure 6 (left panel)
 pdf("ibex_surr_fit_times.pdf", width=4, height=5)
 fit_times_ord <- surr_fit_times[,c(1,6,7)]
 exp_pows <- 7:44
@@ -46,8 +45,7 @@ legend("topleft", c("SVEC (m=25)", "deepgp",
   col=1:4, lty=1:4, lwd=2, cex=1.05)
 dev.off()
 
-## Figure 7 (middle panel)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+## Figure 6 (middle panel)
 pdf("ibex_surr_pred_times.pdf", width=4, height=5)
 pred_times_ord <- surr_pred_times[,c(1,6,7,5)]
 matplot(x=exp_pows, y=pred_times_ord[1:length(exp_pows),]/60, type="l", ylim=c(0, 10),
@@ -55,9 +53,8 @@ matplot(x=exp_pows, y=pred_times_ord[1:length(exp_pows),]/60, type="l", ylim=c(0
   lwd=3)
 dev.off()
 
-## Figure 7 (right panel)
+## Figure 6 (right panel)
 large_ns <- seq(20000, 75000, by=5000)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_total_times.pdf", width=4, height=5)
 long_times_ord <- surr_total_times[,c(1:4,7:10)]
 matplot(x=large_ns, y=long_times_ord[(length(exp_pows)+1):nrow(long_times_ord),]/60, type="l",
@@ -72,7 +69,7 @@ box()
 dev.off()
 
 ###############################################################################
-## FIGURE 8: Timing metrics for surrogate modeling of the IBEX simulator when
+## FIGURE 7: Timing metrics for surrogate modeling of the IBEX simulator when
 ## varying the number of simulator runs
 ## DATA NEEDED: surrogate_time_test_ns.rds, sepia_fit_times_X_ns.csv,
 ## sepia_pred_times_X_ns.csv
@@ -97,8 +94,7 @@ for (i in 1:length(sepia_fit_files)) {
 
 surr_total_times <- surr_fit_times + surr_pred_times
 
-## Figure 8 (left panel)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+## Figure 7 (left panel)
 pdf("ibex_surr_fit_times_ns.pdf", width=4, height=5)
 fit_times_ord <- surr_fit_times[,c(1,6,7)]
 ns <- seq(10, 100, by=10)
@@ -109,8 +105,7 @@ legend("topright", c("SVEC (m=25)", "deepgp", expression(SEPIA~"("*n[k]*"=3)"), 
   col=1:4, lty=1:4, lwd=2, cex=1.05, bg="white")
 dev.off()
 
-## Figure 8 (middle panel)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
+## Figure 7 (middle panel)
 pdf("ibex_surr_pred_times_ns.pdf", width=4, height=5)
 pred_times_ord <- surr_pred_times[,c(1,6,7,5)]
 matplot(x=ns, y=pred_times_ord[1:length(ns),]/60, type="l", ylim=c(0, 10),
@@ -118,10 +113,9 @@ matplot(x=ns, y=pred_times_ord[1:length(ns),]/60, type="l", ylim=c(0, 10),
   lwd=3)
 dev.off()
 
-## Figure 8 (right panel)
+## Figure 7 (right panel)
 match_cols <- c(1,3:4)
 large_ns <- seq(500, 2500, by=500)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 0.2, 0.2))
 pdf("ibex_surr_total_times_ns.pdf", width=4, height=5)
 long_times_ord <- surr_total_times[,c(1:4,7:10)]
 matplot(x=large_ns, y=long_times_ord[(length(ns)+1):nrow(long_times_ord),]/60, type="l",
