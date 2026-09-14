@@ -266,8 +266,9 @@ Parameters {\color{red}$u
 \in \mathbb{R}^{p_U}$} are unknown and {\color{red} $X \in \mathbb{R}^{n
 \times p_F}$} represents the {\color{red} locations (i.e., spatial coordinates
 in columns $x$, $y$, $z$)} where the simulation output is evaluated
-{\color{red}(in our motivating application: $n_F > 23,000$, $p_F=3$, and $p_U
-= 2$)}. These {\color{red}$X$ locations} may be those {\color{red} $X^F \in
+{\color{red}(in our motivating application: $n_F > 23,000$, $n = 16,200$,
+$p_F=3$, and $p_U = 2$)}. These {\color{red}$X$ locations} may be those
+{\color{red} $X^F \in
 \mathbb{R}^{n_F \times p_F}$ } that correspond to field measurements $Y^F$, or
 a grid of predictive locations supporting high-resolution visuals.
 {\color{red}Therefore, computer model and field data are potentially collected
@@ -312,7 +313,8 @@ field measurements, $Y^F$, observed in replicate as $y_i
 example, the computer model $m(\cdot, \cdot)$ was used to generate the data.
 In practice, the model represents a caricature using known or best-guess
 physics. Each light gray line is a realization of $m(\cdot, \cdot)$ for a
-different $u$ on a fine grid of spatial locations $X$. The bold-black-dashed
+different $u$ on a fine grid of spatial locations $X$. {\color{red}(The number
+of unique runs, $n_U$, in this toy example totals 30).} The bold-black-dashed
 line is $m(u^\star, X)$ provided as a reference.
 
 \begin{figure}[ht!]
@@ -370,7 +372,7 @@ and $E(y) = \lambda e$. We thereby extend Eq.~(\ref{eq:inv_bayes_mod}) as
 follows:
 \begin{align}
 Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
-\label{eq:pois_inv_bayes_mod} \\ u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p,
+\label{eq:pois_inv_bayes_mod} \\ u &\sim \pi(u) & \mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^{p_U},
 \end{align}
 where $e(X^F)$ represents the duration (in seconds) the satellite points at
 specific locations in the sky. $\lambda(X^F)$ denotes the rate at which ENA
@@ -454,13 +456,13 @@ Evaluating the likelihood $Y^F$ in Algorithm \ref{alg:gibbs} may proceed via
 surrogate when {\em in situ} evaluation directly on $m(\cdot, \cdot)$ is too
 slow. Suppose we have a vector of observations {\color{red} $Y^M \in
 \mathbb{R}^{n_M}$ } ($M$ for computer model) at input locations
-{\color{red}$X^M \in \mathbb{R}^{n_M \times (p_U+p_F)}$} from a campaign of runs of
-$m(\cdot, \cdot)$, {\color{red}where $X$} may or may not coincide with
-settings in $X^F$. We prefer a small design of space-filling $u$-values ($U$),
-paired via Cartesian product with $X^F$ from the field experiment or a
-predictive grid $X$, e.g., $X^M = X \otimes U$, depending on the situation.
-Two such runs, i.e., for two rows $u^\top \in U$ and a dense grid $X$, are
-shown in Figure \ref{f:fig1}.
+{\color{red}$X^M \in \mathbb{R}^{n_M \times (p_U+p_F)}$} from a campaign of
+runs of $m(\cdot, \cdot)$, {\color{red}where $X$} may or may not coincide with
+settings in $X^F$. We prefer a small design of space-filling $u$-values {\color{red}($U
+\in \mathbb{R}^{n_U \times p_U}$)}, paired via Cartesian product with $X^F$ from
+the field experiment or a predictive grid $X$, e.g., $X^M = X \otimes U$,
+depending on the situation. Two such runs, i.e., for two rows $u^\top \in U$
+and a dense grid $X$, are shown in Figure \ref{f:fig1}.
 
 Given a corpus of runs $(Y^M, X^M)$, a surrogate synthesizes this information
 in order to extend it to new inputs.  Many surrogates for computer
@@ -494,7 +496,7 @@ optimization \citep{jones1998efficient}.
 GP surrogates {\color{red}can provide extremely accurate predictions}. To
 illustrate, recall Figure \ref{f:toy_calib} in
 Section \ref{sec:gen_bayes_inv}, where limited samples of computer model
-evaluations {\color{red}($n_M < 50$)} are shown. For these toy examples, we
+evaluations {\color{red}($n_U < 50$)} are shown. For these toy examples, we
 ``assumed'' we had unlimited access to the simulator. In reality, we fit a GP
 surrogate to the model runs in the left panels. Therefore, ``model runs'' at
 posterior draws of $u$ in the center panels are not in fact evaluations of the
@@ -506,16 +508,17 @@ One downside to working with MVNs whose dimension grows with the dimension of
 the data they are trained on, $n_M$, is that building $n_M \times n_M$
 matrices, and inverting (or otherwise decomposing) them, e.g., for
 Eq.~(\ref{eq:mvn_eq}) requires storage and computation that is quadratic and
-cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in a
-Bayesian MCMC setting, necessitating approximations for GPs that curb this
+cubic in $n_M$, respectively.  This limits $n_M$ to a few thousand at most in
+a Bayesian MCMC setting, necessitating approximations for GPs that curb this
 prohibitive cost. With the 1d example in Figure \ref{f:toy_calib}, we have
-$n_M=20 \times 30$, combining $X$ and $U$, which is manageable. But for IBEX,
-the simulated sky maps like those in the middle and right panels of Figure
-\ref{f:fig1} are in 2d (under the hood the output is in spherical coordinates
-$x$, $y$, and $z$) and results in ${>}16{,}000$ locations (or pixels) for each
-$u$-value. Combine that with {\color{red}$n_M=66$} unique $u$-values used in runs available to
-us and our response vector will have greater than one million elements. Even if
-we used a smaller LHS space-filling design of size {\color{red}$n_M=15$} over the model
+{\color{red}$n_M=n \times n_U = 20 \times 30$}, combining $X$ and $U$, which
+is manageable. But for IBEX, the simulated sky maps like those in the middle
+and right panels of Figure \ref{f:fig1} are in 2d (under the hood the output
+is in spherical coordinates $x$, $y$, and $z$) and results in $n >16{,}000$
+locations (or pixels) for each $u$-value. Combine that with
+{\color{red}$n_U=66$} unique $u$-values used in runs available to us and our
+response vector will have greater than one million elements. Even if we used a
+smaller LHS space-filling design of size {\color{red}$n_U=15$} over the model
 parameters, the response vector would still consist of over 200,000 points. In
 either case, an ordinary GP could not be fit and provide predictions in a
 reasonable amount of time, prompting the next topic.
@@ -536,30 +539,31 @@ fixed-rank kriging \citep{cressie2008fixed}, inducing points
 \citep{kaufman2011efficient}, divide-and-conquer \citep{gramacy2015local}, and
 nearest neighbors \citep{datta2016hierarchical, wu2022variational}. Most of
 these are general enough to be used in a variety of different fields and
-applications. {\color{red}However, there is a method tailor-made for our
-Bayesian inverse problem setting when the likelihood for $Y^F$ is Gaussian.
-We note, however, that it is still insufficient for IBEX, where the likelihood
-for $Y^F$ is Poisson.}
+applications.
 
-Specifically in the context of (Gaussian) inverse problems,
-\citet{higdoncalib2008} faced computational bottlenecks much like the IBEX
-simulator: expensive simulations limiting runs and high-dimensional output in
-the form of images, shape description, time series, etc. Even with today's
-computing resources, it would be prohibitive to fit a GP surrogate model on such
-large data. \citeauthor{higdoncalib2008}'s key insight involved treating $X^F$
-(or gridded $X$) -- i.e., the fixed reference set that a simulator realization
-is evaluated on for each candidate parameter $u$ -- as a feature of {\em
-output}, rather than conventionally as an input. As a result, model and field
-data share the same set of measurement locations, that is, $X = X^F$. In this
-way, $X^M$ remains small, including only the unique combinations of unknown
-parameters $u$.
+For Gaussian inverse problems, however, \citet{higdoncalib2008} developed a
+method tailored to settings with expensive simulations and high-dimensional
+outputs, such as images, shape descriptions, and time series. {\color{red}They faced
+computational bottlenecks similar to those posed by the IBEX simulator: the
+expense of running the simulator limits the number of evaluations available
+for analysis, while each run generates a high-dimensional response. Despite
+this similarity, their method assumes a Gaussian likelihood for the field
+observations $Y^F$ and therefore cannot be applied directly to IBEX, where the
+likelihood for $Y^F$ is Poisson.}
 
-Then, rather than keep track of all of those outputs $Y^M$, indexed over $X^F$
-or $X$, dimensionality may be dramatically reduced via principal components
-analysis (PCA). Specifically, they proposed representing the vector output of a
-simulator model $m(\cdot,\cdot)$ as the sum of $n_k$ basis functions $k_1, k_2,
-\ldots , k_{n_k}$, each scaled by a corresponding weight $w_i(u)$: $m(u, X)
-\approx \sum_{i=1}^{n_k}  k_i \cdot w_i (u)$, where $w_i(u) \sim \mathcal{N}( 0,
+\citeauthor{higdoncalib2008}'s key insight involved treating $X^F$ (or gridded
+$X$) -- i.e., the fixed reference set that a simulator realization is
+evaluated on for each candidate parameter $u$ -- as a feature of {\em output},
+rather than conventionally as an input. As a result, model and field data
+share the same set of measurement locations, that is, $X = X^F$. In this way,
+$X^M$ remains small, including only the unique combinations of unknown
+parameters $u$. Then, rather than keep track of all of those outputs $Y^M$,
+indexed over $X^F$ or $X$, dimensionality may be dramatically reduced via
+principal components analysis (PCA). Specifically, they proposed representing
+the vector output of a simulator model $m(\cdot,\cdot)$ as the sum of $n_k$
+basis functions $k_1, k_2,\ldots , k_{n_k}$, each scaled by a corresponding
+weight $w_i(u)$: $m(u, X) \approx \sum_{i=1}^{n_k}  k_i \cdot w_i (u)$, where
+$w_i(u) \sim \mathcal{N}( 0,
 \Sigma_{w_i})$ and $n_k \ll n_X$. Weights $w_i(u)$ are each modeled as
 realizations of a zero-mean GP. By not directly modeling the high-dimensional
 response $m(\cdot,\cdot)$ and it's associated dense grid $X$, requisite
@@ -684,7 +688,7 @@ a visual assessment. Scientists at LANL have provided us with 66 unique model
 runs, each producing an image of 16,200 points, or pixels. Figure
 \ref{f:ibex_sim_surr} shows four of the actual simulation outputs (corner
 panels displayed with thin, solid borders). {\color{red}An SVEC} GP surrogate is fit
-to all 66 simulated runs. Then, we predict the output for five unobserved
+to all {\color{red}$n_U=66$} simulated runs. Then, we predict the output for five unobserved
 combinations of the model parameters that fall in between the actual runs
 shown. These are depicted in the cross of Figure \ref{f:ibex_sim_surr}, those
 panels with thicker, dashed borders. To the naked eye, these predictive
@@ -722,7 +726,7 @@ Python}.
 
 Figure \ref{f:ibex_surr_metrics} displays the accuracy results of a simple
 hold-one-out bake-off, with time coming next. For each iteration of the
-experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the $n=66$ model
+experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the {\color{red}$n_U=66$} model
 runs available. Then, we predict at the held out model parameter. For now,
 just pay attention to the boxplots on the left-hand side of each panel. We'll
 come back to the others in a moment. It is obvious that {\color{red}SVEC}
@@ -750,12 +754,13 @@ Figures \ref{f:ibex_surr_timing_dim}-\ref{f:ibex_surr_timing_size} summarize
 compute times in a similar experiment but varying data size. Two factors exist
 that contribute to a computational bottleneck: the dimension of the simulator
 response (the main focus of our work), and the number of runs of the computer
-model available for training. To test the former, we vary the dimensionality of
-the response from 200 to 20,000, while keeping the number of runs constant. For
-the two methods that are best equipped for large dimensions ({\color{red}SVEC} and
-SEPIA), we attempt to stretch their capacity by cranking up the length of the
-response vector from 20-75K by steps of 5K. At each dimension size, we run five
-Monte Carlo iterations for each method and record the average elapsed time.
+model available for training. To test the former, we vary the dimensionality
+of the response from $n=200$ to $n=20,000$, while keeping the number of runs
+constant. For the two methods that are best equipped for large dimensions
+({\color{red}SVEC} and SEPIA), we attempt to stretch their capacity by
+cranking up the length of the response vector from 20-75K by steps of 5K. At
+each dimension size, we run five Monte Carlo iterations for each method and
+record the average elapsed time.
 
 \begin{figure}[ht!]
 \centering
@@ -796,7 +801,7 @@ not be the case in other situations, requiring more principal components and by
 extension a heavier computational load.
 
 Figure \ref{f:ibex_surr_timing_size} displays timing results from changing the
-size of the training dataset (i.e., the number of simulator runs $n$). SEPIA was
+size of the training dataset (i.e., the number of simulator runs {\color{red}$n_U$}). SEPIA was
 specifically built for computer experiments with high-dimensional output. While
 it clearly performs well in these situations, it's also fairly inflexible to
 other contexts, such as a large number of simulation runs. {\color{red}SVEC} does
@@ -804,8 +809,8 @@ not face this hurdle, as it treats both high-dimensional output and large-scale
 univariate datasets similarly, as a scalar response. Our experiment is set up
 similar to the previous one, but we keep the dimensionality of the response at
 10K while sliding the number of simulator runs from 10 to 100. Again, all
-methods are run over five MC iterations for each value of $n$. For the higher
-performing methods, we push the campaign size up further ($n=2500$).
+methods are run over five MC iterations for each value of {\color{red}$n_U$}. For the higher
+performing methods, we push the campaign size up further {\color{red}($n_U=2500$)}.
 
 \begin{figure}[ht!]
 \centering
@@ -825,11 +830,11 @@ components) for SEPIA. Settings for {\sf laGP} are identical in all panels.}
 It's no surprise that {\sf deepgp} once again lags in run time. Even a modest
 sized set of runs takes well over an hour to fit and needs almost 10 minutes to
 make a single prediction. Most interesting is the behavior of SEPIA in the
-right panel of Figure \ref{f:ibex_surr_timing_size}. For $n > 500$, SEPIA
+right panel of Figure \ref{f:ibex_surr_timing_size}. For {\color{red}$n_U > 500$}, SEPIA
 takes hours to fit and make predictions. In this context, even {\sf laGP}
 performs better. Our preferred method, {\color{red}SVEC}, shows consistency in
 scaling linearly with an increased campaign size and executes faster than each
-competitor when $m<50$, and for all values of $m$ when $n>1500$.
+competitor when $m<50$, and for all values of $m$ when {\color{red}$n_U>1500$}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -909,7 +914,7 @@ the years 2009-2011 to simulator runs.
 \label{sec:synth_data}
 %------------------------------------------------------------------------------
 
-Using the corpus of $n=66$ computer model runs, varying a design of
+Using the corpus of {\color{red}$n_U=66$} computer model runs, varying a design of
 \textit{parallel mean free path} and \textit{ratio} $u$-values, described in
 Section \ref{sec:vecchia}, we select a value $u^\star$ and set the
 corresponding output ($\lambda^\star = m(u^\star, X^M)$) as the
@@ -979,19 +984,20 @@ simulated.
 
 To further validate our methodology, we apply this method to each unique model
 parameter available. We have access to simulator runs representing all
-combinations for 11 unique values of parallel mean free path and 6 unique values
-of ratio ($n=66$). The spread of parameter values is determined by space
-scientists to include all values considered reasonable: parallel mean free path
-ranges from 500-3000 astronomical units (AU); ratio values are unitless, and
-span from 0.001 to 0.1. Due to the inability for the model to furnish posterior
-samples beyond the boundary parameters, we do not test those combinations for
-which at least one parameter is on its edge (i.e., when parallel mean free path
-$\in \{500, 3000\}$ and/or ratio $\in \{0.001, 0.1\}$). Removing these edge
-cases results in 36 remaining test runs. For each combination, we follow the
-same procedure as above: select one model parameter and set as $u^\star$, create
-simulated observed satellite data, fit {\color{red}an SVEC} surrogate on training
-data excluding $u^\star$, and run Algorithm \ref{alg:gibbs} to sample from the
-posterior $u \mid Y^F$. Results are shown in Figure \ref{f:synth_estimates_all}.
+combinations for 11 unique values of parallel mean free path and 6 unique
+values of ratio {\color{red}($n_U=66$)}. The spread of parameter values is
+determined by space scientists to include all values considered reasonable:
+parallel mean free path ranges from 500-3000 astronomical units (AU); ratio
+values are unitless, and span from 0.001 to 0.1. Due to the inability for the
+model to furnish posterior samples beyond the boundary parameters, we do not
+test those combinations for which at least one parameter is on its edge (i.e.,
+when parallel mean free path $\in \{500, 3000\}$ and/or ratio $\in \{0.001,
+0.1\}$). Removing these edge cases results in 36 remaining test runs. For each
+combination, we follow the same procedure as above: select one model parameter
+and set as $u^\star$, create simulated observed satellite data, fit
+{\color{red}an SVEC} surrogate on training data excluding $u^\star$, and run
+Algorithm \ref{alg:gibbs} to sample from the posterior $u \mid Y^F$. Results
+are shown in Figure \ref{f:synth_estimates_all}.
 
 Each panel shows posterior samples of $u \mid Y^F$ for a unique $u^\star$ as a
 kernel density. We have indicated each $u^\star$ that generated synthetic $Y^F$
@@ -1209,7 +1215,7 @@ modifying Eq.~(\ref{eq:pois_inv_bayes_mod}) as follows:
 Y^F &\sim \mathrm{Pois}(\lambda(X^F), e(X^F)) & \lambda(X) &= m(u, X) \nonumber
 \label{eq:mod_with_disc} \\ \lambda(X^F) &= \lambda(X)*\delta &
 \mathrm{log}(\delta) &\sim \mathcal{N}(0, 1) \nonumber \\ u &\sim \pi(u) &
-\mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^p.
+\mbox{e.g.,} \quad u &\sim \mathrm{Unif}[0,1]^{p_U}.
 \end{align}
 
 \begin{figure}[ht!]
@@ -1406,7 +1412,7 @@ Therefore, in order to verify that our scale discrepancy actually works, we
 conducted an experiment on simulated data that fall within that model class.
 
 First, we select one sky map from the simulator output corresponding to one of
-the $n =66$ $u$-values and set this as $\lambda^\star$. Next, we both scale
+the {\color{red}$n_U=66$} $u$-values and set this as $\lambda^\star$. Next, we both scale
 $\lambda^\star$ by $\delta$ and add in the background rate, $\lambda_b$. Then,
 we generate synthetic satellite data via counts drawn from a Poisson, $Y_i^F
 \sim \mathrm{Pois}(\lambda_i^\star * \delta + \lambda_{b_i}, e_i)$ for given
@@ -1496,7 +1502,7 @@ surrogate and other competitors. In particular, Figure
 \ref{f:ibex_surr_metrics} displays a pair of boxplots measuring each surrogate
 model on RMSE and CRPS. However, RMSE and CRPS are both univariate metrics and
 are not able to capture relationships between output variables (e.g. different
-pixels within the same image). The response for the IBEX is high-dimensional
+pixels within the same image). The response for IBEX is high-dimensional
 (16,200), and therefore it is appropriate to compare using multivariate
 metrics.}
 
