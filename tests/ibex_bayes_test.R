@@ -22,6 +22,7 @@ real <- ifelse(!is.null(args[["r"]]), as.logical(args[["r"]]), FALSE)
 ## if using real field data, what year it should come from
 year <- args[["y"]]
 ## file that contains multiple parameter combinations for synthetic field data
+## file should be a CSV with column names 'pmfp' and 'ratio'
 infile <- args[["if"]]
 ## flag to print more output to screen
 vb <- ifelse(!is.null(args[["v"]]), as.logical(args[["v"]]), FALSE)
