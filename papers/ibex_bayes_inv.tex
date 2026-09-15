@@ -20,11 +20,12 @@
 \title{Bayesian Statistical Inversion for High-Dimensional Computer Model
 Output and Spatially Distributed Counts}
 \author{Steven D. Barnett\thanks{Corresponding author
-\href{mailto:sdbarnett@vt.edu}{\tt sdbarnett@vt.edu}, Department of Statistics,
-Virginia Tech} \and Robert B. Gramacy\thanks{Department of Statistics, Virginia
-Tech} \and Lauren J. Beesley\thanks{Statistics Group, Los Alamos National
-Laboratory} \and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{ Center
-for Space Plasma and Aeronomic Research, University of Alabama in Huntsville }
+\href{mailto:sdbarnett@lanl.gov}{\tt sdbarnett@lanl.gov}, Department of
+Statistics, Virginia Tech; Statistics Group, Los Alamos National Laboratory}
+\and Robert B. Gramacy\thanks{Department of Statistics, Virginia Tech} \and
+Lauren J. Beesley\thanks{Statistics Group, Los Alamos National Laboratory}
+\and Dave Osthus\footnotemark[3] \and Yifan Huang\thanks{ Center for Space
+Plasma and Aeronomic Research, University of Alabama in Huntsville }
 \and Fan Guo\thanks{Nuclear and Particle Physics, AstroPhysics and Cosmology,
 Los Alamos National Laboratory} \and Daniel B. Reisenfeld\thanks{Space Science
 and Applications Group, Los Alamos National Laboratory}}
@@ -337,16 +338,16 @@ model parameter $u$.}
 \label{f:toy_calib}}
 \end{figure}
 
-The middle panel of the figure shows runs of our virtual model evaluated at
-posterior draws {\color{red}$u^{(t)}$ ($t$ indicating the $t^\mathrm{th}$ step of the
-sampler)} obtained under Metropolis sampling using a multivariate normal
-likelihood whose mean $\mu(X^F)=m(u^{(t)}, X^F)$ and whose covariance
+The top middle panel of the figure shows runs of our virtual model evaluated
+at posterior draws {\color{red}$u^{(t)}$ ($t$ indicating the $t^\mathrm{th}$
+step of the sampler)} obtained under Metropolis sampling using a multivariate
+normal likelihood whose mean $\mu(X^F)=m(u^{(t)}, X^F)$ and whose covariance
 $\Sigma(X^F) \sim
 \sigma^2\mathbb{I}$, where $\sigma^2$ is marginalized out under a reference
 prior $\pi(\sigma^2) \propto 1/\sigma^2$. Although we display these runs on a
 high-resolution grid $X$, the sampler only uses evaluations of $m(u^{(t)},
 X^F)$ in likelihood evaluations. The posterior samples of $u$ thus obtained
-are shown in the right panel of the figure.  In this toy example, it is
+are shown in the top right panel of the figure.  In this toy example, it is
 evident that the Metropolis sampler successfully concentrates posterior mass
 around the true value of $u$.
 
@@ -502,7 +503,7 @@ surrogate to the model runs in the left panels. Therefore, ``model runs'' at
 posterior draws of $u$ in the center panels are not in fact evaluations of the
 model, but predictions from a fitted GP surrogate. Even so, the Metropolis
 sampler used those accurate (and fast) predictions to successfully recover the
-true model parameters $u^\star$.
+true model parameter $u^\star$.
 
 One downside to working with MVNs whose dimension grows with the dimension of
 the data they are trained on, $n_M$, is that building $n_M \times n_M$
@@ -556,7 +557,7 @@ $X$) -- i.e., the fixed reference set that a simulator realization is
 evaluated on for each candidate parameter $u$ -- as a feature of {\em output},
 rather than conventionally as an input. As a result, model and field data
 share the same set of measurement locations, that is, $X = X^F$. In this way,
-$X^M$ remains small, including only the unique combinations of unknown
+$X^M=U$ and remains small, including only the unique combinations of unknown
 parameters $u$. Then, rather than keep track of all of those outputs $Y^M$,
 indexed over $X^F$ or $X$, dimensionality may be dramatically reduced via
 principal components analysis (PCA). Specifically, they proposed representing
@@ -614,7 +615,7 @@ where } h(i) \subset \{1, 2, \ldots, i-1\} \hspace{0.3em} \mbox{ and } |h(i)| \l
 \citeauthor{vecchia1988estimation}'s critical observation was that one could
 approximate this function by reducing the size of the conditioning set $g(i)$ to
 a much smaller size $m$, as specified by the user. This induces sparsity in the
-precision matrix (e.g. $\Sigma(X^M)^{-1})$ from Eq.~\ref{eq:mvn_eq}, potentially
+precision matrix (e.g.~$\Sigma(X^M)^{-1})$ from Eq.~\ref{eq:mvn_eq}, potentially
 dramatically speeding up the evaluation of the likelihood for large values of
 $n_M$. \citet{katzfuss2021general} recently made this approximation popular by
 working out its representation in matrix form and furnishing automatic $h(i)$
@@ -683,19 +684,19 @@ $u$-space.
 \label{f:ibex_vecchia}}
 \end{figure}
 
-We begin evaluation of {\color{red}SVEC's} performance on the IBEX simulator with
-a visual assessment. Scientists at LANL have provided us with 66 unique model
-runs, each producing an image of 16,200 points, or pixels. Figure
+We begin evaluation of {\color{red}SVEC's} performance on the IBEX simulator
+with a visual assessment. Scientists at LANL have provided us with $n_U=66$
+unique model runs, each producing an image of 16,200 points, or pixels. Figure
 \ref{f:ibex_sim_surr} shows four of the actual simulation outputs (corner
-panels displayed with thin, solid borders). {\color{red}An SVEC} GP surrogate is fit
-to all {\color{red}$n_U=66$} simulated runs. Then, we predict the output for five unobserved
-combinations of the model parameters that fall in between the actual runs
-shown. These are depicted in the cross of Figure \ref{f:ibex_sim_surr}, those
-panels with thicker, dashed borders. To the naked eye, these predictive
-surfaces appear to have been generated by the computer model itself. Moving
-left to right, or top to bottom, the surfaces change gradually and as one would
-expect. Next we show empirically that our surrogate fit is accurate and
-outperforms competitors.
+panels displayed with thin, solid borders). {\color{red}An SVEC} GP surrogate
+is fit to all {\color{red}$n_U=66$} simulated runs. Then, we predict the
+output for five unobserved combinations of the model parameters that fall in
+between the actual runs shown. These are depicted in the cross of Figure
+\ref{f:ibex_sim_surr}, those panels with thicker, dashed borders. To the naked
+eye, these predictive surfaces appear to have been generated by the computer
+model itself. Moving left to right, or top to bottom, the surfaces change
+gradually and as one would expect. Next we show empirically that our surrogate
+fit is accurate and outperforms competitors.
 
 \begin{figure}[ht!]
 \centering
@@ -703,9 +704,9 @@ outperforms competitors.
 \caption{Actual and predicted outputs from the IBEX \textit{sky map} computer
 model. Corner panels represent the response for four unique combinations of
 model inputs. Panels on the cross with bold, dashed borders are predictions at
-unobserved input combinations from a GP surrogate fit to $n=66$ runs of the
-computer model. Model parameter settings for the predictive panels fall between
-the four actual simulator runs shown.
+unobserved input combinations from a GP surrogate fit to $n_U=66$ runs of the
+computer model. Model parameter settings for the predictive panels fall
+between the four actual simulator runs shown.
 \label{f:ibex_sim_surr}}
 \end{figure}
 
@@ -726,12 +727,12 @@ Python}.
 
 Figure \ref{f:ibex_surr_metrics} displays the accuracy results of a simple
 hold-one-out bake-off, with time coming next. For each iteration of the
-experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the {\color{red}$n_U=66$} model
-runs available. Then, we predict at the held out model parameter. For now,
-just pay attention to the boxplots on the left-hand side of each panel. We'll
-come back to the others in a moment. It is obvious that {\color{red}SVEC}
-outperforms {\sf laGP} and {\sf deepgp} in both RMSE and CRPS.  
-{\color{red}Additional visual aids provided in Appendices
+experiment, we fit {\color{red}an SVEC} GP surrogate on 65 of the
+{\color{red}$n_U=66$} model runs available. Then, we predict at the held out
+model parameter. For now, just pay attention to the boxplots on the left-hand
+side of each panel. We'll come back to the others in a moment. It is obvious
+that {\color{red}SVEC} outperforms {\sf laGP} and {\sf deepgp} in both RMSE
+and CRPS. {\color{red}Additional visual aids are provided in Appendices
 \ref{app:resid_anal} and \ref{app:multivar_mets}.} The local focus of {\sf
 laGP} limits its ability to capture global trends, potentially hurting its
 performance. Large data and corresponding expensive matrix operations restrict
@@ -800,18 +801,6 @@ parameters, allowing SEPIA to perform well with a low value of $n_k$. That may
 not be the case in other situations, requiring more principal components and by
 extension a heavier computational load.
 
-Figure \ref{f:ibex_surr_timing_size} displays timing results from changing the
-size of the training dataset (i.e., the number of simulator runs {\color{red}$n_U$}). SEPIA was
-specifically built for computer experiments with high-dimensional output. While
-it clearly performs well in these situations, it's also fairly inflexible to
-other contexts, such as a large number of simulation runs. {\color{red}SVEC} does
-not face this hurdle, as it treats both high-dimensional output and large-scale
-univariate datasets similarly, as a scalar response. Our experiment is set up
-similar to the previous one, but we keep the dimensionality of the response at
-10K while sliding the number of simulator runs from 10 to 100. Again, all
-methods are run over five MC iterations for each value of {\color{red}$n_U$}. For the higher
-performing methods, we push the campaign size up further {\color{red}($n_U=2500$)}.
-
 \begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.53, trim=0 0 0 0, clip=TRUE]{ibex_surr_fit_times_ns.pdf}
@@ -826,6 +815,20 @@ settings of $m$ (neighborhood size) for SVEC and $n_k$ (number of principal
 components) for SEPIA. Settings for {\sf laGP} are identical in all panels.}
 \label{f:ibex_surr_timing_size}}
 \end{figure}
+
+Figure \ref{f:ibex_surr_timing_size} displays timing results from changing the
+size of the training dataset (i.e., the number of simulator runs
+{\color{red}$n_U$}). SEPIA was specifically built for computer experiments
+with high-dimensional output. While it clearly performs well in these
+situations, it's also fairly inflexible to other contexts, such as a large
+number of simulation runs. {\color{red}SVEC} does not face this hurdle, as it
+treats both high-dimensional output and large-scale univariate datasets
+similarly, as a scalar response. Our experiment is set up similar to the
+previous one, but we keep the dimensionality of the response at 10K while
+sliding the number of simulator runs from $n_U=10$ to $n_U=100$. Again, all
+methods are run over five MC iterations for each value of {\color{red}$n_U$}.
+For the higher performing methods, we push the campaign size up further
+{\color{red}($n_U=2500$)}.
 
 It's no surprise that {\sf deepgp} once again lags in run time. Even a modest
 sized set of runs takes well over an hour to fit and needs almost 10 minutes to
@@ -914,11 +917,11 @@ the years 2009-2011 to simulator runs.
 \label{sec:synth_data}
 %------------------------------------------------------------------------------
 
-Using the corpus of {\color{red}$n_U=66$} computer model runs, varying a design of
-\textit{parallel mean free path} and \textit{ratio} $u$-values, described in
-Section \ref{sec:vecchia}, we select a value $u^\star$ and set the
-corresponding output ($\lambda^\star = m(u^\star, X^M)$) as the
-{\color{red}``unknown''} underlying mean ENA rate (upper right panel of Figure
+Using the corpus of {\color{red}$n_U=66$} computer model runs, varying a
+design of \textit{parallel mean free path} and \textit{ratio} $u$-values,
+described in Section \ref{sec:vecchia}, we select a value $u^\star$ and set
+the corresponding output ($\lambda^\star = m(u^\star, X)$) as the
+{\color{red}``unknown''} underlying mean ENA rate (top middle panel of Figure
 \ref{f:ibex_synth_ex}). Next, we gather measurement locations $X^F$, exposure
 times $e$, and background rates $\lambda_b$ from a single year that the IBEX
 satellite has been in operation, ignoring the observed counts of ENAs in this
@@ -955,22 +958,22 @@ that we employ an empirical Bayes approach
 \citep{berger1985statistical,kennedyohagan2001}, pre-estimating the GP
 hyperparameter $\theta$ and only fitting the surrogate on simulator output
 \citep{Liu2009ModularizationIB}. We execute 10,000 MCMC iterations, throwing
-away 1,000 as burn-in and thinning by 10. Figure \ref{f:ibex_synth_ex} displays
-the remaining posterior samples of $u$ (bottom right) as a kernel density along
-with a 95\% highest posterior density (HPD) interval. The posterior mean of $u
-\mid Y^F$ lies near $u^\star$, demonstrating that our framework is able to
-concentrate mass around the true, {\color{red}``unknown''} model parameter. As
-a sanity check, we take the estimated posterior mean and plug it in to our
-fitted {\color{red}SVEC} GP surrogate of the IBEX simulator. The predicted
-output is shown in the {\color{red}top right} panel of Figure
-\ref{f:ibex_synth_ex}. There are some nearly imperceptible differences between
-the estimated sky map and the true $\lambda^\star$ (i.e., the shape and
-intensity of the ribbon vary slightly between the two). {\color{red}These
-residuals between simulated and predicted output (bottom right panel) are
-orders of magnitude smaller than the response, but do exhibit structure, which
-we will address in Section \ref{sec:discuss}}. However, from a purely visual
-standpoint, it appears that each map could have reasonably generated the data
-we ``observe'' in the top left panel.
+away 1,000 as burn-in and thinning by 10. Figure \ref{f:ibex_synth_ex}
+displays the remaining posterior samples of $u$ (bottom left) as a kernel
+density along with a 95\% highest posterior density (HPD) interval. The
+posterior mean of $u\mid Y^F$ lies near $u^\star$, demonstrating that our
+framework is able to concentrate mass around the true,
+{\color{red}``unknown''} model parameter. As a sanity check, we take the
+estimated posterior mean and plug it in to our fitted {\color{red}SVEC} GP
+surrogate of the IBEX simulator. The predicted output is shown in the
+{\color{red}top right} panel of Figure \ref{f:ibex_synth_ex}. There are some
+nearly imperceptible differences between the estimated sky map and the true
+$\lambda^\star$ (i.e., the shape and intensity of the ribbon vary slightly
+between the two). {\color{red}These residuals between simulated and predicted
+output (bottom right panel) are orders of magnitude smaller than the response,
+but do exhibit structure, which we will address in Section \ref{sec:discuss}}.
+However, from a purely visual standpoint, it appears that each map could have
+reasonably generated the data we ``observe'' in the top left panel.
 
 \begin{figure}[ht!]
 \centering
@@ -982,22 +985,22 @@ simulated.
 \label{f:synth_estimates_all}}
 \end{figure}
 
-To further validate our methodology, we apply this method to each unique model
-parameter available. We have access to simulator runs representing all
-combinations for 11 unique values of parallel mean free path and 6 unique
-values of ratio {\color{red}($n_U=66$)}. The spread of parameter values is
-determined by space scientists to include all values considered reasonable:
-parallel mean free path ranges from 500-3000 astronomical units (AU); ratio
-values are unitless, and span from 0.001 to 0.1. Due to the inability for the
-model to furnish posterior samples beyond the boundary parameters, we do not
-test those combinations for which at least one parameter is on its edge (i.e.,
-when parallel mean free path $\in \{500, 3000\}$ and/or ratio $\in \{0.001,
-0.1\}$). Removing these edge cases results in 36 remaining test runs. For each
-combination, we follow the same procedure as above: select one model parameter
-and set as $u^\star$, create simulated observed satellite data, fit
-{\color{red}an SVEC} surrogate on training data excluding $u^\star$, and run
-Algorithm \ref{alg:gibbs} to sample from the posterior $u \mid Y^F$. Results
-are shown in Figure \ref{f:synth_estimates_all}.
+To further validate our methodology, we conduct this experiment for each
+unique model parameter available. We have access to simulator runs
+representing all combinations for 11 unique values of parallel mean free path
+and 6 unique values of ratio {\color{red}($n_U=66$)}. The spread of parameter
+values is determined by space scientists to include all values considered
+reasonable: parallel mean free path ranges from 500-3000 astronomical units
+(AU); ratio values are unitless, and span from 0.001 to 0.1. Due to the
+inability for the model to furnish posterior samples beyond the boundary
+parameters, we do not test those combinations for which at least one parameter
+is on its edge (i.e., when parallel mean free path $\in \{500, 3000\}$ and/or
+ratio $\in \{0.001, 0.1\}$). Removing these edge cases results in 36 remaining
+test runs. For each combination, we follow the same procedure as above: select
+one model parameter and set as $u^\star$, create simulated observed satellite
+data, fit {\color{red}an SVEC} surrogate on training data excluding $u^\star$,
+and run Algorithm \ref{alg:gibbs} to sample from the posterior $u \mid Y^F$.
+Results are shown in Figure \ref{f:synth_estimates_all}.
 
 Each panel shows posterior samples of $u \mid Y^F$ for a unique $u^\star$ as a
 kernel density. We have indicated each $u^\star$ that generated synthetic $Y^F$
@@ -1263,22 +1266,20 @@ found at \url{https://github.com/lanl/ibex-bayesian-inverse}.
 {\color{red}Figure \ref{f:ibex_disc} illustrates the need for more
 advancements to properly model disparity between the observed IBEX satellite
 data and the corresponding simulator. A fully Bayesian framework could be
-developed enhance uncertainty quantification, perhaps with the use of
-a deep Gaussian process to handle the inherent nonstationarity in the
+developed to enhance uncertainty quantification, perhaps with the use of a
+deep Gaussian process to handle the inherent nonstationarity in the
 discrepancy.}
 
-{\color{red}Section \ref{sec:gp_approx} details several GP approximations for modeling
-large-scale datasets. In particular, we review SEPIA \citep{gattiker2020lanl},
-a {\sf Python} library based on work by \citet{higdoncalib2008}, and
-subsequently use it as a competitor throughout the manuscript. SEPIA performs
-comparably to SVEC in terms of predictive accuracy and uncertainty
-quantification. However, it suffers computationally as the number of computer
-model runs increases. One intriguing extension could involve combining
-\citeauthor{higdoncalib2008}'s PCA approach with Vecchia. 
-% PCA weights could be modeled using the Vecchia approximation and alleviate a
-% growing number of computer model runs. 
-To our knowledge this has not been
-attempted, but represents a promising area of research.}
+{\color{red}Section \ref{sec:gp_approx} details several GP approximations for
+modeling large-scale datasets. In particular, we review SEPIA
+\citep{gattiker2020lanl}, a {\sf Python} library based on work by
+\citet{higdoncalib2008}, and subsequently use it as a competitor throughout
+the manuscript. SEPIA performs comparably to SVEC in terms of predictive
+accuracy and uncertainty quantification. However, it suffers computationally
+as the number of computer model runs increases. One intriguing extension could
+involve combining \citeauthor{higdoncalib2008}'s PCA approach with Vecchia. To
+our knowledge this has not been attempted, but represents a promising area of
+research.}
 
 {\color{red}Several alternative formulations and software implementations may
 also be useful for addressing problems of this type. For example, {\sf GPflow}
@@ -1286,14 +1287,11 @@ proposes a modular system for scalable Gaussian process modeling, as described
 in \citet{van2020framework}. The {\sf Python} package {\sf surmise}
 \citep{surmise2025} provides related surrogate modeling functionality, in
 particular as it relates to computer model calibration
-%. It has been used in
-%multiple academic works 
-\citep{chan2024constructing,surer2022uncertainty}.
-Variational approaches \citep{opper2009variational,hensman2015scalable} could
-also be explored. These methods offer additional modeling and computational
-options that may be appropriate depending on the objectives and requirements
-of a particular application.} % We refer interested readers to the corresponding
-% articles and software documentation for detailed descriptions.}
+\citep{chan2024constructing,surer2022uncertainty}. Variational approaches
+\citep{opper2009variational,hensman2015scalable} could also be explored. These
+methods offer additional modeling and computational options that may be
+appropriate depending on the objectives and requirements of a particular
+application.}
 
 \subsection*{Acknowledgments}
 
@@ -1320,13 +1318,13 @@ for future research endeavors.
 \label{app:pits}
 
 Section \ref{sec:synth_data} showcased the ability of our Poisson Bayesian
-inverse problem framework to recover the {\color{red}true, ``unknown''} model parameters $u$ from
-synthetic satellite data. In particular, we made the claim that both sky maps
-in Figure \ref{f:ibex_synth_ex} (bottom left, top right) could have reasonably
-generated the ENA counts ``observed'' in the top left plot of that figure. This
-assertion was based on a purely visual assessment of the data and the estimated
-underlying ENA rate. A more empirical method to validate our claim could be via
-the probability integral transform
+inverse problem framework to recover the {\color{red}true, ``unknown''} model
+parameters $u$ from synthetic satellite data. In particular, we made the claim
+that both sky maps in Figure \ref{f:ibex_synth_ex} (top middle, top right)
+could have reasonably generated the ENA counts ``observed'' in the top left
+plot of that figure. This assertion was based on a purely visual assessment of
+the data and the estimated underlying ENA rate. A more empirical method to
+validate our claim could be done via the probability integral transform
 \citep[PIT;][]{gneiting2007probabilistic,diebold1997evaluating,dawid1984present}.
 
 PIT values, frequently visualized in PIT histograms, are used to evaluate

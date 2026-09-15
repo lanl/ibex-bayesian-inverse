@@ -144,7 +144,7 @@ cls <- contourLines(fhat$eval.points[[1]],
 ## Figure 10 (top right panel)
 # Plot contour at HPD threshold
 pdf("ibex_real_post_est.pdf", width=5, height=5)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.8, 0))
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), xlab=expression("Parallel Mean Free Path ("~u[1]~")"),
   ylab=expression("Ratio ("~u[2]~")"), xlim=c(500, 3000), ylim=c(0, 0.1))
@@ -172,7 +172,7 @@ cls <- contourLines(fhat$eval.points[[1]],
 ## Figure 10 (bottom right panel)
 # Plot contour at HPD threshold (zoomed in)
 pdf("ibex_real_post_est_zoom.pdf", width=5, height=5)
-par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.6, 0))
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1), mgp=c(2.4, 0.8, 0))
 ## If NOT using pdf(), image will be flipped because of useRaster=TRUE
 image(fhat$eval.points[[1]], fhat$eval.points[[2]], fhat$estimate,
   col=rev(heat.colors(128)), useRaster=TRUE,
